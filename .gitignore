@@ -1,0 +1,15 @@
+# Produced files
+build
+
+# Random Trash
+*.swp
+*.swo
+*.h.gch
+*~
+vgcore.*
+**.orig
+**.directory
+**.patch
+.tags*
+cscope.*
+*.pyc
