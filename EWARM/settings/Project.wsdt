@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<Workspace>
+  <ConfigDictionary>
+    
+  <CurrentConfigs><Project>Diagnostic_Kameleon/Diagnostic_Kameleon</Project></CurrentConfigs></ConfigDictionary>
+  <Desktop>
+    <Static>
+      <Workspace>
+        <ColumnWidths>
+          
+          
+          
+          
+        <Column0>313</Column0><Column1>27</Column1><Column2>27</Column2><Column3>27</Column3></ColumnWidths>
+      </Workspace>
+      <Build>
+        <PreferedWindows>
+          
+          
+          
+          
+        <Position>3</Position><ScreenPosX>0</ScreenPosX><ScreenPosY>0</ScreenPosY><Windows/></PreferedWindows>
+        
+        
+        
+        
+      <ColumnWidth0>20</ColumnWidth0><ColumnWidth1>1349</ColumnWidth1><ColumnWidth2>359</ColumnWidth2><ColumnWidth3>89</ColumnWidth3></Build>
+      <TerminalIO/>
+      <Find-in-Files>
+        <PreferedWindows>
+          
+          
+          
+          
+        <Position>3</Position><ScreenPosX>0</ScreenPosX><ScreenPosY>0</ScreenPosY><Windows/></PreferedWindows>
+        
+        
+        
+        
+      <ColumnWidth0>550</ColumnWidth0><ColumnWidth1>91</ColumnWidth1><ColumnWidth2>826</ColumnWidth2><ColumnWidth3>367</ColumnWidth3></Find-in-Files>
+    <Debug-Log><PreferedWindows><Position>3</Position><ScreenPosX>0</ScreenPosX><ScreenPosY>0</ScreenPosY><Windows/></PreferedWindows><ColumnWidth0>20</ColumnWidth0><ColumnWidth1>1768</ColumnWidth1></Debug-Log><Select-Ambiguous-Definitions><PreferedWindows><Position>3</Position><ScreenPosX>0</ScreenPosX><ScreenPosY>0</ScreenPosY><Windows/></PreferedWindows><ColumnWidth0>633</ColumnWidth0><ColumnWidth1>90</ColumnWidth1><ColumnWidth2>1085</ColumnWidth2></Select-Ambiguous-Definitions><Register><PreferedWindows><Position>4</Position><ScreenPosX>1371</ScreenPosX><ScreenPosY>319</ScreenPosY><Windows/></PreferedWindows></Register><Breakpoints><col-names><item>Breakpoint</item><item>_I0</item></col-names><col-widths><item>500</item><item>35</item></col-widths><PreferedWindows><Position>3</Position><ScreenPosX>0</ScreenPosX><ScreenPosY>0</ScreenPosY><Windows/></PreferedWindows></Breakpoints></Static>
+    <Windows>
+      
+      
+    <Wnd1>
+        <Tabs>
+          <Tab>
+            <Identity>TabID-10282-23121</Identity>
+            <TabName>Workspace</TabName>
+            <Factory>Workspace</Factory>
+            <Session>
+              
+            <NodeDict><ExpandedNode>Diagnostic_Kameleon</ExpandedNode><ExpandedNode>Diagnostic_Kameleon/Application</ExpandedNode><ExpandedNode>Diagnostic_Kameleon/Application/User</ExpandedNode><ExpandedNode>Diagnostic_Kameleon/Drivers</ExpandedNode><ExpandedNode>Diagnostic_Kameleon/Middlewares</ExpandedNode><ExpandedNode>Diagnostic_Kameleon/Output</ExpandedNode></NodeDict></Session>
+          </Tab>
+        </Tabs>
+        
+      <SelectedTab>0</SelectedTab></Wnd1><Wnd5><Tabs><Tab><Identity>TabID-6916-18404</Identity><TabName>Find in Files</TabName><Factory>Find-in-Files</Factory><Session/></Tab></Tabs><SelectedTab>0</SelectedTab></Wnd5></Windows>
+    <Editor>
+      
+      
+      
+      
+      
+    <Pane><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Inc\usbd_conf.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>66</YPos2><SelStart2>0</SelStart2><SelEnd2>0</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Middlewares\ST\STM32_USB_Device_Library\Core\Src\usbd_ctlreq.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>596</YPos2><SelStart2>0</SelStart2><SelEnd2>0</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Src\usb_device.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>20</YPos2><SelStart2>0</SelStart2><SelEnd2>0</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_pcd.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>355</YPos2><SelStart2>0</SelStart2><SelEnd2>0</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Src\is25lq040b.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>0</YPos2><SelStart2>60</SelStart2><SelEnd2>60</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Src\stm32f4xx_hal_msp.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>0</YPos2><SelStart2>0</SelStart2><SelEnd2>0</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Inc\vcp.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>0</YPos2><SelStart2>176</SelStart2><SelEnd2>176</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Src\vcp.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>0</YPos2><SelStart2>257</SelStart2><SelEnd2>257</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Inc\mpu6050.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>0</YPos2><SelStart2>0</SelStart2><SelEnd2>0</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Src\uart.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>8</YPos2><SelStart2>353</SelStart2><SelEnd2>353</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Inc\diagnostic.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>0</YPos2><SelStart2>64</SelStart2><SelEnd2>64</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Src\main.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>52</YPos2><SelStart2>3175</SelStart2><SelEnd2>3175</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Inc\uart.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>0</YPos2><SelStart2>235</SelStart2><SelEnd2>235</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\Diagnostic_Kameleon\List\Diagnostic_Kameleon.map</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>955</YPos2><SelStart2>0</SelStart2><SelEnd2>0</SelEnd2></Tab><ActiveTab>13</ActiveTab></Pane><ActivePane>0</ActivePane><Pane><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Src\esp8266_12e.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>404</YPos2><SelStart2>10129</SelStart2><SelEnd2>10129</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Src\diagnostic.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>1</YPos2><SelStart2>374</SelStart2><SelEnd2>393</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Src\mpu6050.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>10</YPos2><SelStart2>254</SelStart2><SelEnd2>266</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\Src\stm32f4xx_it.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>199</YPos2><SelStart2>6354</SelStart2><SelEnd2>6354</SelEnd2></Tab><ActiveTab>3</ActiveTab></Pane><Sizes><Pane><X>489448</X><Y>1000000</Y></Pane><Pane><X>510551</X><Y>1000000</Y></Pane></Sizes><SplitMode>4</SplitMode></Editor>
+    <Positions>
+      
+      
+      
+      
+      
+    <Top><Row0><Sizes><Toolbar-0025F4F0><key>iaridepm.enu1</key></Toolbar-0025F4F0></Sizes></Row0></Top><Left><Row0><Sizes><Wnd1><Rect><Top>-2</Top><Left>-2</Left><Bottom>795</Bottom><Right>387</Right><x>-2</x><y>-2</y><xscreen>54</xscreen><yscreen>94</yscreen><sizeHorzCX>29064</sizeHorzCX><sizeHorzCY>90559</sizeHorzCY><sizeVertCX>209365</sizeVertCX><sizeVertCY>767823</sizeVertCY></Rect></Wnd1></Sizes></Row0></Left><Right><Row0><Sizes/></Row0></Right><Bottom><Row0><Sizes><Wnd5><Rect><Top>-2</Top><Left>-2</Left><Bottom>198</Bottom><Right>1860</Right><x>-2</x><y>-2</y><xscreen>1862</xscreen><yscreen>200</yscreen><sizeHorzCX>1002153</sizeHorzCX><sizeHorzCY>192678</sizeHorzCY><sizeVertCX>107643</sizeVertCX><sizeVertCY>192678</sizeVertCY></Rect></Wnd5></Sizes></Row0></Bottom><Float><Sizes/></Float></Positions>
+  </Desktop>
+</Workspace>
+
+
