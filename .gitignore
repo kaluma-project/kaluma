@@ -13,3 +13,4 @@ vgcore.*
 .tags*
 cscope.*
 *.pyc
+/Debug/
