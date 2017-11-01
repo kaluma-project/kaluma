@@ -19,19 +19,7 @@
  * SOFTWARE.
  */
 
-#include "events.h"
-#include "repl.h"
+#ifndef __GPIO_H
+#define __GPIO_H
 
-ev_tty_t tty;
-
-static void tty_read_cb() {
-  // ...
-}
-
-/*
- * Initialize the REPL
- */
-void repl_init(ev_loop_t *loop) {
-  ev_tty_init(loop, &tty);
-  ev_tty_start(&tty, tty_read_cb);
-}
+#endif /* __GPIO_H */

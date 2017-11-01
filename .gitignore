@@ -1,16 +1,3 @@
-# Produced files
+# Build folders and files
 build
-
-# Random Trash
-*.swp
-*.swo
-*.h.gch
-*~
-vgcore.*
-**.orig
-**.directory
-**.patch
-.tags*
-cscope.*
-*.pyc
-/Debug/
+.dep

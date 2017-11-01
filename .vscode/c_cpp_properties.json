@@ -1,0 +1,90 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "/usr/local/gcc-arm-none-eabi-6-2017-q1-update/arm-none-eabi/include",
+                "/usr/local/gcc-arm-none-eabi-6-2017-q1-update/arm-none-eabi/include/machine",
+                "/usr/local/gcc-arm-none-eabi-6-2017-q1-update/arm-none-eabi/include/sys",
+                "/usr/local/gcc-arm-none-eabi-6-2017-q1-update/lib/gcc/arm-none-eabi/6.3.1/include",
+                "/usr/local/gcc-arm-none-eabi-6-2017-q1-update/lib/gcc/arm-none-eabi/6.3.1/include-fixed",
+                "${workspaceRoot}/include",
+                "${workspaceRoot}/include/port",
+                "${workspaceRoot}/targets/kameleon-core/include",
+                "${workspaceRoot}/targets/kameleon-core/drivers/STM32F4xx_HAL_Driver/Inc",
+                "${workspaceRoot}/targets/kameleon-core/drivers/STM32F4xx_HAL_Driver/Inc/Legacy",
+                "${workspaceRoot}/targets/kameleon-core/drivers/CMSIS/Include",
+                "${workspaceRoot}/targets/kameleon-core/drivers/CMSIS/Device/ST/STM32F4xx/Include",
+                "${workspaceRoot}/targets/kameleon-core/middlewares/ST/STM32_USB_Device_Library/Core/Inc",
+                "${workspaceRoot}/targets/kameleon-core/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc",
+                "/usr/include",
+                "/usr/local/include"
+            ],
+            "defines": [
+                "USE_HAL_DRIVER",
+                "STM32F411xE",
+                "uint32_t=int"
+            ],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "${workspaceRoot}/include",
+                    "${workspaceRoot}/include/port",
+                    "${workspaceRoot}/targets/kameleon-core/include",
+                    "${workspaceRoot}/targets/kameleon-core/drivers/STM32F4xx_HAL_Driver/Inc",
+                    "${workspaceRoot}/targets/kameleon-core/drivers/STM32F4xx_HAL_Driver/Inc/Legacy",
+                    "${workspaceRoot}/targets/kameleon-core/drivers/CMSIS/Include",
+                    "${workspaceRoot}/targets/kameleon-core/drivers/CMSIS/Device/ST/STM32F4xx/Include",
+                    "${workspaceRoot}/targets/kameleon-core/middlewares/ST/STM32_USB_Device_Library/Core/Inc",
+                    "${workspaceRoot}/targets/kameleon-core/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ]
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "/usr/include",
+                "/usr/local/include",
+                "${workspaceRoot}"
+            ],
+            "defines": [],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "/usr/include",
+                    "/usr/local/include",
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        },
+        {
+            "name": "Win32",
+            "includePath": [
+                "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include",
+                "${workspaceRoot}"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE"
+            ],
+            "intelliSenseMode": "msvc-x64",
+            "browse": {
+                "path": [
+                    "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include/*",
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        }
+    ],
+    "version": 3
+}

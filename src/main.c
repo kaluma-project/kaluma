@@ -21,17 +21,18 @@
 
 #include "system.h"
 #include "repl.h"
+#include "events.h"
 
 ev_loop_t loop;
 ev_tty_t tty;
 
 int main(void)
 {
-	system_init();
+  system_init();
   ev_loop_init();
   repl_init();
-	// jerry_init();
-	// ev_loop_init(&loop);
-	// repl_init(loop);
-	// ev_loop_run(loop);
+  // jerry_init();
+  // ev_loop_init(&loop);
+  // repl_init(loop);
+  // ev_loop_run(loop);
 }
