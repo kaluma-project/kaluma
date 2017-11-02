@@ -40,6 +40,8 @@ TARGET_DIR = targets/$(TARGET)
 ######################################
 # C sources
 C_SOURCES =  \
+src/queue.c \
+src/events.c \
 $(TARGET_DIR)/src/main.c \
 $(TARGET_DIR)/src/usb_device.c \
 $(TARGET_DIR)/src/usbd_conf.c \
@@ -123,6 +125,8 @@ AS_INCLUDES =
 
 # C includes
 C_INCLUDES =  \
+-Iinclude \
+-Iinclude/port \
 -I$(TARGET_DIR)/include \
 -I$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Inc \
 -I$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Inc/Legacy \

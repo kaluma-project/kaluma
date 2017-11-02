@@ -22,74 +22,69 @@
 #ifndef __EVENTS_H
 #define __EVENTS_H
 
+typedef struct {
+	int stop_flag;
+	void *tty_handles;
+} ev_loop_t;
+
 typedef enum {
 	EV_TTY,
 	EV_IDLE,
 	EV_TIMER
 } ev_handle_type_t;
 
-typedef struct {
-	void *tty_handles;
-	void *idle_handles;
-	void *timer_handles;
-} ev_loop_t;
+typedef void (*ev_tty_read_cb)(ev_tty_t* tty, unsigned int nread, const char* buf);
 
 typedef struct {
-	ev_loop_t *loop;
 	ev_handle_type_t handle_type;
-	void *next;
-	void *prev;
-} ev_handle_t;
-
-typedef void (ev_tty_read_cb)(ev_tty_t* tty, ssize_t nread, const char* buf);
-
-typedef struct {
-	// inhert from handle fields...
-	ev_tty_read_cb tty_read_cb;
+	ev_tty_t *next;
+	ev_tty_t *prev;
+	ev_tty_read_cb read_cb;
 } ev_tty_t;
 
+#define QUEUE_PUSH(queue, item)       \
+	do {                                \
+		if ((queue) == NULL) {            \
+			(queue) = (item);               \
+		} else {                          \
+			(item)->next = (queue);         \
+			(item)->next->prev = (item);    \
+			(item)->prev = (queue)->prev;   \
+			(queue)->prev->next = (item);   \
+			(queue) = (item)                \
+		}                                 \
+	} while (0)                         \
+
+/*
 typedef struct {
-	// inhert from handle fields...
-	// idle_cb_t idle_cb;
+	EV_HANDLE_FIELDS
+	ev_idle_cb idle_cb;
 } ev_idle_t;
 
 typedef struct {
-	// inhert from handle fields...
+	EV_HANDLE_FIELDS
+	ev_io_poll_cb poll_cb;
+} ev_stream_t;
+
+typedef struct {
+	EV_HANDLE_FIELDS
 	int timeout;
 	int repeat;
 } ev_timer_t;
+*/
 
-ev_loop_t default_loop;
+void ev_init();
+void ev_run();
 
-ev_loop_t *ev_default_loop() {
-	return &default_loop;
-}
+void ev_tty_init(ev_tty_t *tty);
+void ev_tty_start(ev_tty_t *tty, ev_tty_read_cb read_cb);
+void ev_tty_close(ev_tty_t *tty);
 
-void ev_tty_init(ev_tty_t *tty) {
-	tty->loop = loop;
-	tty->handle_type = EV_TTY;
-	QUEUE_PUSH(loop->tty_handles, tty);
-	// ...
-}
-
-void ev_tty_start(ev_tty_t *tty, ev_tty_read_cb read_cb) {
-	tty->read_cb = read_cb;
-	usb_data_receive(tty->read_cb);
-}
-
-void ev_tty_close(ev_tty_t *tty) {
-	tty->read_cb = NULL;
-	usb_data_receive(tty->read_cb);
-}
-
-void ev_idle_init(ev_loop_t *loop, ev_idle_t *idler);
+/*
+void ev_idle_init(ev_idle_t *idler);
 void ev_idle_start(ev_idle_t *idler);
 void ev_idle_close(ev_idle_t *idler);
 void ev_run_idle(ev_loop_t *loop);
-
-void ev_timer_init(ev_loop_t *loop, ev_timer_t *timer);
-void ev_timer_start(ev_timer_t *timer);
-void ev_timer_close(ev_timer_t *timer);
-void ev_run_timer(ev_loop_t *loop);
+*/
 
 #endif /* __EVENTS_H */
