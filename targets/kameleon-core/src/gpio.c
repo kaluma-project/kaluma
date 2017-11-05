@@ -19,27 +19,36 @@
  * SOFTWARE.
  */
 
-#ifndef __QUEUE_H
-#define __QUEUE_H
+#include <stdint.h>
+#include "gpio.h"
+#include "stm32f4xx_hal.h"
 
-#include <stdbool.h>
-
-struct queue_entry_s {
-  void *data;
-  struct queue_entry_s *next;
+/**
+ * Initialze GPIO pins
+ * ~ : means PWM (e.g. ~4, ~5, ~6...)
+ * @ : means analog (e.g. @1, @2, @3, ...)
+ */
+uint16_t pins[3] = {
+  0,          // NONE
+  GPIO_PIN_1, // PIN 1
+  GPIO_PIN_2, // PIN 2
+  GPIO_PIN_1  // PIN 3
+  // TODO: Define more pins ...
 };
 
-struct queue_s {
-  struct queue_entry_s *head;
-  struct queue_entry_s *tail;
-};
+void gpio_pin_mode(uint8_t pin, uint8_t mode) {
+  // TODO:
+}
 
-typedef struct queue_s queue_t;
-typedef struct queue_entry_s queue_entry_t;
+void gpio_write(uint8_t pin, uint8_t value) {
+  // TODO:
+}
 
-int queue_init(queue_t *queue);
-bool queue_is_empty(queue_t *queue);
-int queue_push(queue_t *queue, void *data);
-void *queue_pop(queue_t *queue);
+void gpio_toggle(uint8_t pin) {
+  // TODO:
+}
 
-#endif /* __QUEUE_H */
+uint8_t gpio_read(uint8_t pin) {
+  // TODO:
+  return 0;
+}

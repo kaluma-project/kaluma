@@ -19,44 +19,29 @@
  * SOFTWARE.
  */
 
-#include <stdio.h>
-#include "events.h"
+#include <stdbool.h>
 #include "tty.h"
 
-/* A global default loop */
-ev_loop_t loop;
-
-
-void ev_init() {
-  loop.stop_flag = 0;
-  loop.tty_handles = NULL;
-}
-
-
-void ev_run() {
-  while (loop.stop_flag == 0) {
-    ev_run_tty();
-  }
-}
-
-
-void ev_tty_init(ev_tty_t *tty) {
-  tty->handle_type = EV_TTY;
-  tty_init();
-  QUEUE_PUSH(loop.tty_handles,tty);
+void tty_init() {
 
 }
 
-void ev_tty_start(ev_tty_t *tty, ev_tty_read_cb read_cb) {
-  tty->read_cb = read_cb;
-  usb_data_receive(tty->read_cb);
+void tty_putc(char ch) {
+
 }
 
-void ev_tty_close(ev_tty_t *tty) {
-  tty->read_cb = NULL;
-  usb_data_receive(tty->read_cb);
+void tty_printf(const char *fmt, ...) {
+
 }
 
-void ev_tty_run() {
+bool tty_has_data() {
 
+}
+
+unsigned int tty_data_size() {
+
+}
+
+char tty_getc() {
+  
 }

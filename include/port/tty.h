@@ -22,13 +22,13 @@
 #ifndef __TTY_H
 #define __TTY_H
 
-typedef void (tty_read_cb)(unsigned int size, const char* buf);
+#include <stdbool.h>
 
 void tty_init();
-void tty_printf(const char *fmt, ...);
 void tty_putc(char ch);
+void tty_printf(const char *fmt, ...);
 bool tty_has_data();
+unsigned int tty_data_size();
 char tty_getc();
-void tty_read_start(tty_read_cb cb);
 
 #endif /* __TTY_H */

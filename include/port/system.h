@@ -22,7 +22,9 @@
 #ifndef __SYSTEM_H
 #define __SYSTEM_H
 
+#include <stdint.h>
+
 void system_init();
-void system_deinit();
+void delay(uint32_t msec);
 
 #endif /* __SYSTEM_H */

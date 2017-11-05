@@ -21,10 +21,12 @@
 
 #include "system.h"
 
-void system_init() {
+#include <stdint.h>
 
+void system_init() {
+  // TODO:
 }
 
-void system_deinit() {
-
+void delay(uint32_t msec) {
+  // TODO:
 }

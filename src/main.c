@@ -20,19 +20,17 @@
  */
 
 #include "system.h"
-#include "repl.h"
-#include "events.h"
-
-ev_loop_t loop;
-ev_tty_t tty;
+#include "gpio.h"
+#include "tty.h"
 
 int main(void)
 {
   system_init();
-  ev_loop_init();
-  repl_init();
-  // jerry_init();
-  // ev_loop_init(&loop);
-  // repl_init(loop);
-  // ev_loop_run(loop);
+  tty_init();
+  gpio_pin_mode(1, GPIO_OUTPUT);
+  while (1) {
+    gpio_toggle(1);
+    delay(100);
+    tty_printf("LED blinking...\n");
+  }
 }
