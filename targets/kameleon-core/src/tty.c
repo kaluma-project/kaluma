@@ -23,25 +23,25 @@
 #include "tty.h"
 
 void tty_init() {
-
+  // TODO:
 }
 
 void tty_putc(char ch) {
-
+  // TODO:
 }
 
 void tty_printf(const char *fmt, ...) {
-
+  // TODO:
 }
 
 bool tty_has_data() {
-
+  // TODO:
 }
 
 unsigned int tty_data_size() {
-
+  // TODO:
 }
 
 char tty_getc() {
-  
+  // TODO:
 }

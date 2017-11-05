@@ -51,7 +51,10 @@ TARGET_DIR = targets/$(TARGET)
 ######################################
 # C sources
 CSRC =  \
-$(TARGET_DIR)/src/main.c \
+src/main.c \
+$(TARGET_DIR)/src/system.c \
+$(TARGET_DIR)/src/gpio.c \
+$(TARGET_DIR)/src/tty.c \
 $(TARGET_DIR)/src/usb_device.c \
 $(TARGET_DIR)/src/usbd_conf.c \
 $(TARGET_DIR)/src/stm32f4xx_it.c \
