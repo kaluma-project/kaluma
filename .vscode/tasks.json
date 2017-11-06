@@ -37,6 +37,11 @@
         "panel": "new"
       },
       "problemMatcher": []
+    },
+    {
+      "taskName": "st-util",
+      "type": "shell",
+      "command": "st-util"
     }
   ]
 }
