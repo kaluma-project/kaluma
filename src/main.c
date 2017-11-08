@@ -27,7 +27,7 @@ int main(void)
 {
   system_init();
   tty_init();
-  gpio_pin_mode(1, GPIO_OUTPUT);
+  gpio_pin_mode(1, GPIO_MODE_OUPUT);
   while (1) {
     gpio_toggle(1);
     delay(100);

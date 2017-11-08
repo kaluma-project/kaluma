@@ -24,15 +24,16 @@
 
 #include <stdint.h>
 
-#define GPIO_INPUT 0
-#define GPIO_OUTPUT 1
-#define GPIO_INPUT_PULLUP 2
-// TODO: Add additional pin modes
+typedef enum {
+  GPIO_MODE_INPUT,
+  GPIO_MODE_OUPUT,
+  GPIO_MODE_INPUT_PULLUP
+} gpio_mode_t;
 
 #define GPIO_LOW 0
 #define GPIO_HIGH 1
 
-void gpio_pin_mode(uint8_t pin, uint8_t mode);
+void gpio_pin_mode(uint8_t pin, gpio_mode_t mode);
 void gpio_write(uint8_t pin, uint8_t value);
 void gpio_toggle(uint8_t pin);
 uint8_t gpio_read(uint8_t pin);
