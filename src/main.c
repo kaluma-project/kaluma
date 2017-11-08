@@ -23,6 +23,9 @@
 #include "gpio.h"
 #include "tty.h"
 
+/*
+test
+*/
 int main(void)
 {
   system_init();
