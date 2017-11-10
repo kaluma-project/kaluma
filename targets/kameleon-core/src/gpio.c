@@ -20,35 +20,77 @@
  */
 
 #include <stdint.h>
-#include "gpio.h"
 #include "stm32f4xx_hal.h"
+#include "gpio.h"
 
 /**
  * Initialze GPIO pins
  * ~ : means PWM (e.g. ~4, ~5, ~6...)
  * @ : means analog (e.g. @1, @2, @3, ...)
  */
-uint16_t pins[3] = {
-  0,          // NONE
+uint16_t pins[] = {
+  GPIO_PIN_0, // PIN 0
   GPIO_PIN_1, // PIN 1
   GPIO_PIN_2, // PIN 2
-  GPIO_PIN_1  // PIN 3
-  // TODO: Define more pins ...
-};
+  GPIO_PIN_3, // PIN 3
 
-void gpio_pin_mode(uint8_t pin, uint8_t mode) {
+  // TODO: Define more pins ...
+ };
+
+
+ struct {
+    GPIO_TypeDef * port;
+    uint32_t pin;
+ } gpio_port_pin[] = {
+   {GPIOC, GPIO_PIN_0},
+   {GPIOC, GPIO_PIN_1},
+   {GPIOC, GPIO_PIN_2},
+   {GPIOC, GPIO_PIN_3},
+   {GPIOB, GPIO_PIN_13}   // Alive LED
+ };
+
+void gpio_pin_mode(uint8_t pin, gpio_mode_t mode) {
   // TODO:
+  GPIO_InitTypeDef GPIO_InitStruct;
+  
+  GPIO_InitStruct.Pin = gpio_port_pin[pin].pin;
+  GPIO_InitStruct.Mode = mode;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(gpio_port_pin[pin].port, &GPIO_InitStruct);   
 }
 
 void gpio_write(uint8_t pin, uint8_t value) {
   // TODO:
+  GPIO_PinState pin_state;
+
+  if(value == GPIO_LOW){
+    pin_state = GPIO_PIN_RESET;
+  }
+  else if(value == GPIO_HIGH){
+    pin_state = GPIO_PIN_SET;
+  }
+
+  HAL_GPIO_WritePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin, pin_state);
 }
 
 void gpio_toggle(uint8_t pin) {
   // TODO:
+  HAL_GPIO_TogglePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
 }
 
 uint8_t gpio_read(uint8_t pin) {
   // TODO:
-  return 0;
+  uint8_t val = 0;
+  GPIO_PinState pin_state;
+  pin_state = HAL_GPIO_ReadPin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
+
+  if(pin_state == GPIO_PIN_RESET){
+    val = 0;
+  }
+  else if(pin_state == GPIO_PIN_SET){
+    val = 1;
+  }
+
+  return val;
 }

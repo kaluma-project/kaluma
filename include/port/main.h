@@ -19,41 +19,10 @@
  * SOFTWARE.
  */
 
-#include "system.h"
-#include "gpio.h"
-#include "tty.h"
-
-/*
-test
-*/
-int main(void)
-{
-  unsigned int sec = 0;
-
-  system_init();
-  tty_init();
-  gpio_pin_mode(0, GPIO_MODE_OUPUT_PP);
-  gpio_pin_mode(4, GPIO_MODE_OUPUT_PP);
-  while (1) {
-    gpio_toggle(0);
-    gpio_toggle(4);   // LED Blinking
-    delay(1000);
-    tty_printf("[%d] : LED blinking...\r\n", sec++);
-  }
-}
+#ifndef __MAIN_H
+#define __MAIN_H
 
 
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @param  None
-  * @retval None
-  */
-  void _Error_Handler(char * file, int line)
-  {
-    /* USER CODE BEGIN Error_Handler_Debug */
-    /* User can add his own implementation to report the HAL error return state */
-    while(1) 
-    {
-    }
-    /* USER CODE END Error_Handler_Debug */ 
-  }
+void _Error_Handler(char * file, int line);
+
+#endif /* __GPIO_H */
