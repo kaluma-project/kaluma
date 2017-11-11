@@ -25,11 +25,11 @@
 #include <stdint.h>
 
 typedef enum {
-  GPIO_MODE_INPUT,
+  GPIO_MODE_INPUT_,
   GPIO_MODE_OUPUT_PP,
   GPIO_MODE_OUPUT_OD,
-  GPIO_MODE_AF_PP,
-  GPIO_MODE_AF_OD
+  GPIO_MODE_AF_PP_,
+  GPIO_MODE_AF_OD_
 } gpio_mode_t;
 
 #define GPIO_LOW 0
