@@ -22,38 +22,41 @@
 #include "kameleon_system.h"
 #include "kameleon_gpio.h"
 #include "kameleon_tty.h"
+#include "kameleon_io.h"
 
-/*
-test
-*/
-int main(void)
-{
-  unsigned int sec = 0;
+void timer_cb() {
+  kameleon_gpio_toggle(4); // LED Blinking
+  /* Should not be blocked */
+  kameleon_tty_printf("[%d] : LED blinking...\r\n");
+}
 
+int main(void) {
   kameleon_system_init();
   kameleon_tty_init();
-  kameleon_gpio_pin_mode(0, KAMELEON_GPIO_MODE_OUPUT_PP);
+  kameleon_io_init();
   kameleon_gpio_pin_mode(4, KAMELEON_GPIO_MODE_OUPUT_PP);
-  while (1) {
-    kameleon_gpio_toggle(0);
-    kameleon_gpio_toggle(4);   // LED Blinking
-    kameleon_delay(1000);
-    kameleon_tty_printf("[%d] : LED blinking...\r\n", sec++);
-  }
+
+  /* Timer setup */
+  kameleon_io_timer_handle_t timer;
+  kameleon_io_timer_init(&timer);
+  kameleon_io_timer_start(&timer, timer_cb, 1000, true);
+
+  /* Enter to IO loop */
+  kameleon_io_run();
 }
 
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @param  None
-  * @retval None
-  */
-  void _Error_Handler(char * file, int line)
+ * @brief  This function is executed in case of error occurrence.
+ * @param  None
+ * @retval None
+ */
+void _Error_Handler(char * file, int line)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  while(1) 
   {
-    /* USER CODE BEGIN Error_Handler_Debug */
-    /* User can add his own implementation to report the HAL error return state */
-    while(1) 
-    {
-    }
-    /* USER CODE END Error_Handler_Debug */ 
   }
+  /* USER CODE END Error_Handler_Debug */ 
+}

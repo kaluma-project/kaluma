@@ -29,18 +29,15 @@
 typedef struct kameleon_io_loop_s kameleon_io_loop_t;
 typedef struct kameleon_io_handle_s kameleon_io_handle_t;
 typedef struct kameleon_io_handle_list_s kameleon_io_handle_list_t;
-typedef struct kameleon_io_idle_handle_s kameleon_io_idle_handle_t;
 typedef struct kameleon_io_timer_handle_s kameleon_io_timer_handle_t;
 typedef struct kameleon_io_tty_handle_s kameleon_io_tty_handle_t;
 
 /* callback function types */
 typedef void (* kameleon_io_tty_read_cb)(unsigned int size, const char *buffer);
 typedef void (* kameleon_io_timer_cb)();
-typedef void (* kameleon_io_idler_cb)();
 
 /* handle types */
 typedef enum kameleon_io_type {
-  KAMELEON_IO_IDLE,
   KAMELEON_IO_TIMER,
   KAMELEON_IO_TTY
 } kameleon_io_type_t;
@@ -48,16 +45,15 @@ typedef enum kameleon_io_type {
 struct kameleon_io_handle_s {
   kameleon_list_node_t base;
   kameleon_io_type_t type;
-};
-
-struct kameleon_io_idle_handle_s {
-  kameleon_io_handle_t base;
-  kameleon_io_idler_cb idler_cb;
+  bool active;
 };
 
 struct kameleon_io_timer_handle_s {
   kameleon_io_handle_t base;
   kameleon_io_timer_cb timer_cb;
+  uint64_t clamped_timeout;
+  uint64_t interval;
+  bool repeat;
 };
 
 struct kameleon_io_tty_handle_s {
@@ -68,23 +64,19 @@ struct kameleon_io_tty_handle_s {
 /* loop type */
 struct kameleon_io_loop_s {
   bool stop_flag;
+  uint64_t time;
   kameleon_list_t timer_handles;
   kameleon_list_t tty_handles;
-  kameleon_list_t idle_handles;
 };
 
 /* loop functions */
 void kameleon_io_init();
 void kameleon_io_run();
 
-/* idle functions */
-void kameleon_io_idle_init(kameleon_io_idle_handle_t *idle, kameleon_io_idler_cb idler);
-void kameleon_io_idle_close(kameleon_io_idle_handle_t *idle);
-
 /* timer functions */
 void kameleon_io_timer_init(kameleon_io_timer_handle_t *timer);
 void kameleon_io_timer_close(kameleon_io_timer_handle_t *timer);
-void kameleon_io_timer_start(kameleon_io_timer_handle_t *timer, kameleon_io_timer_cb timer_cb, uint64_t timeout, bool repeat);
+void kameleon_io_timer_start(kameleon_io_timer_handle_t *timer, kameleon_io_timer_cb timer_cb, uint64_t interval, bool repeat);
 void kameleon_io_timer_stop(kameleon_io_timer_handle_t *timer);
 
 /* TTY functions */

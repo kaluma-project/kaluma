@@ -24,7 +24,19 @@
 
 #include <stdint.h>
 
+/**
+ * Initialize the system
+ */
 void kameleon_system_init();
+
+/**
+ * Delay in milliseconds
+ */
 void kameleon_delay(uint64_t msec);
+
+/**
+ * Return current time in milliseconds
+ */
+uint64_t kameleon_gettime();
 
 #endif /* __KAMELEON_SYSTEM_H */

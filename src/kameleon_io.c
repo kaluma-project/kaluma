@@ -29,9 +29,14 @@ kameleon_io_loop_t loop;
 
 /* forward declarations */
 
-static void __io_idle_run();
-static void __io_timer_run();
-static void __io_tty_run();
+static void io_timer_run();
+static void io_tty_run();
+
+/* internal functions */
+
+static void io_update_time() {
+  loop.time = kameleon_gettime();
+}
 
 /* loop functions */
 
@@ -42,48 +47,52 @@ void kameleon_io_init() {
 
 void kameleon_io_run() {
   while (1) {
-    __io_tty_run();
+    io_update_time();
+    io_timer_run();
+    // io_tty_run();
   }
-}
-
-/* idle functions */
-
-void kameleon_io_idle_init(kameleon_io_idle_handle_t *idle, kameleon_io_idler_cb idler) {
-  idle->base.type = KAMELEON_IO_IDLE;
-  idle->idler_cb = idler;
-  // add to loop.idle_handles
-}
-
-void kameleon_io_idle_close(kameleon_io_idle_handle_t *idle) {
-
-}
-
-static void __io_idle_run() {
-
 }
 
 /* timer functions */
 
 void kameleon_io_timer_init(kameleon_io_timer_handle_t *timer) {
   timer->base.type = KAMELEON_IO_TIMER;
+  timer->base.active = false;
   timer->timer_cb = NULL;
   kameleon_list_append(&loop.timer_handles, timer);
 }
 
 void kameleon_io_timer_close(kameleon_io_timer_handle_t *timer) {
-
+  kameleon_list_remove(&loop.timer_handles, timer);
 }
 
-void kameleon_io_timer_start(kameleon_io_timer_handle_t *timer, kameleon_io_timer_cb timer_cb, uint64_t timeout, bool repeat) {
-
+void kameleon_io_timer_start(kameleon_io_timer_handle_t *timer, kameleon_io_timer_cb timer_cb, uint64_t interval, bool repeat) {
+  timer->base.active = true;
+  timer->timer_cb = timer_cb;
+  timer->clamped_timeout = loop.time + interval;
+  timer->interval = interval;
+  timer->repeat = repeat;
 }
 
 void kameleon_io_timer_stop(kameleon_io_timer_handle_t *timer) {
-
+  timer->base.active = false;
 }
 
-static void __io_timer_run() {
-
+static void io_timer_run() {
+  kameleon_io_timer_handle_t *handle = &loop.timer_handles;
+  while (handle != NULL) {
+    if (handle->base.active) {
+      if (handle->clamped_timeout < loop.time) {
+        if (handle->repeat) {
+          handle->clamped_timeout = handle->clamped_timeout + handle->interval;
+        }
+        if (handle->timer_cb != NULL) {
+          handle->timer_cb();
+        }
+      }
+    }
+    handle = ((kameleon_list_node_t *) handle)->next;
+  }
 }
 
 /* TTY functions */
@@ -102,11 +111,11 @@ void kameleon_io_tty_close(kameleon_io_tty_handle_t *tty) {
   kameleon_io_tty_handle_t *p = &loop.tty_handles;
 }
 
-static void __io_tty_run() {
+static void io_tty_run() {
   kameleon_io_tty_handle_t *p = &loop.tty_handles;
   while (p != NULL) {
     if (p->read_cb != NULL && kameleon_tty_has_data()) {
-      p->read_cb(kameleon_tty_read_size(), kameleon_tty_read());
+      // p->read_cb(kameleon_tty_read_size(), kameleon_tty_read());
     }
     p = ((kameleon_list_node_t *) p)->next;
   }

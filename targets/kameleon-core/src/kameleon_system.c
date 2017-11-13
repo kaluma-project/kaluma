@@ -100,3 +100,7 @@ void kameleon_delay(uint64_t msec) {
   // TODO:
   HAL_Delay(msec);
 }
+
+uint64_t kameleon_gettime() {
+  return 0;
+}
