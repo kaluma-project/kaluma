@@ -19,16 +19,16 @@
  * SOFTWARE.
  */
 
-#ifndef __TTY_H
-#define __TTY_H
+#ifndef __KAMELEON_TTY_H
+#define __KAMELEON_TTY_H
 
 #include <stdbool.h>
 
-void tty_init();
-void tty_putc(char ch);
-void tty_printf(const char *fmt, ...);
-bool tty_has_data();
-unsigned int tty_data_size();
-char tty_getc();
+void kameleon_tty_init();
+void kameleon_tty_putc(char ch);
+void kameleon_tty_printf(const char *fmt, ...);
+bool kameleon_tty_has_data();
+unsigned int kameleon_tty_data_size();
+char kameleon_tty_getc();
 
-#endif /* __TTY_H */
+#endif /* __KAMELEON_TTY_H */

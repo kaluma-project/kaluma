@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-#include "system.h"
+#include "kameleon_system.h"
 #include "stm32f4xx_hal.h"
 #include <stdint.h>
 
@@ -89,14 +89,14 @@ static void SystemClock_Config(void)
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
-void system_init() {
+void kameleon_system_init() {
   // TODO:
   HAL_Init();
   SystemClock_Config();
   GpioClock_Config();
 }
 
-void delay(uint32_t msec) {
+void kameleon_delay(uint64_t msec) {
   // TODO:
   HAL_Delay(msec);
 }

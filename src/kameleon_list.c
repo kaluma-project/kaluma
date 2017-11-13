@@ -21,33 +21,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "kameleon_list.h"
 
-typedef struct list_node_s list_node_t;
-typedef struct list_s list_t;
-
-struct list_node_s {
-  list_node_t *prev; 
-  list_node_t *next;
-};
-
-struct list_s {
-  list_node_t *head;
-  list_node_t *tail;
-};
-
-struct text_node_s {
-  list_node_t base;
-  char *text;  
-};
-
-typedef struct text_node_s text_node_t;
-
-void list_init(list_t *list) {
+void kameleon_list_init(kameleon_list_t *list) {
   list->head = NULL;
   list->tail = NULL;
 }
 
-void list_append(list_t *list, list_node_t *node) {
+void kameleon_list_append(kameleon_list_t *list, kameleon_list_node_t *node) {
   if (list->tail == NULL && list->head == NULL) {
     list->head = node;
     list->tail = node;
@@ -61,10 +42,24 @@ void list_append(list_t *list, list_node_t *node) {
   }
 }
 
+void kameleon_list_remove(kameleon_list_t *list, kameleon_list_node_t *node) {
+  if (list->head == node) {
+    list->head = node->next;
+  }
+  if (list->tail == node) {
+    list->tail = node->prev;
+  }
+  if (node->prev != NULL) {
+    node->prev->next = node->next;
+  }
+  if (node->next != NULL) {
+    node->next->prev = node->prev;
+  }
+}
+
+/*
 int main(void) {
   list_t list;
-
-  printf("start...\n");
 
   text_node_t *node1 = (text_node_t *) malloc(sizeof(text_node_t));
   node1->text = "node1";
@@ -74,46 +69,17 @@ int main(void) {
   node3->text = "node3";
   text_node_t *node4 = (text_node_t *) malloc(sizeof(text_node_t));
   node4->text = "node4";
-  /*
-  text_node_t node2 = {
-    .prev = NULL,
-    .next = NULL,
-    .text = "node2"
-  };
-  text_node_t node3 = {
-    .prev = NULL,
-    .next = NULL,
-    .text = "node3"
-  };
-  text_node_t node4 = {
-    .prev = NULL,
-    .next = NULL,
-    .text = "node4"
-  };
-  */
-
-  printf("nodes are created...\n");
   
   list_init(&list);
-  printf("1...\n");
-  
   list_append(&list, (list_node_t *) node1);
-  printf("2...\n");  
-  printf("%s\n", node1->text);
-
   list_append(&list, (list_node_t *) node2);
-  printf("3...\n");
-  printf("%s\n", node2->text);
-
   list_append(&list, (list_node_t *) node3);
-  printf("4...\n");
-  printf("%s\n", node3->text);
-
   list_append(&list, (list_node_t *) node4);
-  printf("5...\n");
-  printf("%s\n", node4->text);
 
-  printf("nodes are appended...\n");  
+  list_remove(&list, (list_node_t *) node1);
+  list_remove(&list, (list_node_t *) node2);
+  list_remove(&list, (list_node_t *) node3);
+  // list_remove(&list, (list_node_t *) node4);
 
   list_node_t *p = list.head;
   while (p != NULL) {
@@ -121,4 +87,17 @@ int main(void) {
     printf("%s\n", tn->text);
     p = p->next;
   }
+  text_node_t *h = (text_node_t *) list.head;
+  text_node_t *t = (text_node_t *) list.tail;
+  if (h != NULL) {
+    printf("head=%s\n", h->text);
+  } else {
+    printf("head=NULL\n");
+  }
+  if (t != NULL) {
+    printf("tail=%s\n", t->text);
+  } else {
+    printf("tail=NULL\n");
+  }
 }
+*/

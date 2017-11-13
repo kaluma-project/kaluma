@@ -19,25 +19,25 @@
  * SOFTWARE.
  */
 
-#ifndef __GPIO_H
-#define __GPIO_H
+#ifndef __KAMELEON_GPIO_H
+#define __KAMELEON_GPIO_H
 
 #include <stdint.h>
 
 typedef enum {
-  GPIO_MODE_INPUT_,
-  GPIO_MODE_OUPUT_PP,
-  GPIO_MODE_OUPUT_OD,
-  GPIO_MODE_AF_PP_,
-  GPIO_MODE_AF_OD_
-} gpio_mode_t;
+  KAMELEON_GPIO_MODE_INPUT,
+  KAMELEON_GPIO_MODE_OUPUT_PP,
+  KAMELEON_GPIO_MODE_OUPUT_OD,
+  KAMELEON_GPIO_MODE_AF_PP,
+  KAMELEON_GPIO_MODE_AF_OD
+} kameleon_gpio_mode_t;
 
-#define GPIO_LOW 0
-#define GPIO_HIGH 1
+#define KAMELEON_GPIO_LOW 0
+#define KAMELEON_GPIO_HIGH 1
 
-void gpio_pin_mode(uint8_t pin, gpio_mode_t mode);
-void gpio_write(uint8_t pin, uint8_t value);
-void gpio_toggle(uint8_t pin);
-uint8_t gpio_read(uint8_t pin);
+void kameleon_gpio_pin_mode(uint8_t pin, kameleon_gpio_mode_t mode);
+void kameleon_gpio_write(uint8_t pin, uint8_t value);
+void kameleon_gpio_toggle(uint8_t pin);
+uint8_t kameleon_gpio_read(uint8_t pin);
 
-#endif /* __GPIO_H */
+#endif /* __KAMELEON_GPIO_H */

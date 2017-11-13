@@ -19,41 +19,58 @@
  * SOFTWARE.
  */
 
-#include "kameleon_system.h"
-#include "kameleon_gpio.h"
+#include <stdbool.h>
+#include <stdarg.h>
+
 #include "kameleon_tty.h"
+#include "usb_device.h"
+#include "usbd_core.h"
+#include "usbd_desc.h"
+#include "usbd_cdc.h"
+#include "usbd_cdc_if.h"
 
-/*
-test
-*/
-int main(void)
-{
-  unsigned int sec = 0;
+/* USB Device Core handle declaration */
+USBD_HandleTypeDef hUsbDeviceFS;
 
-  kameleon_system_init();
-  kameleon_tty_init();
-  kameleon_gpio_pin_mode(0, KAMELEON_GPIO_MODE_OUPUT_PP);
-  kameleon_gpio_pin_mode(4, KAMELEON_GPIO_MODE_OUPUT_PP);
-  while (1) {
-    kameleon_gpio_toggle(0);
-    kameleon_gpio_toggle(4);   // LED Blinking
-    kameleon_delay(1000);
-    kameleon_tty_printf("[%d] : LED blinking...\r\n", sec++);
-  }
+void kameleon_tty_init() {
+  // TODO:
+  USBD_Init(&hUsbDeviceFS, &FS_Desc, DEVICE_FS);
+  USBD_RegisterClass(&hUsbDeviceFS, &USBD_CDC);
+  USBD_CDC_RegisterInterface(&hUsbDeviceFS, &USBD_Interface_fops_FS);
+  USBD_Start(&hUsbDeviceFS);
 }
 
+void kameleon_tty_putc(char ch) {
+  // TODO:
+}
 
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @param  None
-  * @retval None
-  */
-  void _Error_Handler(char * file, int line)
+void kameleon_tty_printf(const char *fmt, ...) {
+  // TODO:
+  va_list ap;
+  char string[256];
+
+  va_start(ap,fmt);
+  vsprintf(string,fmt,ap);
+
+  while(1)
   {
-    /* USER CODE BEGIN Error_Handler_Debug */
-    /* User can add his own implementation to report the HAL error return state */
-    while(1) 
-    {
-    }
-    /* USER CODE END Error_Handler_Debug */ 
+      uint8_t result = CDC_Transmit_FS((uint8_t *)string, strlen(string));
+      if(result == USBD_OK)
+      {
+          break;
+      }
   }
+  va_end(ap);  
+}
+
+bool kameleon_tty_has_data() {
+  // TODO:
+}
+
+unsigned int kameleon_tty_data_size() {
+  // TODO:
+}
+
+char kameleon_tty_getc() {
+  // TODO:
+}

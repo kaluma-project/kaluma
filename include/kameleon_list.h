@@ -19,58 +19,27 @@
  * SOFTWARE.
  */
 
-#include <stdbool.h>
-#include <stdarg.h>
+#ifndef __KAMELEON_LIST_H
+#define __KAMELEON_LIST_H
 
-#include "tty.h"
-#include "usb_device.h"
-#include "usbd_core.h"
-#include "usbd_desc.h"
-#include "usbd_cdc.h"
-#include "usbd_cdc_if.h"
+typedef struct kameleon_list_node_s kameleon_list_node_t;
+typedef struct kameleon_list_s kameleon_list_t;
 
-/* USB Device Core handle declaration */
-USBD_HandleTypeDef hUsbDeviceFS;
+#define KAMELEON_LIST_NODE_FIELDS                                             \
+  kameleon_list_node_t *prev;                                                 \
+  kameleon_list_node_t *next;                                                 \
 
-void tty_init() {
-  // TODO:
-  USBD_Init(&hUsbDeviceFS, &FS_Desc, DEVICE_FS);
-  USBD_RegisterClass(&hUsbDeviceFS, &USBD_CDC);
-  USBD_CDC_RegisterInterface(&hUsbDeviceFS, &USBD_Interface_fops_FS);
-  USBD_Start(&hUsbDeviceFS);
-}
+struct kameleon_list_node_s {
+  KAMELEON_LIST_NODE_FIELDS
+};
 
-void tty_putc(char ch) {
-  // TODO:
-}
+struct kameleon_list_s {
+  kameleon_list_node_t *head;
+  kameleon_list_node_t *tail;
+};
 
-void tty_printf(const char *fmt, ...) {
-  // TODO:
-  va_list ap;
-  char string[256];
+void kameleon_list_init(kameleon_list_t *list);
+void kameleon_list_append(kameleon_list_t *list, kameleon_list_node_t *node);
+void kameleon_list_remove(kameleon_list_t *list, kameleon_list_node_t *node);
 
-  va_start(ap,fmt);
-  vsprintf(string,fmt,ap);
-
-  while(1)
-  {
-      uint8_t result = CDC_Transmit_FS((uint8_t *)string, strlen(string));
-      if(result == USBD_OK)
-      {
-          break;
-      }
-  }
-  va_end(ap);  
-}
-
-bool tty_has_data() {
-  // TODO:
-}
-
-unsigned int tty_data_size() {
-  // TODO:
-}
-
-char tty_getc() {
-  // TODO:
-}
+#endif /* __KAMELEON_LIST_H */

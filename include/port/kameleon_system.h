@@ -19,12 +19,12 @@
  * SOFTWARE.
  */
 
-#ifndef __SYSTEM_H
-#define __SYSTEM_H
+#ifndef __KAMELEON_SYSTEM_H
+#define __KAMELEON_SYSTEM_H
 
 #include <stdint.h>
 
-void system_init();
-void delay(uint32_t msec);
+void kameleon_system_init();
+void kameleon_delay(uint64_t msec);
 
-#endif /* __SYSTEM_H */
+#endif /* __KAMELEON_SYSTEM_H */
