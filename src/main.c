@@ -27,7 +27,8 @@
 void timer_cb() {
   kameleon_gpio_toggle(4); // LED Blinking
   /* Should not be blocked */
-  kameleon_tty_printf("[%d] : LED blinking...\r\n");
+  uint64_t tick = kameleon_gettime();
+  kameleon_tty_printf("[%d] : LED blinking...\r\n", (int) tick);
 }
 
 int main(void) {

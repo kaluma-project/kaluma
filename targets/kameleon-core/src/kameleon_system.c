@@ -23,6 +23,15 @@
 #include "stm32f4xx_hal.h"
 #include <stdint.h>
 
+static uint64_t tick_count;
+
+
+void inc_tick()
+{
+  tick_count++;
+
+}
+
 /** GPIO Clock Enable
 */
 static void GpioClock_Config(void)
@@ -102,5 +111,5 @@ void kameleon_delay(uint64_t msec) {
 }
 
 uint64_t kameleon_gettime() {
-  return 0;
+  return tick_count;
 }
