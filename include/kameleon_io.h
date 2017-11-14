@@ -33,7 +33,7 @@ typedef struct kameleon_io_timer_handle_s kameleon_io_timer_handle_t;
 typedef struct kameleon_io_tty_handle_s kameleon_io_tty_handle_t;
 
 /* callback function types */
-typedef void (* kameleon_io_tty_read_cb)(unsigned int size, const char *buffer);
+typedef void (* kameleon_io_tty_read_cb)(char);
 typedef void (* kameleon_io_timer_cb)();
 
 /* handle types */
@@ -81,7 +81,8 @@ void kameleon_io_timer_stop(kameleon_io_timer_handle_t *timer);
 
 /* TTY functions */
 void kameleon_io_tty_init(kameleon_io_tty_handle_t *tty);
-void kameleon_io_tty_read_start(kameleon_io_tty_handle_t *tty, kameleon_io_tty_read_cb read_cb);
 void kameleon_io_tty_close(kameleon_io_tty_handle_t *tty);
+void kameleon_io_tty_read_start(kameleon_io_tty_handle_t *tty, kameleon_io_tty_read_cb read_cb);
+void kameleon_io_tty_read_stop(kameleon_io_tty_handle_t *tty);
 
 #endif /* __KAMELEON_IO_H */

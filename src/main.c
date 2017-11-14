@@ -31,6 +31,11 @@ void timer_cb() {
   kameleon_tty_printf("[%d] : LED blinking...\r\n", (int) tick);
 }
 
+void tty_read_cb(char ch) {
+  /* echo */
+  kameleon_tty_putc(ch);
+}
+
 int main(void) {
   kameleon_system_init();
   kameleon_tty_init();
@@ -41,6 +46,11 @@ int main(void) {
   kameleon_io_timer_handle_t timer;
   kameleon_io_timer_init(&timer);
   kameleon_io_timer_start(&timer, timer_cb, 1000, true);
+
+  /* TTY setup */
+  kameleon_io_tty_handle_t tty;
+  kameleon_io_tty_init(&tty);
+  kameleon_io_tty_read_start(&tty, tty_read_cb);
 
   /* Enter to IO loop */
   kameleon_io_run();

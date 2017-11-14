@@ -4,18 +4,22 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "taskName": "make",
+      "label": "make",
       "type": "shell",
       "command": "make",
-      "group": "build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
       "presentation": {
         "reveal": "always",
+        "focus": true,
         "panel": "new"
       },
       "problemMatcher": []
     },
     {
-      "taskName": "make clean",
+      "label": "make clean",
       "type": "shell",
       "command": "make clean",
       "group": "build",
@@ -25,13 +29,10 @@
       }
     },
     {
-      "taskName": "flash",
+      "label": "flash",
       "type": "shell",
       "command": "st-flash write build/kameleon-core.bin 0x8000000",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
+      "group": "build",
       "presentation": {
         "reveal": "always",
         "panel": "new"
@@ -39,7 +40,7 @@
       "problemMatcher": []
     },
     {
-      "taskName": "st-util",
+      "label": "st-util",
       "type": "shell",
       "command": "st-util"
     }

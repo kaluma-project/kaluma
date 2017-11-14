@@ -19,29 +19,43 @@
  * SOFTWARE.
  */
 
-#ifndef __KAMELEON_SYSTEM_H
-#define __KAMELEON_SYSTEM_H
+#ifndef __KAMELEON_REPL_H
+#define __KAMELEON_REPL_H
 
-#include <stdint.h>
+#define MAX_BUFFER_LENGTH 1024
+#define MAX_COMMAND_HISTORY 10
 
-/**
- * Initialize the system
- */
-void kameleon_system_init();
+typedef enum {
+  NORMAL,
+  ESCAPE
+} repl_mode_t;
 
-/**
- * Delay in milliseconds
- */
-void kameleon_delay(uint64_t msec);
+struct repl_state_s;
 
-/**
- * Return current time (UNIX timestamp in milliseconds)
- */
-uint64_t kameleon_gettime();
+typedef void (*repl_input_handler_t)(struct repl_state_s *, char);
 
-/**
- * Set current time (UNIX timestamp in milliseconds)
- */
-void kameleon_settime(uint64_t time);
+struct repl_state_s {
+  repl_mode_t mode;
+  bool echo;
+  repl_input_handler_t input_handler;
+  char buffer[MAX_BUFFER_LENGTH];
+  unsigned int buffer_length;
+  unsigned int position;
+  char escape[3];
+  unsigned int escape_length;
+  char *history[MAX_COMMAND_HISTORY];
+  unsigned int history_size;
+  unsigned int history_position;
+};
 
-#endif /* __KAMELEON_SYSTEM_H */
+typedef struct repl_state_s repl_state_t;
+
+void repl_init();
+void repl_prompt();
+void repl_putc(char ch);
+void repl_set_input_handler(repl_input_handler_t handler);
+void repl_log(const char *format, const char *str);
+void repl_info(const char *format, const char *str);
+void repl_error(const char *format, const char *str);
+
+#endif /* __KAMELEON_REPL_H */

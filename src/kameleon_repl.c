@@ -19,29 +19,26 @@
  * SOFTWARE.
  */
 
-#ifndef __KAMELEON_SYSTEM_H
-#define __KAMELEON_SYSTEM_H
+#include "kameleon_io.h"
+#include "kameleon_repl.h"
 
-#include <stdint.h>
+/* Forward declarations */
 
-/**
- * Initialize the system
- */
-void kameleon_system_init();
+static void repl_putc(char ch);
 
 /**
- * Delay in milliseconds
+ * A global TTY handle for REPL
  */
-void kameleon_delay(uint64_t msec);
+kameleon_io_tty_handle_t tty;
 
 /**
- * Return current time (UNIX timestamp in milliseconds)
+ * Initialize the REPL
  */
-uint64_t kameleon_gettime();
+void repl_init() {
+  kameleon_io_tty_init(&tty);
+  kameleon_io_tty_read_start(&tty, repl_putc);
+}
 
-/**
- * Set current time (UNIX timestamp in milliseconds)
- */
-void kameleon_settime(uint64_t time);
-
-#endif /* __KAMELEON_SYSTEM_H */
+static void repl_putc(char ch) {
+  // ...
+}

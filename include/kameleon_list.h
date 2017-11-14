@@ -25,12 +25,9 @@
 typedef struct kameleon_list_node_s kameleon_list_node_t;
 typedef struct kameleon_list_s kameleon_list_t;
 
-#define KAMELEON_LIST_NODE_FIELDS                                             \
-  kameleon_list_node_t *prev;                                                 \
-  kameleon_list_node_t *next;                                                 \
-
 struct kameleon_list_node_s {
-  KAMELEON_LIST_NODE_FIELDS
+  kameleon_list_node_t *prev;
+  kameleon_list_node_t *next;
 };
 
 struct kameleon_list_s {

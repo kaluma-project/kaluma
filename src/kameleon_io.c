@@ -49,7 +49,7 @@ void kameleon_io_run() {
   while (1) {
     io_update_time();
     io_timer_run();
-    // io_tty_run();
+    io_tty_run();
   }
 }
 
@@ -103,20 +103,30 @@ void kameleon_io_tty_init(kameleon_io_tty_handle_t *tty) {
   kameleon_list_append(&loop.tty_handles, tty);
 }
 
+void kameleon_io_tty_close(kameleon_io_tty_handle_t *tty) {
+  kameleon_list_remove(&loop.tty_handles, tty);
+}
+
 void kameleon_io_tty_read_start(kameleon_io_tty_handle_t *tty, kameleon_io_tty_read_cb read_cb) {
+  tty->base.active = true;
   tty->read_cb = read_cb;
 }
 
-void kameleon_io_tty_close(kameleon_io_tty_handle_t *tty) {
-  kameleon_io_tty_handle_t *p = &loop.tty_handles;
+void kameleon_io_tty_read_stop(kameleon_io_tty_handle_t *tty) {
+  tty->base.active = false;
 }
 
 static void io_tty_run() {
-  kameleon_io_tty_handle_t *p = &loop.tty_handles;
-  while (p != NULL) {
-    if (p->read_cb != NULL && kameleon_tty_has_data()) {
-      // p->read_cb(kameleon_tty_read_size(), kameleon_tty_read());
+  kameleon_io_tty_handle_t *handle = &loop.tty_handles;
+  while (handle != NULL) {
+    if (handle->base.active) {
+      if (handle->read_cb != NULL && kameleon_tty_has_data()) {
+        unsigned int size = kameleon_tty_data_size();
+        for (int i = 0; i < size; i++) {
+          handle->read_cb(kameleon_tty_getc());
+        }
+      }
     }
-    p = ((kameleon_list_node_t *) p)->next;
+    handle = ((kameleon_list_node_t *) handle)->next;
   }
 }
