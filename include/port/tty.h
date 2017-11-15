@@ -28,7 +28,7 @@ void tty_init();
 void tty_putc(char ch);
 void tty_printf(const char *fmt, ...);
 bool tty_has_data();
-unsigned int tty_data_size();
-char tty_getc();
+uint32_t tty_data_size();
+uint8_t tty_getc();
 
 #endif /* __TTY_H */
