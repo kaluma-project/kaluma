@@ -1,0 +1,3 @@
+[submodule "deps/jerryscript"]
+	path = deps/jerryscript
+	url = https://github.com/jerryscript-project/jerryscript.git
