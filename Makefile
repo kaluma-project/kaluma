@@ -43,17 +43,86 @@ OPT = -Og
 # Build path
 BUILD_DIR = build
 
-# Target path
+# -----------------------------------------------------------------------------
+# Jerryscript
+# -----------------------------------------------------------------------------
+
+JERRY_DIR = deps/jerryscript
+
+JERRFY_DEFS = \
+-DFEATURE_CPOINTER_32_BIT=ON \
+-DFEATURE_ERROR_MESSAGES=ON \
+-DJERRY_CMDLINE=OFF \
+-DJERRY_PORT_DEFAULT=OFF \
+-DJERRY_EXT=ON \
+-DJERRY_LIBC=OFF \
+-DJERRY_LIBM=ON \
+-DFEATURE_JS_PARSER=ON \
+-DENABLE_LTO=OFF \
+-DMEM_HEAP_SIZE_KB=78 \
+-DFEATURE_PROFILE=DEFAULT_PROFILE \
+-DFEATURE_DEBUGGER=OFF \
+-DFEATURE_EXTERNAL_CONTEXT=OFF \
+-DFEATURE_SNAPSHOT_EXEC=ON \
+-DFEATURE_SNAPSHOT_SAVE=OFF \
+-DFEATURE_SYSTEM_ALLOCATOR=ON \
+-DENABLE_STATIC_LINK=ON \
+-DENABLE_STRIP=ON \
+-DFEATURE_VM_EXEC_STOP=OFF
+
+JERRY_CSRC = \
+$(wildcard $(JERRY_DIR)/jerry-core/api/*.c) \
+$(wildcard $(JERRY_DIR)/jerry-core/debugger/*.c) \
+$(wildcard $(JERRY_DIR)/jerry-core/ecma/base/*.c) \
+$(wildcard $(JERRY_DIR)/jerry-core/ecma/builtin-objects/*.c) \
+$(wildcard $(JERRY_DIR)/jerry-core/ecma/builtin-objects/typedarray/*.c) \
+$(wildcard $(JERRY_DIR)/jerry-core/ecma/operations/*.c) \
+$(wildcard $(JERRY_DIR)/jerry-core/jcontext/*.c) \
+$(wildcard $(JERRY_DIR)/jerry-core/jmem/*.c) \
+$(wildcard $(JERRY_DIR)/jerry-core/jrt/*.c) \
+$(wildcard $(JERRY_DIR)/jerry-core/lit/*.c) \
+$(wildcard $(JERRY_DIR)/jerry-core/parser/js/*.c) \
+$(wildcard $(JERRY_DIR)/jerry-core/parser/regexp/*.c) \
+$(wildcard $(JERRY_DIR)/jerry-core/vm/*.c) \
+$(wildcard $(JERRY_DIR)/jerry-ext/arg/*.c) \
+$(wildcard $(JERRY_DIR)/jerry-ext/handler/*.c) \
+$(wildcard $(JERRY_DIR)/jerry-ext/module/*.c) \
+$(wildcard $(JERRY_DIR)/jerry-libm/*.c)
+
+JERRY_CINC = \
+-I${JERRY_DIR}/jerry-core \
+-I${JERRY_DIR}/jerry-core/api \
+-I${JERRY_DIR}/jerry-core/debugger \
+-I${JERRY_DIR}/jerry-core/ecma/base \
+-I${JERRY_DIR}/jerry-core/ecma/builtin-objects \
+-I${JERRY_DIR}/jerry-core/ecma/builtin-objects/typedarray \
+-I${JERRY_DIR}/jerry-core/ecma/operations \
+-I${JERRY_DIR}/jerry-core/include \
+-I${JERRY_DIR}/jerry-core/jcontext \
+-I${JERRY_DIR}/jerry-core/jmem \
+-I${JERRY_DIR}/jerry-core/jrt \
+-I${JERRY_DIR}/jerry-core/lit \
+-I${JERRY_DIR}/jerry-core/parser/js \
+-I${JERRY_DIR}/jerry-core/parser/regexp \
+-I${JERRY_DIR}/jerry-core/vm \
+-I${JERRY_DIR}/jerry-ext/arg \
+-I${JERRY_DIR}/jerry-ext/include \
+-I${JERRY_DIR}/jerry-libm
+
+# -----------------------------------------------------------------------------
+# Kameleon
+# -----------------------------------------------------------------------------
+
 TARGET_DIR = targets/$(TARGET)
 
-######################################
-# source
-######################################
-# C sources
-CSRC =  \
+KAMELEON_ASRC = \
+$(TARGET_DIR)/src/startup_stm32f411xe.s
+
+KAMELEON_CSRC = \
 src/main.c \
 src/utils.c \
 src/io.c \
+src/repl.c \
 $(TARGET_DIR)/src/system.c \
 $(TARGET_DIR)/src/gpio.c \
 $(TARGET_DIR)/src/tty.c \
@@ -86,20 +155,21 @@ $(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c \
 $(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c \
 $(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c
 
-# ASM sources
-ASRC = \
-$(TARGET_DIR)/src/startup_stm32f411xe.s
+KAMELEON_CINC = \
+-Iinclude \
+-Iinclude/port \
+-I$(TARGET_DIR)/include \
+-I$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Inc \
+-I$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Inc/Legacy \
+-I$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Inc \
+-I$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc \
+-I$(TARGET_DIR)/drivers/CMSIS/Device/ST/STM32F4xx/Include \
+-I$(TARGET_DIR)/drivers/CMSIS/Include
 
+# -----------------------------------------------------------------------------
+# Toolchain
+# -----------------------------------------------------------------------------
 
-######################################
-# firmware library
-######################################
-PERIFLIB_SOURCES =
-
-
-#######################################
-# binaries
-#######################################
 PREFIX = arm-none-eabi-
 CC = $(PREFIX)gcc
 AS = $(PREFIX)gcc -x assembler-with-cpp
@@ -131,41 +201,31 @@ AS_DEFS =
 # C defines
 C_DEFS =  \
 -DUSE_HAL_DRIVER \
--DSTM32F411xE
+-DSTM32F411xE \
+$(JERRY_DEFS)
 
-# AS includes
-AS_INCLUDES =
+ASRC = $(KAMELEON_ASRC)
+AINC =
 
-# C includes
-C_INCLUDES =  \
--Iinclude \
--Iinclude/port \
--I$(TARGET_DIR)/include \
--I$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Inc \
--I$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Inc/Legacy \
--I$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Inc \
--I$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc \
--I$(TARGET_DIR)/drivers/CMSIS/Device/ST/STM32F4xx/Include \
--I$(TARGET_DIR)/drivers/CMSIS/Include
-
+CSRC = $(KAMELEON_CSRC) # $(JERRY_CSRC)
+CINC = $(KAMELEON_CINC) # $(JERRY_CINC)
 
 # compile gcc flags
-ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
+ASFLAGS = $(MCU) $(AS_DEFS) $(AINC) $(OPT) -Wall -fdata-sections -ffunction-sections
 
-CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
+CFLAGS = $(MCU) $(C_DEFS) $(CINC) $(OPT) -Wall -fdata-sections -ffunction-sections
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2
 endif
 
-
 # Generate dependency information
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)"
-
 
 #######################################
 # LDFLAGS
 #######################################
+
 # link script
 LDSCRIPT = \
 $(TARGET_DIR)/src/STM32F411RETx_FLASH.ld
@@ -178,13 +238,14 @@ LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BU
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
 
-
 #######################################
 # build the application
 #######################################
+
 # list of objects
 OBJS = $(addprefix $(BUILD_DIR)/,$(notdir $(CSRC:.c=.o)))
 vpath %.c $(sort $(dir $(CSRC)))
+
 # list of ASM program objects
 OBJS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASRC:.s=.o)))
 vpath %.s $(sort $(dir $(ASRC)))

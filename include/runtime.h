@@ -19,38 +19,11 @@
  * SOFTWARE.
  */
 
-#ifndef __REPL_H
-#define __REPL_H
+#ifndef __RUNTIME_H
+#define __RUNTIME_H
 
-#define MAX_BUFFER_LENGTH 1024
-#define MAX_COMMAND_HISTORY 10
+void runtime_init();
 
-typedef enum {
-  REPL_MODE_NORMAL,
-  REPL_MODE_ESCAPE
-} repl_mode_t;
+void runtime_test();
 
-typedef struct repl_state_s repl_state_t;
-typedef void (*repl_input_handler_t)(repl_state_t *, char);
-
-struct repl_state_s {
-  repl_mode_t mode;
-  bool echo;
-  repl_input_handler_t input_handler;
-  char buffer[MAX_BUFFER_LENGTH];
-  unsigned int buffer_length;
-  unsigned int position;
-  char escape[3];
-  unsigned int escape_length;
-  char *history[MAX_COMMAND_HISTORY];
-  unsigned int history_size;
-  unsigned int history_position;
-};
-
-void repl_init();
-void repl_set_input_handler(repl_input_handler_t handler);
-void repl_log(const char *format, const char *str);
-void repl_info(const char *format, const char *str);
-void repl_error(const char *format, const char *str);
-
-#endif /* __REPL_H */
+#endif /* __RUNTIME_H */

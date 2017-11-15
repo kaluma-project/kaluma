@@ -5,6 +5,8 @@
             "includePath": [
                 "${workspaceRoot}/include",
                 "${workspaceRoot}/include/port",
+                "${workspaceRoot}/deps/jerryscript/jerry-core/include",
+                "${workspaceRoot}/deps/jerryscript/jerry-ext/include",
                 "${workspaceRoot}/targets/kameleon-core/include",
                 "${workspaceRoot}/targets/kameleon-core/drivers/STM32F4xx_HAL_Driver/Inc",
                 "${workspaceRoot}/targets/kameleon-core/drivers/STM32F4xx_HAL_Driver/Inc/Legacy",
@@ -51,6 +53,8 @@
             "includePath": [
                 "${workspaceRoot}/include/",
                 "${workspaceRoot}/include/port",
+                "${workspaceRoot}/deps/jerryscript/jerry-core/include",
+                "${workspaceRoot}/deps/jerryscript/jerry-ext/include",
                 "${workspaceRoot}/targets/kameleon-core/include",
                 "${workspaceRoot}/targets/kameleon-core/drivers/STM32F4xx_HAL_Driver/Inc",
                 "${workspaceRoot}/targets/kameleon-core/drivers/STM32F4xx_HAL_Driver/Inc/Legacy",

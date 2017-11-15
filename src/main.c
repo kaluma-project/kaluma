@@ -23,6 +23,7 @@
 #include "gpio.h"
 #include "tty.h"
 #include "io.h"
+#include "runtime.h"
 
 void timer_cb() {
   gpio_toggle(4); // LED Blinking
@@ -40,6 +41,7 @@ int main(void) {
   system_init();
   tty_init();
   io_init();
+
   gpio_pin_mode(4, GPIO_PIN_MODE_OUPUT_PP);
 
   /* Timer setup */
@@ -53,6 +55,9 @@ int main(void) {
   io_tty_init(&tty);
   io_tty_read_start(&tty, tty_read_cb);
   */
+
+  // runtime_test();
+
 
   /* Enter to IO loop */
   io_run();

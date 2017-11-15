@@ -19,38 +19,27 @@
  * SOFTWARE.
  */
 
-#ifndef __REPL_H
-#define __REPL_H
+#include <string.h>
+#include "jerryscript.h"
+#include "jerryscript-ext/handler.h"
 
-#define MAX_BUFFER_LENGTH 1024
-#define MAX_COMMAND_HISTORY 10
+void runtime_init() {
+  jerry_init (JERRY_INIT_EMPTY);
+}
 
-typedef enum {
-  REPL_MODE_NORMAL,
-  REPL_MODE_ESCAPE
-} repl_mode_t;
 
-typedef struct repl_state_s repl_state_t;
-typedef void (*repl_input_handler_t)(repl_state_t *, char);
+void runtime_test() {
+  const jerry_char_t script[] = "print ('Hello, World!');";
+  size_t script_size = strlen ((const char *) script);
+  jerryx_handler_register_global ((const jerry_char_t *) "print", jerryx_handler_print);
+  jerry_value_t parsed_code = jerry_parse (script, script_size, false);
+  if (!jerry_value_has_error_flag (parsed_code)) {
+    jerry_value_t ret_value = jerry_run (parsed_code);
+    jerry_release_value (ret_value);
+  }
+  jerry_release_value (parsed_code);
+}
 
-struct repl_state_s {
-  repl_mode_t mode;
-  bool echo;
-  repl_input_handler_t input_handler;
-  char buffer[MAX_BUFFER_LENGTH];
-  unsigned int buffer_length;
-  unsigned int position;
-  char escape[3];
-  unsigned int escape_length;
-  char *history[MAX_COMMAND_HISTORY];
-  unsigned int history_size;
-  unsigned int history_position;
-};
-
-void repl_init();
-void repl_set_input_handler(repl_input_handler_t handler);
-void repl_log(const char *format, const char *str);
-void repl_info(const char *format, const char *str);
-void repl_error(const char *format, const char *str);
-
-#endif /* __REPL_H */
+void runtime_deinit() {
+  jerry_cleanup ();  
+}
