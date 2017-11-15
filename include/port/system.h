@@ -19,29 +19,29 @@
  * SOFTWARE.
  */
 
-#ifndef __KAMELEON_SYSTEM_H
-#define __KAMELEON_SYSTEM_H
+#ifndef __SYSTEM_H
+#define __SYSTEM_H
 
 #include <stdint.h>
 
 /**
  * Initialize the system
  */
-void kameleon_system_init();
+void system_init();
 
 /**
  * Delay in milliseconds
  */
-void kameleon_delay(uint64_t msec);
+void delay(uint64_t msec);
 
 /**
  * Return current time (UNIX timestamp in milliseconds)
  */
-uint64_t kameleon_gettime();
+uint64_t gettime();
 
 /**
  * Set current time (UNIX timestamp in milliseconds)
  */
-void kameleon_settime(uint64_t time);
+void settime(uint64_t time);
 
-#endif /* __KAMELEON_SYSTEM_H */
+#endif /* __SYSTEM_H */

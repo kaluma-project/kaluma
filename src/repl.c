@@ -19,8 +19,8 @@
  * SOFTWARE.
  */
 
-#include "kameleon_io.h"
-#include "kameleon_repl.h"
+#include "io.h"
+#include "repl.h"
 
 /* Forward declarations */
 
@@ -29,14 +29,14 @@ static void repl_putc(char ch);
 /**
  * A global TTY handle for REPL
  */
-kameleon_io_tty_handle_t tty;
+io_tty_handle_t tty;
 
 /**
  * Initialize the REPL
  */
 void repl_init() {
-  kameleon_io_tty_init(&tty);
-  kameleon_io_tty_read_start(&tty, repl_putc);
+  io_tty_init(&tty);
+  io_tty_read_start(&tty, repl_putc);
 }
 
 static void repl_putc(char ch) {

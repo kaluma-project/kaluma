@@ -19,58 +19,16 @@
  * SOFTWARE.
  */
 
+#ifndef __TTY_H
+#define __TTY_H
+
 #include <stdbool.h>
-#include <stdarg.h>
 
-#include "kameleon_tty.h"
-#include "usb_device.h"
-#include "usbd_core.h"
-#include "usbd_desc.h"
-#include "usbd_cdc.h"
-#include "usbd_cdc_if.h"
+void tty_init();
+void tty_putc(char ch);
+void tty_printf(const char *fmt, ...);
+bool tty_has_data();
+unsigned int tty_data_size();
+char tty_getc();
 
-/* USB Device Core handle declaration */
-USBD_HandleTypeDef hUsbDeviceFS;
-
-void kameleon_tty_init() {
-  // TODO:
-  USBD_Init(&hUsbDeviceFS, &FS_Desc, DEVICE_FS);
-  USBD_RegisterClass(&hUsbDeviceFS, &USBD_CDC);
-  USBD_CDC_RegisterInterface(&hUsbDeviceFS, &USBD_Interface_fops_FS);
-  USBD_Start(&hUsbDeviceFS);
-}
-
-void kameleon_tty_putc(char ch) {
-  // TODO:
-}
-
-void kameleon_tty_printf(const char *fmt, ...) {
-  // TODO:
-  va_list ap;
-  char string[256];
-
-  va_start(ap,fmt);
-  vsprintf(string,fmt,ap);
-
-  while(1)
-  {
-      uint8_t result = CDC_Transmit_FS((uint8_t *)string, strlen(string));
-      if(result == USBD_OK)
-      {
-          break;
-      }
-  }
-  va_end(ap);  
-}
-
-bool kameleon_tty_has_data() {
-  // TODO:
-}
-
-unsigned int kameleon_tty_data_size() {
-  // TODO:
-}
-
-char kameleon_tty_getc() {
-  // TODO:
-}
+#endif /* __TTY_H */

@@ -21,14 +21,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "kameleon_list.h"
+#include "utils.h"
 
-void kameleon_list_init(kameleon_list_t *list) {
+void list_init(list_t *list) {
   list->head = NULL;
   list->tail = NULL;
 }
 
-void kameleon_list_append(kameleon_list_t *list, kameleon_list_node_t *node) {
+void list_append(list_t *list, list_node_t *node) {
   if (list->tail == NULL && list->head == NULL) {
     list->head = node;
     list->tail = node;
@@ -42,7 +42,7 @@ void kameleon_list_append(kameleon_list_t *list, kameleon_list_node_t *node) {
   }
 }
 
-void kameleon_list_remove(kameleon_list_t *list, kameleon_list_node_t *node) {
+void list_remove(list_t *list, list_node_t *node) {
   if (list->head == node) {
     list->head = node->next;
   }

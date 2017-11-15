@@ -19,24 +19,24 @@
  * SOFTWARE.
  */
 
-#ifndef __KAMELEON_LIST_H
-#define __KAMELEON_LIST_H
+#ifndef __UTILS_H
+#define __UTILS_H
 
-typedef struct kameleon_list_node_s kameleon_list_node_t;
-typedef struct kameleon_list_s kameleon_list_t;
+typedef struct list_node_s list_node_t;
+typedef struct list_s list_t;
 
-struct kameleon_list_node_s {
-  kameleon_list_node_t *prev;
-  kameleon_list_node_t *next;
+struct list_node_s {
+  list_node_t *prev;
+  list_node_t *next;
 };
 
-struct kameleon_list_s {
-  kameleon_list_node_t *head;
-  kameleon_list_node_t *tail;
+struct list_s {
+  list_node_t *head;
+  list_node_t *tail;
 };
 
-void kameleon_list_init(kameleon_list_t *list);
-void kameleon_list_append(kameleon_list_t *list, kameleon_list_node_t *node);
-void kameleon_list_remove(kameleon_list_t *list, kameleon_list_node_t *node);
+void list_init(list_t *list);
+void list_append(list_t *list, list_node_t *node);
+void list_remove(list_t *list, list_node_t *node);
 
-#endif /* __KAMELEON_LIST_H */
+#endif /* __UTILS_H */

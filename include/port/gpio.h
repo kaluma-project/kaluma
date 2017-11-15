@@ -19,16 +19,25 @@
  * SOFTWARE.
  */
 
-#ifndef __KAMELEON_TTY_H
-#define __KAMELEON_TTY_H
+#ifndef __GPIO_H
+#define __GPIO_H
 
-#include <stdbool.h>
+#include <stdint.h>
 
-void kameleon_tty_init();
-void kameleon_tty_putc(char ch);
-void kameleon_tty_printf(const char *fmt, ...);
-bool kameleon_tty_has_data();
-unsigned int kameleon_tty_data_size();
-char kameleon_tty_getc();
+typedef enum {
+  GPIO_PIN_MODE_INPUT,
+  GPIO_PIN_MODE_OUPUT_PP,
+  GPIO_PIN_MODE_OUPUT_OD,
+  GPIO_PIN_MODE_AF_PP,
+  GPIO_PIN_MODE_AF_OD
+} gpio_mode_t;
 
-#endif /* __KAMELEON_TTY_H */
+#define GPIO_LOW 0
+#define GPIO_HIGH 1
+
+void gpio_pin_mode(uint8_t pin, gpio_mode_t mode);
+void gpio_write(uint8_t pin, uint8_t value);
+void gpio_toggle(uint8_t pin);
+uint8_t gpio_read(uint8_t pin);
+
+#endif /* __GPIO_H */

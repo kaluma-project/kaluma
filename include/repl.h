@@ -19,8 +19,8 @@
  * SOFTWARE.
  */
 
-#ifndef __KAMELEON_REPL_H
-#define __KAMELEON_REPL_H
+#ifndef __REPL_H
+#define __REPL_H
 
 #define MAX_BUFFER_LENGTH 1024
 #define MAX_COMMAND_HISTORY 10
@@ -58,4 +58,4 @@ void repl_log(const char *format, const char *str);
 void repl_info(const char *format, const char *str);
 void repl_error(const char *format, const char *str);
 
-#endif /* __KAMELEON_REPL_H */
+#endif /* __REPL_H */

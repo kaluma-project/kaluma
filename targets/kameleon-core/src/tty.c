@@ -19,25 +19,58 @@
  * SOFTWARE.
  */
 
-#ifndef __KAMELEON_GPIO_H
-#define __KAMELEON_GPIO_H
+#include <stdbool.h>
+#include <stdarg.h>
 
-#include <stdint.h>
+#include "tty.h"
+#include "usb_device.h"
+#include "usbd_core.h"
+#include "usbd_desc.h"
+#include "usbd_cdc.h"
+#include "usbd_cdc_if.h"
 
-typedef enum {
-  KAMELEON_GPIO_MODE_INPUT,
-  KAMELEON_GPIO_MODE_OUPUT_PP,
-  KAMELEON_GPIO_MODE_OUPUT_OD,
-  KAMELEON_GPIO_MODE_AF_PP,
-  KAMELEON_GPIO_MODE_AF_OD
-} kameleon_gpio_mode_t;
+/* USB Device Core handle declaration */
+USBD_HandleTypeDef hUsbDeviceFS;
 
-#define KAMELEON_GPIO_LOW 0
-#define KAMELEON_GPIO_HIGH 1
+void tty_init() {
+  // TODO:
+  USBD_Init(&hUsbDeviceFS, &FS_Desc, DEVICE_FS);
+  USBD_RegisterClass(&hUsbDeviceFS, &USBD_CDC);
+  USBD_CDC_RegisterInterface(&hUsbDeviceFS, &USBD_Interface_fops_FS);
+  USBD_Start(&hUsbDeviceFS);
+}
 
-void kameleon_gpio_pin_mode(uint8_t pin, kameleon_gpio_mode_t mode);
-void kameleon_gpio_write(uint8_t pin, uint8_t value);
-void kameleon_gpio_toggle(uint8_t pin);
-uint8_t kameleon_gpio_read(uint8_t pin);
+void tty_putc(char ch) {
+  // TODO:
+}
 
-#endif /* __KAMELEON_GPIO_H */
+void tty_printf(const char *fmt, ...) {
+  // TODO:
+  va_list ap;
+  char string[256];
+
+  va_start(ap,fmt);
+  vsprintf(string,fmt,ap);
+
+  while(1)
+  {
+      uint8_t result = CDC_Transmit_FS((uint8_t *)string, strlen(string));
+      if(result == USBD_OK)
+      {
+          break;
+      }
+  }
+  va_end(ap);  
+}
+
+bool tty_has_data() {
+  // TODO:
+}
+
+unsigned int tty_data_size() {
+  // TODO:
+}
+
+char tty_getc() {
+  // TODO:
+}

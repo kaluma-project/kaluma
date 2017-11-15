@@ -19,41 +19,43 @@
  * SOFTWARE.
  */
 
-#include "kameleon_system.h"
-#include "kameleon_gpio.h"
-#include "kameleon_tty.h"
-#include "kameleon_io.h"
+#include "system.h"
+#include "gpio.h"
+#include "tty.h"
+#include "io.h"
 
 void timer_cb() {
-  kameleon_gpio_toggle(4); // LED Blinking
+  gpio_toggle(4); // LED Blinking
   /* Should not be blocked */
-  uint64_t tick = kameleon_gettime();
-  kameleon_tty_printf("[%d] : LED blinking...\r\n", (int) tick);
+  uint64_t tick = gettime();
+  tty_printf("[%d] : LED blinking...\r\n", (int) tick);
 }
 
 void tty_read_cb(char ch) {
   /* echo */
-  kameleon_tty_putc(ch);
+  tty_putc(ch);
 }
 
 int main(void) {
-  kameleon_system_init();
-  kameleon_tty_init();
-  kameleon_io_init();
-  kameleon_gpio_pin_mode(4, KAMELEON_GPIO_MODE_OUPUT_PP);
+  system_init();
+  tty_init();
+  io_init();
+  gpio_pin_mode(4, GPIO_PIN_MODE_OUPUT_PP);
 
   /* Timer setup */
-  kameleon_io_timer_handle_t timer;
-  kameleon_io_timer_init(&timer);
-  kameleon_io_timer_start(&timer, timer_cb, 1000, true);
+  io_timer_handle_t timer;
+  io_timer_init(&timer);
+  io_timer_start(&timer, timer_cb, 1000, true);
 
   /* TTY setup */
-  kameleon_io_tty_handle_t tty;
-  kameleon_io_tty_init(&tty);
-  kameleon_io_tty_read_start(&tty, tty_read_cb);
+  /*
+  io_tty_handle_t tty;
+  io_tty_init(&tty);
+  io_tty_read_start(&tty, tty_read_cb);
+  */
 
   /* Enter to IO loop */
-  kameleon_io_run();
+  io_run();
 }
 
 

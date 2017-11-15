@@ -22,10 +22,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include "kameleon_io.h"
-#include "kameleon_tty.h"
+#include "io.h"
+#include "tty.h"
 
-kameleon_io_loop_t loop;
+io_loop_t loop;
 
 /* forward declarations */
 
@@ -35,17 +35,17 @@ static void io_tty_run();
 /* internal functions */
 
 static void io_update_time() {
-  loop.time = kameleon_gettime();
+  loop.time = gettime();
 }
 
 /* loop functions */
 
-void kameleon_io_init() {
+void io_init() {
   loop.stop_flag = false;
-  kameleon_list_init(&loop.tty_handles);
+  list_init(&loop.tty_handles);
 }
 
-void kameleon_io_run() {
+void io_run() {
   while (1) {
     io_update_time();
     io_timer_run();
@@ -55,18 +55,18 @@ void kameleon_io_run() {
 
 /* timer functions */
 
-void kameleon_io_timer_init(kameleon_io_timer_handle_t *timer) {
-  timer->base.type = KAMELEON_IO_TIMER;
+void io_timer_init(io_timer_handle_t *timer) {
+  timer->base.type = IO_TIMER;
   timer->base.active = false;
   timer->timer_cb = NULL;
-  kameleon_list_append(&loop.timer_handles, timer);
+  list_append(&loop.timer_handles, timer);
 }
 
-void kameleon_io_timer_close(kameleon_io_timer_handle_t *timer) {
-  kameleon_list_remove(&loop.timer_handles, timer);
+void io_timer_close(io_timer_handle_t *timer) {
+  list_remove(&loop.timer_handles, timer);
 }
 
-void kameleon_io_timer_start(kameleon_io_timer_handle_t *timer, kameleon_io_timer_cb timer_cb, uint64_t interval, bool repeat) {
+void io_timer_start(io_timer_handle_t *timer, io_timer_cb timer_cb, uint64_t interval, bool repeat) {
   timer->base.active = true;
   timer->timer_cb = timer_cb;
   timer->clamped_timeout = loop.time + interval;
@@ -74,12 +74,12 @@ void kameleon_io_timer_start(kameleon_io_timer_handle_t *timer, kameleon_io_time
   timer->repeat = repeat;
 }
 
-void kameleon_io_timer_stop(kameleon_io_timer_handle_t *timer) {
+void io_timer_stop(io_timer_handle_t *timer) {
   timer->base.active = false;
 }
 
 static void io_timer_run() {
-  kameleon_io_timer_handle_t *handle = &loop.timer_handles;
+  io_timer_handle_t *handle = &loop.timer_handles;
   while (handle != NULL) {
     if (handle->base.active) {
       if (handle->clamped_timeout < loop.time) {
@@ -91,42 +91,42 @@ static void io_timer_run() {
         }
       }
     }
-    handle = ((kameleon_list_node_t *) handle)->next;
+    handle = ((list_node_t *) handle)->next;
   }
 }
 
 /* TTY functions */
 
-void kameleon_io_tty_init(kameleon_io_tty_handle_t *tty) {
-  tty->base.type = KAMELEON_IO_TTY;
+void io_tty_init(io_tty_handle_t *tty) {
+  tty->base.type = IO_TTY;
   tty->read_cb = NULL;
-  kameleon_list_append(&loop.tty_handles, tty);
+  list_append(&loop.tty_handles, tty);
 }
 
-void kameleon_io_tty_close(kameleon_io_tty_handle_t *tty) {
-  kameleon_list_remove(&loop.tty_handles, tty);
+void io_tty_close(io_tty_handle_t *tty) {
+  list_remove(&loop.tty_handles, tty);
 }
 
-void kameleon_io_tty_read_start(kameleon_io_tty_handle_t *tty, kameleon_io_tty_read_cb read_cb) {
+void io_tty_read_start(io_tty_handle_t *tty, io_tty_read_cb read_cb) {
   tty->base.active = true;
   tty->read_cb = read_cb;
 }
 
-void kameleon_io_tty_read_stop(kameleon_io_tty_handle_t *tty) {
+void io_tty_read_stop(io_tty_handle_t *tty) {
   tty->base.active = false;
 }
 
 static void io_tty_run() {
-  kameleon_io_tty_handle_t *handle = &loop.tty_handles;
+  io_tty_handle_t *handle = &loop.tty_handles;
   while (handle != NULL) {
     if (handle->base.active) {
-      if (handle->read_cb != NULL && kameleon_tty_has_data()) {
-        unsigned int size = kameleon_tty_data_size();
+      if (handle->read_cb != NULL && tty_has_data()) {
+        unsigned int size = tty_data_size();
         for (int i = 0; i < size; i++) {
-          handle->read_cb(kameleon_tty_getc());
+          handle->read_cb(tty_getc());
         }
       }
     }
-    handle = ((kameleon_list_node_t *) handle)->next;
+    handle = ((list_node_t *) handle)->next;
   }
 }

@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 #include "stm32f4xx_hal.h"
-#include "kameleon_gpio.h"
+#include "gpio.h"
 
 /**
  * Initialze GPIO pins
@@ -49,7 +49,7 @@ uint16_t pins[] = {
    {GPIOB, GPIO_PIN_13}   // Alive LED
  };
 
-void kameleon_gpio_pin_mode(uint8_t pin, kameleon_gpio_mode_t mode) {
+void gpio_pin_mode(uint8_t pin, gpio_mode_t mode) {
   // TODO:
   GPIO_InitTypeDef GPIO_InitStruct;
   
@@ -60,26 +60,26 @@ void kameleon_gpio_pin_mode(uint8_t pin, kameleon_gpio_mode_t mode) {
   HAL_GPIO_Init(gpio_port_pin[pin].port, &GPIO_InitStruct);   
 }
 
-void kameleon_gpio_write(uint8_t pin, uint8_t value) {
+void gpio_write(uint8_t pin, uint8_t value) {
   // TODO:
   GPIO_PinState pin_state;
 
-  if(value == KAMELEON_GPIO_LOW){
+  if(value == GPIO_LOW){
     pin_state = GPIO_PIN_RESET;
   }
-  else if(value == KAMELEON_GPIO_HIGH){
+  else if(value == GPIO_HIGH){
     pin_state = GPIO_PIN_SET;
   }
 
   HAL_GPIO_WritePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin, pin_state);
 }
 
-void kameleon_gpio_toggle(uint8_t pin) {
+void gpio_toggle(uint8_t pin) {
   // TODO:
   HAL_GPIO_TogglePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
 }
 
-uint8_t kameleon_gpio_read(uint8_t pin) {
+uint8_t gpio_read(uint8_t pin) {
   // TODO:
   uint8_t val = 0;
   GPIO_PinState pin_state;
