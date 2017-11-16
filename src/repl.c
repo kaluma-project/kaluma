@@ -25,6 +25,7 @@
 #include "io.h"
 #include "tty.h"
 #include "repl.h"
+#include "jerryscript.h"
 
 #define CONFIG_KAMELEON_VERSION "0.1.0"
 
@@ -50,6 +51,9 @@ static repl_state_t state;
 void repl_init() {
   io_tty_init(&tty);
   io_tty_read_start(&tty, repl_getc);
+
+  jerry_init(JERRY_INIT_EMPTY); /* TODO: MOVE THIS TO OTHER PLACE */
+
   state.mode = REPL_MODE_NORMAL;
   state.echo = true;
   state.buffer_length = 0;
@@ -79,6 +83,28 @@ void repl_init() {
   repl_prompt();
 }
 
+static void print_value (const jerry_value_t value) {
+  if (jerry_value_has_error_flag(value)) {
+    repl_error("%s\r\n", "Error.");
+  } else {
+    jerry_value_t str_value = jerry_value_to_string(value);
+
+    /* Determining required buffer size */
+    jerry_size_t req_sz = jerry_get_string_size (str_value);
+    jerry_char_t str_buf_p[req_sz + 1];
+
+    jerry_string_to_char_buffer (str_value, str_buf_p, req_sz);
+    str_buf_p[req_sz] = '\0';
+    if (jerry_value_is_string(value)) {
+      repl_info("\"%s\"\r\n", (char *) str_buf_p);
+    } else if (jerry_value_is_array(value)) {
+      repl_info("[%s]\r\n", (char *) str_buf_p);
+    } else {
+      repl_info("%s\r\n", (char *) str_buf_p);
+    }
+  }
+}
+
 static void repl_prompt() {
   if (state.echo) {
     state.buffer[state.buffer_length] = '\0';
@@ -103,6 +129,26 @@ void repl_set_input_handler(repl_input_handler_t handler) {
   }
 }
 
+/**
+ * Push a command to history
+ */
+static void history_push(char *cmd) {
+  if (state.history_size < MAX_COMMAND_HISTORY) {
+    state.history[state.history_size] = cmd;
+    state.history_size++;
+  } else {
+    // free memory of history[0]
+    free(state.history[0]);
+    // Shift history array to left (e.g. 1 to 0, 2 to 1, ...)
+    for (int i = 0; i < (state.history_size - 1); i++) {
+      state.history[i] = state.history[i + 1];
+    }
+    // Put to the last of history
+    state.history[state.history_size - 1] = cmd;
+  }
+  state.history_position = state.history_size;
+}
+
 static void run_command() {
   state.buffer_length = 0;
   state.position = 0;  
@@ -110,9 +156,31 @@ static void run_command() {
 }
 
 static void eval_code() {
-  state.buffer_length = 0;
-  state.position = 0;
-  repl_prompt();
+  if (state.buffer_length > 0) {
+
+    /* copy buffer to data */
+    char *data = malloc(state.buffer_length + 1);
+    state.buffer[state.buffer_length] = '\0';
+    strcpy(data, state.buffer);
+    state.buffer_length = 0;
+    state.position = 0;
+
+    /* push to history */
+    history_push(data);
+
+    /* evaluate code */
+    jerry_value_t parsed_code = jerry_parse((const jerry_char_t *) data, strlen(data), false);
+    if (jerry_value_has_error_flag (parsed_code)) {
+      repl_error("%s\r\n", "Syntax error");
+    } else {
+      jerry_value_t ret_value = jerry_run(parsed_code);
+      print_value(ret_value);
+      jerry_release_value(ret_value);
+    }
+    jerry_release_value(parsed_code);
+  } else {
+    repl_prompt();
+  }
 }
 
 /**
@@ -169,7 +237,7 @@ static void handle_normal(char ch) {
           }
         }
       } else {
-        repl_error("%s\n", "REPL buffer overflow");
+        repl_error("%s\r\n", "REPL buffer overflow");
       }
       break;
   }

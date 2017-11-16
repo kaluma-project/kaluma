@@ -49,9 +49,16 @@ BUILD_DIR = build
 
 JERRY_DIR = deps/jerryscript
 
-JERRFY_DEFS = \
+JERRY_LIBDIR = $(JERRY_DIR)/build/lib
+
+JERRY_LIBS = \
+$(JERRY_LIBDIR)/libjerry-core.a \
+$(JERRY_LIBDIR)/libjerry-ext.a
+
+JERRY_DEF = \
+-DPLATFORM=MCU \
 -DFEATURE_CPOINTER_32_BIT=ON \
--DFEATURE_ERROR_MESSAGES=ON \
+-DFEATURE_ERROR_MESSAGES=OFF \
 -DJERRY_CMDLINE=OFF \
 -DJERRY_PORT_DEFAULT=OFF \
 -DJERRY_EXT=ON \
@@ -70,7 +77,7 @@ JERRFY_DEFS = \
 -DENABLE_STRIP=ON \
 -DFEATURE_VM_EXEC_STOP=OFF
 
-JERRY_CSRC = \
+JERRY_SRC = \
 $(wildcard $(JERRY_DIR)/jerry-core/api/*.c) \
 $(wildcard $(JERRY_DIR)/jerry-core/debugger/*.c) \
 $(wildcard $(JERRY_DIR)/jerry-core/ecma/base/*.c) \
@@ -89,7 +96,7 @@ $(wildcard $(JERRY_DIR)/jerry-ext/handler/*.c) \
 $(wildcard $(JERRY_DIR)/jerry-ext/module/*.c) \
 $(wildcard $(JERRY_DIR)/jerry-libm/*.c)
 
-JERRY_CINC = \
+JERRY_INC = \
 -I${JERRY_DIR}/jerry-core \
 -I${JERRY_DIR}/jerry-core/api \
 -I${JERRY_DIR}/jerry-core/debugger \
@@ -115,14 +122,17 @@ JERRY_CINC = \
 
 TARGET_DIR = targets/$(TARGET)
 
-KAMELEON_ASRC = \
+KAMELEON_ASM = \
 $(TARGET_DIR)/src/startup_stm32f411xe.s
 
-KAMELEON_CSRC = \
+KAMELEON_DEF =
+
+KAMELEON_SRC = \
 src/main.c \
 src/utils.c \
 src/io.c \
 src/repl.c \
+src/jerry_port.c \
 $(TARGET_DIR)/src/system.c \
 $(TARGET_DIR)/src/gpio.c \
 $(TARGET_DIR)/src/tty.c \
@@ -155,7 +165,7 @@ $(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c \
 $(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c \
 $(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c
 
-KAMELEON_CINC = \
+KAMELEON_INC = \
 -Iinclude \
 -Iinclude/port \
 -I$(TARGET_DIR)/include \
@@ -192,7 +202,7 @@ FPU = -mfpu=fpv4-sp-d16
 FLOAT-ABI = -mfloat-abi=hard
 
 # mcu
-MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
+MCU = $(CPU) -mlittle-endian -mthumb $(FPU) $(FLOAT-ABI)
 
 # macros for gcc
 # AS defines
@@ -201,14 +211,14 @@ AS_DEFS =
 # C defines
 C_DEFS =  \
 -DUSE_HAL_DRIVER \
--DSTM32F411xE \
-$(JERRY_DEFS)
+-DSTM32F411xE
+# $(JERRY_DEF)
 
-ASRC = $(KAMELEON_ASRC)
+ASRC = $(KAMELEON_ASM)
 AINC =
 
-CSRC = $(KAMELEON_CSRC) # $(JERRY_CSRC)
-CINC = $(KAMELEON_CINC) # $(JERRY_CINC)
+CSRC = $(KAMELEON_SRC) # $(JERRY_SRC)
+CINC = $(KAMELEON_INC) $(JERRY_INC)
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AINC) $(OPT) -Wall -fdata-sections -ffunction-sections
@@ -231,8 +241,8 @@ LDSCRIPT = \
 $(TARGET_DIR)/src/STM32F411RETx_FLASH.ld
 
 # libraries
-LIBS = -lc -lm -lnosys
-LIBDIR =
+LIBS = -ljerry-core -ljerry-ext -lc -lnosys -lm
+LIBDIR = -L$(JERRY_LIBDIR)
 LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # default action: build all
@@ -258,7 +268,7 @@ $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 	@echo "compile:" $<
 	$(Q) $(AS) -c $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/$(TARGET).elf: $(OBJS) Makefile
+$(BUILD_DIR)/$(TARGET).elf: $(OBJS) $(JERRY_LIBS) Makefile
 	@echo "link:" $@
 	$(Q) $(CC) $(OBJS) $(LDFLAGS) -o $@
 	$(Q) $(SZ) $@
@@ -274,10 +284,14 @@ $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir $@
 
+$(JERRY_LIBS):
+	$(Q) python deps/jerryscript/tools/build.py --toolchain=cmake/toolchain_mcu_stm32f4.cmake --debug --lto=OFF --error-messages=ON --js-parser=ON --cpointer-32bit=ON --mem-heap=78 --jerry-cmdline=OFF
+
 #######################################
 # clean up
 #######################################
 clean:
+	$(Q) -rm -rf deps/jerryscript/build
 	$(Q) -rm -fR .dep $(BUILD_DIR)
 
 #######################################

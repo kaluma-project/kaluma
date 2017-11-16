@@ -5,7 +5,6 @@
       "name": "Debug",
       "type": "gdb",
       "request": "attach",
-      "preLaunchTask": "st-util",
       "executable": "${workspaceRoot}/build/kameleon-core.elf",
       "target": ":4242",
       "remote": true,
