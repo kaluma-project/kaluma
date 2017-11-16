@@ -79,7 +79,7 @@ void io_timer_stop(io_timer_handle_t *timer) {
 }
 
 static void io_timer_run() {
-  io_timer_handle_t *handle = &loop.timer_handles;
+  io_timer_handle_t *handle = loop.timer_handles.head;
   while (handle != NULL) {
     if (handle->base.active) {
       if (handle->clamped_timeout < loop.time) {
@@ -117,7 +117,7 @@ void io_tty_read_stop(io_tty_handle_t *tty) {
 }
 
 static void io_tty_run() {
-  io_tty_handle_t *handle = &loop.tty_handles;
+  io_tty_handle_t *handle = loop.tty_handles.head;
   while (handle != NULL) {
     if (handle->base.active) {
       if (handle->read_cb != NULL && tty_has_data()) {

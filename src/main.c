@@ -29,7 +29,7 @@ void timer_cb() {
   gpio_toggle(4); // LED Blinking
   /* Should not be blocked */
   uint64_t tick = gettime();
-  tty_printf("[%d] : LED blinking...\r\n", (int) tick);
+  // tty_printf("[%d] : LED blinking...\r\n", (int) tick);
 }
 
 void tty_read_cb(char ch) {
@@ -50,14 +50,11 @@ int main(void) {
   io_timer_start(&timer, timer_cb, 1000, true);
 
   /* TTY setup */
-  /*
   io_tty_handle_t tty;
   io_tty_init(&tty);
   io_tty_read_start(&tty, tty_read_cb);
-  */
 
   // runtime_test();
-
 
   /* Enter to IO loop */
   io_run();
