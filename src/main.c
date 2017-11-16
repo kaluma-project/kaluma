@@ -23,24 +23,22 @@
 #include "gpio.h"
 #include "tty.h"
 #include "io.h"
+#include "repl.h"
 #include "runtime.h"
+
 
 void timer_cb() {
   gpio_toggle(4); // LED Blinking
   /* Should not be blocked */
-  uint64_t tick = gettime();
+  uint64_t time = gettime();
   // tty_printf("[%d] : LED blinking...\r\n", (int) tick);
-}
-
-void tty_read_cb(char ch) {
-  /* echo */
-  tty_putc(ch);
 }
 
 int main(void) {
   system_init();
   tty_init();
   io_init();
+  repl_init();
 
   gpio_pin_mode(4, GPIO_PIN_MODE_OUPUT_PP);
 
@@ -48,11 +46,6 @@ int main(void) {
   io_timer_handle_t timer;
   io_timer_init(&timer);
   io_timer_start(&timer, timer_cb, 1000, true);
-
-  /* TTY setup */
-  io_tty_handle_t tty;
-  io_tty_init(&tty);
-  io_tty_read_start(&tty, tty_read_cb);
 
   // runtime_test();
 

@@ -19,15 +19,20 @@
  * SOFTWARE.
  */
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "io.h"
+#include "tty.h"
 #include "repl.h"
 
 #define CONFIG_KAMELEON_VERSION "0.1.0"
 
 /* Forward declarations */
 
-static void repl_putc(char ch);
+static void repl_getc(char ch);
 static void default_input_handler(repl_state_t *state, char ch);
+static void repl_prompt();
 
 /**
  * TTY handle for REPL
@@ -44,7 +49,7 @@ static repl_state_t state;
  */
 void repl_init() {
   io_tty_init(&tty);
-  io_tty_read_start(&tty, repl_putc);
+  io_tty_read_start(&tty, repl_getc);
   state.mode = REPL_MODE_NORMAL;
   state.echo = true;
   state.buffer_length = 0;
@@ -54,31 +59,60 @@ void repl_init() {
   state.history_position = 0;
   state.input_handler = &default_input_handler;
   tty_printf("\33[2K\r");
-  tty_printf("/---------------------------\\\n");
-  tty_printf("|                  ____     |\n");
-  tty_printf("|     /----_______/    \\    |\n");
-  tty_printf("|    /               O  \\   |\n");
-  tty_printf("|   /               _____\\  |\n");
-  tty_printf("|  |  /------__ ___ ____/   |\n");
-  tty_printf("|  | | /``\\   //   \\\\       |\n");
-  tty_printf("|  | \\ @`\\ \\  W     W       |\n");
-  tty_printf("|   \\ \\__/ / ***************|\n");
-  tty_printf("|    \\____/     ************|\n");
-  tty_printf("|                       ****|\n");
-  tty_printf("\\---------------------------/\n");
-  tty_printf("\n");
-  tty_printf("Welcome to Kameleon!\n");
-  tty_printf("%s %s\n", "Version:", CONFIG_KAMELEON_VERSION);
-  tty_printf("For more info: http://kameleon.io\n");
-  tty_printf("\n");
+  tty_printf("/---------------------------\\\r\n");
+  tty_printf("|                  ____     |\r\n");
+  tty_printf("|     /----_______/    \\    |\r\n");
+  tty_printf("|    /               O  \\   |\r\n");
+  tty_printf("|   /               _____\\  |\r\n");
+  tty_printf("|  |  /------__ ___ ____/   |\r\n");
+  tty_printf("|  | | /``\\   //   \\\\       |\r\n");
+  tty_printf("|  | \\ @`\\ \\  W     W       |\r\n");
+  tty_printf("|   \\ \\__/ / ***************|\r\n");
+  tty_printf("|    \\____/     ************|\r\n");
+  tty_printf("|                       ****|\r\n");
+  tty_printf("\\---------------------------/\r\n");
+  tty_printf("\r\n");
+  tty_printf("Welcome to Kameleon!\r\n");
+  tty_printf("%s %s\r\n", "Version:", CONFIG_KAMELEON_VERSION);
+  tty_printf("For more info: http://kameleon.io\r\n");
+  tty_printf("\r\n");
   repl_prompt();
+}
+
+static void repl_prompt() {
+  if (state.echo) {
+    state.buffer[state.buffer_length] = '\0';
+    tty_printf("> %s", &state.buffer);
+  }
 }
 
 /**
  * Inject a char to REPL
  */
-static void repl_putc(char ch) {
-  // ...
+static void repl_getc(char ch) {
+  if (state.input_handler != NULL) {
+    (*state.input_handler)(&state, ch); /* call input handler */
+  }
+}
+
+void repl_set_input_handler(repl_input_handler_t handler) {
+  if (handler != NULL) {
+    state.input_handler = handler;
+  } else {
+    state.input_handler = &default_input_handler;
+  }
+}
+
+static void run_command() {
+  state.buffer_length = 0;
+  state.position = 0;  
+  repl_prompt();
+}
+
+static void eval_code() {
+  state.buffer_length = 0;
+  state.position = 0;
+  repl_prompt();
 }
 
 /**
@@ -104,7 +138,6 @@ static void handle_normal(char ch) {
         state.position--;
         if (state.echo) {
           tty_printf("\033[D\033[K");
-          // fflush(stdout);
         }
       }
       break;
@@ -112,7 +145,6 @@ static void handle_normal(char ch) {
       state.mode = REPL_MODE_ESCAPE;
       state.escape_length = 0;
       tty_printf("\033[s"); // save current cursor pos
-      // fflush(stdout);
       break;
     default:
       // check buffer overflow
@@ -122,8 +154,7 @@ static void handle_normal(char ch) {
           state.buffer_length++;
           state.position++;
           if (state.echo) {
-            tty_printf("%c", ch);
-            // fflush(stdout);
+            tty_putc(ch);
           }
         } else {
           for (int i = state.buffer_length; i > state.position; i--) {
@@ -135,7 +166,6 @@ static void handle_normal(char ch) {
           state.buffer[state.buffer_length] = '\0';
           if (state.echo) {
             tty_printf("\r> %s\033[%dG", state.buffer, state.position + 3);
-            // fflush(stdout);
           }
         }
       } else {
@@ -160,11 +190,9 @@ static void handle_escape(char ch) {
     if (state.escape_length == 2 && state.escape[0] == 0x5b && state.escape[1] == 0x41) {
       if (state.history_position > 0) {
         tty_printf("\033[u"); // restore cursor position
-        // fflush(stdout);
         state.history_position--;
         char *cmd = state.history[state.history_position];
         tty_printf("\33[2K\r> %s", cmd);
-        // fflush(stdout);
         strcpy(state.buffer, cmd);
         state.buffer_length = strlen(cmd);
         state.position = state.buffer_length;
@@ -174,18 +202,16 @@ static void handle_escape(char ch) {
     } else if (state.escape_length == 2 && state.escape[0] == 0x5b && state.escape[1] == 0x42) {
       tty_printf("\033[u"); // restore cursor position
       if (state.history_position == state.history_size) {
-        // do nothing
+        /* do nothing */
       } else if (state.history_position == (state.history_size - 1)) {
         state.history_position++;
         tty_printf("\33[2K\r> ");
-        // fflush(stdout);
         state.buffer_length = 0;
         state.position = 0;
       } else {
         state.history_position++;
         char *cmd = state.history[state.history_position];
         tty_printf("\33[2K\r> %s", cmd);
-        // fflush(stdout);
         strcpy(state.buffer, cmd);
         state.buffer_length = strlen(cmd);
         state.position = state.buffer_length;
@@ -198,7 +224,6 @@ static void handle_escape(char ch) {
       } else {
         state.position--;
         tty_printf("\33[D");
-        // fflush(stdout);
       }
 
     // right key
@@ -208,7 +233,6 @@ static void handle_escape(char ch) {
       } else {
         state.position++;
         tty_printf("\33[C");
-        // fflush(stdout);
       }
 
     // Run original escape sequence
@@ -217,7 +241,6 @@ static void handle_escape(char ch) {
       for (int i = 0; i < state.escape_length; i++) {
         tty_putc(state.escape[i]);
       }
-      // fflush(stdout);
     }
   }
 }
@@ -234,4 +257,37 @@ static void default_input_handler(repl_state_t *state, char ch) {
       handle_escape(ch);
       break;
   }
+}
+
+/**
+ * Print a log string to the console
+ */
+void repl_log(const char *format, const char *str) {
+  tty_printf("\33[2K\r"); // set column to 0
+  tty_printf("\33[0m"); // set to normal color
+  tty_printf(format, str);
+  repl_prompt();
+}
+
+/**
+ * Print a info string to the console.
+ * Evaluated value is printed on console as an info.
+ */
+void repl_info(const char *format, const char *str) {
+  tty_printf("\33[2K\r"); // set column to 0
+  tty_printf("\33[90m"); // set to dark gray color
+  tty_printf(format, str);
+  tty_printf("\33[0m"); // back to normal color
+  repl_prompt();
+}
+
+/**
+ * Print an error string to the console
+ */
+void repl_error(const char *format, const char *str) {
+  tty_printf("\33[2K\r"); // set column to 0
+  tty_printf("\33[31m"); // red
+  tty_printf(format, str);
+  tty_printf("\33[0m"); // back to normal color
+  repl_prompt();
 }

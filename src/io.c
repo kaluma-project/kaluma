@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+
+#include "system.h"
 #include "io.h"
 #include "tty.h"
 
@@ -59,11 +61,11 @@ void io_timer_init(io_timer_handle_t *timer) {
   timer->base.type = IO_TIMER;
   timer->base.active = false;
   timer->timer_cb = NULL;
-  list_append(&loop.timer_handles, timer);
+  list_append(&loop.timer_handles, (list_node_t *) timer);
 }
 
 void io_timer_close(io_timer_handle_t *timer) {
-  list_remove(&loop.timer_handles, timer);
+  list_remove(&loop.timer_handles, (list_node_t *) timer);
 }
 
 void io_timer_start(io_timer_handle_t *timer, io_timer_cb timer_cb, uint64_t interval, bool repeat) {
@@ -100,11 +102,11 @@ static void io_timer_run() {
 void io_tty_init(io_tty_handle_t *tty) {
   tty->base.type = IO_TTY;
   tty->read_cb = NULL;
-  list_append(&loop.tty_handles, tty);
+  list_append(&loop.tty_handles, (list_node_t *) tty);
 }
 
 void io_tty_close(io_tty_handle_t *tty) {
-  list_remove(&loop.tty_handles, tty);
+  list_remove(&loop.tty_handles, (list_node_t *) tty);
 }
 
 void io_tty_read_start(io_tty_handle_t *tty, io_tty_read_cb read_cb) {
