@@ -1,9 +1,5 @@
 # ------------------------------------------------
-# Generic Makefile (based on gcc)
-#
-# ChangeLog :
-#	2017-02-10 - Several enhancements + project update mode
-#   2015-07-22 - first version
+# Makefile (based on gcc)
 # ------------------------------------------------
 
 # Control build verbosity
@@ -26,15 +22,13 @@ endif
 ######################################
 TARGET = kameleon-core
 
-
 ######################################
 # building variables
 ######################################
 # debug build?
-DEBUG = 1
+DEBUG = 0
 # optimization
 OPT = -Og
-
 
 #######################################
 # paths
@@ -47,74 +41,42 @@ BUILD_DIR = build
 # Jerryscript
 # -----------------------------------------------------------------------------
 
-JERRY_DIR = deps/jerryscript
+JERRY_ROOT = deps/jerryscript
 
-JERRY_LIBDIR = $(JERRY_DIR)/build/lib
+JERRY_LIBDIR = $(JERRY_ROOT)/build/lib
 
 JERRY_LIBS = \
 $(JERRY_LIBDIR)/libjerry-core.a \
 $(JERRY_LIBDIR)/libjerry-ext.a
 
-JERRY_DEF = \
--DPLATFORM=MCU \
--DFEATURE_CPOINTER_32_BIT=ON \
--DFEATURE_ERROR_MESSAGES=OFF \
--DJERRY_CMDLINE=OFF \
--DJERRY_PORT_DEFAULT=OFF \
--DJERRY_EXT=ON \
--DJERRY_LIBC=OFF \
--DJERRY_LIBM=ON \
--DFEATURE_JS_PARSER=ON \
--DENABLE_LTO=OFF \
--DMEM_HEAP_SIZE_KB=78 \
--DFEATURE_PROFILE=DEFAULT_PROFILE \
--DFEATURE_DEBUGGER=OFF \
--DFEATURE_EXTERNAL_CONTEXT=OFF \
--DFEATURE_SNAPSHOT_EXEC=ON \
--DFEATURE_SNAPSHOT_SAVE=OFF \
--DFEATURE_SYSTEM_ALLOCATOR=ON \
--DENABLE_STATIC_LINK=ON \
--DENABLE_STRIP=ON \
--DFEATURE_VM_EXEC_STOP=OFF
-
-JERRY_SRC = \
-$(wildcard $(JERRY_DIR)/jerry-core/api/*.c) \
-$(wildcard $(JERRY_DIR)/jerry-core/debugger/*.c) \
-$(wildcard $(JERRY_DIR)/jerry-core/ecma/base/*.c) \
-$(wildcard $(JERRY_DIR)/jerry-core/ecma/builtin-objects/*.c) \
-$(wildcard $(JERRY_DIR)/jerry-core/ecma/builtin-objects/typedarray/*.c) \
-$(wildcard $(JERRY_DIR)/jerry-core/ecma/operations/*.c) \
-$(wildcard $(JERRY_DIR)/jerry-core/jcontext/*.c) \
-$(wildcard $(JERRY_DIR)/jerry-core/jmem/*.c) \
-$(wildcard $(JERRY_DIR)/jerry-core/jrt/*.c) \
-$(wildcard $(JERRY_DIR)/jerry-core/lit/*.c) \
-$(wildcard $(JERRY_DIR)/jerry-core/parser/js/*.c) \
-$(wildcard $(JERRY_DIR)/jerry-core/parser/regexp/*.c) \
-$(wildcard $(JERRY_DIR)/jerry-core/vm/*.c) \
-$(wildcard $(JERRY_DIR)/jerry-ext/arg/*.c) \
-$(wildcard $(JERRY_DIR)/jerry-ext/handler/*.c) \
-$(wildcard $(JERRY_DIR)/jerry-ext/module/*.c) \
-$(wildcard $(JERRY_DIR)/jerry-libm/*.c)
-
 JERRY_INC = \
--I${JERRY_DIR}/jerry-core \
--I${JERRY_DIR}/jerry-core/api \
--I${JERRY_DIR}/jerry-core/debugger \
--I${JERRY_DIR}/jerry-core/ecma/base \
--I${JERRY_DIR}/jerry-core/ecma/builtin-objects \
--I${JERRY_DIR}/jerry-core/ecma/builtin-objects/typedarray \
--I${JERRY_DIR}/jerry-core/ecma/operations \
--I${JERRY_DIR}/jerry-core/include \
--I${JERRY_DIR}/jerry-core/jcontext \
--I${JERRY_DIR}/jerry-core/jmem \
--I${JERRY_DIR}/jerry-core/jrt \
--I${JERRY_DIR}/jerry-core/lit \
--I${JERRY_DIR}/jerry-core/parser/js \
--I${JERRY_DIR}/jerry-core/parser/regexp \
--I${JERRY_DIR}/jerry-core/vm \
--I${JERRY_DIR}/jerry-ext/arg \
--I${JERRY_DIR}/jerry-ext/include \
--I${JERRY_DIR}/jerry-libm
+-I${JERRY_ROOT}/jerry-core \
+-I${JERRY_ROOT}/jerry-core/api \
+-I${JERRY_ROOT}/jerry-core/debugger \
+-I${JERRY_ROOT}/jerry-core/ecma/base \
+-I${JERRY_ROOT}/jerry-core/ecma/builtin-objects \
+-I${JERRY_ROOT}/jerry-core/ecma/builtin-objects/typedarray \
+-I${JERRY_ROOT}/jerry-core/ecma/operations \
+-I${JERRY_ROOT}/jerry-core/include \
+-I${JERRY_ROOT}/jerry-core/jcontext \
+-I${JERRY_ROOT}/jerry-core/jmem \
+-I${JERRY_ROOT}/jerry-core/jrt \
+-I${JERRY_ROOT}/jerry-core/lit \
+-I${JERRY_ROOT}/jerry-core/parser/js \
+-I${JERRY_ROOT}/jerry-core/parser/regexp \
+-I${JERRY_ROOT}/jerry-core/vm \
+-I${JERRY_ROOT}/jerry-ext/arg \
+-I${JERRY_ROOT}/jerry-ext/include \
+-I${JERRY_ROOT}/jerry-libm
+
+JERRY_ARGS = \
+--toolchain=cmake/toolchain_mcu_stm32f4.cmake \
+--lto=OFF \
+--error-messages=ON \
+--js-parser=ON \
+--cpointer-32bit=ON \
+--mem-heap=78 \
+--jerry-cmdline=OFF
 
 # -----------------------------------------------------------------------------
 # Kameleon
@@ -212,7 +174,6 @@ AS_DEFS =
 C_DEFS =  \
 -DUSE_HAL_DRIVER \
 -DSTM32F411xE
-# $(JERRY_DEF)
 
 ASRC = $(KAMELEON_ASM)
 AINC =
@@ -247,6 +208,8 @@ LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BU
 
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
+	$(Q) ls -al $(BUILD_DIR)/$(TARGET).*
+	@echo "Done."
 
 #######################################
 # build the application
@@ -285,7 +248,7 @@ $(BUILD_DIR):
 	mkdir $@
 
 $(JERRY_LIBS):
-	$(Q) python deps/jerryscript/tools/build.py --toolchain=cmake/toolchain_mcu_stm32f4.cmake --debug --lto=OFF --error-messages=ON --js-parser=ON --cpointer-32bit=ON --mem-heap=78 --jerry-cmdline=OFF
+	$(Q) python deps/jerryscript/tools/build.py $(JERRY_ARGS)
 
 #######################################
 # clean up
