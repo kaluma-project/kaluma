@@ -18,11 +18,6 @@ endif
 endif
 
 ######################################
-# target
-######################################
-TARGET = kameleon-core
-
-######################################
 # building variables
 ######################################
 # debug build?
@@ -36,6 +31,20 @@ OPT = -Og
 
 # Build path
 BUILD_DIR = build
+
+# -----------------------------------------------------------------------------
+# Toolchain
+# -----------------------------------------------------------------------------
+
+PREFIX = arm-none-eabi-
+CC = $(PREFIX)gcc
+AS = $(PREFIX)gcc -x assembler-with-cpp
+CP = $(PREFIX)objcopy
+AR = $(PREFIX)ar
+SZ = $(PREFIX)size
+HEX = $(CP) -O ihex
+BIN = $(CP) -O binary -S
+
 
 # -----------------------------------------------------------------------------
 # Jerryscript
@@ -82,74 +91,37 @@ JERRY_ARGS = \
 # Kameleon
 # -----------------------------------------------------------------------------
 
-TARGET_DIR = targets/$(TARGET)
-
-KAMELEON_ASM = \
-$(TARGET_DIR)/src/startup_stm32f411xe.s
-
 KAMELEON_DEF =
+
+KAMELEON_ASM = 
 
 KAMELEON_SRC = \
 src/main.c \
 src/utils.c \
 src/io.c \
 src/repl.c \
-src/jerry_port.c \
-$(TARGET_DIR)/src/system.c \
-$(TARGET_DIR)/src/gpio.c \
-$(TARGET_DIR)/src/tty.c \
-$(TARGET_DIR)/src/usb_device.c \
-$(TARGET_DIR)/src/usbd_conf.c \
-$(TARGET_DIR)/src/stm32f4xx_it.c \
-$(TARGET_DIR)/src/usbd_desc.c \
-$(TARGET_DIR)/src/usbd_cdc_if.c \
-$(TARGET_DIR)/src/system_stm32f4xx.c \
-$(TARGET_DIR)/src/stm32f4xx_hal_msp.c \
-$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c \
-$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c \
-$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c \
-$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c \
-$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c \
-$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c \
-$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c \
-$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c \
-$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c \
-$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd.c \
-$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c \
-$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd_ex.c \
-$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c \
-$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c \
-$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c \
-$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c \
-$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c \
-$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c \
-$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c \
-$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c \
-$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c
+src/jerry_port.c
 
 KAMELEON_INC = \
 -Iinclude \
--Iinclude/port \
--I$(TARGET_DIR)/include \
--I$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Inc \
--I$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Inc/Legacy \
--I$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Inc \
--I$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc \
--I$(TARGET_DIR)/drivers/CMSIS/Device/ST/STM32F4xx/Include \
--I$(TARGET_DIR)/drivers/CMSIS/Include
+-Iinclude/port
 
 # -----------------------------------------------------------------------------
-# Toolchain
+# Target-specific
 # -----------------------------------------------------------------------------
 
-PREFIX = arm-none-eabi-
-CC = $(PREFIX)gcc
-AS = $(PREFIX)gcc -x assembler-with-cpp
-CP = $(PREFIX)objcopy
-AR = $(PREFIX)ar
-SZ = $(PREFIX)size
-HEX = $(CP) -O ihex
-BIN = $(CP) -O binary -S
+ifndef TARGET 
+TARGET = kameleon-core
+endif
+
+TARGET_DIR = targets/$(TARGET)
+
+TARGET_ASM =
+TARGET_SRC =
+TARGET_INC =
+TARGET_DEF =
+
+-include $(TARGET_DIR)/Make.def
 
 #######################################
 # CFLAGS
@@ -171,15 +143,13 @@ MCU = $(CPU) -mlittle-endian -mthumb $(FPU) $(FLOAT-ABI)
 AS_DEFS =
 
 # C defines
-C_DEFS =  \
--DUSE_HAL_DRIVER \
--DSTM32F411xE
+C_DEFS = $(TARGET_DEF)
 
-ASRC = $(KAMELEON_ASM)
+ASRC = $(KAMELEON_ASM) $(TARGET_ASM)
 AINC =
 
-CSRC = $(KAMELEON_SRC) # $(JERRY_SRC)
-CINC = $(KAMELEON_INC) $(JERRY_INC)
+CSRC = $(TARGET_SRC) $(KAMELEON_SRC)
+CINC = $(TARGET_INC) $(KAMELEON_INC) $(JERRY_INC)
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AINC) $(OPT) -Wall -fdata-sections -ffunction-sections
@@ -206,7 +176,10 @@ LIBS = -ljerry-core -ljerry-ext -lc -lnosys -lm
 LIBDIR = -L$(JERRY_LIBDIR)
 LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
-# default action: build all
+# -----------------------------------------------------------------------------
+# Default action: build all
+# -----------------------------------------------------------------------------
+
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
 	$(Q) ls -al $(BUILD_DIR)/$(TARGET).*
 	@echo "Done."

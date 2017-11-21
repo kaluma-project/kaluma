@@ -1,0 +1,52 @@
+# -----------------------------------------------------------------------------
+# Target-specific for kameleon-core board
+# -----------------------------------------------------------------------------
+
+TARGET_DEF += \
+-DUSE_HAL_DRIVER \
+-DSTM32F411xE
+
+TARGET_ASM += \
+$(TARGET_DIR)/src/startup_stm32f411xe.s
+
+TARGET_SRC += \
+$(TARGET_DIR)/src/system.c \
+$(TARGET_DIR)/src/gpio.c \
+$(TARGET_DIR)/src/tty.c \
+$(TARGET_DIR)/src/usb_device.c \
+$(TARGET_DIR)/src/usbd_conf.c \
+$(TARGET_DIR)/src/stm32f4xx_it.c \
+$(TARGET_DIR)/src/usbd_desc.c \
+$(TARGET_DIR)/src/usbd_cdc_if.c \
+$(TARGET_DIR)/src/system_stm32f4xx.c \
+$(TARGET_DIR)/src/stm32f4xx_hal_msp.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd_ex.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c \
+$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c \
+$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c \
+$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c \
+$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c
+
+TARGET_INC += \
+-I$(TARGET_DIR)/include \
+-I$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Inc \
+-I$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Inc/Legacy \
+-I$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Inc \
+-I$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc \
+-I$(TARGET_DIR)/drivers/CMSIS/Device/ST/STM32F4xx/Include \
+-I$(TARGET_DIR)/drivers/CMSIS/Include
