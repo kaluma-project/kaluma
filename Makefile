@@ -21,7 +21,7 @@ endif
 # building variables
 ######################################
 # debug build?
-DEBUG = 0
+DEBUG = 1
 # optimization
 OPT = -Og
 
@@ -99,6 +99,7 @@ KAMELEON_SRC = \
 src/main.c \
 src/utils.c \
 src/io.c \
+src/runtime.c \
 src/repl.c \
 src/jerry_port.c
 

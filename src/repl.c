@@ -51,9 +51,6 @@ static repl_state_t state;
 void repl_init() {
   io_tty_init(&tty);
   io_tty_read_start(&tty, repl_getc);
-
-  jerry_init(JERRY_INIT_EMPTY); /* TODO: MOVE THIS TO OTHER PLACE */
-
   state.mode = REPL_MODE_NORMAL;
   state.echo = true;
   state.buffer_length = 0;

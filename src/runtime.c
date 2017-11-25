@@ -25,8 +25,12 @@
 
 void runtime_init() {
   jerry_init (JERRY_INIT_EMPTY);
+  runtime_global_objects();
 }
 
+static void runtime_global_objects() {
+  jerryx_handler_register_global ((const jerry_char_t *) "print", jerryx_handler_print);
+}
 
 void runtime_test() {
   const jerry_char_t script[] = "print ('Hello, World!');";
