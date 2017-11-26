@@ -21,6 +21,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdarg.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
 
 #include "tty.h"
 #include "usb_device.h"
@@ -143,6 +147,8 @@ uint32_t tty_data_size() {
   return tty_get_datalength_ringbuffer();
 }
 
+/** non-blocking function
+*/
 uint8_t tty_getc() {
   // TODO:
   uint8_t c = 0;
@@ -151,4 +157,100 @@ uint8_t tty_getc() {
      tty_read_ringbuffer(&c, sizeof(c));
   } 
   return c;
+}
+
+/** blocking function
+*/
+uint8_t tty_getch() {
+  // TODO:
+  uint8_t c;
+
+  while(tty_data_size() == 0);  
+  tty_read_ringbuffer(&c, sizeof(c));
+  return c;
+}
+
+
+void tty_getstring(char * string)
+{
+    char *string2 = string;
+    char c;
+    while((c = tty_getch())!='\r')
+    {
+        if(c=='\b')
+        {
+            if( (int)string2 < (int)string )
+            {
+                tty_printf("\b \b");
+                string--;
+            }
+        }
+        else
+        {
+            *string++ = c;
+            tty_putc(c);
+        }
+    }
+    *string='\0';
+    tty_putc('\r');   tty_putc('\n');
+}
+
+int tty_getintnum()
+{
+    char str[30];
+    char *string = str;
+    int base     = 10;
+    int minus    = 0;
+    int result   = 0;
+    int lastIndex;
+    int i;
+
+    tty_getstring(string);
+
+    if(string[0]=='-')
+    {
+        minus = 1;
+        string++;
+    }
+
+    if(string[0]=='0' && (string[1]=='x' || string[1]=='X'))
+    {
+        base    = 16;
+        string += 2;
+    }
+
+    lastIndex = strlen(string) - 1;
+
+    if(lastIndex<0)
+        return -1;
+
+    if(string[lastIndex]=='h' || string[lastIndex]=='H' )
+    {
+        base = 16;
+        string[lastIndex] = 0;
+        lastIndex--;
+    }
+
+    if(base==10)
+    {
+        result = atoi(string);
+        result = minus ? (-1*result):result;
+    }
+    else
+    {
+        for(i=0;i<=lastIndex;i++)
+        {
+            if(isalpha(string[i]))
+            {
+                if(isupper(string[i]))
+                    result = (result<<4) + string[i] - 'A' + 10;
+                else
+                    result = (result<<4) + string[i] - 'a' + 10;
+            }
+            else
+                result = (result<<4) + string[i] - '0';
+        }
+        result = minus ? (-1*result):result;
+    }
+    return result;
 }

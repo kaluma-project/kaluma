@@ -22,6 +22,7 @@
 #ifndef __TTY_H
 #define __TTY_H
 
+#include <stdint.h>
 #include <stdbool.h>
 
 void tty_init();
@@ -30,5 +31,6 @@ void tty_printf(const char *fmt, ...);
 bool tty_has_data();
 uint32_t tty_data_size();
 uint8_t tty_getc();
+uint8_t tty_getch();
 
 #endif /* __TTY_H */

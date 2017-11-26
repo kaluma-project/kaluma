@@ -21,16 +21,19 @@
 
 #include "system.h"
 #include "stm32f4xx_hal.h"
+#include "is25lq040b.h"
 #include <stdint.h>
 
+static SPI_HandleTypeDef hspi3;
 static uint64_t tick_count;
 
-
+/** increment system timer tick every 1msec
+*/
 void inc_tick()
 {
   tick_count++;
-
 }
+
 
 /** GPIO Clock Enable
 */
@@ -98,11 +101,38 @@ static void SystemClock_Config(void)
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
+/** SPI Flash Configuation
+*/
+static void SpiFlash_Config(void)
+{
+  hspi3.Instance = SPI3;
+  hspi3.Init.Mode = SPI_MODE_MASTER;
+  hspi3.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi3.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi3.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi3.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi3.Init.NSS = SPI_NSS_SOFT;
+  hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi3.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi3.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi3.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi3.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi3) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  } 
+}
+
+/** Kameleon Hardware System Initializations
+*/
 void system_init() {
   // TODO:
   HAL_Init();
   SystemClock_Config();
   GpioClock_Config();
+  SpiFlash_Config();
+
+  Is25Lq_Init(&hspi3);
 }
 
 void delay(uint64_t msec) {
