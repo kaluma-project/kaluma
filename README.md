@@ -4,6 +4,7 @@ Development settings
 Required packages:
 * __GNU ARM Toolchain__ (6-2017-q1-update) : https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 * __ST-Link tool__ : https://github.com/texane/stlink
+* __Node.js__ : https://nodejs.org
 
 Recommended tools:
 * Visual Studo Code: https://code.visualstudio.com/

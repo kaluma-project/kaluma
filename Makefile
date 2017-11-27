@@ -192,6 +192,10 @@ all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET
 # JS snapshot generation
 # -----------------------------------------------------------------------------
 
+snapshot:
+	$(Q) python $(JERRY_ROOT)/tools/build.py --clean --jerry-cmdline-snapshot=ON --snapshot-save=ON --snapshot-exec=ON
+	$(Q) node tools/js2c.js
+
 JERRY_SNAPSHOTS = src/jerry-targetjs.h
 
 $(JERRY_SNAPSHOTS): $(JERRY_ROOT)/build/bin/jerry

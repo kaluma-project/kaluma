@@ -1,3 +1,7 @@
 # Build folders and files
 build
 .dep
+
+# Generated files
+src/js/*.wrapped
+src/js/*.snapshot
