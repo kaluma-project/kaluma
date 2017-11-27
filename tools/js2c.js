@@ -3,6 +3,7 @@
 const fs = require('fs')
 const path = require('path')
 const childProcess = require('child_process')
+const mustache = require('mustache')
 
 var js_path = path.join(__dirname, '../src/js')
 var files = fs.readdirSync(js_path)
@@ -33,12 +34,33 @@ function generateSnapshot(src, dest) {
 }
 
 function generate() {
+  const template_h = fs.readFileSync(__dirname + '/kameleon_js.h.mustache', 'utf8')
+  const template_c = fs.readFileSync(__dirname + '/kameleon_js.c.mustache', 'utf8')
+  var view = {
+    modules: []
+  }
   snapshots.forEach(snapshot => {
-    var buffer = fs.readFileSync(snapshot);
+    var buffer = fs.readFileSync(snapshot)
     var hex = buffer.toString('hex')
-    console.log(snapshot)
-    console.log(hex + '\n')
-    console.log('length=' + hex.length + '\n')
-    console.log('\n')
+    var segments = hex.match(/.{1,20}/g)
+    var moduleView = {
+      name: path.basename(snapshot, '.snapshot'),
+      size: buffer.length,
+      segments: []
+    }
+    segments.forEach((segment, index) => {
+      var bytes = segment.match(/.{1,2}/g).map(item => ({ value: item }))
+      if (index == segments.length - 1) {
+        bytes[bytes.length - 1].last = true
+      }
+      moduleView.segments.push({ bytes: bytes })
+    })
+    view.modules.push(moduleView)
   })
+  var rendered_h = mustache.render(template_h, view)
+  var rendered_c = mustache.render(template_c, view)
+  fs.writeFileSync(path.join(js_path, '../kameleon_js.h'), rendered_h, 'utf8')
+  fs.writeFileSync(path.join(js_path, '../kameleon_js.c'), rendered_c, 'utf8')
+  // console.log(rendered_h)
+  // console.log(rendered_c)
 }

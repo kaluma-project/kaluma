@@ -2,6 +2,11 @@
 build
 .dep
 
+# Node.js modules
+node_modules
+
 # Generated files
 src/js/*.wrapped
 src/js/*.snapshot
+src/kameleon_js.c
+src/kameleon_js.h

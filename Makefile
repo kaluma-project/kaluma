@@ -192,17 +192,13 @@ all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET
 # JS snapshot generation
 # -----------------------------------------------------------------------------
 
+JERRY_GENERATED = \
+src/kameleon_js.c \
+src/kameleon_js.h
+
 snapshot:
 	$(Q) python $(JERRY_ROOT)/tools/build.py --clean --jerry-cmdline-snapshot=ON --snapshot-save=ON --snapshot-exec=ON
 	$(Q) node tools/js2c.js
-
-JERRY_SNAPSHOTS = src/jerry-targetjs.h
-
-$(JERRY_SNAPSHOTS): $(JERRY_ROOT)/build/bin/jerry
-	$(Q) python $(JERRY_ROOT)/tools/js2c.py --build-type=debug --no-main --js-source=src/js --dest=src
-
-$(JERRY_HOST):
- 	$(Q) python $(JERRY_ROOT)/tools/build.py --clean --snapshot-save=ON
 
 # -----------------------------------------------------------------------------
 # Build app
@@ -216,7 +212,7 @@ vpath %.c $(sort $(dir $(CSRC)))
 OBJS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASRC:.s=.o)))
 vpath %.s $(sort $(dir $(ASRC)))
 
-$(BUILD_DIR)/%.o: %.c Makefile $(JERRY_SNAPSHOTS) | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
 	@echo "compile:" $<
 	$(Q) $(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
@@ -248,7 +244,9 @@ $(JERRY_LIBS):
 #######################################
 clean:
 	$(Q) -rm -rf deps/jerryscript/build
-	$(Q) -rm $(JERRY_SNAPSHOTS)
+	$(Q) -rm src/js/*.wrapped
+	$(Q) -rm src/js/*.snapshot
+	$(Q) -rm src/kameleon_js.h src/kameleon_js.c
 	$(Q) -rm -fR $(BUILD_DIR)
 
 # *** EOF ***
