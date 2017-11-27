@@ -52,6 +52,8 @@ BIN = $(CP) -O binary -S
 
 JERRY_ROOT = deps/jerryscript
 
+JERRY_HOST = $(JERRY_ROOT)/build/bin/jerry
+
 JERRY_LIBDIR = $(JERRY_ROOT)/build/lib
 
 JERRY_LIBS = \
@@ -124,9 +126,10 @@ TARGET_DEF =
 
 -include $(TARGET_DIR)/Make.def
 
-#######################################
+# -----------------------------------------------------------------------------
 # CFLAGS
-#######################################
+# -----------------------------------------------------------------------------
+
 # cpu
 CPU = -mcpu=cortex-m4
 
@@ -185,9 +188,21 @@ all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET
 	$(Q) ls -al $(BUILD_DIR)/$(TARGET).*
 	@echo "Done."
 
-#######################################
-# build the application
-#######################################
+# -----------------------------------------------------------------------------
+# JS snapshot generation
+# -----------------------------------------------------------------------------
+
+JERRY_SNAPSHOTS = src/jerry-targetjs.h
+
+$(JERRY_SNAPSHOTS): $(JERRY_ROOT)/build/bin/jerry
+	$(Q) python $(JERRY_ROOT)/tools/js2c.py --build-type=debug --no-main --js-source=src/js --dest=src
+
+$(JERRY_HOST):
+ 	$(Q) python $(JERRY_ROOT)/tools/build.py --clean --snapshot-save=ON
+
+# -----------------------------------------------------------------------------
+# Build app
+# -----------------------------------------------------------------------------
 
 # list of objects
 OBJS = $(addprefix $(BUILD_DIR)/,$(notdir $(CSRC:.c=.o)))
@@ -197,7 +212,7 @@ vpath %.c $(sort $(dir $(CSRC)))
 OBJS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASRC:.s=.o)))
 vpath %.s $(sort $(dir $(ASRC)))
 
-$(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.c Makefile $(JERRY_SNAPSHOTS) | $(BUILD_DIR)
 	@echo "compile:" $<
 	$(Q) $(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
@@ -222,18 +237,14 @@ $(BUILD_DIR):
 	mkdir $@
 
 $(JERRY_LIBS):
-	$(Q) python deps/jerryscript/tools/build.py $(JERRY_ARGS)
+	$(Q) python $(JERRY_ROOT)/tools/build.py --clean $(JERRY_ARGS)
 
 #######################################
 # clean up
 #######################################
 clean:
 	$(Q) -rm -rf deps/jerryscript/build
-	$(Q) -rm -fR .dep $(BUILD_DIR)
-
-#######################################
-# dependencies
-#######################################
--include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
+	$(Q) -rm $(JERRY_SNAPSHOTS)
+	$(Q) -rm -fR $(BUILD_DIR)
 
 # *** EOF ***
