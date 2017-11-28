@@ -21,10 +21,12 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include "kameleon_js.h"
 
 {{#modules}}
+#define SIZE_{{nameUC}} {{size}}
 const char {{name}}_n[] = "{{name}}";
-const size_t {{name}}_l = {{size}};
+const size_t {{name}}_l = SIZE_{{nameUC}};
 const uint8_t {{name}}_s[] = {
 {{#segments}}
   {{#bytes}}0x{{value}}{{^last}}, {{/last}}{{/bytes}}
@@ -32,3 +34,8 @@ const uint8_t {{name}}_s[] = {
 };
 
 {{/modules}}
+const kameleon_js_module natives[] = {
+{{#modules}}
+  { {{name}}_n, {{name}}_s, SIZE_{{nameUC}} }{{^lastModule}}, {{/lastModule}}
+{{/modules}}
+};

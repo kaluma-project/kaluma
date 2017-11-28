@@ -85,13 +85,17 @@ JERRY_ARGS = \
 --lto=OFF \
 --error-messages=ON \
 --js-parser=ON \
---cpointer-32bit=ON \
 --mem-heap=78 \
+--snapshot-exec=ON \
 --jerry-cmdline=OFF
 
 # -----------------------------------------------------------------------------
 # Kameleon
 # -----------------------------------------------------------------------------
+
+KAMELEON_GENERATED_C = src/kameleon_js.c
+KAMELEON_GENERATED_H = include/kameleon_js.h
+KAMELEON_GENERATED = $(KAMELEON_GENERATED_C) $(KAMELEON_GENERATED_H)
 
 KAMELEON_DEF =
 
@@ -103,7 +107,8 @@ src/utils.c \
 src/io.c \
 src/runtime.c \
 src/repl.c \
-src/jerry_port.c
+src/jerry_port.c \
+$(KAMELEON_GENERATED_C)
 
 KAMELEON_INC = \
 -Iinclude \
@@ -192,13 +197,10 @@ all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET
 # JS snapshot generation
 # -----------------------------------------------------------------------------
 
-JERRY_GENERATED = \
-src/kameleon_js.c \
-src/kameleon_js.h
-
-snapshot:
+$(KAMELEON_GENERATED):
 	$(Q) python $(JERRY_ROOT)/tools/build.py --clean --jerry-cmdline-snapshot=ON --snapshot-save=ON --snapshot-exec=ON
 	$(Q) node tools/js2c.js
+	$(Q) -rm -rf deps/jerryscript/build
 
 # -----------------------------------------------------------------------------
 # Build app
@@ -212,7 +214,7 @@ vpath %.c $(sort $(dir $(CSRC)))
 OBJS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASRC:.s=.o)))
 vpath %.s $(sort $(dir $(ASRC)))
 
-$(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.c Makefile $(KAMELEON_GENERATED) | $(BUILD_DIR)
 	@echo "compile:" $<
 	$(Q) $(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
@@ -239,14 +241,13 @@ $(BUILD_DIR):
 $(JERRY_LIBS):
 	$(Q) python $(JERRY_ROOT)/tools/build.py --clean $(JERRY_ARGS)
 
-#######################################
-# clean up
-#######################################
+
 clean:
 	$(Q) -rm -rf deps/jerryscript/build
-	$(Q) -rm src/js/*.wrapped
-	$(Q) -rm src/js/*.snapshot
-	$(Q) -rm src/kameleon_js.h src/kameleon_js.c
+	$(Q) -rm $(KAMELEON_GENERATED)
 	$(Q) -rm -fR $(BUILD_DIR)
+
+flash:
+	$(Q) st-flash write build/kameleon-core.bin 0x8000000
 
 # *** EOF ***

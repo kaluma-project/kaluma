@@ -23,6 +23,9 @@
 #include "jerryscript.h"
 #include "jerryscript-ext/handler.h"
 
+#include "repl.h"
+#include "kameleon_js.h"
+
 static void runtime_global_objects() {
   jerryx_handler_register_global ((const jerry_char_t *) "print", jerryx_handler_print);
 }
@@ -33,15 +36,17 @@ void runtime_init() {
 }
 
 void runtime_test() {
-  const jerry_char_t script[] = "print ('Hello, World!');";
-  size_t script_size = strlen ((const char *) script);
-  jerryx_handler_register_global ((const jerry_char_t *) "print", jerryx_handler_print);
-  jerry_value_t parsed_code = jerry_parse (script, script_size, false);
-  if (!jerry_value_has_error_flag (parsed_code)) {
-    jerry_value_t ret_value = jerry_run (parsed_code);
-    jerry_release_value (ret_value);
-  }
-  jerry_release_value (parsed_code);
+  jerry_value_t res = jerry_exec_snapshot (startup_s, startup_l, true);
+
+  jerry_value_t this_val = jerry_create_undefined ();
+  jerry_value_t ret_val = jerry_call_function (res, this_val, NULL, 0);
+
+  print_value(res);
+  print_value(ret_val);
+
+  jerry_release_value (ret_val);
+  jerry_release_value (this_val);  
+  jerry_release_value (res);
 }
 
 void runtime_deinit() {

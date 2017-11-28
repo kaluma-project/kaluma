@@ -22,6 +22,8 @@
 #ifndef __REPL_H
 #define __REPL_H
 
+#include "jerryscript.h"
+
 #define MAX_BUFFER_LENGTH 1024
 #define MAX_COMMAND_HISTORY 10
 
@@ -46,6 +48,8 @@ struct repl_state_s {
   unsigned int history_size;
   unsigned int history_position;
 };
+
+void print_value (const jerry_value_t value);
 
 void repl_init();
 void repl_set_input_handler(repl_input_handler_t handler);

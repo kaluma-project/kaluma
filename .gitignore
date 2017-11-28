@@ -6,7 +6,5 @@ build
 node_modules
 
 # Generated files
-src/js/*.wrapped
-src/js/*.snapshot
 src/kameleon_js.c
-src/kameleon_js.h
+include/kameleon_js.h

@@ -80,7 +80,7 @@ void repl_init() {
   repl_prompt();
 }
 
-static void print_value (const jerry_value_t value) {
+void print_value (const jerry_value_t value) {
   if (jerry_value_has_error_flag(value)) {
     repl_error("%s\r\n", "Error.");
   } else {

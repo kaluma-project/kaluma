@@ -7,6 +7,7 @@ const mustache = require('mustache')
 
 var js_path = path.join(__dirname, '../src/js')
 var files = fs.readdirSync(js_path)
+var wrappers = []
 var snapshots = []
 
 files.forEach(file => {
@@ -16,6 +17,7 @@ files.forEach(file => {
     const wrapped = path.join(js_path, basename + '.wrapped')
     const snapshot = path.join(js_path, basename + '.snapshot')
     generateWrapper(src, wrapped)
+    wrappers.push(wrapped)
     generateSnapshot(wrapped, snapshot)
     snapshots.push(snapshot)
   }
@@ -33,6 +35,18 @@ function generateSnapshot(src, dest) {
   childProcess.spawnSync('deps/jerryscript/build/bin/jerry-snapshot', [ 'generate', src, '-o', dest ], { stdio: 'inherit' })
 }
 
+function removeWrappers() {
+  wrappers.forEach(item => {
+    fs.unlinkSync(item)
+  })  
+}
+
+function removeSnapshots() {
+  snapshots.forEach(item => {
+    fs.unlinkSync(item)
+  })
+}
+
 function generate() {
   const template_h = fs.readFileSync(__dirname + '/kameleon_js.h.mustache', 'utf8')
   const template_c = fs.readFileSync(__dirname + '/kameleon_js.c.mustache', 'utf8')
@@ -45,6 +59,7 @@ function generate() {
     var segments = hex.match(/.{1,20}/g)
     var moduleView = {
       name: path.basename(snapshot, '.snapshot'),
+      nameUC: path.basename(snapshot, '.snapshot').toUpperCase(),
       size: buffer.length,
       segments: []
     }
@@ -57,10 +72,11 @@ function generate() {
     })
     view.modules.push(moduleView)
   })
+  view.modules[view.modules.length - 1].lastModule = true
   var rendered_h = mustache.render(template_h, view)
   var rendered_c = mustache.render(template_c, view)
-  fs.writeFileSync(path.join(js_path, '../kameleon_js.h'), rendered_h, 'utf8')
-  fs.writeFileSync(path.join(js_path, '../kameleon_js.c'), rendered_c, 'utf8')
-  // console.log(rendered_h)
-  // console.log(rendered_c)
+  fs.writeFileSync(path.join(__dirname, '../include/kameleon_js.h'), rendered_h, 'utf8')
+  fs.writeFileSync(path.join(__dirname, '../src/kameleon_js.c'), rendered_c, 'utf8')
+  removeWrappers()
+  removeSnapshots()
 }
