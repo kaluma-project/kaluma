@@ -1,6 +1,6 @@
 // Generate c source from js files
 
-const fs = require('fs')
+const fs = require('fs-extra')
 const path = require('path')
 const childProcess = require('child_process')
 const mustache = require('mustache')
@@ -75,8 +75,10 @@ function generate() {
   view.modules[view.modules.length - 1].lastModule = true
   var rendered_h = mustache.render(template_h, view)
   var rendered_c = mustache.render(template_c, view)
-  fs.writeFileSync(path.join(__dirname, '../include/kameleon_js.h'), rendered_h, 'utf8')
-  fs.writeFileSync(path.join(__dirname, '../src/kameleon_js.c'), rendered_c, 'utf8')
+  var genPath = path.join(__dirname, '../src/gen')
+  fs.ensureDirSync(genPath)
+  fs.writeFileSync(path.join(genPath, 'kameleon_js.h'), rendered_h, 'utf8')
+  fs.writeFileSync(path.join(genPath, 'kameleon_js.c'), rendered_c, 'utf8')
   removeWrappers()
   removeSnapshots()
 }

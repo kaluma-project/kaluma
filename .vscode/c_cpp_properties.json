@@ -5,6 +5,8 @@
             "includePath": [
                 "${workspaceRoot}/include",
                 "${workspaceRoot}/include/port",
+                "${workspaceRoot}/src/gen",
+                "${workspaceRoot}/src/modules",
                 "${workspaceRoot}/deps/jerryscript/jerry-core/include",
                 "${workspaceRoot}/deps/jerryscript/jerry-core/ecma/base",
                 "${workspaceRoot}/deps/jerryscript/jerry-core/ecma/builtin-objects",
@@ -43,6 +45,8 @@
                 "path": [
                     "${workspaceRoot}/include",
                     "${workspaceRoot}/include/port",
+                    "${workspaceRoot}/src/gen",
+                    "${workspaceRoot}/src/modules",
                     "${workspaceRoot}/deps/jerryscript/jerry-core/api",
                     "${workspaceRoot}/deps/jerryscript/jerry-core/debugger",
                     "${workspaceRoot}/deps/jerryscript/jerry-core/ecma/base",
@@ -76,6 +80,8 @@
             "includePath": [
                 "${workspaceRoot}/include/",
                 "${workspaceRoot}/include/port",
+                "${workspaceRoot}/src/gen",
+                "${workspaceRoot}/src/modules",
                 "${workspaceRoot}/deps/jerryscript/jerry-core/include",
                 "${workspaceRoot}/deps/jerryscript/jerry-core/ecma/base",
                 "${workspaceRoot}/deps/jerryscript/jerry-core/ecma/builtin-objects",
@@ -110,6 +116,8 @@
                 "path": [
                     "${workspaceRoot}/include",
                     "${workspaceRoot}/include/port",
+                    "${workspaceRoot}/src/gen",
+                    "${workspaceRoot}/src/modules",
                     "${workspaceRoot}/deps/jerryscript/jerry-core/api",
                     "${workspaceRoot}/deps/jerryscript/jerry-core/debugger",
                     "${workspaceRoot}/deps/jerryscript/jerry-core/ecma/base",
