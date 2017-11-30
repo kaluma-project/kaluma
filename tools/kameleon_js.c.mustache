@@ -24,20 +24,20 @@
 #include "kameleon_js.h"
 
 {{#modules}}
-#define SIZE_{{nameUC}} {{size}}
-const char {{name}}_n[] = "{{name}}";
-const size_t {{name}}_l = SIZE_{{nameUC}};
-const uint8_t {{name}}_s[] = {
+#define MODULE_{{nameUC}}_SIZE {{size}}
+const char module_{{name}}_name[] = "{{name}}";
+const size_t module_{{name}}_size = MODULE_{{nameUC}}_SIZE;
+const uint8_t module_{{name}}_code[] = {
 {{#segments}}
   {{#bytes}}0x{{value}}{{^last}}, {{/last}}{{/bytes}}
 {{/segments}}
 };
 
 {{/modules}}
-#define NATIVES_LENGTH {{modules.length}}
-const size_t natives_length = NATIVES_LENGTH;
-const kameleon_js_module natives[] = {
-{{#modules}}
-  { {{name}}_n, {{name}}_s, SIZE_{{nameUC}} }{{^lastModule}}, {{/lastModule}}
-{{/modules}}
+#define NATIVE_MODULES_SIZE {{modulesByRequire.length}}
+const size_t native_modules_length = NATIVE_MODULES_SIZE;
+const kameleon_js_module native_modules[] = {
+{{#modulesByRequire}}
+  { module_{{name}}_name, module_{{name}}_code, MODULE_{{nameUC}}_SIZE }{{^lastModule}}, {{/lastModule}}
+{{/modulesByRequire}}
 };

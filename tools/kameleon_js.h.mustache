@@ -23,18 +23,18 @@
 #define KAMELEON_JS_H
 
 {{#modules}}
-extern const char {{name}}_n[];
-extern const uint8_t {{name}}_s[];
-extern const size_t {{name}}_l;
+extern const char module_{{name}}_name[];
+extern const uint8_t module_{{name}}_code[];
+extern const size_t module_{{name}}_size;
 
 {{/modules}}
 typedef struct {
   const char* name;
   const void* code;
-  const size_t length;
+  const size_t size;
 } kameleon_js_module;
 
-extern const size_t natives_length;
-extern const kameleon_js_module natives[];
+extern const size_t native_modules_size;
+extern const kameleon_js_module native_modules[];
 
 #endif

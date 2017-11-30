@@ -14,6 +14,9 @@ var snapshots = []
 var argv = minimist(process.argv.slice(2))
 var modules = argv.modules.trim().split(' ')
 
+/* modules which can be loaded by 'require()' */
+var modulesByRequire = modules.slice()
+
 // Add default modules
 modules.push('startup')
 
@@ -37,7 +40,7 @@ function generateSnapshots() {
     createSnapshot(wrapped, snapshot)
     snapshots.push(snapshot)
     console.log()
-  })  
+  })
 }
 
 function createWrapper(src, dest) {
@@ -67,7 +70,8 @@ function generateSources() {
   const template_h = fs.readFileSync(__dirname + '/kameleon_js.h.mustache', 'utf8')
   const template_c = fs.readFileSync(__dirname + '/kameleon_js.c.mustache', 'utf8')
   var view = {
-    modules: []
+    modules: [],
+    modulesByRequire: []
   }
   snapshots.forEach(snapshot => {
     var buffer = fs.readFileSync(snapshot)
@@ -88,7 +92,15 @@ function generateSources() {
     })
     view.modules.push(moduleView)
   })
-  view.modules[view.modules.length - 1].lastModule = true
+
+  modulesByRequire.forEach(mod => {
+    view.modulesByRequire.push({
+      name: mod,
+      nameUC: mod.toUpperCase()
+    })
+  })
+  view.modulesByRequire[view.modulesByRequire.length - 1].lastModule = true
+  
   var rendered_h = mustache.render(template_h, view)
   var rendered_c = mustache.render(template_c, view)
   var genPath = path.join(__dirname, '../src/gen')

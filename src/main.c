@@ -25,6 +25,7 @@
 #include "io.h"
 #include "repl.h"
 #include "runtime.h"
+#include "global.h"
 
 void timer_cb() {
   gpio_toggle(4); // LED Blinking
@@ -46,8 +47,6 @@ int main(void) {
   io_timer_handle_t timer;
   io_timer_init(&timer);
   io_timer_start(&timer, timer_cb, 1000, true);
-
-  runtime_test();
 
   /* Enter to IO loop */
   io_run();

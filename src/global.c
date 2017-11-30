@@ -22,7 +22,9 @@
 #include "jerryscript.h"
 #include "jerryscript-ext/handler.h"
 
+#include "runtime.h"
 #include "global.h"
+#include "kameleon_js.h"
 
 static void global_process_init() {
   jerry_value_t object = jerry_create_object();
@@ -52,21 +54,27 @@ static void global_process_init() {
   jerry_release_value (global_object);
 }
 
-static void global_objects_init() {
+static void register_global_objects() {
 
 }
 
-static void global_constants_init() {
+static void register_global_constants() {
 
 }
 
-static void global_functions_init() {
+static void register_global_functions() {
   jerryx_handler_register_global ((const jerry_char_t *) "print", jerryx_handler_print);
+}
+
+static void run_startup_module() {
+  jerry_value_t ret = runtime_load_snapshot(module_startup_code, module_startup_size);
+  jerry_release_value(ret);
 }
 
 void global_init() {
   global_process_init();
-  global_objects_init();
-  global_constants_init();
-  global_functions_init();
+  register_global_objects();
+  register_global_constants();
+  register_global_functions();
+  run_startup_module();
 }

@@ -22,8 +22,9 @@
 #ifndef __RUNTIME_H
 #define __RUNTIME_H
 
-void runtime_init();
+#include "jerryscript.h"
 
-void runtime_test();
+void runtime_init();
+jerry_value_t runtime_load_snapshot(const int *code, size_t size);
 
 #endif /* __RUNTIME_H */
