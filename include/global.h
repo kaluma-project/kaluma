@@ -19,3 +19,9 @@
  * SOFTWARE.
  */
 
+#ifndef __GLOBAL_H
+#define __GLOBAL_H
+
+void global_init();
+
+#endif /* __GLOBAL_H */

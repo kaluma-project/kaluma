@@ -58,10 +58,12 @@ Etc.
   * `warn()`
   * `error()`
 * `process`
-  * (event) `onUncaughtException`
+  * `native_modules` - _array of native module names_
+  * `bindings` - 'fs', 'gpio', ...
   * `arch`
   * `platform`
   * `version`
+  * (event) `onUncaughtException`
 * `module` ?
 * `exports` ?
 * `__dirname` ?
@@ -72,11 +74,11 @@ Etc.
 
 ## Native Modules
 
-* `assert`
-* `buffer` - default in global
-* `timers` - default in global
-* `events`
+* `console` (default, global)
+* `buffer` (default, global)
+* `timers` (default, global)
+* `assert` (default)
+* `events` (default)
 * `net`
 * `fs`
 * `http`
-

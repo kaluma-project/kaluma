@@ -108,6 +108,7 @@ src/io.c \
 src/runtime.c \
 src/repl.c \
 src/jerry_port.c \
+src/global.c \
 $(KAMELEON_GENERATED_C)
 
 KAMELEON_INC = \
@@ -132,6 +133,37 @@ TARGET_INC =
 TARGET_DEF =
 
 -include $(TARGET_DIR)/Make.def
+
+# -----------------------------------------------------------------------------
+# Kameleon Modules
+# -----------------------------------------------------------------------------
+
+ifdef KAMELEON_MODULE_ASSERT
+endif
+
+ifdef KAMELEON_MODULE_CONSOLE
+endif
+
+ifdef KAMELEON_MODULE_BUFFER
+endif
+
+ifdef KAMELEON_MODULE_TIMERS
+endif
+
+ifdef KAMELEON_MODULE_EVENTS
+endif
+
+ifdef KAMELEON_MODULE_FS
+endif
+
+ifdef KAMELEON_MODULE_NET
+endif
+
+ifdef KAMELEON_MODULE_HTTP
+endif
+
+ifdef KAMELEON_MODULE_FS
+endif
 
 # -----------------------------------------------------------------------------
 # CFLAGS
@@ -201,7 +233,7 @@ all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET
 
 $(KAMELEON_GENERATED):
 	$(Q) python $(JERRY_ROOT)/tools/build.py --clean --jerry-cmdline-snapshot=ON --snapshot-save=ON --snapshot-exec=ON
-	$(Q) node tools/js2c.js
+	$(Q) node tools/js2c.js --module=$(KAMELEON_MODULES)
 	$(Q) -rm -rf deps/jerryscript/build
 
 # -----------------------------------------------------------------------------

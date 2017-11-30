@@ -34,6 +34,8 @@ const uint8_t {{name}}_s[] = {
 };
 
 {{/modules}}
+#define NATIVES_LENGTH {{modules.length}}
+const size_t natives_length = NATIVES_LENGTH;
 const kameleon_js_module natives[] = {
 {{#modules}}
   { {{name}}_n, {{name}}_s, SIZE_{{nameUC}} }{{^lastModule}}, {{/lastModule}}

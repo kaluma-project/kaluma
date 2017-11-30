@@ -6,5 +6,4 @@ build
 node_modules
 
 # Generated files
-src/kameleon_js.c
-include/kameleon_js.h
+src/gen

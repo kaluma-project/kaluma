@@ -4,23 +4,28 @@ const fs = require('fs-extra')
 const path = require('path')
 const childProcess = require('child_process')
 const mustache = require('mustache')
+const minimist = require('minimist')
 
-var js_path = path.join(__dirname, '../src/js')
-var files = fs.readdirSync(js_path)
+var modulesPath = path.join(__dirname, '../src/js')
 var wrappers = []
 var snapshots = []
 
-files.forEach(file => {
-  if (path.extname(file) === '.js') {
-    const basename = path.basename(file, '.js')
-    const src = path.join(js_path, file)
-    const wrapped = path.join(js_path, basename + '.wrapped')
-    const snapshot = path.join(js_path, basename + '.snapshot')
-    generateWrapper(src, wrapped)
-    wrappers.push(wrapped)
-    generateSnapshot(wrapped, snapshot)
-    snapshots.push(snapshot)
-  }
+var argv = minimist(process.argv.slice(2))
+var modules = argv.modules.trim().split(' ')
+
+console.log('Generating modules for build...')
+console.log()
+
+modules.forEach(moduleName => {
+  console.log('module: ' + moduleName)
+  const src = path.join(modulesPath, moduleName + '.js')
+  const wrapped = path.join(modulesPath, moduleName + '.wrapped')
+  const snapshot = path.join(modulesPath, moduleName + '.snapshot')
+  generateWrapper(src, wrapped)
+  wrappers.push(wrapped)
+  generateSnapshot(wrapped, snapshot)
+  snapshots.push(snapshot)
+  console.log()
 })
 generate();
 
