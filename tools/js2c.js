@@ -6,37 +6,48 @@ const childProcess = require('child_process')
 const mustache = require('mustache')
 const minimist = require('minimist')
 
-var modulesPath = path.join(__dirname, '../src/js')
+var modulesPath = path.join(__dirname, '../src/modules')
 var wrappers = []
 var snapshots = []
 
+// Parse modules for generate
 var argv = minimist(process.argv.slice(2))
 var modules = argv.modules.trim().split(' ')
 
+// Add default modules
+modules.push('startup')
+
+// Start generation
 console.log('Generating modules for build...')
 console.log()
+generateSnapshots()
+generateSources()
+removeWrappers()
+removeSnapshots()
 
-modules.forEach(moduleName => {
-  console.log('module: ' + moduleName)
-  const src = path.join(modulesPath, moduleName + '.js')
-  const wrapped = path.join(modulesPath, moduleName + '.wrapped')
-  const snapshot = path.join(modulesPath, moduleName + '.snapshot')
-  generateWrapper(src, wrapped)
-  wrappers.push(wrapped)
-  generateSnapshot(wrapped, snapshot)
-  snapshots.push(snapshot)
-  console.log()
-})
-generate();
+function generateSnapshots() {
+  modules.forEach(moduleName => {
+    console.log('module: ' + moduleName)
+    const modpath = path.join(modulesPath, moduleName)
+    const src = path.join(modpath, moduleName + '.js')
+    const wrapped = path.join(modpath, moduleName + '.wrapped')
+    const snapshot = path.join(modpath, moduleName + '.snapshot')
+    createWrapper(src, wrapped)
+    wrappers.push(wrapped)
+    createSnapshot(wrapped, snapshot)
+    snapshots.push(snapshot)
+    console.log()
+  })  
+}
 
-function generateWrapper(src, dest) {
+function createWrapper(src, dest) {
   const wrapper_header = '(function(exports, require, module) {\n'
   const wrapper_footer = '\n});\n'
   const data = fs.readFileSync(src, 'utf8')
   fs.writeFileSync(dest, wrapper_header + data + wrapper_footer, 'utf8')
 }
 
-function generateSnapshot(src, dest) {
+function createSnapshot(src, dest) {
   childProcess.spawnSync('deps/jerryscript/build/bin/jerry-snapshot', [ 'generate', src, '-o', dest ], { stdio: 'inherit' })
 }
 
@@ -52,7 +63,7 @@ function removeSnapshots() {
   })
 }
 
-function generate() {
+function generateSources() {
   const template_h = fs.readFileSync(__dirname + '/kameleon_js.h.mustache', 'utf8')
   const template_c = fs.readFileSync(__dirname + '/kameleon_js.c.mustache', 'utf8')
   var view = {
@@ -84,6 +95,4 @@ function generate() {
   fs.ensureDirSync(genPath)
   fs.writeFileSync(path.join(genPath, 'kameleon_js.h'), rendered_h, 'utf8')
   fs.writeFileSync(path.join(genPath, 'kameleon_js.c'), rendered_c, 'utf8')
-  removeWrappers()
-  removeSnapshots()
 }

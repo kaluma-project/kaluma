@@ -51,13 +51,12 @@ TARGET_INC += \
 -I$(TARGET_DIR)/drivers/CMSIS/Device/ST/STM32F4xx/Include \
 -I$(TARGET_DIR)/drivers/CMSIS/Include
 
-KAMELEON_MODULES='events module'
+# -----------------------------------------------------------------------------
+# Kameleon modules
+# -----------------------------------------------------------------------------
 
-KAMELEON_MODULE_ASSERT = 0
-KAMELEON_MODULE_CONSOLE = 1
-KAMELEON_MODULE_BUFFER = 0
-KAMELEON_MODULE_TIMERS = 0
+KAMELEON_MODULES='events module timers'
+
 KAMELEON_MODULE_EVENTS = 1
-KAMELEON_MODULE_FS = 0
-KAMELEON_MODULE_NET = 0
-KAMELEON_MODULE_HTTP = 0
+KAMELEON_MODULE_MODULE = 1
+KAMELEON_MODULE_TIMERS = 1

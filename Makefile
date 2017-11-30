@@ -138,31 +138,15 @@ TARGET_DEF =
 # Kameleon Modules
 # -----------------------------------------------------------------------------
 
-ifdef KAMELEON_MODULE_ASSERT
-endif
-
-ifdef KAMELEON_MODULE_CONSOLE
-endif
-
-ifdef KAMELEON_MODULE_BUFFER
-endif
-
-ifdef KAMELEON_MODULE_TIMERS
-endif
-
 ifdef KAMELEON_MODULE_EVENTS
 endif
 
-ifdef KAMELEON_MODULE_FS
+ifdef KAMELEON_MODULE_MODULE
 endif
 
-ifdef KAMELEON_MODULE_NET
-endif
-
-ifdef KAMELEON_MODULE_HTTP
-endif
-
-ifdef KAMELEON_MODULE_FS
+ifdef KAMELEON_MODULE_TIMERS
+KAMELEON_SRC += src/modules/timers/module_timers.c
+KAMELEON_INC += -Isrc/modules/timers
 endif
 
 # -----------------------------------------------------------------------------
@@ -233,7 +217,7 @@ all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET
 
 $(KAMELEON_GENERATED):
 	$(Q) python $(JERRY_ROOT)/tools/build.py --clean --jerry-cmdline-snapshot=ON --snapshot-save=ON --snapshot-exec=ON
-	$(Q) node tools/js2c.js --module=$(KAMELEON_MODULES)
+	$(Q) node tools/js2c.js --modules=$(KAMELEON_MODULES)
 	$(Q) -rm -rf deps/jerryscript/build
 
 # -----------------------------------------------------------------------------
