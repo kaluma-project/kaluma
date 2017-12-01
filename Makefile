@@ -141,9 +141,6 @@ TARGET_DEF =
 ifdef KAMELEON_MODULE_EVENTS
 endif
 
-ifdef KAMELEON_MODULE_MODULE
-endif
-
 ifdef KAMELEON_MODULE_TIMERS
 KAMELEON_SRC += src/modules/timers/module_timers.c
 KAMELEON_INC += -Isrc/modules/timers

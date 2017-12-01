@@ -1,27 +1,32 @@
-print("this is startup.js...");
 
-function test_snapshot() {
-  print("snapshot loaded successfully");
-}
-
-function NativeModule(id) {
+function Module(id) {
   this.id = id;
   this.exports = {};
 }
 
-NativeModule.cache = {}
+Module.cache = {}
 
-NativeModule.require = function (id) {
-  if (NativeModule.cache[id]) {
-    return NativeModule.cache[id].exports;
+Module.require = function (id) {
+  if (Module.cache[id]) {
+    return Module.cache[id].exports;
   }
-  var mod = new NativeModule(id);
-  NativeModule.cache[id] = mod;
-  mod.compile();
-  return mod.exports;
+  if (process.native_modules.indexOf(id) >= 0) {
+    var mod = new Module(id);
+    Module.cache[id] = mod;
+    mod.loadNative();
+    return mod.exports;
+  } else {
+    print('Try to load non-native module: ' + id);
+  }
 }
 
-NativeModule.prototype.compile = function () {
-  var wrapper = process.getNative(this.id);
-  wrapper(this.exports, NativeModule.require, this);
+Module.prototype.loadNative = function () {
+  var fn = process.getNativeModule(this.id);
+  fn(this.exports, Module.require, this);
 }
+
+var timers = Module.require('timers');
+
+global.require = Module.require;
+global.setTimeout = timers.setTimeout;
+global.setInterval = timers.setInterval;

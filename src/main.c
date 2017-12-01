@@ -39,6 +39,7 @@ int main(void) {
   tty_init();
   io_init();
   runtime_init();
+  global_init();
   repl_init();
 
   gpio_pin_mode(4, GPIO_PIN_MODE_OUPUT_PP);
