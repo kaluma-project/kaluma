@@ -156,24 +156,5 @@ void global_init() {
   register_global_objects();
   register_global_constants();
   register_global_functions();
-  builtin_modules_init();
   run_startup_module();
-}
-
-jerry_value_t global_get_process() {
-  jerry_value_t global_object = jerry_get_global_object ();
-  jerry_value_t prop_name = jerry_create_string ((const jerry_char_t *) "process");
-  jerry_value_t process_object = jerry_get_property (global_object, prop_name);
-  jerry_release_value (prop_name);
-  jerry_release_value (global_object);
-  return process_object;
-}
-
-jerry_value_t global_get_process_binding() {
-  jerry_value_t process_object = global_get_process();
-  jerry_value_t prop_name = jerry_create_string ((const jerry_char_t *) "binding");
-  jerry_value_t binding_object = jerry_get_property (process_object, prop_name);
-  jerry_release_value (prop_name);
-  jerry_release_value (process_object);
-  return binding_object;
 }

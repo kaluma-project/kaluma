@@ -45,10 +45,3 @@ const kameleon_builtin_module builtin_modules[] = {
   { module_{{name}}_name, module_{{name}}_code, MODULE_{{nameUC}}_SIZE, {{#native}}module_{{name}}_init{{/native}}{{^native}}NULL{{/native}} }{{^lastModule}}, {{/lastModule}}
 {{/requireModules}}
 };
-
-/* modules has native C implementation */
-void builtin_modules_init() {
-{{#nativeModules}}
-  module_{{name}}_init();
-{{/nativeModules}}
-}

@@ -19,8 +19,8 @@
  * SOFTWARE.
  */
 
-#ifndef KAMELEON_JS_H
-#define KAMELEON_JS_H
+#ifndef KAMELEON_MODULES_H
+#define KAMELEON_MODULES_H
 
 #include <stdint.h>
 #include "jerryscript.h"
@@ -42,7 +42,5 @@ typedef struct {
 
 extern const size_t builtin_modules_length;
 extern const kameleon_builtin_module builtin_modules[];
-
-void builtin_modules_init();
 
 #endif
