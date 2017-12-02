@@ -24,12 +24,12 @@
 
 #include "runtime.h"
 #include "global.h"
-#include "kameleon_js.h"
+#include "kameleon_modules.h"
 
 #include "repl.h"
 
 static jerry_value_t
-process_get_native_module(const jerry_value_t func_value, /**< function object */
+process_binding_fn(const jerry_value_t func_value, /**< function object */
              const jerry_value_t this_val, /**< this arg */
              const jerry_value_t args_p[], /**< function arguments */
              const jerry_length_t args_cnt) /**< number of function arguments */
@@ -40,10 +40,33 @@ process_get_native_module(const jerry_value_t func_value, /**< function object *
   jerry_string_to_char_buffer(args_p[0], module_name, module_name_sz);
   module_name[module_name_sz] = '\0';
 
-  /* Find and return corresponding module */
-  for (int i = 0; i < native_modules_length; i++) {
-    if (strcmp(native_modules[i].name, module_name) == 0) {
-      jerry_value_t fn = jerry_exec_snapshot(native_modules[i].code, native_modules[i].size, true);
+  /* Return a native initialized object */
+  for (int i = 0; i < builtin_modules_length; i++) {
+    if (strcmp(builtin_modules[i].name, module_name) == 0 && builtin_modules[i].fn != NULL) {
+      return builtin_modules[i].fn();
+    }
+  }
+
+  /* If no corresponding module, return undefined */
+  return jerry_create_undefined();
+}
+
+static jerry_value_t
+process_get_builtin_module_fn(const jerry_value_t func_value, /**< function object */
+             const jerry_value_t this_val, /**< this arg */
+             const jerry_value_t args_p[], /**< function arguments */
+             const jerry_length_t args_cnt) /**< number of function arguments */
+{
+  /* Get module name */
+  jerry_size_t module_name_sz = jerry_get_string_size(args_p[0]);
+  jerry_char_t module_name[module_name_sz + 1];
+  jerry_string_to_char_buffer(args_p[0], module_name, module_name_sz);
+  module_name[module_name_sz] = '\0';
+
+  /* Find and return a builtin module */
+  for (int i = 0; i < builtin_modules_length; i++) {
+    if (strcmp(builtin_modules[i].name, module_name) == 0) {
+      jerry_value_t fn = jerry_exec_snapshot(builtin_modules[i].code, builtin_modules[i].size, true);
       return fn;
     }
   }
@@ -55,25 +78,40 @@ process_get_native_module(const jerry_value_t func_value, /**< function object *
 static void global_process_init() {
   jerry_value_t process_object = jerry_create_object();
 
-  /* Add `process.native_modules` property */
-  jerry_value_t array_native_modules = jerry_create_array(native_modules_length);
-  for (int i = 0; i < native_modules_length; i++) {
-    jerry_value_t value = jerry_create_string((const jerry_char_t *) native_modules[i].name);
-    jerry_value_t ret = jerry_set_property_by_index(array_native_modules, i, value);
+  /* Add `process.binding` function */
+  jerry_value_t binding_fn = jerry_create_external_function(process_binding_fn);
+  jerry_value_t binding_prop = jerry_create_string((const jerry_char_t *) "binding");
+  jerry_set_property (process_object, binding_prop, binding_fn);
+  jerry_release_value (binding_prop);
+  for (int i = 0; i < builtin_modules_length; i++) {
+    if (builtin_modules[i].fn != NULL) {
+      jerry_value_t value = jerry_create_string((const jerry_char_t *) builtin_modules[i].name);
+      jerry_value_t ret = jerry_set_property(binding_fn, value, value);
+      jerry_release_value(ret);
+      jerry_release_value(value);
+    }
+  }
+  jerry_release_value(binding_fn);
+
+  /* Add `process.buildin_modules` property */
+  jerry_value_t array_modules = jerry_create_array(builtin_modules_length);
+  for (int i = 0; i < builtin_modules_length; i++) {
+    jerry_value_t value = jerry_create_string((const jerry_char_t *) builtin_modules[i].name);
+    jerry_value_t ret = jerry_set_property_by_index(array_modules, i, value);
     jerry_release_value(ret);
     jerry_release_value(value);
   }
-  jerry_value_t prop_native_modules = jerry_create_string((const jerry_char_t *) "native_modules");
-  jerry_set_property(process_object, prop_native_modules, array_native_modules);
-  jerry_release_value(prop_native_modules);
-  jerry_release_value(array_native_modules);
+  jerry_value_t prop_buildin_modules = jerry_create_string((const jerry_char_t *) "builtin_modules");
+  jerry_set_property(process_object, prop_buildin_modules, array_modules);
+  jerry_release_value(prop_buildin_modules);
+  jerry_release_value(array_modules);
 
-  /* Add `process.getNativeModule` property */
-  jerry_value_t get_native_module_fn = jerry_create_external_function(process_get_native_module);
-  jerry_value_t get_native_module_prop = jerry_create_string((const jerry_char_t *) "getNativeModule");
-  jerry_set_property (process_object, get_native_module_prop, get_native_module_fn);
-  jerry_release_value (get_native_module_prop);
-  jerry_release_value(get_native_module_fn);
+  /* Add `process.getBuiltinModule` function */
+  jerry_value_t get_builtin_module_fn = jerry_create_external_function(process_get_builtin_module_fn);
+  jerry_value_t get_builtin_module_prop = jerry_create_string((const jerry_char_t *) "getBuiltinModule");
+  jerry_set_property (process_object, get_builtin_module_prop, get_builtin_module_fn);
+  jerry_release_value (get_builtin_module_prop);
+  jerry_release_value(get_builtin_module_fn);
 
   /* Register 'process' object to global */
   jerry_value_t global_object = jerry_get_global_object();
@@ -97,7 +135,11 @@ static void register_global_constants() {
 }
 
 static void register_global_functions() {
-  jerryx_handler_register_global ((const jerry_char_t *) "print", jerryx_handler_print);
+  jerryx_handler_register_global((const jerry_char_t *) "print", jerryx_handler_print);
+  // jerryx_handler_register_global((const jerry_char_t *) "setInterval", set_interval_handler);
+  // jerryx_handler_register_global((const jerry_char_t *) "setTimeout", set_timeout_handler);
+  // jerryx_handler_register_global((const jerry_char_t *) "clearInterval", clear_interval_handler);
+  // jerryx_handler_register_global((const jerry_char_t *) "clearTimeout", clear_timeout_handler);
 }
 
 static void run_startup_module() {
@@ -114,5 +156,24 @@ void global_init() {
   register_global_objects();
   register_global_constants();
   register_global_functions();
+  builtin_modules_init();
   run_startup_module();
+}
+
+jerry_value_t global_get_process() {
+  jerry_value_t global_object = jerry_get_global_object ();
+  jerry_value_t prop_name = jerry_create_string ((const jerry_char_t *) "process");
+  jerry_value_t process_object = jerry_get_property (global_object, prop_name);
+  jerry_release_value (prop_name);
+  jerry_release_value (global_object);
+  return process_object;
+}
+
+jerry_value_t global_get_process_binding() {
+  jerry_value_t process_object = global_get_process();
+  jerry_value_t prop_name = jerry_create_string ((const jerry_char_t *) "binding");
+  jerry_value_t binding_object = jerry_get_property (process_object, prop_name);
+  jerry_release_value (prop_name);
+  jerry_release_value (process_object);
+  return binding_object;
 }

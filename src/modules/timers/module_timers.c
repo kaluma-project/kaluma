@@ -18,3 +18,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#include "jerryscript.h"
+#include "global.h"
+
+static jerry_value_t
+set_timer(const jerry_value_t func_value, /**< function object */
+          const jerry_value_t this_val, /**< this arg */
+          const jerry_value_t args_p[], /**< function arguments */
+          const jerry_length_t args_cnt) /**< number of function arguments */
+{
+  return jerry_create_string((const jerry_char_t *) "native set_timer() called...");
+}
+
+jerry_value_t module_timers_init() {
+  jerry_value_t object = jerry_create_object();
+
+  /* Add `process.object.set_timer` property */
+  jerry_value_t set_timer_fn = jerry_create_external_function(set_timer);
+  jerry_value_t set_timer_prop = jerry_create_string((const jerry_char_t *) "set_timer");
+  jerry_set_property (object, set_timer_prop, set_timer_fn);
+  jerry_release_value (set_timer_prop);
+  jerry_release_value(set_timer_fn);
+
+  return object;
+}

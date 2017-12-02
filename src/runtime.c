@@ -22,9 +22,7 @@
 #include <string.h>
 #include "jerryscript.h"
 #include "jerryscript-ext/handler.h"
-
 #include "repl.h"
-#include "kameleon_js.h"
 
 void runtime_init() {
   jerry_init (JERRY_INIT_EMPTY);

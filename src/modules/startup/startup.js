@@ -10,18 +10,18 @@ Module.require = function (id) {
   if (Module.cache[id]) {
     return Module.cache[id].exports;
   }
-  if (process.native_modules.indexOf(id) >= 0) {
+  if (process.builtin_modules.indexOf(id) >= 0) {
     var mod = new Module(id);
     Module.cache[id] = mod;
-    mod.loadNative();
+    mod.loadBuiltin();
     return mod.exports;
   } else {
     print('Try to load non-native module: ' + id);
   }
 }
 
-Module.prototype.loadNative = function () {
-  var fn = process.getNativeModule(this.id);
+Module.prototype.loadBuiltin = function () {
+  var fn = process.getBuiltinModule(this.id);
   fn(this.exports, Module.require, this);
 }
 

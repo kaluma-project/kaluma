@@ -12,26 +12,39 @@ var snapshots = []
 
 // Parse modules for generate
 var argv = minimist(process.argv.slice(2))
+
+// modules
 var modules = argv.modules.trim().split(' ')
 
-/* modules which can be loaded by 'require()' */
-var modulesByRequire = modules.slice()
+// modules which can be imported by `require()`
+var requireModules = []
 
-// Add default modules
-modules.push('startup')
+// modules which has native C implementation
+var nativeModules = []
 
-// Start generation
-console.log('Generating modules for build...')
-console.log()
-generateSnapshots()
-generateSources()
-removeWrappers()
-removeSnapshots()
+generateAll();
+
+function generateAll() {
+  console.log('Generating modules for build...')
+  console.log()
+  generateSnapshots()
+  generateSources()
+  removeWrappers()
+  removeSnapshots()  
+}
 
 function generateSnapshots() {
   modules.forEach(moduleName => {
-    console.log('module: ' + moduleName)
+    console.log('module: ' + moduleName + ' ------------------------------')
     const modpath = path.join(modulesPath, moduleName)
+    const config = JSON.parse(fs.readFileSync(path.join(modpath + '/module.json')))
+    console.log(config)
+    if (config.require) {
+      requireModules.push(moduleName)
+    }
+    if (config.native) {
+      nativeModules.push(moduleName)
+    }
     const src = path.join(modpath, moduleName + '.js')
     const wrapped = path.join(modpath, moduleName + '.wrapped')
     const snapshot = path.join(modpath, moduleName + '.snapshot')
@@ -67,11 +80,12 @@ function removeSnapshots() {
 }
 
 function generateSources() {
-  const template_h = fs.readFileSync(__dirname + '/kameleon_js.h.mustache', 'utf8')
-  const template_c = fs.readFileSync(__dirname + '/kameleon_js.c.mustache', 'utf8')
+  const template_h = fs.readFileSync(__dirname + '/kameleon_modules.h.mustache', 'utf8')
+  const template_c = fs.readFileSync(__dirname + '/kameleon_modules.c.mustache', 'utf8')
   var view = {
     modules: [],
-    modulesByRequire: []
+    requireModules: [],
+    nativeModules: []
   }
   snapshots.forEach(snapshot => {
     var buffer = fs.readFileSync(snapshot)
@@ -93,18 +107,27 @@ function generateSources() {
     view.modules.push(moduleView)
   })
 
-  modulesByRequire.forEach(mod => {
-    view.modulesByRequire.push({
+  requireModules.forEach(mod => {
+    view.requireModules.push({
+      name: mod,
+      nameUC: mod.toUpperCase(),
+      native: (nativeModules.indexOf(mod) >= 0) ? true : false
+    })
+  })
+  view.requireModules[view.requireModules.length - 1].lastModule = true
+
+  nativeModules.forEach(mod => {
+    view.nativeModules.push({
       name: mod,
       nameUC: mod.toUpperCase()
     })
   })
-  view.modulesByRequire[view.modulesByRequire.length - 1].lastModule = true
-  
+  view.nativeModules[view.nativeModules.length - 1].lastModule = true
+
   var rendered_h = mustache.render(template_h, view)
   var rendered_c = mustache.render(template_c, view)
   var genPath = path.join(__dirname, '../src/gen')
   fs.ensureDirSync(genPath)
-  fs.writeFileSync(path.join(genPath, 'kameleon_js.h'), rendered_h, 'utf8')
-  fs.writeFileSync(path.join(genPath, 'kameleon_js.c'), rendered_c, 'utf8')
+  fs.writeFileSync(path.join(genPath, 'kameleon_modules.h'), rendered_h, 'utf8')
+  fs.writeFileSync(path.join(genPath, 'kameleon_modules.c'), rendered_c, 'utf8')
 }

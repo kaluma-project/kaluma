@@ -19,25 +19,30 @@
  * SOFTWARE.
  */
 
-#include <stdio.h>
+#ifndef KAMELEON_JS_H
+#define KAMELEON_JS_H
+
 #include <stdint.h>
-#include "kameleon_js.h"
+#include "jerryscript.h"
+
+typedef jerry_value_t (* initialize_fn)();
 
 {{#modules}}
-#define MODULE_{{nameUC}}_SIZE {{size}}
-const char module_{{name}}_name[] = "{{name}}";
-const size_t module_{{name}}_size = MODULE_{{nameUC}}_SIZE;
-const uint8_t module_{{name}}_code[] = {
-{{#segments}}
-  {{#bytes}}0x{{value}}{{^last}}, {{/last}}{{/bytes}}
-{{/segments}}
-};
+extern const char module_{{name}}_name[];
+extern const uint8_t module_{{name}}_code[];
+extern const size_t module_{{name}}_size;
 
 {{/modules}}
-#define NATIVE_MODULES_SIZE {{modulesByRequire.length}}
-const size_t native_modules_length = NATIVE_MODULES_SIZE;
-const kameleon_js_module native_modules[] = {
-{{#modulesByRequire}}
-  { module_{{name}}_name, module_{{name}}_code, MODULE_{{nameUC}}_SIZE }{{^lastModule}}, {{/lastModule}}
-{{/modulesByRequire}}
-};
+typedef struct {
+  const char* name;
+  const void* code;
+  const size_t size;
+  initialize_fn fn;
+} kameleon_builtin_module;
+
+extern const size_t builtin_modules_length;
+extern const kameleon_builtin_module builtin_modules[];
+
+void builtin_modules_init();
+
+#endif

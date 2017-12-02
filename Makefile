@@ -93,8 +93,8 @@ JERRY_ARGS = \
 # Kameleon
 # -----------------------------------------------------------------------------
 
-KAMELEON_GENERATED_C = src/gen/kameleon_js.c
-KAMELEON_GENERATED_H = src/gen/kameleon_js.h
+KAMELEON_GENERATED_C = src/gen/kameleon_modules.c
+KAMELEON_GENERATED_H = src/gen/kameleon_modules.h
 KAMELEON_GENERATED = $(KAMELEON_GENERATED_C) $(KAMELEON_GENERATED_H)
 
 KAMELEON_DEF =

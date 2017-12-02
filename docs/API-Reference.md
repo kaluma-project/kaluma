@@ -58,8 +58,9 @@ Etc.
   * `warn()`
   * `error()`
 * `process`
-  * `native_modules` - _array of native module names_
-  * `bindings` - 'fs', 'gpio', ...
+  * `builtin_modules` - _array of builtin module names_
+  * `binding(native_module_name)` - _load native modules_
+    * `<native_module_name>` - _binding has native module names as properties_
   * `arch`
   * `platform`
   * `version`
@@ -72,7 +73,7 @@ Etc.
 * `SPI`_n_
 * `I2C`_n_
 
-## Native Modules
+## Builtin Modules
 
 * `console` (default, global)
 * `buffer` (default, global)

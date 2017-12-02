@@ -23,5 +23,7 @@
 #define __GLOBAL_H
 
 void global_init();
+jerry_value_t global_get_process();
+jerry_value_t global_get_process_binding();
 
 #endif /* __GLOBAL_H */
