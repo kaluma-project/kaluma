@@ -22,7 +22,9 @@
 #include "system.h"
 #include "stm32f4xx_hal.h"
 #include "is25lq040b.h"
-#include <stdint.h>
+#include "usbd_cdc_if.h"
+#include "usb_device.h"
+#include "usbd_desc.h"
 
 static SPI_HandleTypeDef hspi3;
 static uint64_t tick_count;
@@ -123,6 +125,17 @@ static void SpiFlash_Config(void)
   } 
 }
 
+
+/** USB Device Configuation
+*/
+static void UsbDevice_Config()
+{
+    USBD_Init(&hUsbDeviceFS, &FS_Desc, DEVICE_FS);
+    USBD_RegisterClass(&hUsbDeviceFS, &USBD_CDC);
+    USBD_CDC_RegisterInterface(&hUsbDeviceFS, &USBD_Interface_fops_FS);
+    USBD_Start(&hUsbDeviceFS);
+}
+
 /** Kameleon Hardware System Initializations
 */
 void system_init() {
@@ -133,6 +146,7 @@ void system_init() {
   SpiFlash_Config();
 
   Is25Lq_Init(&hspi3);
+  UsbDevice_Config();
 }
 
 void delay(uint64_t msec) {
@@ -146,4 +160,8 @@ uint64_t gettime() {
 
 void settime(uint64_t time) {
   // TODO:
+}
+
+void SetPendSV() {
+   NVIC_INT_CTRL_REG = NVIC_PENDSVSET_BIT;
 }

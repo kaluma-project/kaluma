@@ -24,6 +24,9 @@
 
 #include <stdint.h>
 
+#define NVIC_INT_CTRL_REG   (*(volatile uint32_t *)0xe000ed04)
+#define NVIC_PENDSVSET_BIT  (1UL << 28UL)
+
 /**
  * Initialize the system
  */
@@ -43,5 +46,11 @@ uint64_t gettime();
  * Set current time (UNIX timestamp in milliseconds)
  */
 void settime(uint64_t time);
+
+
+/**
+ * Set PendSV
+ */
+void SetPendSV();
 
 #endif /* __SYSTEM_H */

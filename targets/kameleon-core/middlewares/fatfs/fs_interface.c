@@ -154,31 +154,45 @@ static void FS_CreateDirectoryTest()
 
 static void FS_CreateFileTest()
 {
-    char buf[64];
+    char buf[512];
     FIL fil;
     FRESULT res;
-    uint32_t bw;
+    uint32_t bw = 0;
+    uint64_t start, end;
+
+    for(int k=0; k<sizeof(buf); k++)    buf[k] = (char)gettime();
 
     tty_printf("enter file name to create : ");
     tty_getstring(buf);
     
+    start = gettime();
+
     res = f_open(&fil, buf, FA_WRITE | FA_CREATE_ALWAYS);
     if(res != FR_OK)
     {
         tty_printf("f_open error [%d] \r\n", res);
     }
 
-    res = f_write(&fil, buf, strlen(buf), &bw);
-    tty_printf("%d bytes are written \r\n", bw);
+    /* write 50kB data */
+    for(int k=0; k<100; k++) {
+        uint32_t w;
+        res = f_write(&fil, buf, sizeof(buf), &w);
+        bw = bw + w;
+    }
     
     f_close(&fil);      
+
+    end = gettime();
+
+    tty_printf("%d bytes are written. \r\n", bw);
+    tty_printf("%d elaspsed time. \r\n", (uint32_t)(end - start));
 }
 
 static void FS_CreateMultipleFileTest()
 {
     FIL fil;
     FRESULT res;
-    uint32_t bw, br;
+    UINT bw, br;
     uint8_t buf[32];
     uint8_t data[1024];
     

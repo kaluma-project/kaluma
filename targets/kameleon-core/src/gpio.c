@@ -66,12 +66,12 @@ void gpio_write(uint8_t pin, uint8_t value) {
 
   if(value == GPIO_LOW){
     pin_state = GPIO_PIN_RESET;
+    HAL_GPIO_WritePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin, pin_state);
   }
   else if(value == GPIO_HIGH){
     pin_state = GPIO_PIN_SET;
-  }
-
-  HAL_GPIO_WritePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin, pin_state);
+    HAL_GPIO_WritePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin, pin_state);
+  }  
 }
 
 void gpio_toggle(uint8_t pin) {

@@ -100,7 +100,8 @@ src/main.c \
 src/utils.c \
 src/io.c \
 src/repl.c \
-src/jerry_port.c
+src/jerry_port.c \
+src/buffer.c
 
 KAMELEON_INC = \
 -Iinclude \
