@@ -71,7 +71,8 @@ void tty_putc(char ch) {
     if( GetFreeSpaceInRingBuffer(&tty_tx_ringbuffer) > 1 )
     {
         FillRingBuffer(&tty_tx_ringbuffer, (uint8_t *)&ch, 1);
-    }    
+    }
+    SetPendSV(); 
 }
 
 void tty_printf(const char *fmt, ...) {
