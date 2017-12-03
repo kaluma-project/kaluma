@@ -1,10 +1,12 @@
 
+var timers = process.binding(process.binding.timers);
+
 function setTimeout(callback, timeout) {
-  print('setTimeout called');
+  return timers.set_timer(callback, timeout, false);
 }
 
 function setInterval(callback, interval) {
-  print('setInterval called');
+  return timers.set_timer(callback, interval, true);
 }
 
 exports.setTimeout = setTimeout;

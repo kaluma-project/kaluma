@@ -57,9 +57,12 @@ void io_run() {
 
 /* timer functions */
 
+uint32_t timer_count = 0;
+
 void io_timer_init(io_timer_handle_t *timer) {
   timer->base.type = IO_TIMER;
   timer->base.active = false;
+  timer->timer_id = timer_count++;
   timer->timer_cb = NULL;
   list_append(&loop.timer_handles, (list_node_t *) timer);
 }
@@ -89,7 +92,7 @@ static void io_timer_run() {
           handle->clamped_timeout = handle->clamped_timeout + handle->interval;
         }
         if (handle->timer_cb != NULL) {
-          handle->timer_cb();
+          handle->timer_cb(handle);
         }
       }
     }

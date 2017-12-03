@@ -26,6 +26,8 @@
 #include <stdbool.h>
 #include "utils.h"
 
+#include "jerryscript.h"
+
 typedef struct io_loop_s io_loop_t;
 typedef struct io_handle_s io_handle_t;
 typedef struct io_handle_list_s io_handle_list_t;
@@ -34,7 +36,7 @@ typedef struct io_tty_handle_s io_tty_handle_t;
 
 /* callback function types */
 typedef void (* io_tty_read_cb)(char);
-typedef void (* io_timer_cb)();
+typedef void (* io_timer_cb)(io_timer_handle_t *);
 
 /* handle types */
 typedef enum io_type {
@@ -50,7 +52,9 @@ struct io_handle_s {
 
 struct io_timer_handle_s {
   io_handle_t base;
+  uint32_t timer_id;
   io_timer_cb timer_cb;
+  jerry_value_t timer_js_cb;
   uint64_t clamped_timeout;
   uint64_t interval;
   bool repeat;

@@ -27,7 +27,7 @@
 #include "runtime.h"
 #include "global.h"
 
-void timer_cb() {
+void timer_cb(io_timer_handle_t *timer) {
   gpio_toggle(4); // LED Blinking
   /* Should not be blocked */
   uint64_t time = gettime();
