@@ -30,3 +30,5 @@ var timers = Module.require('timers');
 global.require = Module.require;
 global.setTimeout = timers.setTimeout;
 global.setInterval = timers.setInterval;
+global.clearTimeout = timers.clearTimeout;
+global.clearInterval = timers.clearInterval;
