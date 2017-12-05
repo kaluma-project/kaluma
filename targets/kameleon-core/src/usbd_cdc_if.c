@@ -76,8 +76,8 @@
 /* USER CODE BEGIN PRIVATE_DEFINES */
 /* Define size for the receive and transmit buffer over CDC */
 /* It's up to user to redefine and/or remove those define */
-#define APP_RX_DATA_SIZE  4
-#define APP_TX_DATA_SIZE  4
+#define APP_RX_DATA_SIZE  2048
+#define APP_TX_DATA_SIZE  2048
 /* USER CODE END PRIVATE_DEFINES */
 /**
   * @}
@@ -147,7 +147,7 @@ USBD_CDC_ItfTypeDef USBD_Interface_fops_FS =
 
 /* Private functions ---------------------------------------------------------*/
 /**
-  * @brief  CDC_Init_FS
+  * @brief  CDC_Init_FSINSTRUCTION_CACHE_ENABLE
   *         Initializes the CDC media low layer over the FS USB IP
   * @param  None
   * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
@@ -270,7 +270,8 @@ static int8_t CDC_Receive_FS (uint8_t* Buf, uint32_t *Len)
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
 
-  tty_fill_ringbuffer((uint8_t *)Buf, *Len);
+  ringbuffer_t * pbuf = tty_get_rx_ringbuffer();
+  FillRingBuffer(pbuf, (uint8_t *)Buf, *Len);
   return (USBD_OK);
   /* USER CODE END 6 */ 
 }
@@ -290,17 +291,27 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
 {
   uint8_t result = USBD_OK;
   /* USER CODE BEGIN 7 */ 
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
-  if (hcdc->TxState != 0){
-    return USBD_BUSY;
-  }
+ 
   USBD_CDC_SetTxBuffer(&hUsbDeviceFS, Buf, Len);
   result = USBD_CDC_TransmitPacket(&hUsbDeviceFS);
+  
   /* USER CODE END 7 */ 
   return result;
 }
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_IMPLEMENTATION */
+uint8_t CDC_Transmit_IsReady()
+{
+    USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
+   
+    /* if the previous data is under transmitting, just return to avoid blocking */
+    if (hcdc->TxState == 0) {
+      return 1;
+    }
+    else {
+      return 0;
+    }
+}
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 
 /**

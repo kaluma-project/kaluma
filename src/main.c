@@ -30,13 +30,16 @@
 void timer_cb(io_timer_handle_t *timer) {
   gpio_toggle(4); // LED Blinking
   /* Should not be blocked */
-  uint64_t time = gettime();
+  //uint64_t time = gettime();
   // tty_printf("[%d] : LED blinking...\r\n", (int) tick);
 }
 
 int main(void) {
   system_init();
   tty_init();
+
+  gpio_pin_mode(4, GPIO_PIN_MODE_OUPUT_PP);
+
   io_init();
   runtime_init();
   global_init();

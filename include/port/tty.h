@@ -22,13 +22,31 @@
 #ifndef __TTY_H
 #define __TTY_H
 
+#include <stdint.h>
 #include <stdbool.h>
+#include "buffer.h"
 
+#define TTY_TX_RINGBUFFER_SIZE  1024
+#define TTY_RX_RINGBUFFER_SIZE  1024
+
+typedef enum {
+  tty_state_ok = 0,
+  tty_state_busy,
+  tty_state_fail,
+}tty_state_t;
+
+ringbuffer_t * tty_get_tx_ringbuffer();
+ringbuffer_t * tty_get_rx_ringbuffer();
 void tty_init();
-void tty_putc(char ch);
-void tty_printf(const char *fmt, ...);
 bool tty_has_data();
+void tty_getstring(char *);
+void tty_putc(char);
+void tty_printf(const char *, ...);
 uint32_t tty_data_size();
 uint8_t tty_getc();
+uint8_t tty_getch();
+void tty_transmit_data();
+
+
 
 #endif /* __TTY_H */

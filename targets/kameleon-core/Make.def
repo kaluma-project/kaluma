@@ -20,6 +20,8 @@ $(TARGET_DIR)/src/usbd_desc.c \
 $(TARGET_DIR)/src/usbd_cdc_if.c \
 $(TARGET_DIR)/src/system_stm32f4xx.c \
 $(TARGET_DIR)/src/stm32f4xx_hal_msp.c \
+$(TARGET_DIR)/src/is25lq040b.c \
+$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c \
 $(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c \
 $(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c \
 $(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c \
@@ -40,7 +42,11 @@ $(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c \
 $(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c \
 $(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c \
 $(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c \
-$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c
+$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c \
+$(TARGET_DIR)/middlewares/fatfs/ff13a/source/ff.c \
+$(TARGET_DIR)/middlewares/fatfs/ff13a/source/diskio.c \
+$(TARGET_DIR)/middlewares/fatfs/ff13a/source/ffunicode.c \
+$(TARGET_DIR)/middlewares/fatfs/fs_interface.c
 
 TARGET_INC += \
 -I$(TARGET_DIR)/include \
@@ -48,6 +54,8 @@ TARGET_INC += \
 -I$(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Inc/Legacy \
 -I$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Inc \
 -I$(TARGET_DIR)/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc \
+-I$(TARGET_DIR)/middlewares/fatfs/ff13a/source \
+-I$(TARGET_DIR)/middlewares/fatfs \
 -I$(TARGET_DIR)/drivers/CMSIS/Device/ST/STM32F4xx/Include \
 -I$(TARGET_DIR)/drivers/CMSIS/Include
 
