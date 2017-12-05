@@ -109,6 +109,7 @@ src/runtime.c \
 src/repl.c \
 src/jerry_port.c \
 src/global.c \
+src/buffer.c \
 $(KAMELEON_GENERATED_C)
 
 KAMELEON_INC = \
