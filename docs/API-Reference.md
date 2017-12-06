@@ -80,6 +80,79 @@ Etc.
 * `timers` (default, global)
 * `assert` (default)
 * `events` (default)
-* `net`
+* `i2c`
+* `spi`
+* `uart`
 * `fs`
+* `net`
 * `http`
+
+### Module: `console`
+
+* (class) `Console`
+  * `log()`
+  * `warn()`
+  * `error()`
+
+### Module: `buffer`
+
+* (class) `Buffer`
+
+### Module: `timers`
+
+* `setInterval(callback, interval)`
+* `setTimeout(callback, timeout)`
+* `clearInterval(timerId)`
+* `clearTimeout(timerId)`
+
+### Module: `assert`
+
+* ...
+
+### Module: `events`
+
+* (class) `EventEmitter`
+  * `addListener(eventName, listener)`
+  * `emit(eventName, ...args)`
+  * `eventNames()`
+  * `getMaxListeners()`
+  * `listenerCount(eventName)`
+  * `listeners(eventName)`
+  * `on(eventName, listener)`
+  * `once(eventName, listener)`
+  * `prependListener(eventName, listener)`
+  * `prependOnceListener(eventName, listener)`
+  * `removeAllListeners([eventName])`
+  * `removeListener(eventName, listener)`
+  * `setMaxListeners(n)`
+
+### Module: `i2c`
+
+* (class) `I2C`
+  * `begin(address)`
+  * `beginTransmission(address)`
+  * `endTransmission()`
+  * `write(data)`
+  * `requestFrom()`
+  * `available()` - Return the number of bytes available for read.
+  * `read()` - Read a byte.
+
+### Module: `spi`
+
+* ...
+
+### Module: `uart`
+
+* ...
+
+### Module: `fs`
+
+* ...
+
+### Module: `net`
+
+* ...
+
+### Module: `http`
+
+* ...
