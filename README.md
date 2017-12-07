@@ -20,6 +20,7 @@ $ git clone https://github.com/kameleon-project/kameleon.git
 $ cd kameleon
 $ git submodule init
 $ git submodule update
+$ npm install
 ```
 
 2. Build
@@ -32,13 +33,15 @@ $ make
 
 ```sh
 $ st-flash write build/kameleon-core.bin 0x8000000
+# or
+$ make flash
 ```
 
 4. Connect via Terminal
 
 ```sh
 # Press RESET button on board
-$ screen /dev/tty.usbmodem1 115200 # macOS
+$ screen /dev/tty.usbmodem1441 115200 # macOS
 # or
-$ sudo screen /dev/ttyACM0 115200 # Linux
+$ sudo screen /dev/ttyACM? 115200 # Linux
 ```
