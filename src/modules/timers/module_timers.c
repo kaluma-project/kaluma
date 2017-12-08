@@ -23,6 +23,7 @@
 #include "jerryscript.h"
 #include "io.h"
 #include "runtime.h"
+#include "system.h"
 
 static void set_timer_cb(io_timer_handle_t *timer) {
   if (jerry_value_is_function(timer->timer_js_cb)) {
@@ -68,9 +69,29 @@ static jerry_value_t clear_timer(const jerry_value_t func_value,
   return jerry_create_undefined();
 }
 
+static jerry_value_t delay_(const jerry_value_t func_value,
+  const jerry_value_t this_val, const jerry_value_t args_p[],
+  const jerry_length_t args_cnt) {
+  // ASSERT(args_cnt == 1);
+  // ASSERT(jerry_value_is_number(args_p[0]))
+  uint64_t msec = (uint64_t) jerry_get_number_value(args_p[0]);
+  delay(msec);
+  return jerry_create_undefined();
+}
+
+static jerry_value_t millis(const jerry_value_t func_value,
+  const jerry_value_t this_val, const jerry_value_t args_p[],
+  const jerry_length_t args_cnt) {
+  // ASSERT(args_cnt == 0);
+  uint64_t msec = gettime();
+  return jerry_create_number(msec);
+}
+
 jerry_value_t module_timers_init() {
   jerry_value_t object = jerry_create_object();
   runtime_register_function(object, "setTimer", set_timer);
   runtime_register_function(object, "clearTimer", clear_timer);
+  runtime_register_function(object, "delay", delay_);
+  runtime_register_function(object, "millis", millis);
   return object;
 }

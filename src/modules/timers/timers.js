@@ -21,3 +21,5 @@ exports.setTimeout = setTimeout;
 exports.setInterval = setInterval;
 exports.clearTimeout = clearTimeout;
 exports.clearInterval = clearInterval;
+exports.delay = timers.delay;
+exports.millis = timers.millis;

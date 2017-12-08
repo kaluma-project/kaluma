@@ -33,6 +33,8 @@ global.setTimeout = timers.setTimeout;
 global.setInterval = timers.setInterval;
 global.clearTimeout = timers.clearTimeout;
 global.clearInterval = timers.clearInterval;
+global.delay = timers.delay;
+global.millis = timers.millis;
 
 global.HIGH = gpio.HIGH;
 global.LOW = gpio.LOW;
