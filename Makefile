@@ -139,6 +139,11 @@ TARGET_DEF =
 # Kameleon Modules
 # -----------------------------------------------------------------------------
 
+ifdef KAMELEON_MODULE_CONSOLE
+KAMELEON_SRC += src/modules/console/module_console.c
+KAMELEON_INC += -Isrc/modules/console
+endif
+
 ifdef KAMELEON_MODULE_EVENTS
 endif
 

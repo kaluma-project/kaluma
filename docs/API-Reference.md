@@ -81,7 +81,7 @@ Etc.
 * `timers` (global)
 * `assert`
 * `events`
-* `gpio` (default, global)
+* `gpio` (global)
 * `pwm`
 * `i2c`
 * `spi`
@@ -92,10 +92,10 @@ Etc.
 
 ### Module: `console`
 
-* (class) `Console`
-  * `log()`
-  * `warn()`
-  * `error()`
+* `log(...)`
+* `info(...)`
+* `warn(...)`
+* `error(...)`
 
 ### Module: `buffer`
 
