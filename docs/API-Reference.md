@@ -4,20 +4,20 @@
 
 ### Constants
 
-* `HIGH`
-* `LOW`
-* `INPUT`
-* `OUTPUT`
-* `INPUT_PULLUP`
+* `HIGH` _(from gpio)_
+* `LOW` _(from gpio)_
+* `INPUT` _(from gpio)_
+* `OUTPUT` _(from gpio)_
+* ...
 
 ### Functions
 
 Digital I/O
 
-* `digitalRead(pin)`
-* `digitalWrite(pin, value)`
-* `digitalToggle(pin)`
-* `pinMode(pin, mode)`
+* `digitalRead(pin)` _(from gpio)_
+* `digitalWrite(pin, value)` _(from gpio)_
+* `digitalToggle(pin)` _(from gpio)_
+* `pinMode(pin, mode)` _(from gpio)_
 
 Analog I/O
 
@@ -36,14 +36,14 @@ Advanced I/O
 
 Time
 
-* `delay(msec)`
-* `delayMicroseconds(microsec)`
-* `micros()`
-* `millis()`
-* `setTimeout(fun, msec)`
-* `setInterval(fun, msec)`
-* `clearTimeout(timer)`
-* `clearInterval(timer)`
+* `delay(msec)` _(from timers)_
+* `millis()` _(from timers)_
+* ~~`delayMicroseconds(microsec)`~~ (suspended)
+* ~~`micros()`~~ (suspended)
+* `setTimeout(fun, msec)` _(from timers)_
+* `setInterval(fun, msec)` _(from timers)_
+* `clearTimeout(timer)` _(from timers)_
+* `clearInterval(timer)` _(from timers)_
 
 Etc.
 
@@ -76,11 +76,13 @@ Etc.
 
 ## Builtin Modules
 
-* `console` (default, global)
-* `buffer` (default, global)
-* `timers` (default, global)
-* `assert` (default)
-* `events` (default)
+* `console` (global)
+* `buffer` (global)
+* `timers` (global)
+* `assert`
+* `events`
+* `gpio` (default, global)
+* `pwm`
 * `i2c`
 * `spi`
 * `uart`
@@ -97,7 +99,7 @@ Etc.
 
 ### Module: `buffer`
 
-* (class) `Buffer`
+* (class) `Buffer` _(=exports)_
 
 ### Module: `timers`
 
@@ -126,6 +128,21 @@ Etc.
   * `removeAllListeners([eventName])`
   * `removeListener(eventName, listener)`
   * `setMaxListeners(n)`
+
+### Module: `gpio`
+
+* (const) `HIGH`
+* (const) `LOW`
+* (const) `INPUT`
+* (const) `OUTPUT`
+* `digitalRead(pin)`
+* `digitalWrite(pin, value)`
+* `digitalToggle(pin)`
+* `pinMode(pin, mode)`
+
+### Module: `pwm`
+
+* ...
 
 ### Module: `i2c`
 
