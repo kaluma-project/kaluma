@@ -26,9 +26,19 @@ Module.prototype.loadBuiltin = function () {
 }
 
 var timers = Module.require('timers');
+var gpio = Module.require('gpio');
 
 global.require = Module.require;
 global.setTimeout = timers.setTimeout;
 global.setInterval = timers.setInterval;
 global.clearTimeout = timers.clearTimeout;
 global.clearInterval = timers.clearInterval;
+
+global.HIGH = gpio.HIGH;
+global.LOW = gpio.LOW;
+global.INPUT = gpio.INPUT;
+global.OUTPUT = gpio.OUTPUT;
+global.pinMode = gpio.pinMode;
+global.digitalRead = gpio.digitalRead;
+global.digitalWrite = gpio.digitalWrite;
+global.digitalToggle = gpio.digitalToggle;

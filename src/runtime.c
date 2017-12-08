@@ -28,15 +28,22 @@ void runtime_init() {
   jerry_init (JERRY_INIT_EMPTY);
 }
 
-jerry_value_t runtime_load_snapshot(const int *code, size_t size) {
-  jerry_value_t res = jerry_exec_snapshot(code, size, true);
-  jerry_value_t this_val = jerry_create_undefined ();
-  jerry_value_t ret_val = jerry_call_function (res, this_val, NULL, 0);
-  jerry_release_value (this_val);  
-  jerry_release_value (res);  
-  return ret_val;
-}
-
 void runtime_deinit() {
   jerry_cleanup ();  
+}
+
+void runtime_register_number(jerry_value_t object, const char *name, double value) {
+  jerry_value_t val = jerry_create_number(value);
+  jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
+  jerry_set_property (object, prop, val);
+  jerry_release_value (prop);
+  jerry_release_value(val);
+}
+
+void runtime_register_function(jerry_value_t object, const char *name, jerry_external_handler_t fn) {
+  jerry_value_t ext_fn = jerry_create_external_function(fn);
+  jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
+  jerry_set_property (object, prop, ext_fn);
+  jerry_release_value (prop);
+  jerry_release_value(ext_fn);
 }

@@ -147,6 +147,11 @@ KAMELEON_SRC += src/modules/timers/module_timers.c
 KAMELEON_INC += -Isrc/modules/timers
 endif
 
+ifdef KAMELEON_MODULE_GPIO
+KAMELEON_SRC += src/modules/gpio/module_gpio.c
+KAMELEON_INC += -Isrc/modules/gpio
+endif
+
 # -----------------------------------------------------------------------------
 # CFLAGS
 # -----------------------------------------------------------------------------

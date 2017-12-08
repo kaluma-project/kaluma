@@ -27,32 +27,13 @@
 #include "runtime.h"
 #include "global.h"
 
-void timer_cb(io_timer_handle_t *timer) {
-  gpio_toggle(4); // LED Blinking
-  /* Should not be blocked */
-  //uint64_t time = gettime();
-  // tty_printf("[%d] : LED blinking...\r\n", (int) tick);
-}
-
 int main(void) {
   system_init();
   tty_init();
-
-  gpio_pin_mode(4, GPIO_PIN_MODE_OUPUT_PP);
-
   io_init();
   runtime_init();
   global_init();
   repl_init();
-
-  gpio_pin_mode(4, GPIO_PIN_MODE_OUPUT_PP);
-
-  /* Timer setup */
-  io_timer_handle_t timer;
-  io_timer_init(&timer);
-  io_timer_start(&timer, timer_cb, 1000, true);
-
-  /* Enter to IO loop */
   io_run();
 }
 

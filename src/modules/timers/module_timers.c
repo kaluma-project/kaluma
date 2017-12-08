@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include "jerryscript.h"
 #include "io.h"
-#include "global.h"
+#include "runtime.h"
 
 static void set_timer_cb(io_timer_handle_t *timer) {
   if (jerry_value_is_function(timer->timer_js_cb)) {
@@ -36,12 +36,9 @@ static void set_timer_cb(io_timer_handle_t *timer) {
   } 
 }
 
-static jerry_value_t
-set_timer(const jerry_value_t func_value, /**< function object */
-          const jerry_value_t this_val, /**< this arg */
-          const jerry_value_t args_p[], /**< function arguments */
-          const jerry_length_t args_cnt) /**< number of function arguments */
-{
+static jerry_value_t set_timer(const jerry_value_t func_value,
+  const jerry_value_t this_val, const jerry_value_t args_p[],
+  const jerry_length_t args_cnt) {
   // ASSERT(args_cnt == 3);
   // ASSERT(jerry_value_is_function(args_p[0]))
   // ASSERT(jerry_value_is_number(args_p[1]))
@@ -59,12 +56,9 @@ static void timer_close_cb(io_handle_t *handle) {
   free(handle);
 }
 
-static jerry_value_t
-clear_timer(const jerry_value_t func_value, /**< function object */
-          const jerry_value_t this_val, /**< this arg */
-          const jerry_value_t args_p[], /**< function arguments */
-          const jerry_length_t args_cnt) /**< number of function arguments */
-{
+static jerry_value_t clear_timer(const jerry_value_t func_value,
+  const jerry_value_t this_val, const jerry_value_t args_p[],
+  const jerry_length_t args_cnt) {
   // ASSERT(args_cnt == 1);
   // ASSERT(jerry_value_is_number(args_p[0]))
   int timer_id = (int) jerry_get_number_value(args_p[0]);
@@ -76,20 +70,7 @@ clear_timer(const jerry_value_t func_value, /**< function object */
 
 jerry_value_t module_timers_init() {
   jerry_value_t object = jerry_create_object();
-
-  /* Add `setTimer` function */
-  jerry_value_t set_timer_fn = jerry_create_external_function(set_timer);
-  jerry_value_t set_timer_prop = jerry_create_string((const jerry_char_t *) "setTimer");
-  jerry_set_property (object, set_timer_prop, set_timer_fn);
-  jerry_release_value (set_timer_prop);
-  jerry_release_value(set_timer_fn);
-
-  /* Add `clearTimer` function */
-  jerry_value_t clear_timer_fn = jerry_create_external_function(clear_timer);
-  jerry_value_t clear_timer_prop = jerry_create_string((const jerry_char_t *) "clearTimer");
-  jerry_set_property (object, clear_timer_prop, clear_timer_fn);
-  jerry_release_value (clear_timer_prop);
-  jerry_release_value(clear_timer_fn);
-
+  runtime_register_function(object, "setTimer", set_timer);
+  runtime_register_function(object, "clearTimer", clear_timer);
   return object;
 }

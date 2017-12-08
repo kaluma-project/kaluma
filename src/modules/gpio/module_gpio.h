@@ -19,15 +19,6 @@
  * SOFTWARE.
  */
 
-#ifndef __RUNTIME_H
-#define __RUNTIME_H
-
 #include "jerryscript.h"
 
-void runtime_init();
-void runtime_deinit();
-
-void runtime_register_number(jerry_value_t object, const char *name, double value);
-void runtime_register_function(jerry_value_t object, const char *name, jerry_external_handler_t fn);
-
-#endif /* __RUNTIME_H */
+jerry_value_t module_gpio_init();

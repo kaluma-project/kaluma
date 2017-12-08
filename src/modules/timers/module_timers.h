@@ -19,4 +19,6 @@
  * SOFTWARE.
  */
 
-void module_timers_init();
+#include "jerryscript.h"
+
+jerry_value_t module_timers_init();

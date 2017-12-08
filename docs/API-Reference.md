@@ -16,6 +16,7 @@ Digital I/O
 
 * `digitalRead(pin)`
 * `digitalWrite(pin, value)`
+* `digitalToggle(pin)`
 * `pinMode(pin, mode)`
 
 Analog I/O
