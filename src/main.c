@@ -19,8 +19,10 @@
  * SOFTWARE.
  */
 
+#include "stm32f4xx.h"
 #include "system.h"
 #include "gpio.h"
+#include "led.h"
 #include "tty.h"
 #include "io.h"
 #include "repl.h"
@@ -38,14 +40,10 @@ int main(void) {
   system_init();
   tty_init();
 
-  gpio_pin_mode(4, GPIO_PIN_MODE_OUPUT_PP);
-
   io_init();
   runtime_init();
   global_init();
   repl_init();
-
-  gpio_pin_mode(4, GPIO_PIN_MODE_OUPUT_PP);
 
   /* Timer setup */
   io_timer_handle_t timer;
@@ -53,7 +51,7 @@ int main(void) {
   io_timer_start(&timer, timer_cb, 1000, true);
 
   /* Enter to IO loop */
-  io_run();
+  io_run();  
 }
 
 
@@ -64,10 +62,10 @@ int main(void) {
  */
 void _Error_Handler(char * file, int line)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   while(1) 
   {
+    tty_printf("_Error_Handler : file[%s], line[%d] \r\n", file, line);
+    while(1);
   }
-  /* USER CODE END Error_Handler_Debug */ 
 }

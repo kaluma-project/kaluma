@@ -47,10 +47,4 @@ uint64_t gettime();
  */
 void settime(uint64_t time);
 
-
-/**
- * Set PendSV
- */
-void SetPendSV();
-
 #endif /* __SYSTEM_H */

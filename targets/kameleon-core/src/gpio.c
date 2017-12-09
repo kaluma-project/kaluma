@@ -42,23 +42,12 @@ uint16_t pins[] = {
     GPIO_TypeDef * port;
     uint32_t pin;
  } gpio_port_pin[] = {
-   {GPIOC, GPIO_PIN_0},
-   {GPIOC, GPIO_PIN_1},
-   {GPIOC, GPIO_PIN_2},
-   {GPIOC, GPIO_PIN_3},
-   {GPIOB, GPIO_PIN_13}   // Alive LED
+   {GPIOC, GPIO_PIN_0},     // 1
+   {GPIOC, GPIO_PIN_1},     // 2
+   {GPIOC, GPIO_PIN_2},     // 3
+   {GPIOC, GPIO_PIN_3},     // 4
+ 
  };
-
-void gpio_pin_mode(uint8_t pin, gpio_mode_t mode) {
-  // TODO:
-  GPIO_InitTypeDef GPIO_InitStruct;
-  
-  GPIO_InitStruct.Pin = gpio_port_pin[pin].pin;
-  GPIO_InitStruct.Mode = mode;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(gpio_port_pin[pin].port, &GPIO_InitStruct);   
-}
 
 void gpio_write(uint8_t pin, uint8_t value) {
   // TODO:
@@ -72,11 +61,6 @@ void gpio_write(uint8_t pin, uint8_t value) {
     pin_state = GPIO_PIN_SET;
     HAL_GPIO_WritePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin, pin_state);
   }  
-}
-
-void gpio_toggle(uint8_t pin) {
-  // TODO:
-  HAL_GPIO_TogglePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
 }
 
 uint8_t gpio_read(uint8_t pin) {
@@ -94,3 +78,88 @@ uint8_t gpio_read(uint8_t pin) {
 
   return val;
 }
+
+void gpio_toggle(uint8_t pin) {
+  // TODO:
+  HAL_GPIO_TogglePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
+}
+
+void gpio_set_spi_mode(uint8_t pin)
+{
+  assert_param(IS_GPIO_SPI_PIN(pin));
+
+  // todo
+  
+}
+
+void gpio_spi_config(SPI_CLK_MODE mode, uint32_t prescaler, uint32_t cs_pin)
+{
+  uint32_t polarity, phase;
+
+  if(mode == POLARITY_LOW_PHASE_1EDGE) {
+    polarity = SPI_POLARITY_LOW;
+    phase = SPI_PHASE_1EDGE;
+  }
+  else if(mode == POLARITY_LOW_PHASE_2EDGE) {
+    polarity = SPI_POLARITY_LOW;
+    phase = SPI_PHASE_2EDGE;
+  }
+  else if(mode == POLARITY_HIGH_PHASE_1EDGE) {
+    polarity = SPI_POLARITY_HIGH;
+    phase = SPI_PHASE_1EDGE;
+  }
+  else if(mode == POLARITY_HIGH_PHASE_2EDGE) {
+    polarity = SPI_POLARITY_HIGH;
+    phase = SPI_PHASE_2EDGE;
+  }
+
+  /* todo
+  hspi3.Instance = SPI3;
+  hspi3.Init.Mode = SPI_MODE_MASTER;
+  hspi3.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi3.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi3.Init.CLKPolarity = polarity;
+  hspi3.Init.CLKPhase = phase;
+  hspi3.Init.NSS = SPI_NSS_SOFT;
+  hspi3.Init.BaudRatePrescaler = prescaler;
+  hspi3.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi3.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi3.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi3.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi3) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  } 
+  */
+}
+
+
+void gpio_set_i2c_mode(uint8_t pin)
+{
+  assert_param(IS_GPIO_I2C_PIN(pin));
+
+  // todo
+
+}
+
+void gpio_set_pwm_mode(uint8_t pin)
+{
+  assert_param(IS_GPIO_PWM_PIN(pin));
+
+  // todo
+
+}
+
+void gpio_set_gpio_mode(uint8_t pin, gpio_mode_t mode) {
+  // TODO:
+  GPIO_InitTypeDef GPIO_InitStruct;
+  
+  GPIO_InitStruct.Pin = gpio_port_pin[pin].pin;
+  GPIO_InitStruct.Mode = mode;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(gpio_port_pin[pin].port, &GPIO_InitStruct);   
+}
+
+
+

@@ -24,14 +24,45 @@
 
 #include <stdint.h>
 
-/* Base address of flash memory for data store */
-extern const uint8_t *flash_base_address;
+typedef enum {
+	FLASH_SUCCESS 	= 0x00U,
+	FLASH_FAIL		= 0x01U,
+	FLASH_TIMEOUT 	= 0x02U,
+} FLASH_STATUS;
 
-/* Total size of flash memory for data store */
-extern const uint32_t flash_size;
+/**
+ * Erase all the data in the flash and set the data size to zero
+ */
+void flash_clear();
 
-void flash_write(uint32_t offset, uint8_t buf[], uint32_t size);
-void flash_read(uint32_t offset, uint8_t buf[], uint32_t size);
-void flash_erase();
+/**
+ * Return total size of flash
+ */
+uint32_t flash_size();
+
+/**
+ * Return a pointer to the data stored in the flash
+ */
+uint8_t *flash_get_data();
+
+/**
+ * Return the size of the data stored in the flash
+ */
+uint32_t flash_get_data_size();
+
+/**
+ * Begin to write data to the flash
+ */
+void flash_program_begin();
+
+/**
+ * Write data to the flash and return checksum
+ */
+FLASH_STATUS flash_program(uint8_t * buf, uint32_t size, uint32_t * checksum);
+
+/**
+ * Finish to write data to the flash
+ */
+void flash_program_end();
 
 #endif /* __FLASH_H */
