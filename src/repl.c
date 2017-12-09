@@ -33,7 +33,6 @@
 
 static void repl_getc(char ch);
 static void default_input_handler(repl_state_t *state, char ch);
-static void repl_prompt();
 
 /**
  * TTY handle for REPL
@@ -44,6 +43,78 @@ static io_tty_handle_t tty;
  * REPL state
  */
 static repl_state_t state;
+
+static void print_value_in_format(const char *format, jerry_value_t value) {
+    jerry_value_t str = jerry_value_to_string(value);
+    jerry_size_t str_sz = jerry_get_string_size (str);
+    jerry_char_t str_buf[str_sz + 1];
+    jerry_string_to_char_buffer (str, str_buf, str_sz);
+    str_buf[str_sz] = '\0';
+    tty_printf(format, (char *) str_buf);
+}
+
+void print_value(const jerry_value_t value, int depth) {
+  if (jerry_value_has_error_flag(value)) {
+    repl_error("%s\r\n", "Error");
+  } else if (jerry_value_is_array(value)) {
+    if (depth == 0) {
+      tty_printf("[Array]");
+    } else {
+      uint32_t len = jerry_get_array_length(value);
+      tty_printf("[");
+      for (int i = 0; i < len; i++) {
+        jerry_value_t item = jerry_get_property_by_index(value, i);
+        if (i > 0) {
+          tty_printf(", ");
+        } else {
+          tty_printf(" ");
+        }
+        print_value(item, depth - 1);
+        jerry_release_value(item);
+      }
+      tty_printf(" ]");
+    }
+  } else if (jerry_value_is_boolean(value)) {
+    print_value_in_format("%s", value);
+  } else if (jerry_value_is_function(value)) {
+    tty_printf("[Function]");
+  } else if (jerry_value_is_constructor(value)) {
+    print_value_in_format("[Constructor]", value);
+  } else if (jerry_value_is_number(value)) {
+    print_value_in_format("%s", value);
+  } else if (jerry_value_is_null(value)) {
+    tty_printf("null");
+  } else if (jerry_value_is_object(value)) {
+    if (depth == 0) {
+      tty_printf("[Object]");
+    } else {
+      tty_printf("{");
+      jerry_value_t keys = jerry_get_object_keys(value);
+      uint32_t len = jerry_get_array_length(keys);
+      for (int i = 0; i < len; i++) {
+        jerry_value_t prop_name = jerry_get_property_by_index(keys, i);
+        jerry_value_t prop_val = jerry_get_property (value, prop_name);
+        if (i > 0) {
+          tty_printf(", ");
+        } else {
+          tty_printf(" ");
+        }
+        print_value_in_format("%s: ", prop_name);
+        print_value(prop_val, depth - 1);
+        jerry_release_value(prop_val);
+        jerry_release_value(prop_name);
+      }
+      jerry_release_value(keys);
+      tty_printf(" }");
+    }
+  } else if (jerry_value_is_string(value)) {
+    print_value_in_format("\'%s\'", value);
+  } else if (jerry_value_is_undefined(value)) {
+    tty_printf("undefined");
+  } else {
+    print_value_in_format("%s", value);
+  }
+}
 
 /**
  * Initialize the REPL
@@ -80,29 +151,7 @@ void repl_init() {
   repl_prompt();
 }
 
-void print_value (const jerry_value_t value) {
-  if (jerry_value_has_error_flag(value)) {
-    repl_error("%s\r\n", "Error.");
-  } else {
-    jerry_value_t str_value = jerry_value_to_string(value);
-
-    /* Determining required buffer size */
-    jerry_size_t req_sz = jerry_get_string_size (str_value);
-    jerry_char_t str_buf_p[req_sz + 1];
-
-    jerry_string_to_char_buffer (str_value, str_buf_p, req_sz);
-    str_buf_p[req_sz] = '\0';
-    if (jerry_value_is_string(value)) {
-      repl_info("\"%s\"\r\n", (char *) str_buf_p);
-    } else if (jerry_value_is_array(value)) {
-      repl_info("[%s]\r\n", (char *) str_buf_p);
-    } else {
-      repl_info("%s\r\n", (char *) str_buf_p);
-    }
-  }
-}
-
-static void repl_prompt() {
+void repl_prompt() {
   if (state.echo) {
     state.buffer[state.buffer_length] = '\0';
     tty_printf("> %s", &state.buffer);
@@ -171,7 +220,12 @@ static void eval_code() {
       repl_error("%s\r\n", "Syntax error");
     } else {
       jerry_value_t ret_value = jerry_run(parsed_code);
-      print_value(ret_value);
+      tty_printf("\33[2K\r"); // set column to 0
+      tty_printf("\33[90m"); // set to dark gray color
+      print_value(ret_value, 1);
+      tty_printf("\r\n");
+      tty_printf("\33[0m"); // back to normal color
+      repl_prompt();
       jerry_release_value(ret_value);
     }
     jerry_release_value(parsed_code);

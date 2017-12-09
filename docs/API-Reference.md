@@ -93,8 +93,8 @@ Etc.
 ### Module: `console`
 
 * `log(...)`
-* `info(...)`
-* `warn(...)`
+* ~~`info(...)`~~ (suspended)
+* ~~`warn(...)`~~ (suspended)
 * `error(...)`
 
 ### Module: `buffer`

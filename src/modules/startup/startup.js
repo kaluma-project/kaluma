@@ -36,6 +36,8 @@ global.clearInterval = timers.clearInterval;
 global.delay = timers.delay;
 global.millis = timers.millis;
 
+global.console = Module.require('console');
+
 global.HIGH = gpio.HIGH;
 global.LOW = gpio.LOW;
 global.INPUT = gpio.INPUT;

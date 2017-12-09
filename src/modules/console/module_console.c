@@ -22,16 +22,51 @@
 #include <stdlib.h>
 #include "jerryscript.h"
 #include "runtime.h"
+#include "tty.h"
+#include "repl.h"
 
-static jerry_value_t log(const jerry_value_t func_value,
+static jerry_value_t log_(const jerry_value_t func_value,
   const jerry_value_t this_val, const jerry_value_t args_p[],
   const jerry_length_t args_cnt) {
   // ASSERT(args_cnt == *);
+  if (args_cnt > 0) {
+    tty_printf("\33[2K\r"); // set column to 0
+    tty_printf("\33[0m"); // set to normal color
+    for (int i = 0; i < args_cnt; i++) {
+      if (i > 0) {
+        tty_printf(" ");
+      }
+      print_value(args_p[i], 1);
+    }
+    tty_printf("\r\n");
+    repl_prompt();
+  }
+  return jerry_create_undefined();
+}
+
+static jerry_value_t error_(const jerry_value_t func_value,
+  const jerry_value_t this_val, const jerry_value_t args_p[],
+  const jerry_length_t args_cnt) {
+  // ASSERT(args_cnt == *);
+  if (args_cnt > 0) {
+    tty_printf("\33[2K\r"); // set column to 0
+    tty_printf("\33[31m"); // red
+    for (int i = 0; i < args_cnt; i++) {
+      if (i > 0) {
+        tty_printf(" ");
+      }
+      print_value(args_p[i], 1);
+    }
+    tty_printf("\r\n");
+    tty_printf("\33[0m"); // back to normal color
+    repl_prompt();
+  }
   return jerry_create_undefined();
 }
 
 jerry_value_t module_console_init() {
   jerry_value_t object = jerry_create_object();
-  runtime_register_function(object, "log", log);
+  runtime_register_function(object, "log", log_);
+  runtime_register_function(object, "error", error_);
   return object;
 }

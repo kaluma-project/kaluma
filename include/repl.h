@@ -49,10 +49,11 @@ struct repl_state_s {
   unsigned int history_position;
 };
 
-void print_value (const jerry_value_t value);
+void print_value(const jerry_value_t value, int depth);
 
 void repl_init();
 void repl_set_input_handler(repl_input_handler_t handler);
+void repl_prompt();
 void repl_log(const char *format, const char *str);
 void repl_info(const char *format, const char *str);
 void repl_error(const char *format, const char *str);
