@@ -117,17 +117,17 @@ Etc.
 * (class) `EventEmitter`
   * `addListener(eventName, listener)`
   * `emit(eventName, ...args)`
-  * `eventNames()`
-  * `getMaxListeners()`
-  * `listenerCount(eventName)`
-  * `listeners(eventName)`
   * `on(eventName, listener)`
   * `once(eventName, listener)`
-  * `prependListener(eventName, listener)`
-  * `prependOnceListener(eventName, listener)`
   * `removeAllListeners([eventName])`
   * `removeListener(eventName, listener)`
-  * `setMaxListeners(n)`
+  * ~~`eventNames()`~~ (suspended)
+  * ~~`getMaxListeners()`~~ (suspended)
+  * ~~`listenerCount(eventName)`~~ (suspended)
+  * ~~`listeners(eventName)`~~ (suspended)
+  * ~~`prependListener(eventName, listener)`~~ (suspended)
+  * ~~`prependOnceListener(eventName, listener)`~~ (suspended)
+  * ~~`setMaxListeners(n)`~~ (suspended)
 
 ### Module: `gpio`
 

@@ -13,10 +13,6 @@
  * limitations under the License.
  */
 
-
-var util = require('util');
-
-
 function EventEmitter() {
   this._events = {};
 }
@@ -40,7 +36,7 @@ EventEmitter.prototype.emit = function(type) {
   }
 
   var listeners = this._events[type];
-  if (util.isArray(listeners)) {
+  if (Array.isArray(listeners)) {
     listeners = listeners.slice();
     var args = Array.prototype.slice.call(arguments, 1);
     for (var i = 0; i < listeners.length; ++i) {
@@ -54,7 +50,7 @@ EventEmitter.prototype.emit = function(type) {
 
 
 EventEmitter.prototype.addListener = function(type, listener) {
-  if (!util.isFunction(listener)) {
+  if (typeof listener !== 'function') {
     throw new TypeError('listener must be a function');
   }
 
@@ -75,7 +71,7 @@ EventEmitter.prototype.on = EventEmitter.prototype.addListener;
 
 
 EventEmitter.prototype.once = function(type, listener) {
-  if (!util.isFunction(listener)) {
+  if (typeof listener !== 'function') {
     throw new TypeError('listener must be a function');
   }
 
@@ -96,7 +92,7 @@ EventEmitter.prototype.once = function(type, listener) {
 
 
 EventEmitter.prototype.removeListener = function(type, listener) {
-  if (!util.isFunction(listener)) {
+  if (typeof listener !== 'function') {
     throw new TypeError('listener must be a function');
   }
 
