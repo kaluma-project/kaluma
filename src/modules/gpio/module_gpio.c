@@ -32,7 +32,7 @@ static jerry_value_t pin_mode(const jerry_value_t func_value,
   // ASSERT(jerry_value_is_number(args_p[1]))
   uint8_t pin = (uint8_t) jerry_get_number_value(args_p[0]);
   gpio_mode_t mode = (gpio_mode_t) jerry_get_number_value(args_p[1]);
-  gpio_pin_mode(pin, mode);
+  gpio_set_gpio_mode(pin, mode);
   return jerry_create_undefined();
 }
 
