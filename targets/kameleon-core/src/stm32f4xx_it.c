@@ -34,7 +34,8 @@
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx.h"
 #include "stm32f4xx_it.h"
-#include "buffer.h"
+#include "tty_low_level.h"
+#include "system_low_level.h"
 
 /* USER CODE BEGIN 0 */
 
@@ -176,9 +177,8 @@ void SysTick_Handler(void)
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-
-  ringbuffer_t * rbuf = (ringbuffer_t *)tty_get_tx_ringbuffer();
-  if(GetDataLenInRingBuffer(rbuf))
+  
+  if(tty_get_tx_data_length())
   {
       SetPendSV();
   }

@@ -26,51 +26,20 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "tty.h"
 #include "system.h"
+#include "system_low_level.h"
+#include "tty_low_level.h"
 #include "usbd_cdc_if.h"
 
-static unsigned char tty_tx_buffer[TTY_TX_RINGBUFFER_SIZE];
-static unsigned char tty_rx_buffer[TTY_RX_RINGBUFFER_SIZE];
-static ringbuffer_t tty_tx_ringbuffer;
-static ringbuffer_t tty_rx_ringbuffer;
-
-ringbuffer_t * tty_get_tx_ringbuffer() {
-    return &tty_tx_ringbuffer;
-}
-
-ringbuffer_t * tty_get_rx_ringbuffer() {
-    return &tty_rx_ringbuffer;
-}
-
-/* this function is called in the pendable interrupt service routine which has lowest priority
-   to allow other interrupts service.
-*/
-void tty_transmit_data() {
-   
-    /* if the previous data is under transmitting, just return to avoid blocking */
-    if ( CDC_Transmit_IsReady() )
-    {
-        uint32_t len = GetDataLenInRingBuffer(&tty_tx_ringbuffer);
-        if(len)
-        {
-            uint8_t buf[TTY_TX_RINGBUFFER_SIZE];
-            ReadRingBuffer(&tty_tx_ringbuffer, buf, len);      
-            CDC_Transmit_FS(buf, len);
-        }
-    }
-}
-
 void tty_init() {
-    InitRingBuffer(&tty_tx_ringbuffer, tty_tx_buffer, sizeof(tty_tx_buffer));
-    InitRingBuffer(&tty_rx_ringbuffer, tty_rx_buffer, sizeof(tty_rx_buffer));
+    tty_init_ringbuffer();
 }
 
 void tty_putc(char ch) {
     /* (ring)buffering the string instead of transmitting it via usb channel */
-    if( GetFreeSpaceInRingBuffer(&tty_tx_ringbuffer) > 1 )
+    if( tty_get_tx_freespace() > 1 )
     {
-        FillRingBuffer(&tty_tx_ringbuffer, (uint8_t *)&ch, 1);
+        tty_put_byte(ch);
     }
     SetPendSV(); 
 }
@@ -84,15 +53,15 @@ void tty_printf(const char *fmt, ...) {
     va_end(ap);
 
     /* (ring)buffering the string instead of transmitting it via usb channel */
-    if( GetFreeSpaceInRingBuffer(&tty_tx_ringbuffer) > strlen(string) )
+    if( tty_get_tx_freespace() > strlen(string) )
     {
-        FillRingBuffer(&tty_tx_ringbuffer, (uint8_t *)string, strlen(string));
+        tty_put_bytes((uint8_t *)string, strlen(string));
     }    
     SetPendSV();
 }
 
 bool tty_has_data() {
-    uint32_t n = GetDataLenInRingBuffer(&tty_rx_ringbuffer);
+    uint32_t n = tty_get_rx_data_length();
     if(n) {
         return 1;
     }
@@ -103,7 +72,7 @@ bool tty_has_data() {
 
 uint32_t tty_data_size() {
     // TODO:
-    return GetDataLenInRingBuffer(&tty_rx_ringbuffer);
+    return tty_get_rx_data_length();
 }
 
 /** non-blocking function
@@ -112,7 +81,7 @@ uint8_t tty_getc() {
     // TODO:
     uint8_t c = 0;
     if(tty_data_size()) {
-        ReadRingBuffer(&tty_rx_ringbuffer, &c, 1);        
+        c = tty_get_byte();       
     } 
     return c;
 }
@@ -120,12 +89,8 @@ uint8_t tty_getc() {
 /** blocking function
 */
 uint8_t tty_getch() {
-    // TODO:
-    uint8_t c;
-
     while(tty_data_size() == 0);  
-    ReadRingBuffer(&tty_rx_ringbuffer, &c, 1);   
-    return c;
+    return tty_get_byte();
 }
 
 

@@ -2,6 +2,14 @@
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
   "files.associations": {
-    "usbd_cdc.h": "c"
+    "usbd_cdc.h": "c",
+    "system.h": "c",
+    "stm32f4xx_hal.h": "c",
+    "main.h": "c",
+    "is25lq040b.h": "c",
+    "tty.h": "c",
+    "diskio.h": "c",
+    "buffer.h": "c",
+    "limits": "c"
   }
 }

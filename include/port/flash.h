@@ -24,6 +24,12 @@
 
 #include <stdint.h>
 
+typedef enum {
+	FLASH_SUCCESS 	= 0x00U,
+	FLASH_FAIL		= 0x01U,
+	FLASH_TIMEOUT 	= 0x02U,
+} FLASH_STATUS;
+
 /**
  * Erase all the data in the flash and set the data size to zero
  */
@@ -47,16 +53,16 @@ uint32_t flash_get_data_size();
 /**
  * Begin to write data to the flash
  */
-void flash_write_begin();
+void flash_program_begin();
 
 /**
  * Write data to the flash and return checksum
  */
-uint8_t flash_write(uint8_t buf[], uint32_t size);
+FLASH_STATUS flash_program(uint8_t * buf, uint32_t size, uint32_t * checksum);
 
 /**
  * Finish to write data to the flash
  */
-void flash_write_end();
+void flash_program_end();
 
 #endif /* __FLASH_H */

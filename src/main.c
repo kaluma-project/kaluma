@@ -19,8 +19,10 @@
  * SOFTWARE.
  */
 
+#include "stm32f4xx.h"
 #include "system.h"
 #include "gpio.h"
+#include "led.h"
 #include "tty.h"
 #include "io.h"
 #include "repl.h"
@@ -45,10 +47,10 @@ int main(void) {
  */
 void _Error_Handler(char * file, int line)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   while(1) 
   {
+    tty_printf("_Error_Handler : file[%s], line[%d] \r\n", file, line);
+    while(1);
   }
-  /* USER CODE END Error_Handler_Debug */ 
 }
