@@ -30,16 +30,17 @@ static jerry_value_t log_(const jerry_value_t func_value,
   const jerry_length_t args_cnt) {
   // ASSERT(args_cnt == *);
   if (args_cnt > 0) {
-    tty_printf("\33[2K\r"); // set column to 0
-    tty_printf("\33[0m"); // set to normal color
+    repl_print_begin(REPL_OUTPUT_LOG);
+    repl_printf("\33[2K\r"); // set column to 0
+    repl_printf("\33[0m"); // set to normal color
     for (int i = 0; i < args_cnt; i++) {
       if (i > 0) {
-        tty_printf(" ");
+        repl_printf(" ");
       }
-      print_value(args_p[i], 1);
+      repl_print_value(args_p[i]);
     }
-    tty_printf("\r\n");
-    repl_prompt();
+    repl_printf("\r\n");
+    repl_print_end();
   }
   return jerry_create_undefined();
 }
@@ -49,17 +50,18 @@ static jerry_value_t error_(const jerry_value_t func_value,
   const jerry_length_t args_cnt) {
   // ASSERT(args_cnt == *);
   if (args_cnt > 0) {
-    tty_printf("\33[2K\r"); // set column to 0
-    tty_printf("\33[31m"); // red
+    repl_print_begin(REPL_OUTPUT_ERROR);
+    repl_printf("\33[2K\r"); // set column to 0
+    repl_printf("\33[31m"); // red
     for (int i = 0; i < args_cnt; i++) {
       if (i > 0) {
-        tty_printf(" ");
+        repl_printf(" ");
       }
-      print_value(args_p[i], 1);
+      repl_print_value(args_p[i]);
     }
-    tty_printf("\r\n");
-    tty_printf("\33[0m"); // back to normal color
-    repl_prompt();
+    repl_printf("\r\n");
+    repl_printf("\33[0m"); // back to normal color
+    repl_print_end();
   }
   return jerry_create_undefined();
 }

@@ -20,9 +20,27 @@
  */
 
 #include <string.h>
+#include "tty.h"
 #include "jerryscript.h"
 #include "jerryscript-ext/handler.h"
 #include "repl.h"
+
+// --------------------------------------------------------------------------
+// PRIVATE FUNCTIONS
+// --------------------------------------------------------------------------
+
+static void print_value_in_format(const char *format, jerry_value_t value) {
+    jerry_value_t str = jerry_value_to_string(value);
+    jerry_size_t str_sz = jerry_get_string_size (str);
+    jerry_char_t str_buf[str_sz + 1];
+    jerry_string_to_char_buffer (str, str_buf, str_sz);
+    str_buf[str_sz] = '\0';
+    tty_printf(format, (char *) str_buf);
+}
+
+// --------------------------------------------------------------------------
+// PUBLIC FUNCTIONS
+// --------------------------------------------------------------------------
 
 void runtime_init() {
   jerry_init (JERRY_INIT_EMPTY);
@@ -30,6 +48,67 @@ void runtime_init() {
 
 void runtime_deinit() {
   jerry_cleanup ();  
+}
+
+void runtime_print_value(const jerry_value_t value, int depth) {
+  if (jerry_value_is_array(value)) {
+    if (depth == 0) {
+      repl_printf("[Array]");
+    } else {
+      uint32_t len = jerry_get_array_length(value);
+      repl_printf("[");
+      for (int i = 0; i < len; i++) {
+        jerry_value_t item = jerry_get_property_by_index(value, i);
+        if (i > 0) {
+          repl_printf(", ");
+        } else {
+          repl_printf(" ");
+        }
+        runtime_print_value(item, depth - 1);
+        jerry_release_value(item);
+      }
+      repl_printf(" ]");
+    }
+  } else if (jerry_value_is_boolean(value)) {
+    print_value_in_format("%s", value);
+  } else if (jerry_value_is_function(value)) {
+    repl_printf("[Function]");
+  } else if (jerry_value_is_constructor(value)) {
+    print_value_in_format("[Constructor]", value);
+  } else if (jerry_value_is_number(value)) {
+    print_value_in_format("%s", value);
+  } else if (jerry_value_is_null(value)) {
+    repl_printf("null");
+  } else if (jerry_value_is_object(value)) {
+    if (depth == 0) {
+      repl_printf("[Object]");
+    } else {
+      repl_printf("{");
+      jerry_value_t keys = jerry_get_object_keys(value);
+      uint32_t len = jerry_get_array_length(keys);
+      for (int i = 0; i < len; i++) {
+        jerry_value_t prop_name = jerry_get_property_by_index(keys, i);
+        jerry_value_t prop_val = jerry_get_property (value, prop_name);
+        if (i > 0) {
+          repl_printf(", ");
+        } else {
+          repl_printf(" ");
+        }
+        print_value_in_format("%s: ", prop_name);
+        runtime_print_value(prop_val, depth - 1);
+        jerry_release_value(prop_val);
+        jerry_release_value(prop_name);
+      }
+      jerry_release_value(keys);
+      repl_printf(" }");
+    }
+  } else if (jerry_value_is_string(value)) {
+    print_value_in_format("\'%s\'", value);
+  } else if (jerry_value_is_undefined(value)) {
+    repl_printf("undefined");
+  } else {
+    print_value_in_format("%s", value);
+  }
 }
 
 void runtime_register_number(jerry_value_t object, const char *name, double value) {

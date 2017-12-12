@@ -32,13 +32,19 @@ typedef enum {
   REPL_MODE_ESCAPE
 } repl_mode_t;
 
+typedef enum {
+  REPL_OUTPUT_LOG,
+  REPL_OUTPUT_INFO,
+  REPL_OUTPUT_ERROR
+} repl_output_t;
+
 typedef struct repl_state_s repl_state_t;
-typedef void (*repl_input_handler_t)(repl_state_t *, char);
+typedef void (*repl_handler_t)(repl_state_t *, char);
 
 struct repl_state_s {
   repl_mode_t mode;
   bool echo;
-  repl_input_handler_t input_handler;
+  repl_handler_t handler;
   char buffer[MAX_BUFFER_LENGTH];
   unsigned int buffer_length;
   unsigned int position;
@@ -49,13 +55,18 @@ struct repl_state_s {
   unsigned int history_position;
 };
 
-void print_value(const jerry_value_t value, int depth);
-
 void repl_init();
-void repl_set_input_handler(repl_input_handler_t handler);
+void repl_set_handler(repl_handler_t handler);
 void repl_prompt();
+
 void repl_log(const char *format, const char *str);
 void repl_info(const char *format, const char *str);
 void repl_error(const char *format, const char *str);
+
+void repl_print_begin(repl_output_t output);
+#define repl_printf(format,args...) tty_printf(format, ## args)
+#define repl_print_value(value) runtime_print_value(value, 1)
+#define repl_putc(ch) tty_putc(ch)
+void repl_print_end();
 
 #endif /* __REPL_H */

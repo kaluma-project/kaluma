@@ -39,4 +39,6 @@ void list_init(list_t *list);
 void list_append(list_t *list, list_node_t *node);
 void list_remove(list_t *list, list_node_t *node);
 
+uint8_t hex2bin(char *hex);
+
 #endif /* __UTILS_H */
