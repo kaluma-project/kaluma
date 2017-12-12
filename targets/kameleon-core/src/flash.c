@@ -22,12 +22,14 @@
 #include "stm32f4xx.h"
 #include "flash.h"
 
-#define ADDR_FLASH_USER_AREA    ((uint32_t)0x08060000)
-#define ADDR_FLASH_USER_CODE    (ADDR_FLASH_USER_AREA + 4)
-#define SECTOR_FLASH_USER_AREA  FLASH_SECTOR_7
-#define SIZE_FLASH_USER_AREA    (128 * 1024)
+#define ADDR_FLASH_USER_AREA            ((uint32_t)0x08060000)
+#define ADDR_FLASH_USER_CODE_SIZE       (ADDR_FLASH_USER_AREA + 0)
+#define ADDR_FLASH_USER_CODE_CHECKSUM   (ADDR_FLASH_USER_AREA + 4)
+#define ADDR_FLASH_USER_CODE            (ADDR_FLASH_USER_AREA + 8)
+#define SECTOR_FLASH_USER_AREA          FLASH_SECTOR_7
+#define SIZE_FLASH_USER_AREA            (128 * 1024)
 
-uint32_t offset;
+uint32_t code_offset;
 
 static void flush_cache() {
   /* Note: If an erase operation in Flash memory also concerns data in the data or instruction cache,
@@ -107,17 +109,17 @@ uint32_t flash_get_data_size() {
 }
 
 void flash_program_begin() {
-  offset = 0;
+  code_offset = 0;
   flash_erase();
 }
 
-FLASH_STATUS flash_program(uint8_t * buf, uint32_t size, uint32_t * checksum) {
+FLASH_STATUS flash_program(uint8_t * buf, uint32_t size) {
   FLASH_STATUS status = FLASH_SUCCESS;
   uint32_t address, start_address, end_address;
   uint32_t k=0;
   uint8_t * p = buf;
 
-  start_address = ADDR_FLASH_USER_CODE + offset;
+  start_address = ADDR_FLASH_USER_CODE + code_offset;
   end_address = start_address + size;
   address = start_address;
 
@@ -129,7 +131,7 @@ FLASH_STATUS flash_program(uint8_t * buf, uint32_t size, uint32_t * checksum) {
   while (address < end_address) {
     if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, address, p[k]) == HAL_OK) {
       address = address + 1;
-      offset = offset + 1;
+      code_offset = code_offset + 1;
       k = k + 1;
     }
     else { 
@@ -144,36 +146,38 @@ FLASH_STATUS flash_program(uint8_t * buf, uint32_t size, uint32_t * checksum) {
   /* Lock the Flash to disable the flash control register access (recommended to protect the FLASH memory against possible unwanted operation) */
   HAL_FLASH_Lock();
 
-  /* create checksum */
-  if(status == FLASH_SUCCESS) {
-    *checksum = calculate_checksum((uint8_t *)start_address, size);
-  }
-  else {
-    *checksum = (uint32_t)-1;
-  }
-
   return status;
 }
 
 void flash_program_end() {
+  uint32_t checksum;
+
   /* Unlock the Flash to enable the flash control register access */ 
   HAL_FLASH_Unlock();
   flush_cache();
   
-  /* Program the user Flash area word by word */
-  HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, ADDR_FLASH_USER_AREA, offset);
-  
+  /* Program the user code size by word */
+  HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, ADDR_FLASH_USER_AREA, code_offset);
+    
+  /* Program the user code checksum value by word */
+  checksum = calculate_checksum((uint8_t *)ADDR_FLASH_USER_CODE, code_offset);
+  HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, ADDR_FLASH_USER_CODE_CHECKSUM, checksum);
+
   /* Lock the Flash to disable the flash control register access (recommended to protect the FLASH memory against possible unwanted operation) */
   HAL_FLASH_Lock();
+}
+
+uint32_t flash_get_checksum() {
+  return  *(uint32_t *)ADDR_FLASH_USER_CODE_CHECKSUM;
 }
 
 void flash_test()
 {
   flash_program_begin();
 
-  uint32_t checksum, sum;
+  uint32_t sum;
   { uint8_t buf[] = {0x12, 0x34, 0x56, 0x78, 0x9A};
-    FLASH_STATUS status = flash_program(buf, sizeof(buf), &checksum);
+    FLASH_STATUS status = flash_program(buf, sizeof(buf));
     if(status != FLASH_SUCCESS)
     {
         tty_printf("FLASH ERROR \r\n");
@@ -183,40 +187,32 @@ void flash_test()
     for(int k=0; k<sizeof(buf); k++)
     {
         sum += buf[k];
-    }
-    
-    tty_printf("calcurated checksum [%#010x] \r\n", checksum);    
-    if( sum + checksum )
-    {
-          tty_printf("checksum error \r\n");
-    }
+    }    
   }
 
   { uint8_t buf[] = {0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF};
-    FLASH_STATUS status = flash_program(buf, sizeof(buf), &checksum);
+    FLASH_STATUS status = flash_program(buf, sizeof(buf));
     if(status != FLASH_SUCCESS)
     {
         tty_printf("FLASH ERROR \r\n");
     }
 
-    sum = 0;
     for(int k=0; k<sizeof(buf); k++)
     {
         sum += buf[k];
-    }
-
-    tty_printf("calcurated checksum [%#010x] \r\n", checksum);    
-    if( sum + checksum )
-    {
-          tty_printf("checksum error \r\n");
-    }
+    }    
   }
 
   flash_program_end();
 
-
-  int len = flash_get_data_size();
+  uint32_t len = flash_get_data_size();
   tty_printf("code size [%d] \r\n", len);
+
+  uint32_t checksum = flash_get_checksum();
+  tty_printf("code checksum [%#010x] \r\n", checksum);
+  if(sum + checksum) {
+    tty_printf("checksum error \r\n");
+  }
   
   uint8_t * p = flash_get_data();
   for(int k=0; k<len; k++)

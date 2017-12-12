@@ -56,13 +56,18 @@ uint32_t flash_get_data_size();
 void flash_program_begin();
 
 /**
- * Write data to the flash and return checksum
+ * Program data to the flash
  */
-FLASH_STATUS flash_program(uint8_t * buf, uint32_t size, uint32_t * checksum);
+FLASH_STATUS flash_program(uint8_t * buf, uint32_t size);
 
 /**
  * Finish to write data to the flash
  */
 void flash_program_end();
+
+/**
+ * Calcurate the checksum value for the written data in flash
+ */
+uint32_t flash_get_checksum();
 
 #endif /* __FLASH_H */
