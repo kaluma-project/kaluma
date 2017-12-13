@@ -64,8 +64,10 @@ static jerry_value_t clear_timer(const jerry_value_t func_value,
   // ASSERT(jerry_value_is_number(args_p[0]))
   int timer_id = (int) jerry_get_number_value(args_p[0]);
   io_timer_handle_t *timer = io_timer_get_by_id(timer_id);
-  io_timer_stop(timer);
-  io_handle_close((io_handle_t *) timer, timer_close_cb);
+  if (timer != NULL) {
+    io_timer_stop(timer);
+    io_handle_close((io_handle_t *) timer, timer_close_cb);
+  }
   return jerry_create_undefined();
 }
 

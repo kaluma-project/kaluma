@@ -46,7 +46,7 @@ uint16_t pins[] = {
    {GPIOC, GPIO_PIN_1},     // 2
    {GPIOC, GPIO_PIN_2},     // 3
    {GPIOC, GPIO_PIN_3},     // 4
- 
+   {GPIOB, GPIO_PIN_13}
  };
 
 void gpio_write(uint8_t pin, uint8_t value) {

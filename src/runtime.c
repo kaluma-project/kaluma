@@ -21,8 +21,10 @@
 
 #include <string.h>
 #include "tty.h"
+#include "flash.h"
 #include "jerryscript.h"
 #include "jerryscript-ext/handler.h"
+#include "global.h"
 #include "repl.h"
 
 // --------------------------------------------------------------------------
@@ -30,12 +32,26 @@
 // --------------------------------------------------------------------------
 
 static void print_value_in_format(const char *format, jerry_value_t value) {
-    jerry_value_t str = jerry_value_to_string(value);
-    jerry_size_t str_sz = jerry_get_string_size (str);
-    jerry_char_t str_buf[str_sz + 1];
-    jerry_string_to_char_buffer (str, str_buf, str_sz);
-    str_buf[str_sz] = '\0';
-    tty_printf(format, (char *) str_buf);
+  jerry_value_t str = jerry_value_to_string(value);
+  jerry_size_t str_sz = jerry_get_string_size (str);
+  jerry_char_t str_buf[str_sz + 1];
+  jerry_string_to_char_buffer (str, str_buf, str_sz);
+  str_buf[str_sz] = '\0';
+  tty_printf(format, (char *) str_buf);
+}
+
+static void runtime_run_main() {
+  uint32_t size = flash_get_data_size();
+  if (size > 0) {
+    uint8_t *script = flash_get_data();
+    jerry_value_t parsed_code = jerry_parse (script, size, false);
+    if (!jerry_value_has_error_flag (parsed_code))
+    {
+      jerry_value_t ret_value = jerry_run (parsed_code);
+      jerry_release_value (ret_value);
+    }
+    jerry_release_value (parsed_code);  
+  }
 }
 
 // --------------------------------------------------------------------------
@@ -44,6 +60,8 @@ static void print_value_in_format(const char *format, jerry_value_t value) {
 
 void runtime_init() {
   jerry_init (JERRY_INIT_EMPTY);
+  global_init();
+  runtime_run_main();  
 }
 
 void runtime_deinit() {

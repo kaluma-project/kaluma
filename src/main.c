@@ -27,14 +27,12 @@
 #include "io.h"
 #include "repl.h"
 #include "runtime.h"
-#include "global.h"
 
 int main(void) {
   system_init();
   tty_init();
   io_init();
   runtime_init();
-  global_init();
   repl_init();
   io_run();
 }
