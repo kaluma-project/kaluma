@@ -394,37 +394,48 @@ static void cmd_flash(repl_state_t *state, char *arg) {
   if (strcmp(arg, "-e") == 0) { /* erase flash */
     flash_clear();
     repl_print_begin(REPL_OUTPUT_LOG);
-    repl_printf("Flash has erased.\r\n");
+    repl_printf("Flash has erased\r\n");
     repl_print_end();
   } else if (strcmp(arg, "-c") == 0) { /* get checksum */
     uint32_t checksum = flash_get_checksum();
     repl_print_begin(REPL_OUTPUT_LOG);
-    repl_printf("Checksum = %u\r\n", checksum);
+    repl_printf("%u\r\n", checksum);
     repl_print_end();
-  } else if (strcmp(arg, "-i") == 0) { /* get info */
+  } else if (strcmp(arg, "-t") == 0) { /* get total size of flash */
     uint32_t size = flash_size();
-    uint32_t data_sz = flash_get_data_size();
     repl_print_begin(REPL_OUTPUT_LOG);
-    repl_printf("Total flash size = %u\r\n", size);
-    repl_printf("Used data size = %u\r\n", data_sz);
+    repl_printf("%u\r\n", size);
+    repl_print_end();
+  } else if (strcmp(arg, "-s") == 0) { /* get data size in flash */
+    uint32_t data_size = flash_get_data_size();
+    repl_print_begin(REPL_OUTPUT_LOG);
+    repl_printf("%u\r\n", data_size);
     repl_print_end();
   } else if (strcmp(arg, "-r") == 0) { /* read data */
     uint32_t sz = flash_get_data_size();
     uint8_t *ptr = flash_get_data();
     repl_print_begin(REPL_OUTPUT_LOG);
     for (int i = 0; i < sz; i++) {
+      if (ptr[i] == '\n') { /* convert "\n" to "\r\n" */
+        repl_putc('\r');
+      }
       repl_putc(ptr[i]);
     }
     repl_printf("\r\n");
     repl_print_end();
-  } else if (strcmp(arg, "-h") == 0) { /* read data in hex */
-    repl_print_begin(REPL_OUTPUT_LOG);
-    // ...
-    repl_printf("\r\n");
-    repl_print_end();
-  } else { /* write mode */
+  } else if (strcmp(arg, "-w") == 0) { /* write mode */
     flash_program_begin();
     set_handler(&cmd_flash_handler);
+  } else {
+    repl_print_begin(REPL_OUTPUT_LOG);
+    repl_printf(".flash command options:\r\n");
+    repl_printf("-w\tWrite data in hex format\r\n");
+    repl_printf("-e\tErase the flash\r\n");
+    repl_printf("-c\tGet checksum\r\n");
+    repl_printf("-t\tGet total size of flash\r\n");
+    repl_printf("-s\tGet data size in flash\r\n");
+    repl_printf("-r\tRead data in textual format\r\n");
+    repl_print_end();    
   }
 }
 

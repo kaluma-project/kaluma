@@ -1,14 +1,15 @@
 # REPL Commands
 
 * `.echo <on|off>` -- echo on/off
-* `.clear` -- Reset REPL context.
-* `.exit` -- Exit the REPL.
-* `.flash` -- Write binary data in the hex format to the flash memory. Sending `0x1a` (Ctrl+Z) is to finish to write.
+* ~~`.clear` -- Reset REPL context.~~ (suspended)
+* ~~`.exit` -- Exit the REPL.~~ (suspended)
+* `.flash` -- Read or write data to the non-versatile flash memory.
+  * option `-w` -- Write data to flash in hex format. Send `0x1a`(Ctrl+Z) to finish to write.
   * option `-e` -- Erase the flash data. 
-  * option `-c` -- Return checksum of the data in flash.
-  * option `-i` -- Return information of the data in flash. (Total size of flash and total size of data).
-  * option `-r` -- Return the data in textual format.
-  * option `-h` -- Return the data in hex format.
+  * option `-c` -- Get checksum of the data.
+  * option `-t` -- Get total size of flash.
+  * option `-s` -- Get data size in flash.
+  * option `-r` -- Read data in textual format.
 
 ## Deprecated
 
