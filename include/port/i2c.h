@@ -22,5 +22,12 @@
 #ifndef __I2C_H
 #define __I2C_H
 
+#include <stdint.h>
+
+void i2c_open_master(uint8_t bus);
+void i2c_open_slave(uint8_t bus, uint8_t address);
+void i2c_write(uint8_t bus, uint8_t *buf, uint32_t len);
+void i2c_read(uint8_t bus, uint8_t *buf, uint32_t len);
+void i2c_close(uint8_t bus);
 
 #endif /* __I2C_H */

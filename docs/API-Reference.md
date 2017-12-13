@@ -147,13 +147,15 @@ Etc.
 ### Module: `i2c`
 
 * (class) `I2C`
-  * `begin(address)`
-  * `beginTransmission(address)`
-  * `endTransmission()`
-  * `write(data)`
-  * `requestFrom()`
-  * `available()` - Return the number of bytes available for read.
-  * `read()` - Read a byte.
+  * `open(bus, address)`
+    * `bus` -- bus number
+    * `address` (optional) -- when use in slave mode. If given, open as slave mode
+  * `write(data, ?timeout)` -- write data
+    * `data` (Buffer|Array of Number) -- Data to write
+  * `read(data, length)` -- read bytes and send data to callback
+    * `data` (Buffer|Array of Number) -- Read and store in data
+    * `length` -- data length
+  * `close()` -- close the bus
 
 ### Module: `spi`
 
