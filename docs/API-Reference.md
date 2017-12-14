@@ -148,7 +148,7 @@ Etc.
 
 * (class) `I2C`
   * `open(bus, address)`
-    * `bus` -- bus number
+    * `bus` -- bus number 0, 1, 2...
     * `address` (optional) -- when use in slave mode. If given, open as slave mode
   * `write(data, ?timeout)` -- write data
     * `data` (Buffer|Array of Number) -- Data to write
@@ -157,13 +157,48 @@ Etc.
     * `length` -- data length
   * `close()` -- close the bus
 
+  __Example:__
+  ```js
+  var I2C = require('i2c');
+  var i2c = new I2C();
+  i2c.open(0); // open bus number 0
+  i2c.write([0x66, 0x77]);
+  i2c.read(?); // how to do it?
+  i2c.close();
+  ```
+
 ### Module: `spi`
 
 * ...
 
 ### Module: `uart`
 
-* ...
+* (class) `UART`
+  * `open(bus, ?options)`
+    * `bus` -- bus number
+    * `?options` [Object] -- when use in slave mode. If given, open as slave mode
+      * `.baudrate` [Number] -- default `9600`
+      * `.bits` [Number] -- [5, 6, 7, 8, 9]? default `8`
+      * `.parity` [Number] -- [-1 (none), 0, 1] default `-1`
+      * `.stop`
+      * `.flow`
+      * `.timeout`
+  * `write(data)` -- write data
+    * `data` [String|Buffer|Number|Array of Number] -- Data to write
+  * `read(data, length)` -- read bytes and send data to callback
+    * `data` [Buffer|Array of Number] -- Read and store in data
+    * `length` -- data length
+  * `close()` -- close the bus
+
+  __Example:__
+  ```js
+  var UART = require('uart');
+  var uart = new UART();
+  uart.open(0, {}); // open bus number 0
+  uart.write("data...");
+  // ...
+  uart.close();
+  ```
 
 ### Module: `fs`
 
