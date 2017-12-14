@@ -38,12 +38,12 @@ typedef enum {
   POLARITY_LOW_PHASE_2EDGE,
   POLARITY_HIGH_PHASE_1EDGE,
   POLARITY_HIGH_PHASE_2EDGE,
-}SPI_CLK_MODE;
+} spi_clk_mode_t;
 
 #define GPIO_LOW 0
 #define GPIO_HIGH 1
 
-void gpio_set_gpio_mode(uint8_t pin, gpio_mode_t mode);
+void gpio_set_io_mode(uint8_t pin, gpio_mode_t mode);
 void gpio_write(uint8_t pin, uint8_t value);
 void gpio_toggle(uint8_t pin);
 uint8_t gpio_read(uint8_t pin);

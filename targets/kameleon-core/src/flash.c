@@ -23,11 +23,11 @@
 #include "flash.h"
 
 #define ADDR_FLASH_USER_AREA            ((uint32_t)0x08060000)
+#define SIZE_FLASH_USER_AREA            (128 * 1024)
 #define ADDR_FLASH_USER_CODE_SIZE       (ADDR_FLASH_USER_AREA + 0)
 #define ADDR_FLASH_USER_CODE_CHECKSUM   (ADDR_FLASH_USER_AREA + 4)
 #define ADDR_FLASH_USER_CODE            (ADDR_FLASH_USER_AREA + 8)
 #define SECTOR_FLASH_USER_AREA          FLASH_SECTOR_7
-#define SIZE_FLASH_USER_AREA            (128 * 1024)
 
 uint32_t code_offset;
 
@@ -79,7 +79,7 @@ static void flash_erase() {
 static uint32_t calculate_checksum(uint8_t * pbuf, uint32_t size) {
   uint32_t calcurated_checksum = 0;
 
-  for(int k=0; k<size; k++) {
+  for (int k=0; k<size; k++) {
     calcurated_checksum = calcurated_checksum + pbuf[k];
   }
   return (calcurated_checksum ^ (uint32_t)-1) + 1;
@@ -94,14 +94,14 @@ uint8_t * flash_get_data() {
 }
 
 uint32_t flash_size() {
-  return SIZE_FLASH_USER_AREA;
+  return SIZE_FLASH_USER_AREA - (ADDR_FLASH_USER_CODE - ADDR_FLASH_USER_AREA);
 }
 
 uint32_t flash_get_data_size() {
   uint32_t size = 0;
   uint32_t * p = (uint32_t *)ADDR_FLASH_USER_AREA;
   
-  if(*p != (uint32_t)-1) {
+  if (*p != (uint32_t)-1) {
     size = *p;
   }
   
@@ -145,7 +145,32 @@ FLASH_STATUS flash_program(uint8_t * buf, uint32_t size) {
   
   /* Lock the Flash to disable the flash control register access (recommended to protect the FLASH memory against possible unwanted operation) */
   HAL_FLASH_Lock();
+  return status;
+}
 
+FLASH_STATUS flash_program_byte(uint8_t val) {
+  FLASH_STATUS status = FLASH_SUCCESS;
+  uint32_t address;
+
+  address = ADDR_FLASH_USER_CODE + code_offset;;
+
+  /* Unlock the Flash to enable the flash control register access */ 
+  HAL_FLASH_Unlock();
+  flush_cache();
+  
+  /* Program byte on the user Flash area */
+  if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, address, val) == HAL_OK) {
+    code_offset = code_offset + 1;
+  }
+  else { 
+    /* Error occurred while writing data in Flash memory. User can add here some code to deal with this error */
+    /* FLASH_ErrorTypeDef errorcode = HAL_FLASH_GetError(); */
+    Error_Handler();
+    status = FLASH_FAIL;
+  }
+  
+  /* Lock the Flash to disable the flash control register access (recommended to protect the FLASH memory against possible unwanted operation) */
+  HAL_FLASH_Lock();
   return status;
 }
 
@@ -171,8 +196,17 @@ uint32_t flash_get_checksum() {
   return  *(uint32_t *)ADDR_FLASH_USER_CODE_CHECKSUM;
 }
 
+//
+//
+//
 void flash_test()
 {
+
+  char buf[32];
+  tty_getstring(buf);
+  tty_printf("FLASH test begins. \r\n");
+  tty_printf("FLASH size [%d] \r\n", flash_size());
+
   flash_program_begin();
 
   uint32_t sum;
@@ -190,7 +224,7 @@ void flash_test()
     }    
   }
 
-  { uint8_t buf[] = {0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF};
+  { uint8_t buf[] = {0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE};
     FLASH_STATUS status = flash_program(buf, sizeof(buf));
     if(status != FLASH_SUCCESS)
     {
@@ -202,6 +236,9 @@ void flash_test()
         sum += buf[k];
     }    
   }
+
+  flash_program_byte(0xff);
+  sum = sum + (uint32_t)0xff;
 
   flash_program_end();
 

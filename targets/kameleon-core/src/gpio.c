@@ -46,8 +46,7 @@ uint16_t pins[] = {
    {GPIOC, GPIO_PIN_1},     // 2
    {GPIOC, GPIO_PIN_2},     // 3
    {GPIOC, GPIO_PIN_3},     // 4
- 
- };
+  };
 
 void gpio_write(uint8_t pin, uint8_t value) {
   // TODO:
@@ -56,8 +55,7 @@ void gpio_write(uint8_t pin, uint8_t value) {
   if(value == GPIO_LOW){
     pin_state = GPIO_PIN_RESET;
     HAL_GPIO_WritePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin, pin_state);
-  }
-  else if(value == GPIO_HIGH){
+  } else if (value == GPIO_HIGH){
     pin_state = GPIO_PIN_SET;
     HAL_GPIO_WritePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin, pin_state);
   }  
@@ -71,8 +69,7 @@ uint8_t gpio_read(uint8_t pin) {
 
   if(pin_state == GPIO_PIN_RESET){
     val = 0;
-  }
-  else if(pin_state == GPIO_PIN_SET){
+  } else if (pin_state == GPIO_PIN_SET){
     val = 1;
   }
 
@@ -84,31 +81,27 @@ void gpio_toggle(uint8_t pin) {
   HAL_GPIO_TogglePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
 }
 
-void gpio_set_spi_mode(uint8_t pin)
-{
+void gpio_set_spi_mode(uint8_t pin) {
   assert_param(IS_GPIO_SPI_PIN(pin));
 
   // todo
   
 }
 
-void gpio_spi_config(SPI_CLK_MODE mode, uint32_t prescaler, uint32_t cs_pin)
+void gpio_spi_config(spi_clk_mode_t mode, uint32_t prescaler, uint32_t cs_pin)
 {
   uint32_t polarity, phase;
 
-  if(mode == POLARITY_LOW_PHASE_1EDGE) {
+  if (mode == POLARITY_LOW_PHASE_1EDGE) {
     polarity = SPI_POLARITY_LOW;
     phase = SPI_PHASE_1EDGE;
-  }
-  else if(mode == POLARITY_LOW_PHASE_2EDGE) {
+  } else if (mode == POLARITY_LOW_PHASE_2EDGE) {
     polarity = SPI_POLARITY_LOW;
     phase = SPI_PHASE_2EDGE;
-  }
-  else if(mode == POLARITY_HIGH_PHASE_1EDGE) {
+  } else if (mode == POLARITY_HIGH_PHASE_1EDGE) {
     polarity = SPI_POLARITY_HIGH;
     phase = SPI_PHASE_1EDGE;
-  }
-  else if(mode == POLARITY_HIGH_PHASE_2EDGE) {
+  } else if (mode == POLARITY_HIGH_PHASE_2EDGE) {
     polarity = SPI_POLARITY_HIGH;
     phase = SPI_PHASE_2EDGE;
   }
@@ -134,23 +127,21 @@ void gpio_spi_config(SPI_CLK_MODE mode, uint32_t prescaler, uint32_t cs_pin)
 }
 
 
-void gpio_set_i2c_mode(uint8_t pin)
-{
+void gpio_set_i2c_mode(uint8_t pin) {
   assert_param(IS_GPIO_I2C_PIN(pin));
 
   // todo
 
 }
 
-void gpio_set_pwm_mode(uint8_t pin)
-{
+void gpio_set_pwm_mode(uint8_t pin) {
   assert_param(IS_GPIO_PWM_PIN(pin));
 
   // todo
 
 }
 
-void gpio_set_gpio_mode(uint8_t pin, gpio_mode_t mode) {
+void gpio_set_io_mode(uint8_t pin, gpio_mode_t mode) {
   // TODO:
   GPIO_InitTypeDef GPIO_InitStruct;
   

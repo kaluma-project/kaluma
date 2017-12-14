@@ -61,6 +61,11 @@ void flash_program_begin();
 FLASH_STATUS flash_program(uint8_t * buf, uint32_t size);
 
 /**
+ * Program data to the flash
+ */
+FLASH_STATUS flash_program_byte(uint8_t val);
+
+/**
  * Finish to write data to the flash
  */
 void flash_program_end();
