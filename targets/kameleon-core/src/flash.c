@@ -58,8 +58,7 @@ static void flash_erase() {
   EraseInitStruct.VoltageRange = FLASH_VOLTAGE_RANGE_3;
   EraseInitStruct.Sector = SECTOR_FLASH_USER_AREA;
   EraseInitStruct.NbSectors = 1;
-  if(HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError) != HAL_OK)
-  { 
+  if(HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError) != HAL_OK) { 
     /* 
       Error occurred while sector erase. 
       User can add here some code to deal with this error. 
@@ -133,8 +132,7 @@ FLASH_STATUS flash_program(uint8_t * buf, uint32_t size) {
       address = address + 1;
       code_offset = code_offset + 1;
       k = k + 1;
-    }
-    else { 
+    } else { 
       /* Error occurred while writing data in Flash memory. User can add here some code to deal with this error */
       /* FLASH_ErrorTypeDef errorcode = HAL_FLASH_GetError(); */
       Error_Handler();
@@ -152,7 +150,7 @@ FLASH_STATUS flash_program_byte(uint8_t val) {
   FLASH_STATUS status = FLASH_SUCCESS;
   uint32_t address;
 
-  address = ADDR_FLASH_USER_CODE + code_offset;;
+  address = ADDR_FLASH_USER_CODE + code_offset;
 
   /* Unlock the Flash to enable the flash control register access */ 
   HAL_FLASH_Unlock();
@@ -161,8 +159,7 @@ FLASH_STATUS flash_program_byte(uint8_t val) {
   /* Program byte on the user Flash area */
   if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, address, val) == HAL_OK) {
     code_offset = code_offset + 1;
-  }
-  else { 
+  } else { 
     /* Error occurred while writing data in Flash memory. User can add here some code to deal with this error */
     /* FLASH_ErrorTypeDef errorcode = HAL_FLASH_GetError(); */
     Error_Handler();
