@@ -4,8 +4,8 @@
 
 ### Constants
 
-* `HIGH` _(from gpio)_
-* `LOW` _(from gpio)_
+* `HIGH` = 1 _(from gpio)_
+* `LOW` = 0 _(from gpio)_
 * `INPUT` _(from gpio)_
 * `OUTPUT` _(from gpio)_
 * ...
@@ -27,12 +27,23 @@ Analog I/O
 
 Advanced I/O
 
-* `tone(pin, frequency, duration, duty?)`
+* `tone(pin, frequency, duration, ?duty)`
 * `noTone(pin)`
 * `pulseIn()` -- ? (ref to Arduino)
 * `pulseInLong()` -- ? (ref to Arduino)
 * `shiftIn()` -- ? (ref to Arduino)
 * `shiftOut()` -- ? (ref to Arduino)
+
+Asynchronous I/O
+
+* `ANY` = -1 _(from gpio)_
+* `setWatch(callback, pin, ?repeat=true, ?state=ANY, ?debounce=0) -> id` _(from gpio)_
+  * `callback` [Function: (state) -> undefined] -- Pass pin state (HIGH | LOW) via first argument
+  * `pin` [Number]
+  * `?repeat=true` [Boolean = true]
+  * `?state=ANY` [Number = HIGH | LOW | ANY?]
+  * `?debounce=0` [Number]
+* `clearWatch(id)` _(from gpio)_
 
 Time
 
@@ -40,15 +51,15 @@ Time
 * `millis()` _(from timers)_
 * ~~`delayMicroseconds(microsec)`~~ (suspended)
 * ~~`micros()`~~ (suspended)
-* `setTimeout(fun, msec)` _(from timers)_
-* `setInterval(fun, msec)` _(from timers)_
-* `clearTimeout(timer)` _(from timers)_
-* `clearInterval(timer)` _(from timers)_
+* `setTimeout(callback, msec) -> id` _(from timers)_
+* `setInterval(callback, msec) -> id` _(from timers)_
+* `clearTimeout(id)` _(from timers)_
+* `clearInterval(id)` _(from timers)_
 
 Etc.
 
 * `require(module)`
-* `print(value)`
+* `print(value)` - equivalent to console.log
 
 ### Objects
 
