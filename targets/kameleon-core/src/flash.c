@@ -112,8 +112,8 @@ void flash_program_begin() {
   flash_erase();
 }
 
-FLASH_STATUS flash_program(uint8_t * buf, uint32_t size) {
-  FLASH_STATUS status = FLASH_SUCCESS;
+flash_status_t flash_program(uint8_t * buf, uint32_t size) {
+  flash_status_t status = FLASH_SUCCESS;
   uint32_t address, start_address, end_address;
   uint32_t k=0;
   uint8_t * p = buf;
@@ -146,8 +146,8 @@ FLASH_STATUS flash_program(uint8_t * buf, uint32_t size) {
   return status;
 }
 
-FLASH_STATUS flash_program_byte(uint8_t val) {
-  FLASH_STATUS status = FLASH_SUCCESS;
+flash_status_t flash_program_byte(uint8_t val) {
+  flash_status_t status = FLASH_SUCCESS;
   uint32_t address;
 
   address = ADDR_FLASH_USER_CODE + code_offset;
@@ -208,7 +208,7 @@ void flash_test()
 
   uint32_t sum;
   { uint8_t buf[] = {0x12, 0x34, 0x56, 0x78, 0x9A};
-    FLASH_STATUS status = flash_program(buf, sizeof(buf));
+    flash_status_t status = flash_program(buf, sizeof(buf));
     if(status != FLASH_SUCCESS)
     {
         tty_printf("FLASH ERROR \r\n");
@@ -222,7 +222,7 @@ void flash_test()
   }
 
   { uint8_t buf[] = {0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE};
-    FLASH_STATUS status = flash_program(buf, sizeof(buf));
+    flash_status_t status = flash_program(buf, sizeof(buf));
     if(status != FLASH_SUCCESS)
     {
         tty_printf("FLASH ERROR \r\n");

@@ -1,0 +1,325 @@
+[33mcommit c2c22b5d716f9b88213026d93e4580448f825a1a[m
+Author: ubuntu64 <einrock@naver.com>
+Date:   Thu Dec 14 11:09:09 2017 +0900
+
+    change flash.c confirming to coding rule
+
+[33mcommit 72f92275cd5d1f8a665503128abee23f2e3f6a3d[m
+Author: ubuntu64 <einrock@naver.com>
+Date:   Thu Dec 14 10:57:59 2017 +0900
+
+    implement flash_program_byte() function and modify the name of gpio_set_gpio_mode as gpio_set_io_mode
+
+[33mcommit 557e5e07f8adba181707ffa5c034a02df7f079fa[m
+Author: ubuntu64 <einrock@naver.com>
+Date:   Mon Dec 11 22:32:27 2017 +0900
+
+    change flash_program(...) api and add flash_get_checksum() api
+
+[33mcommit a791298830679cdb88af94da4d66462021ce05ec[m
+Author: ubuntu64 <einrock@naver.com>
+Date:   Sat Dec 9 18:36:46 2017 +0900
+
+    implemented flash.c, led.c, and some changes on other files
+
+[33mcommit 6b2de9958566250b72da80d0fe4bdd1916e5bee4[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Wed Dec 6 15:17:58 2017 +0900
+
+    API doc updates
+
+[33mcommit cf9a7c9f3ba5e73aacf04449da93d74a270c4da6[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Tue Dec 5 12:38:37 2017 +0900
+
+    Fix Makefile for build
+
+[33mcommit 00b08447aa9a847b246c7d7df88f08a242263736[m
+Merge: c447803 cc5bbb4
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Tue Dec 5 12:23:53 2017 +0900
+
+    Merged 'fatfs' branch
+
+[33mcommit c447803a3ac7e48062da6837d8478ca16c36c76d[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Tue Dec 5 12:05:55 2017 +0900
+
+    Initial flash.h definition
+
+[33mcommit 779009afca868d463485b03356ccb2e69122b783[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Mon Dec 4 16:41:29 2017 +0900
+
+    Implements timer functions #3
+
+[33mcommit f952e5ae1d9beae07f9844c9d9b3db60728f8bfe[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Sun Dec 3 14:27:52 2017 +0900
+
+    Implemented setInterval()
+
+[33mcommit cc5bbb4a6f6c9590769b4cd28d05f79fec881e9a[m
+Author: ubuntu64 <einrock@naver.com>
+Date:   Sun Dec 3 11:18:41 2017 +0900
+
+    implement tty_printf and tty_putc functions as non-blocking type using cdc tx buffering scheme
+
+[33mcommit 8745cb53e948cff1d5f66043394e9c7164cc69a5[m
+Author: ubuntu64 <einrock@naver.com>
+Date:   Sun Dec 3 10:57:17 2017 +0900
+
+    implement tty_printf function as non-blocking type using cdc tx buffering scheme
+
+[33mcommit aa88be6b0ffca8da94a86dcf7072a484d8c11e5b[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Sat Dec 2 17:24:02 2017 +0900
+
+    Delete unncessary codes
+
+[33mcommit d7b7a7122038a54dcb958b35ed136e2884925b1b[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Sat Dec 2 17:14:23 2017 +0900
+
+    Implementation for loading native and builtin modules
+
+[33mcommit f8bf687ae48ce5117d1911adce6aa55b72fc33c0[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Fri Dec 1 20:17:27 2017 +0900
+
+    Implemented module loading (require) feature
+
+[33mcommit b650a8ed371355dd77eee7492cc4ee235d59727e[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Fri Dec 1 02:52:38 2017 +0900
+
+    Update kameleon_js.c/.h templates for js modules
+
+[33mcommit 8a164771da57b8c04d2736811afe718b3956000a[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Thu Nov 30 21:19:14 2017 +0900
+
+    Update Makefile to build modules selectively
+
+[33mcommit 8360cc575473aabbe93dbb3a8e2d352a3cb2d526[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Thu Nov 30 20:33:48 2017 +0900
+
+    Delete generated files in git
+
+[33mcommit 4e27a20b20360b557985e06b32293af285256094[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Wed Nov 29 20:11:18 2017 +0900
+
+    Add a global `process` object
+
+[33mcommit 76caae8c4e5629880cd6e6aac98c1b1fda13fc83[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Tue Nov 28 18:53:28 2017 +0900
+
+    Tested snapshot execution
+
+[33mcommit 2948701bda21226130d21858cb508c5b36c0376f[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Tue Nov 28 02:33:54 2017 +0900
+
+    Make script to generate snapshots for native modules #7
+
+[33mcommit 6d2e7241d217a7875ce0f33cb6e155efe0e9d92b[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Mon Nov 27 20:37:15 2017 +0900
+
+    Added js2c.js for generating snapshots
+
+[33mcommit 08c4e531c811d86d1e6967e59fcd261f1273c8f2[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Mon Nov 27 14:39:07 2017 +0900
+
+    Ready for jerryscript snapshot generation
+
+[33mcommit 4b5ce7eac06c16fc536d7caff4734c5a5b891b25[m
+Author: ubuntu64 <einrock@naver.com>
+Date:   Sun Nov 26 19:20:39 2017 +0900
+
+    FatFs ff13a included in kameleon-core project
+
+[33mcommit 299069155401fcb5f6054360282d36fa4bfcf9c7[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Sat Nov 25 18:23:55 2017 +0900
+
+    add API doc
+
+[33mcommit f5f57dd3e8aa42d4df1ce2f22e72be480a275ba9[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Tue Nov 21 19:05:32 2017 +0900
+
+    Add README.md in fatfs
+
+[33mcommit c18613e9f828396bc015f665aad57b92d337ae3a[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Tue Nov 21 16:14:39 2017 +0900
+
+    Separate target-specific Makefile scripts
+
+[33mcommit a2229a42f52241e4370ad8377276f7314584d6da[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Tue Nov 21 15:48:16 2017 +0900
+
+    makefile update
+
+[33mcommit 4962c452513576a8ca0001440eff54477fd39eb9[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Thu Nov 16 17:32:10 2017 +0900
+
+    REPL works with jerryscript
+    Make boilerplate #1
+
+[33mcommit fa428042a598f6f74a82f088f0e7209448cfde8c[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Thu Nov 16 15:11:52 2017 +0900
+
+    Initial REPL impl
+
+[33mcommit 4f8a875e5a2965e7d522b8e71f9da2f78aab1cdc[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Thu Nov 16 12:19:58 2017 +0900
+
+    Implement IO TTY handle
+
+[33mcommit a480773bed5a98730147ef656fec1508395e926c[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Thu Nov 16 00:44:06 2017 +0900
+
+    merge tty impls
+
+[33mcommit 4ff68100e6e24c498d5b2d723720ad410777f6c0[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Thu Nov 16 00:19:00 2017 +0900
+
+    add jerryscript submodule
+
+[33mcommit 597514354aaaf4a016a19505329ad7618d4309e9[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Wed Nov 15 17:16:19 2017 +0900
+
+    ready for adding jerryscript
+
+[33mcommit 6a2a04a88eeee6234d0ae9588d9ab94b6c9b5039[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Wed Nov 15 11:41:43 2017 +0900
+
+    Naming convention has changed (remove "kameleon_" prefix for readability)
+
+[33mcommit e492ff8ecb51b4e2ab0aabee9770d44cdafb409a[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Wed Nov 15 01:01:48 2017 +0900
+
+    Initial implementation of TTY IO.
+
+[33mcommit 2fa2289f7ea365fcf769626e6b24722438eb8ce0[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Mon Nov 13 19:16:36 2017 +0900
+
+    Implemented kameleon_gettime()
+
+[33mcommit 48aca1158a06f0c7e53abb6c8c5fa34cc734136f[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Mon Nov 13 18:44:55 2017 +0900
+
+    Initial implementation of io_timer
+
+[33mcommit 7c09bcf62e4ccc75f6c6287ea0e4a46bf337a80f[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Mon Nov 13 16:02:32 2017 +0900
+
+    New naming scheme has applied (add "kameleon_" prefix to all identifiers and files)
+
+[33mcommit 8eeae7f4259b2df3bb22ad9ed329a91831c2b850[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Mon Nov 13 12:30:55 2017 +0900
+
+    add initial io.c and list.c impl
+
+[33mcommit 6e44dc5fbd8932a3c1b29d2f4125acac4b9d6bcc[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Sat Nov 11 13:48:42 2017 +0900
+
+    Avoid name conficts with STM32 HAL Driver
+
+[33mcommit 664fd8473fdfeab9b04def1a92f589bfacf3f858[m
+Author: ubuntu64 <einrock@naver.com>
+Date:   Fri Nov 10 22:15:39 2017 +0900
+
+    initial implementation of system.c,gpio.c, tty.c
+
+[33mcommit 344fe1d96feac419dd9299d41872a0421d19e5e0[m
+Author: ubuntu64 <einrock@naver.com>
+Date:   Wed Nov 8 19:37:34 2017 +0900
+
+    commit test
+
+[33mcommit d71691604885c7685117ca72cea5e282635b6902[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Wed Nov 8 19:14:58 2017 +0900
+
+    gpio mode enum defined
+
+[33mcommit be9743b447e87499047b17e53c164657f18dab63[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Mon Nov 6 15:11:46 2017 +0900
+
+    debug setting
+
+[33mcommit 6ab0c8c664dd54ef4a69d4867f039f2b331ec57e[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Sun Nov 5 13:10:52 2017 +0900
+
+    Makefile update
+
+[33mcommit 40343a53a873737086131a30053b7cceec537f32[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Sun Nov 5 13:07:19 2017 +0900
+
+    Initial system, gpio, tty interface defined
+
+[33mcommit 56e4e936af6bdf67edaa63afc39cdd3763284ba3[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Thu Nov 2 19:47:51 2017 +0900
+
+    just commit
+
+[33mcommit 4f6516500553325a9bcf3c5bed257d2a4b9c257e[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Wed Nov 1 19:12:47 2017 +0900
+
+    settings for vscode
+
+[33mcommit c9868c9a613e782bbfdcf562349bf2f29cf418cf[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Wed Nov 1 14:12:39 2017 +0900
+
+    add tty interface
+
+[33mcommit d14f41c62633beda1322acbccbc4db20542768cb[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Wed Nov 1 00:58:12 2017 +0900
+
+    initial boilerplate
+
+[33mcommit ab3be41a83c2a102ac0b152debc3c9532461cd02[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Wed Oct 25 20:22:28 2017 +0900
+
+    turn to eclipse c project
+
+[33mcommit 6f92ea7f5483e992d9c78a697f72d9299a9ed99c[m
+Author: niklaus <niklaus.lee@gmail.com>
+Date:   Wed Oct 25 16:41:57 2017 +0900
+
+    first commit
+
+[33mcommit 562d987990c119addf543cb35fd0580d795fc3c9[m
+Author: Minkyu Lee <niklaus.lee@gmail.com>
+Date:   Wed Oct 25 16:35:09 2017 +0900
+
+    Initial commit

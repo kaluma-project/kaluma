@@ -21,45 +21,4 @@
 
 #include "system.h"
 #include "stm32f4xx_hal.h"
-#include "system_low_level.h"
 
-static uint64_t tick_count;
-
-/** increment system timer tick every 1msec
-*/
-void inc_tick()
-{
-  tick_count++;
-}
-
-/** 
-*/
-void delay(uint64_t msec) {
-  HAL_Delay(msec);
-}
-
-/** 
-*/
-uint64_t gettime() {
-  return tick_count;
-}
-
-/** 
-*/
-void settime(uint64_t time) {
-  __set_PRIMASK(1);
- tick_count = time;
-  __set_PRIMASK(0);
-}
-
-/** Kameleon Hardware System Initializations
-*/
-void system_init() {
-  HAL_Init();
-  SystemClock_Config();
-  GpioClock_Config();
-  Led_Config();
-  UsbDevice_Config();  
-  SpiFlash_Config();
-  Uart_Config();
-}
