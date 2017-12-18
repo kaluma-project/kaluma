@@ -153,19 +153,59 @@ Etc.
 
 ### Module: `pwm`
 
-* ...
+* (class) `PWM`
+  * `setup(pin, freq, duty)`
+    * `pin {number}`
+    * `freq {number}` in Hz
+    * `duty {number}` 0 ~ 1
+  * `start()`
+  * `stop()`
+  * `getFrequency() -> number`
+  * `setFrequency(freq)`
+  * `getDuty() -> number`
+  * `setDuty(duty)`
+  * `close()`
+
+  __Example:__
+  ```js
+  var PWM = require('pwm');
+  var pwm = new PWM();
+  pwm.setup(1, 1000, 0.5);
+  pwm.start();
+  // ...
+  pwm.stop();
+  pwm.close();
+  ```
+
+### Module: `adc`
+
+* (class) `ADC`
+  * `setup(pin)`
+    * `pin {number}`
+  * `read() -> number`
+  * `close()`
+
+  __Example:__
+  ```js
+  var ADC = require('adc');
+  var adc = new ADC();
+  adc.setup(1);
+  var val = adc.read();
+  adc.close();
+  ```
 
 ### Module: `i2c`
 
 * (class) `I2C`
-  * `open(bus, address)`
-    * `bus` -- bus number 0, 1, 2...
-    * `address` (optional) -- when use in slave mode. If given, open as slave mode
-  * `write(data, ?timeout)` -- write data
-    * `data` (Buffer|Array of Number) -- Data to write
+  * `open(bus, ?address)`
+    * `bus {number}` -- bus number 0, 1, 2...
+    * `?address {number}` (optional) -- when use in slave mode. If given, open as slave mode
+  * `write(data, ?timeout=0)` -- write data
+    * `data {Buffer|Array<number>}`  -- Data to write
+    * `timeout {number}`
   * `read(data, length)` -- read bytes and send data to callback
-    * `data` (Buffer|Array of Number) -- Read and store in data
-    * `length` -- data length
+    * `data {Buffer|Array<number>}` -- Read and store in data
+    * `length {number}` -- data length
   * `close()` -- close the bus
 
   __Example:__
@@ -180,7 +220,39 @@ Etc.
 
 ### Module: `spi`
 
-* ...
+* (class) `SPI`
+  * (static) `MASTER` = 0
+  * (static) `SLAVE` = 1
+  * (static) `MSB` = 0
+  * (static) `LSB` = 1
+  * `setup(bus, mode, cs, ?baudrate=6000000, ?polarity=0, ?phase=0, ?bits=8, ?bitorder=MSB)`
+    * `bus {number}`
+    * `mode {number}` -- `SPI.MASTER` or `SPI.SLAVE`
+    * `cs {number}` -- Chip select pin number
+    * `?baudrate {number}` -- baudrate
+    * `?polarity {number}` -- 0 or 1
+    * `?phase {number}` -- 0 or 1
+    * `?bits {number}` -- 8 or 9?
+    * `?bitorder {number}` -- `SPI.MSB` or `SPI.LSB`
+  * `send(data, ?timeout=5000)`
+    * `data {Buffer|Array<Number>|string}`
+    * `?timeout=5000 {number}`
+  * `recv(size, ?timeout=5000) -> Buffer`
+    * `size {number}`
+    * `?timeout=5000 {number}`
+  * `close()` -- close the bus
+
+  __Example:__
+  ```js
+  var SPI = require('spi');
+  var spi = new SPI();
+  spi.setup(0, SPI.MASTER, 11 /*, ... */); // open bus number 0
+  spi.send("data...");
+  // ...
+  var buf = spi.recv(5);
+  // ...
+  spi.close();
+  ```
 
 ### Module: `uart`
 

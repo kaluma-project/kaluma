@@ -19,70 +19,30 @@
  * SOFTWARE.
  */
 
-#ifndef __PWM_H
-#define __PWM_H
+#ifndef __ADC_H
+#define __ADC_H
 
 #include <stdint.h>
 
 /**
- * Setup a PWM channel
+ * Setup a ADC channel
  * 
  * @param {uint8_t} pin
- * @param {uint32_t} frequency
- * @param {uint32_t} duty
  * @return result status code
  */
-int pwm_setup(uint8_t pin, uint32_t frequency, uint32_t duty);
+int adc_setup(uint8_t pin);
 
 /**
- * Start the PWM channel
- * 
- * @param {uint8_t} pin
- */
-void pwm_start(uint8_t pin);
-
-/**
- * Stop the PWM channel
- * 
- * @param {uint8_t} pin
- */
-void pwm_stop(uint8_t pin);
-
-/**
- * Return the current frequency
+ * Read value from the ADC channel
  * 
  * @param {uint8_t} pin
  * @return {uint32_t}
  */
-uint32_t pwm_get_frequency(uint8_t pin);
+uint32_t adc_read(uint8_t pin);
 
 /**
- * Set the current frequency
- * 
- * @param {uint8_t} pin
- * @param {uint32_t} frequency
+ * Close the ADC channel
  */
-void pwm_set_frequency(uint8_t pin, uint32_t frequency);
+void adc_close(uint8_t pin);
 
-/**
- * Return the current duty cycle
- * 
- * @param {uint8_t} pin
- * @return {uint32_t}
- */
-uint32_t pwm_get_duty(uint8_t pin);
-
-/**
- * Set the current duty cycle
- * 
- * @param {uint8_t} pin
- * @param {uint32_t} duty
- */
-void pwm_set_duty(uint8_t pin, uint32_t duty);
-
-/**
- * Close the PWM channel
- */
-void pwm_close(uint8_t pin);
-
-#endif /* __PWM_H */
+#endif /* __ADC_H */
