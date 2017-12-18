@@ -1,3 +1,14 @@
+![logo](https://github.com/kameleon-project/kameleon/blob/master/logo.png?raw=true)
+
+Kameleon is a tiny and efficient Javascript runtime for microcontrollers. The main features are:
+
+* Small footprint (Run on 300KB ROM, 64KB RAM)
+* ECMAScript 5.1 standard compliant (built on Jerryscript)
+* Non-blocking I/O
+* REPL mode
+* Portability (No RTOS)
+* Native modules (File system, Networking, etc.)
+
 Development settings
 ====================
 

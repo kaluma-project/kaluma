@@ -10,6 +10,7 @@
   * option `-t` -- Get total size of flash.
   * option `-s` -- Get data size in flash.
   * option `-r` -- Read data in textual format.
+* `.load` -- Load and run Javascript program stored in flash memory.
 
 ## Deprecated
 
