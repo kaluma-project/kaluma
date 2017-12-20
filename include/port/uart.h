@@ -24,33 +24,50 @@
 
 #include <stdint.h>
 
-typedef enum {
+
+enum {
   UART_PARITY_TYPE_NONE,
   UART_PARITY_TYPE_ODD,
   UART_PARITY_TYPE_EVEN
-} uart_parity_t;
+};
 
-typedef enum {
+enum {
   UART_FLOW_NONE,
   UART_FLOW_RTS,
   UART_FLOW_CTS,
   UART_FLOW_RTS_CTS
-} uart_flow_t;
+};
+
+enum {
+  UART_STOP_1_BIT,
+  UART_STOP_2_BIT
+};
+
+enum {
+  UART_DATA_8_BIT,
+  UART_DATA_9_BIT
+};
+
+typedef enum {
+  UART_STATUS_SUCCESS,
+  UART_STATUS_FAIL,
+  UART_STATUS_TIMEOUT
+} uart_status_t;
 
 /**
  * Open a UART bus
  * 
  * @param {uint8_t} bus
  * @param {uint32_t} baudrate
- * @param {uint8_t} bits
- * @param {uart_parity_t} parity
- * @param {uint8_t} stop
- * @param {uart_flow_t} flow
+ * @param {uint32_t} bits
+ * @param {uint32_t} parity
+ * @param {uint32_t} stop
+ * @param {uint32_t} flow
  * @param {uint32_t} timeout
  * @return
  */
-int uart_open(uint8_t bus, uint32_t baudrate, uint8_t bits, 
-  uart_parity_t parity, uint8_t stop, uart_flow_t flow, uint32_t timeout);
+int uart_open(uint8_t bus, uint32_t baudrate, uint32_t bits, 
+  uint32_t parity, uint32_t stop, uint32_t flow, uint32_t timeout);
 
 /**
  * Write a character to the bus.
@@ -75,9 +92,9 @@ int uart_write(uint8_t bus, uint8_t *buf, uint32_t len);
  * Read a character from the bus.
  * 
  * @param {uint8_t} bus
- * @return a character read
+ * @return a character read or -1 on timeout
  */
-uint8_t uart_read_char(uint8_t bus);
+int uart_read_char(uint8_t bus);
 
 /**
  * Read bytes from the bus and store them into a given buffer.
@@ -97,3 +114,4 @@ int uart_read(uint8_t bus, uint8_t *buf, uint32_t len);
 void uart_close(uint8_t bus);
 
 #endif /* __UART_H */
+

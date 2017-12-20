@@ -28,7 +28,7 @@ typedef enum {
 	FLASH_SUCCESS 	= 0x00U,
 	FLASH_FAIL		= 0x01U,
 	FLASH_TIMEOUT 	= 0x02U,
-} FLASH_STATUS;
+} flash_status_t;
 
 /**
  * Erase all the data in the flash and set the data size to zero
@@ -58,7 +58,12 @@ void flash_program_begin();
 /**
  * Program data to the flash
  */
-FLASH_STATUS flash_program(uint8_t * buf, uint32_t size);
+flash_status_t flash_program(uint8_t * buf, uint32_t size);
+
+/**
+ * Program data to the flash
+ */
+flash_status_t flash_program_byte(uint8_t val);
 
 /**
  * Finish to write data to the flash

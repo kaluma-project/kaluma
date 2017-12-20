@@ -25,29 +25,28 @@
 #include <stdint.h>
 
 typedef enum {
-  GPIO_PIN_MODE_INPUT,
-  GPIO_PIN_MODE_OUPUT_PP,
-  GPIO_PIN_MODE_OUPUT_OD,
-  GPIO_PIN_MODE_AF_PP,
-  GPIO_PIN_MODE_AF_OD
-} gpio_mode_t;
-
+  GPIO_IO_MODE_INPUT,
+  GPIO_IO_MODE_OUTPUT,
+} gpio_io_mode_t;
 
 typedef enum {
   POLARITY_LOW_PHASE_1EDGE,
   POLARITY_LOW_PHASE_2EDGE,
   POLARITY_HIGH_PHASE_1EDGE,
   POLARITY_HIGH_PHASE_2EDGE,
-}SPI_CLK_MODE;
+} spi_clk_mode_t;
 
 #define GPIO_LOW 0
 #define GPIO_HIGH 1
 
-void gpio_set_gpio_mode(uint8_t pin, gpio_mode_t mode);
+#define GPIO_NUM  19
+
+void gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode);
 void gpio_write(uint8_t pin, uint8_t value);
 void gpio_toggle(uint8_t pin);
 uint8_t gpio_read(uint8_t pin);
 
+/*
 #define IS_GPIO_SPI_PIN(PIN) (((PIN) == 5) || \
                               ((PIN) == 6) || \
                               ((PIN) == 7) || \
@@ -58,4 +57,5 @@ uint8_t gpio_read(uint8_t pin);
 
 #define IS_GPIO_PWM_PIN(PIN) (((PIN) == 10) || \
                               ((PIN) == 11))
+*/                              
 #endif /* __GPIO_H */

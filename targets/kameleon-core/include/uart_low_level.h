@@ -19,15 +19,14 @@
  * SOFTWARE.
  */
 
-#ifndef __SYSTEM_LOW_LEVEL_H
-#define __SYSTEM_LOW_LEVEL_H
+#ifndef __UART_LOW_LEVEL_H
+#define __UART_LOW_LEVEL_H
 
-void GpioClock_Config(void);
-void SystemClock_Config(void);
-void Uart_Config(void);
-void UsbDevice_Config(void);
-void Led_Config(void);
-void SetPendSV(void);
-void SpiFlash_Config(void);
+#include "uart.h"
 
-#endif /* __SYSTEM_LOW_LEVEL_H */
+uart_status_t uart_transmit(int bus, uint8_t * buf, uint32_t size, uint32_t timeout);
+uart_status_t uart_receive(int bus, uint8_t * buf, uint32_t size, uint32_t timeout);
+void uart_init(uint32_t ch, uint32_t baudrate, uint32_t word_length, uint32_t parity, uint32_t stop_bits, uint32_t flow_control);
+void uart_deinit(uint8_t bus);
+
+#endif /* __UART_LOW_LEVEL_H */
