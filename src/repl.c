@@ -373,7 +373,7 @@ static void cmd_flash_handler(repl_state_t *state, char ch) {
           repl_putc(' ');
         }
         uint8_t dat = hex2bin(cmd_flash_state.buffer);
-        FLASH_STATUS flash_status = flash_program(&dat, 1);
+        flash_status_t flash_status = flash_program(&dat, 1);
         if (FLASH_SUCCESS != flash_status) {
           repl_print_begin(REPL_OUTPUT_ERROR);
           repl_printf("%s\r\n", "Failed during data writing to file.");

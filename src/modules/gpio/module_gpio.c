@@ -31,8 +31,8 @@ static jerry_value_t pin_mode(const jerry_value_t func_value,
   // ASSERT(jerry_value_is_number(args_p[0]))
   // ASSERT(jerry_value_is_number(args_p[1]))
   uint8_t pin = (uint8_t) jerry_get_number_value(args_p[0]);
-  gpio_mode_t mode = (gpio_mode_t) jerry_get_number_value(args_p[1]);
-  gpio_set_gpio_mode(pin, mode);
+  gpio_io_mode_t mode = (gpio_io_mode_t) jerry_get_number_value(args_p[1]);
+  gpio_set_io_mode(pin, mode);
   return jerry_create_undefined();
 }
 
@@ -70,10 +70,10 @@ static jerry_value_t digital_toggle(const jerry_value_t func_value,
 
 jerry_value_t module_gpio_init() {
   jerry_value_t object = jerry_create_object();
-  runtime_register_number(object, "HIGH", 1);
-  runtime_register_number(object, "LOW", 0);
-  runtime_register_number(object, "INPUT", (double) GPIO_PIN_MODE_INPUT);
-  runtime_register_number(object, "OUTPUT", (double) GPIO_PIN_MODE_OUPUT_PP);
+  runtime_register_number(object, "HIGH", GPIO_HIGH);
+  runtime_register_number(object, "LOW", GPIO_LOW);
+  runtime_register_number(object, "INPUT", (double) GPIO_IO_MODE_INPUT);
+  runtime_register_number(object, "OUTPUT", (double) GPIO_IO_MODE_OUTPUT);
   runtime_register_function(object, "pinMode", pin_mode);
   runtime_register_function(object, "digitalRead", digital_read);
   runtime_register_function(object, "digitalWrite", digital_write);
