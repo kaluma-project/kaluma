@@ -26,6 +26,7 @@
 #include "jerryscript-ext/handler.h"
 #include "global.h"
 #include "repl.h"
+#include "runtime.h"
 
 // --------------------------------------------------------------------------
 // PRIVATE FUNCTIONS
@@ -40,20 +41,6 @@ static void print_value_in_format(const char *format, jerry_value_t value) {
   tty_printf(format, (char *) str_buf);
 }
 
-static void runtime_run_main() {
-  uint32_t size = flash_get_data_size();
-  if (size > 0) {
-    uint8_t *script = flash_get_data();
-    jerry_value_t parsed_code = jerry_parse (script, size, false);
-    if (!jerry_value_has_error_flag (parsed_code))
-    {
-      jerry_value_t ret_value = jerry_run (parsed_code);
-      jerry_release_value (ret_value);
-    }
-    jerry_release_value (parsed_code);  
-  }
-}
-
 // --------------------------------------------------------------------------
 // PUBLIC FUNCTIONS
 // --------------------------------------------------------------------------
@@ -66,6 +53,20 @@ void runtime_init() {
 
 void runtime_deinit() {
   jerry_cleanup ();  
+}
+
+void runtime_run_main() {
+  uint32_t size = flash_get_data_size();
+  if (size > 0) {
+    uint8_t *script = flash_get_data();
+    jerry_value_t parsed_code = jerry_parse (script, size, false);
+    if (!jerry_value_has_error_flag (parsed_code))
+    {
+      jerry_value_t ret_value = jerry_run (parsed_code);
+      jerry_release_value (ret_value);
+    }
+    jerry_release_value (parsed_code);  
+  }
 }
 
 void runtime_print_value(const jerry_value_t value, int depth) {

@@ -38,6 +38,7 @@
 
 static void cmd_echo(repl_state_t *state, char *arg);
 static void cmd_flash(repl_state_t *state, char *arg);
+static void cmd_load(repl_state_t *state);
 
 // --------------------------------------------------------------------------
 // PRIVATE VARIABLES
@@ -119,7 +120,7 @@ static void run_command() {
     } else if (strcmp(tokenv[0], ".flash") == 0) {
       cmd_flash(&state, tokenv[1]);
     } else if (strcmp(tokenv[0], ".load") == 0) {
-      // TODO: cmd_load(&state, tokenv[1]);
+      cmd_load(&state);
     } else { /* unknown command */
       repl_print_begin(REPL_OUTPUT_ERROR);
       repl_printf("Unknown command: %s\r\n", tokenv[0]);
@@ -437,6 +438,16 @@ static void cmd_flash(repl_state_t *state, char *arg) {
     repl_printf("-r\tRead data in textual format\r\n");
     repl_print_end();    
   }
+}
+
+/**
+ * .load command
+ */
+static void cmd_load(repl_state_t *state) {
+  runtime_run_main();
+  repl_print_begin(REPL_OUTPUT_LOG);
+  repl_printf("\r");
+  repl_print_end();
 }
 
 // --------------------------------------------------------------------------

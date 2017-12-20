@@ -26,6 +26,7 @@
 
 void runtime_init();
 void runtime_deinit();
+void runtime_run_main();
 
 void runtime_print_value(const jerry_value_t value, int depth);
 void runtime_register_number(jerry_value_t object, const char *name, double value);
