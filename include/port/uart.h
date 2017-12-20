@@ -24,7 +24,6 @@
 
 #include <stdint.h>
 
-
 enum {
   UART_PARITY_TYPE_NONE,
   UART_PARITY_TYPE_ODD,
@@ -48,12 +47,6 @@ enum {
   UART_DATA_9_BIT
 };
 
-typedef enum {
-  UART_STATUS_SUCCESS,
-  UART_STATUS_FAIL,
-  UART_STATUS_TIMEOUT
-} uart_status_t;
-
 /**
  * Open a UART bus
  * 
@@ -63,11 +56,10 @@ typedef enum {
  * @param {uint32_t} parity
  * @param {uint32_t} stop
  * @param {uint32_t} flow
- * @param {uint32_t} timeout
  * @return
  */
 int uart_open(uint8_t bus, uint32_t baudrate, uint32_t bits, 
-  uint32_t parity, uint32_t stop, uint32_t flow, uint32_t timeout);
+  uint32_t parity, uint32_t stop, uint32_t flow);
 
 /**
  * Write a character to the bus.
@@ -76,7 +68,7 @@ int uart_open(uint8_t bus, uint32_t baudrate, uint32_t bits,
  * @param {uint8_t} ch
  * @return the number of bytes written or -1 on timeout or nothing written.
  */
-int uart_write_char(uint8_t bus, uint8_t ch);
+int uart_write_char(uint8_t bus, uint8_t ch, uint32_t timeout);
 
 /**
  * Write a given buffer to the bus.
@@ -86,7 +78,7 @@ int uart_write_char(uint8_t bus, uint8_t ch);
  * @param {uint32_t} len
  * @return the number of bytes written or -1 on timeout or nothing written.
  */
-int uart_write(uint8_t bus, uint8_t *buf, uint32_t len);
+int uart_write(uint8_t bus, uint8_t *buf, uint32_t len, uint32_t timeout);
 
 /**
  * Read a character from the bus.
@@ -94,7 +86,7 @@ int uart_write(uint8_t bus, uint8_t *buf, uint32_t len);
  * @param {uint8_t} bus
  * @return a character read or -1 on timeout
  */
-int uart_read_char(uint8_t bus);
+int uart_read_char(uint8_t bus, uint32_t timeout);
 
 /**
  * Read bytes from the bus and store them into a given buffer.
@@ -104,14 +96,14 @@ int uart_read_char(uint8_t bus);
  * @param {uint32_t} len
  * @return the number of bytes read or -1 on timeout
  */
-int uart_read(uint8_t bus, uint8_t *buf, uint32_t len);
+int uart_read(uint8_t bus, uint8_t *buf, uint32_t len, uint32_t timeout);
 
 /**
  * Close the UART bus
  * 
  * @param {uint8_t} bus
  */
-void uart_close(uint8_t bus);
+int uart_close(uint8_t bus);
 
 #endif /* __UART_H */
 

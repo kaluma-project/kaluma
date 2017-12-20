@@ -19,14 +19,25 @@
  * SOFTWARE.
  */
 
-#ifndef __UART_LOW_LEVEL_H
-#define __UART_LOW_LEVEL_H
+#include <stdint.h>
+#include "stm32f4xx_hal.h"
 
-#include "uart.h"
+uint8_t button_is_pressed() {
+  uint8_t pressed = 0;
+  GPIO_PinState state = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8);
+  if (state == GPIO_PIN_SET) {
+    pressed = 1;
+  }
+  return pressed;
+}
 
-uart_status_t uart_transmit(int bus, uint8_t * buf, uint32_t size, uint32_t timeout);
-uart_status_t uart_receive(int bus, uint8_t * buf, uint32_t size, uint32_t timeout);
-void uart_init(uint32_t ch, uint32_t baudrate, uint32_t word_length, uint32_t parity, uint32_t stop_bits, uint32_t flow_control);
-void uart_deinit(uint8_t bus);
-
-#endif /* __UART_LOW_LEVEL_H */
+void button_test() {
+  while(1) {
+    if (button_is_pressed()) {
+      tty_printf("button is pressed \r\n");
+    } else {
+      tty_printf("button is not pressed \r\n");
+    }
+    delay(1000);
+  }    
+}

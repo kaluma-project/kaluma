@@ -21,6 +21,7 @@
 
 #include "stm32f4xx.h"
 #include "flash.h"
+#include "tty.h"
 
 #define ADDR_FLASH_USER_AREA            ((uint32_t)0x08060000)
 #define SIZE_FLASH_USER_AREA            (128 * 1024)
@@ -68,7 +69,7 @@ static void flash_erase() {
     /*
       FLASH_ErrorTypeDef errorcode = HAL_FLASH_GetError();
     */
-    Error_Handler();
+    _Error_Handler(__FILE__, __LINE__);
   }
 
   /* Lock the Flash to disable the flash control register access (recommended to protect the FLASH memory against possible unwanted operation) *********/
@@ -135,7 +136,7 @@ flash_status_t flash_program(uint8_t * buf, uint32_t size) {
     } else { 
       /* Error occurred while writing data in Flash memory. User can add here some code to deal with this error */
       /* FLASH_ErrorTypeDef errorcode = HAL_FLASH_GetError(); */
-      Error_Handler();
+      _Error_Handler(__FILE__, __LINE__);
       status = FLASH_FAIL;
       break;
     }
@@ -162,7 +163,7 @@ flash_status_t flash_program_byte(uint8_t val) {
   } else { 
     /* Error occurred while writing data in Flash memory. User can add here some code to deal with this error */
     /* FLASH_ErrorTypeDef errorcode = HAL_FLASH_GetError(); */
-    Error_Handler();
+    _Error_Handler(__FILE__, __LINE__);
     status = FLASH_FAIL;
   }
   

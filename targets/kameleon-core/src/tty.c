@@ -27,7 +27,6 @@
 #include <ctype.h>
 
 #include "system.h"
-#include "system_low_level.h"
 #include "tty_low_level.h"
 #include "usbd_cdc_if.h"
 
