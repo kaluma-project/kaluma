@@ -97,7 +97,13 @@ typedef void (* io_watch_cb)(io_watch_handle_t *);
 struct io_watch_handle_s {
   io_handle_t base;
   io_watch_mode_t mode;
+  uint8_t pin;
+  uint64_t debounce_time;
+  uint32_t debounce_delay;
+  uint8_t last_val;
+  uint8_t val;
   io_watch_cb watch_cb;
+  jerry_value_t watch_js_cb;
 };
 
 /* loop type */

@@ -26,6 +26,7 @@
 #include "system.h"
 #include "io.h"
 #include "tty.h"
+#include "gpio.h"
 
 io_loop_t loop;
 
@@ -33,6 +34,7 @@ io_loop_t loop;
 
 static void io_timer_run();
 static void io_tty_run();
+static void io_watch_run();
 
 /* general handle functions */
 
@@ -91,6 +93,7 @@ void io_run() {
     io_update_time();
     io_timer_run();
     io_tty_run();
+    io_watch_run();
     io_handle_closing();
   }
 }
@@ -176,17 +179,21 @@ static void io_tty_run() {
 
 /* IO watch functions */
 
-uint32_t watch_count = 0;
-
 void io_watch_init(io_watch_handle_t *watch) {
   io_handle_init((io_handle_t *) watch, IO_WATCH);
   watch->watch_cb = NULL;
 }
 
-void io_watch_start(io_watch_handle_t *watch, io_watch_cb watch_cb, uint8_t pin, uint8_t edge, uint32_t debounce) {
+void io_watch_start(io_watch_handle_t *watch, io_watch_cb watch_cb, uint8_t pin, io_watch_mode_t mode, uint32_t debounce) {
   IO_SET_FLAG_ON(watch->base.flags, IO_FLAG_ACTIVE);
+  gpio_set_io_mode(pin, GPIO_IO_MODE_INPUT);
   watch->watch_cb = watch_cb;
-  // watch->repeat = repeat;
+  watch->pin = pin;
+  watch->mode = mode;
+  watch->debounce_time = 0;
+  watch->debounce_delay = debounce;
+  watch->last_val = gpio_read(watch->pin);
+  watch->val = gpio_read(watch->pin);
   list_append(&loop.watch_handles, (list_node_t *) watch);
 }
 
@@ -203,18 +210,36 @@ static void io_watch_run() {
   io_watch_handle_t *handle = (io_watch_handle_t *) loop.watch_handles.head;
   while (handle != NULL) {
     if (IO_HAS_FLAG(handle->base.flags, IO_FLAG_ACTIVE)) {
-      /*
-      if (handle->clamped_timeout < loop.time) {
-        if (handle->repeat) {
-          handle->clamped_timeout = handle->clamped_timeout + handle->interval;
-        } else {
-          IO_SET_FLAG_OFF(handle->base.flags, IO_FLAG_ACTIVE);
-        }
-        if (handle->watch_cb) {
-          handle->watch_cb(handle);
-        }
+      uint8_t reading = gpio_read(handle->pin);
+      if (handle->last_val != reading) { /* changed by noise or pressing */
+        handle->debounce_time = gettime();
       }
-      */
+      /* debounce delay elapsed */
+      uint32_t elapsed_time = gettime() - handle->debounce_time;
+      if (handle->debounce_time > 0 && elapsed_time >= handle->debounce_delay) {
+        if (reading != handle->val) {
+          handle->val = reading;
+          switch (handle->mode) {
+            case IO_WATCH_MODE_CHANGE:
+              if (handle->watch_cb) {
+                handle->watch_cb(handle);
+              }
+              break;
+            case IO_WATCH_MODE_RISING:
+              if (handle->val == 1 && handle->watch_cb) {
+                handle->watch_cb(handle);
+              }
+              break;
+            case IO_WATCH_MODE_FALLING:
+              if (handle->val == 0 && handle->watch_cb) {
+                handle->watch_cb(handle);
+              }
+              break;
+          }
+        }
+        handle->debounce_time = 0;
+      }
+      handle->last_val = reading;
     }
     handle = (io_watch_handle_t *) ((list_node_t *) handle)->next;
   }

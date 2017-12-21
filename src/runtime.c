@@ -48,6 +48,7 @@ static void print_value_in_format(const char *format, jerry_value_t value) {
 void runtime_init() {
   jerry_init (JERRY_INIT_EMPTY);
   global_init();
+  jerry_gc();
   runtime_run_main();  
 }
 

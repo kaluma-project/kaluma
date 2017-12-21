@@ -25,24 +25,25 @@ Analog I/O
 * `analogWrite(pin, value)`
 * `analogReference()` -- ? (ref to Arduino)
 
-Advanced I/O
+~~Advanced I/O~~
 
-* `tone(pin, frequency, duration, ?duty)`
-* `noTone(pin)`
-* `pulseIn()` -- ? (ref to Arduino)
-* `pulseInLong()` -- ? (ref to Arduino)
-* `shiftIn()` -- ? (ref to Arduino)
-* `shiftOut()` -- ? (ref to Arduino)
+* ~~`tone(pin, frequency, duration, ?duty)`~~ (suspended)
+* ~~`noTone(pin)` ~~ (suspended)
+* ~~`pulseIn()`~~ (suspended)
+* ~~`pulseInLong()`~~ (suspended)
+* ~~`shiftIn()`~~ (suspended)
+* ~~`shiftOut()`~~ (suspended)
 
-Asynchronous I/O
+Non-blocking I/O
 
-* `ANY` = -1 _(from gpio)_
-* `setWatch(callback, pin, ?repeat=true, ?state=ANY, ?debounce=0) -> id` _(from gpio)_
-  * `callback` [Function: (state) -> undefined] -- Pass pin state (HIGH | LOW) via first argument
-  * `pin` [Number]
-  * `?repeat=true` [Boolean = true]
-  * `?state=ANY` [Number = HIGH | LOW | ANY?]
-  * `?debounce=0` [Number]
+* `FALLING` = 0
+* `RISING` = 1
+* `CHANGE` = 2
+* `setWatch(callback, pin, ?mode=CHANGE, ?debounce=0) -> id` _(from gpio)_
+  * `callback {Function: () -> undefined}`
+  * `pin {number}`
+  * `?mode=CHANGE {number}` -- RISING | FALLING | CHANGE
+  * `?debounce=0 {number}`
 * `clearWatch(id)` _(from gpio)_
 
 Time
