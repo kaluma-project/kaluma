@@ -50,7 +50,7 @@ static jerry_value_t set_timer(const jerry_value_t func_value,
   uint64_t interval = (uint64_t) jerry_get_number_value(args_p[1]);
   bool repeat = jerry_get_boolean_value(args_p[2]);
   io_timer_start(timer, set_timer_cb, interval, repeat);
-  return jerry_create_number(timer->timer_id);
+  return jerry_create_number(timer->base.id);
 }
 
 static void timer_close_cb(io_handle_t *handle) {
@@ -62,8 +62,8 @@ static jerry_value_t clear_timer(const jerry_value_t func_value,
   const jerry_length_t args_cnt) {
   // ASSERT(args_cnt == 1);
   // ASSERT(jerry_value_is_number(args_p[0]))
-  int timer_id = (int) jerry_get_number_value(args_p[0]);
-  io_timer_handle_t *timer = io_timer_get_by_id(timer_id);
+  int id = (int) jerry_get_number_value(args_p[0]);
+  io_timer_handle_t *timer = io_timer_get_by_id(id);
   if (timer != NULL) {
     io_timer_stop(timer);
     io_handle_close((io_handle_t *) timer, timer_close_cb);

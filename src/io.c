@@ -36,7 +36,10 @@ static void io_tty_run();
 
 /* general handle functions */
 
+uint32_t handle_id_count = 0;
+
 void io_handle_init(io_handle_t *handle, io_type_t type) {
+  handle->id = handle_id_count++;
   handle->type = type;
   handle->flags = 0;
   handle->close_cb = NULL;  
@@ -46,6 +49,17 @@ void io_handle_close(io_handle_t *handle, io_close_cb close_cb) {
   IO_SET_FLAG_ON(handle->flags, IO_FLAG_CLOSING);
   handle->close_cb = close_cb;
   list_append(&loop.closing_handles, (list_node_t *) handle);
+}
+
+io_handle_t *io_handle_get_by_id(uint32_t id, list_t *handle_list) {
+  io_handle_t *handle = (io_handle_t *) handle_list->head;
+  while (handle != NULL) {
+    if (handle->id == id) {
+      return handle;
+    }
+    handle = (io_handle_t *) ((list_node_t *) handle)->next;
+  }
+  return NULL;
 }
 
 static void io_update_time() {
@@ -67,6 +81,9 @@ static void io_handle_closing() {
 void io_init() {
   loop.stop_flag = false;
   list_init(&loop.tty_handles);
+  list_init(&loop.timer_handles);
+  list_init(&loop.watch_handles);
+  list_init(&loop.closing_handles);
 }
 
 void io_run() {
@@ -84,7 +101,6 @@ uint32_t timer_count = 0;
 
 void io_timer_init(io_timer_handle_t *timer) {
   io_handle_init((io_handle_t *) timer, IO_TIMER);
-  timer->timer_id = timer_count++;
   timer->timer_cb = NULL;
 }
 
@@ -102,15 +118,8 @@ void io_timer_stop(io_timer_handle_t *timer) {
   list_remove(&loop.timer_handles, (list_node_t *) timer);
 }
 
-io_timer_handle_t *io_timer_get_by_id(int timer_id) {
-  io_timer_handle_t *handle = (io_timer_handle_t *) loop.timer_handles.head;
-  while (handle != NULL) {
-    if (handle->timer_id == timer_id) {
-      return handle;
-    }
-    handle = (io_timer_handle_t *) ((list_node_t *) handle)->next;
-  }
-  return NULL;
+io_timer_handle_t *io_timer_get_by_id(int id) {
+  return (io_timer_handle_t *) io_handle_get_by_id(id, &loop.timer_handles);
 }
 
 static void io_timer_run() {
@@ -162,5 +171,51 @@ static void io_tty_run() {
       }
     }
     handle = (io_tty_handle_t *) ((list_node_t *) handle)->next;
+  }
+}
+
+/* IO watch functions */
+
+uint32_t watch_count = 0;
+
+void io_watch_init(io_watch_handle_t *watch) {
+  io_handle_init((io_handle_t *) watch, IO_WATCH);
+  watch->watch_cb = NULL;
+}
+
+void io_watch_start(io_watch_handle_t *watch, io_watch_cb watch_cb, uint8_t pin, uint8_t edge, uint32_t debounce) {
+  IO_SET_FLAG_ON(watch->base.flags, IO_FLAG_ACTIVE);
+  watch->watch_cb = watch_cb;
+  // watch->repeat = repeat;
+  list_append(&loop.watch_handles, (list_node_t *) watch);
+}
+
+void io_watch_stop(io_watch_handle_t *watch) {
+  IO_SET_FLAG_OFF(watch->base.flags, IO_FLAG_ACTIVE);
+  list_remove(&loop.watch_handles, (list_node_t *) watch);
+}
+
+io_watch_handle_t *io_watch_get_by_id(int id) {
+  return (io_watch_handle_t *) io_handle_get_by_id(id, &loop.watch_handles);
+}
+
+static void io_watch_run() {
+  io_watch_handle_t *handle = (io_watch_handle_t *) loop.watch_handles.head;
+  while (handle != NULL) {
+    if (IO_HAS_FLAG(handle->base.flags, IO_FLAG_ACTIVE)) {
+      /*
+      if (handle->clamped_timeout < loop.time) {
+        if (handle->repeat) {
+          handle->clamped_timeout = handle->clamped_timeout + handle->interval;
+        } else {
+          IO_SET_FLAG_OFF(handle->base.flags, IO_FLAG_ACTIVE);
+        }
+        if (handle->watch_cb) {
+          handle->watch_cb(handle);
+        }
+      }
+      */
+    }
+    handle = (io_watch_handle_t *) ((list_node_t *) handle)->next;
   }
 }
