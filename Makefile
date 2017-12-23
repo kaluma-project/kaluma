@@ -122,15 +122,18 @@ KAMELEON_INC = \
 # -----------------------------------------------------------------------------
 
 ifndef TARGET 
-TARGET = kameleon-core
+TARGET = stm32f4discovery
 endif
 
-TARGET_DIR = targets/$(TARGET)
+TARGET_DIR = targets/boards/$(TARGET)
+SHARED_DIR = targets/shared
 
 TARGET_ASM =
 TARGET_SRC =
 TARGET_INC =
 TARGET_DEF =
+
+TARGET_BIN = kameleon
 
 -include $(TARGET_DIR)/Make.def
 
@@ -214,8 +217,8 @@ LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BU
 # Default action: build all
 # -----------------------------------------------------------------------------
 
-all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
-	$(Q) ls -al $(BUILD_DIR)/$(TARGET).*
+all: $(BUILD_DIR)/$(TARGET_BIN).elf $(BUILD_DIR)/$(TARGET_BIN).hex $(BUILD_DIR)/$(TARGET_BIN).bin
+	$(Q) ls -al $(BUILD_DIR)/$(TARGET_BIN).*
 	@echo "Done."
 
 # -----------------------------------------------------------------------------
@@ -247,7 +250,7 @@ $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 	@echo "compile:" $<
 	$(Q) $(AS) -c $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/$(TARGET).elf: $(OBJS) $(JERRY_LIBS) Makefile
+$(BUILD_DIR)/$(TARGET_BIN).elf: $(OBJS) $(JERRY_LIBS) Makefile
 	@echo "link:" $@
 	$(Q) $(CC) $(OBJS) $(LDFLAGS) -o $@
 	$(Q) $(SZ) $@
@@ -273,6 +276,6 @@ clean:
 	$(Q) -rm -fR $(BUILD_DIR)
 
 flash:
-	$(Q) st-flash write build/kameleon-core.bin 0x8000000
+	$(Q) st-flash write build/kameleon.bin 0x8000000
 
 # *** EOF ***
