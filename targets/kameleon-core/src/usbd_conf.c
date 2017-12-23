@@ -53,7 +53,7 @@
 #include "usbd_core.h"
 
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
-void _Error_Handler(char * file, int line);
+void _Error_Handler(uint8_t * file, uint32_t line);
 
 /* External functions --------------------------------------------------------*/
 void SystemClock_Config(void);

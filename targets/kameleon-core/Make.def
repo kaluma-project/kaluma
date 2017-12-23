@@ -13,7 +13,6 @@ $(TARGET_DIR)/src/startup_stm32f411xe.s
 TARGET_SRC += \
 $(TARGET_DIR)/src/buffer.c \
 $(TARGET_DIR)/src/system.c \
-$(TARGET_DIR)/src/system_low_level.c \
 $(TARGET_DIR)/src/gpio.c \
 $(TARGET_DIR)/src/led.c \
 $(TARGET_DIR)/src/tty.c \
@@ -28,7 +27,7 @@ $(TARGET_DIR)/src/stm32f4xx_hal_msp.c \
 $(TARGET_DIR)/src/is25lq040b.c \
 $(TARGET_DIR)/src/flash.c \
 $(TARGET_DIR)/src/uart.c \
-$(TARGET_DIR)/src/uart_low_level.c \
+$(TARGET_DIR)/src/i2c.c \
 $(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c \
 $(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c \
 $(TARGET_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c \

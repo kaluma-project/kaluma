@@ -43,7 +43,7 @@ int main(void) {
  * @param  None
  * @retval None
  */
-void _Error_Handler(char * file, int line) {
+void _Error_Handler(uint8_t * file, uint32_t line) {
   /* User can add his own implementation to report the HAL error return state */
   while(1) {
     tty_printf("_Error_Handler : file[%s], line[%d] \r\n", file, line);

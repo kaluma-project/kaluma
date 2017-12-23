@@ -22,7 +22,8 @@
 #ifndef __MAIN_H
 #define __MAIN_H
 
+#include <stdint.h>
 
-void _Error_Handler(char * file, int line);
+void _Error_Handler(uint8_t * file, uint32_t line);
 
 #endif /* __GPIO_H */

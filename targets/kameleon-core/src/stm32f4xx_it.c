@@ -35,7 +35,7 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_it.h"
 #include "tty_low_level.h"
-#include "system_low_level.h"
+#include "system.h"
 
 /* USER CODE BEGIN 0 */
 

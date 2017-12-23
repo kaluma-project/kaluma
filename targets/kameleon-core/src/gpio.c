@@ -153,8 +153,6 @@ void gpio_test() {
 
     gpio_toggle(pin);
     delay(1000);
-
-    assert_param(1);
   }
 
 #else

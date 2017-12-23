@@ -33,6 +33,11 @@
 void system_init();
 
 /**
+ * Increment tick count
+ */
+void inc_tick();
+
+/**
  * Delay in milliseconds
  */
 void delay(uint64_t msec);
@@ -46,5 +51,10 @@ uint64_t gettime();
  * Set current time (UNIX timestamp in milliseconds)
  */
 void settime(uint64_t time);
+
+/**
+ * Pend SV Interrupt
+ */
+void SetPendSV();
 
 #endif /* __SYSTEM_H */

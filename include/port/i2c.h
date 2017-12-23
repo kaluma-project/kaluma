@@ -24,6 +24,11 @@
 
 #include <stdint.h>
 
+typedef enum {
+  I2C_MODE_MASTER,
+  I2C_MODE_SLAVE
+}i2c_mode_t;
+
 /**
  * Open a I2C bus as master
  * 
@@ -73,18 +78,19 @@ int i2c_write_char(uint8_t bus, uint8_t address, uint8_t ch, uint32_t timeout);
  * @param {uint32_t} len
  * @return the number of bytes read
  */
-int i2c_read(uint8_t bus, uint8_t address, uint8_t *buf, uint32_t len);
+int i2c_read(uint8_t bus, uint8_t address, uint8_t *buf, uint32_t len, uint32_t timeout);
 
 /**
  * Read a character from the bus.
  * 
  * @return a character read
  */
-uint8_t i2c_read_char(uint8_t bus, uint8_t address);
+int i2c_read_char(uint8_t bus, uint8_t address, uint32_t timeout);
 
 /**
  * Close the I2C bus
  */
-void i2c_close(uint8_t bus);
+int i2c_close(uint8_t bus);
 
 #endif /* __I2C_H */
+
