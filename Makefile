@@ -108,6 +108,7 @@ src/io.c \
 src/runtime.c \
 src/repl.c \
 src/jerry_port.c \
+src/jerryxx.c \
 src/global.c \
 $(KAMELEON_GENERATED_C)
 
@@ -147,6 +148,11 @@ KAMELEON_INC += -Isrc/modules/console
 endif
 
 ifdef KAMELEON_MODULE_EVENTS
+endif
+
+ifdef KAMELEON_MODULE_BUFFER
+KAMELEON_SRC += src/modules/buffer/module_buffer.c
+KAMELEON_INC += -Isrc/modules/buffer
 endif
 
 ifdef KAMELEON_MODULE_TIMERS

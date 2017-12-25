@@ -19,15 +19,13 @@
  * SOFTWARE.
  */
 
-#ifndef __RUNTIME_H
-#define __RUNTIME_H
+#ifndef __JERRYXX_H
+#define __JERRYXX_H
 
 #include "jerryscript.h"
 
-void runtime_init();
-void runtime_deinit();
-void runtime_run_main();
+void jerryxx_set_propery_number(jerry_value_t object, const char *name, double value);
+void jerryxx_set_propery_object(jerry_value_t object, const char *name, jerry_value_t obj);
+void jerryxx_set_propery_function(jerry_value_t object, const char *name, jerry_external_handler_t fn);
 
-void runtime_print_value(const jerry_value_t value, int depth);
-
-#endif /* __RUNTIME_H */
+#endif /* __JERRYXX_H */

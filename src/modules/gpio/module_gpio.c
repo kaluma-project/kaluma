@@ -23,7 +23,7 @@
 #include "jerryscript.h"
 #include "gpio.h"
 #include "io.h"
-#include "runtime.h"
+#include "jerryxx.h"
 
 static jerry_value_t pin_mode(const jerry_value_t func_value,
   const jerry_value_t this_val, const jerry_value_t args_p[],
@@ -125,18 +125,18 @@ static jerry_value_t clear_watch(const jerry_value_t func_value,
 
 jerry_value_t module_gpio_init() {
   jerry_value_t object = jerry_create_object();
-  runtime_register_number(object, "HIGH", GPIO_HIGH);
-  runtime_register_number(object, "LOW", GPIO_LOW);
-  runtime_register_number(object, "INPUT", (double) GPIO_IO_MODE_INPUT);
-  runtime_register_number(object, "OUTPUT", (double) GPIO_IO_MODE_OUTPUT);
-  runtime_register_number(object, "CHANGE", (double) IO_WATCH_MODE_CHANGE);
-  runtime_register_number(object, "RISING", (double) IO_WATCH_MODE_RISING);
-  runtime_register_number(object, "FALLING", (double) IO_WATCH_MODE_FALLING);
-  runtime_register_function(object, "pinMode", pin_mode);
-  runtime_register_function(object, "digitalRead", digital_read);
-  runtime_register_function(object, "digitalWrite", digital_write);
-  runtime_register_function(object, "digitalToggle", digital_toggle);
-  runtime_register_function(object, "setWatch", set_watch);
-  runtime_register_function(object, "clearWatch", clear_watch);  
+  jerryxx_set_propery_number(object, "HIGH", GPIO_HIGH);
+  jerryxx_set_propery_number(object, "LOW", GPIO_LOW);
+  jerryxx_set_propery_number(object, "INPUT", (double) GPIO_IO_MODE_INPUT);
+  jerryxx_set_propery_number(object, "OUTPUT", (double) GPIO_IO_MODE_OUTPUT);
+  jerryxx_set_propery_number(object, "CHANGE", (double) IO_WATCH_MODE_CHANGE);
+  jerryxx_set_propery_number(object, "RISING", (double) IO_WATCH_MODE_RISING);
+  jerryxx_set_propery_number(object, "FALLING", (double) IO_WATCH_MODE_FALLING);
+  jerryxx_set_propery_function(object, "pinMode", pin_mode);
+  jerryxx_set_propery_function(object, "digitalRead", digital_read);
+  jerryxx_set_propery_function(object, "digitalWrite", digital_write);
+  jerryxx_set_propery_function(object, "digitalToggle", digital_toggle);
+  jerryxx_set_propery_function(object, "setWatch", set_watch);
+  jerryxx_set_propery_function(object, "clearWatch", clear_watch);  
   return object;
 }

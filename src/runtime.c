@@ -130,19 +130,3 @@ void runtime_print_value(const jerry_value_t value, int depth) {
     print_value_in_format("%s", value);
   }
 }
-
-void runtime_register_number(jerry_value_t object, const char *name, double value) {
-  jerry_value_t val = jerry_create_number(value);
-  jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
-  jerry_set_property (object, prop, val);
-  jerry_release_value (prop);
-  jerry_release_value(val);
-}
-
-void runtime_register_function(jerry_value_t object, const char *name, jerry_external_handler_t fn) {
-  jerry_value_t ext_fn = jerry_create_external_function(fn);
-  jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
-  jerry_set_property (object, prop, ext_fn);
-  jerry_release_value (prop);
-  jerry_release_value(ext_fn);
-}

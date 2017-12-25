@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include "jerryscript.h"
 #include "io.h"
-#include "runtime.h"
+#include "jerryxx.h"
 #include "system.h"
 
 static void set_timer_cb(io_timer_handle_t *timer) {
@@ -91,9 +91,9 @@ static jerry_value_t millis(const jerry_value_t func_value,
 
 jerry_value_t module_timers_init() {
   jerry_value_t object = jerry_create_object();
-  runtime_register_function(object, "setTimer", set_timer);
-  runtime_register_function(object, "clearTimer", clear_timer);
-  runtime_register_function(object, "delay", delay_);
-  runtime_register_function(object, "millis", millis);
+  jerryxx_set_propery_function(object, "setTimer", set_timer);
+  jerryxx_set_propery_function(object, "clearTimer", clear_timer);
+  jerryxx_set_propery_function(object, "delay", delay_);
+  jerryxx_set_propery_function(object, "millis", millis);
   return object;
 }

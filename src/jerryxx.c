@@ -19,15 +19,33 @@
  * SOFTWARE.
  */
 
-#ifndef __RUNTIME_H
-#define __RUNTIME_H
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "jerryscript.h"
+#include "jerryxx.h"
 
-void runtime_init();
-void runtime_deinit();
-void runtime_run_main();
+void jerryxx_set_propery_number(jerry_value_t object, const char *name, double value) {
+  jerry_value_t val = jerry_create_number(value);
+  jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
+  jerry_value_t ret = jerry_set_property (object, prop, val);
+  jerry_release_value(ret);
+  jerry_release_value (prop);
+  jerry_release_value(val);
+}
 
-void runtime_print_value(const jerry_value_t value, int depth);
+void jerryxx_set_propery_object(jerry_value_t object, const char *name, jerry_value_t obj) {
+  jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
+  jerry_value_t ret = jerry_set_property (object, prop, obj);
+  jerry_release_value(ret);
+  jerry_release_value (prop);
+}
 
-#endif /* __RUNTIME_H */
+void jerryxx_set_propery_function(jerry_value_t object, const char *name, jerry_external_handler_t fn) {
+  jerry_value_t ext_fn = jerry_create_external_function(fn);
+  jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
+  jerry_value_t ret = jerry_set_property (object, prop, ext_fn);
+  jerry_release_value(ret);
+  jerry_release_value (prop);
+  jerry_release_value(ext_fn);
+}

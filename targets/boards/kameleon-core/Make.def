@@ -73,9 +73,10 @@ TARGET_INC += \
 # Kameleon modules
 # -----------------------------------------------------------------------------
 
-KAMELEON_MODULES='console events timers gpio startup'
+KAMELEON_MODULES='console events buffer timers gpio startup'
 
 KAMELEON_MODULE_CONSOLE = 1
 KAMELEON_MODULE_EVENTS = 1
+KAMELEON_MODULE_BUFFER = 1
 KAMELEON_MODULE_TIMERS = 1
 KAMELEON_MODULE_GPIO = 1

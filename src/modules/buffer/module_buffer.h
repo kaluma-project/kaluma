@@ -19,15 +19,11 @@
  * SOFTWARE.
  */
 
-#ifndef __RUNTIME_H
-#define __RUNTIME_H
-
 #include "jerryscript.h"
 
-void runtime_init();
-void runtime_deinit();
-void runtime_run_main();
+typedef struct {
+  uint8_t *buf;
+  uint32_t size;
+} native_buffer_t;
 
-void runtime_print_value(const jerry_value_t value, int depth);
-
-#endif /* __RUNTIME_H */
+jerry_value_t module_buffer_init();
