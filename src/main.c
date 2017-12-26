@@ -19,7 +19,6 @@
  * SOFTWARE.
  */
 
-#include "stm32f4xx.h"
 #include "system.h"
 #include "gpio.h"
 #include "led.h"
@@ -32,7 +31,7 @@ int main(void) {
   system_init();
   tty_init();
   io_init();
-  runtime_init();
+  runtime_init(true);
   repl_init();
   io_run();
 }

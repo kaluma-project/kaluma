@@ -86,6 +86,7 @@ JERRY_ARGS = \
 --error-messages=ON \
 --js-parser=ON \
 --mem-heap=78 \
+--mem-stats=ON \
 --snapshot-exec=ON \
 --jerry-cmdline=OFF
 

@@ -24,7 +24,7 @@
 
 #include "jerryscript.h"
 
-void runtime_init();
+void runtime_init(bool run_main);
 void runtime_deinit();
 void runtime_run_main();
 

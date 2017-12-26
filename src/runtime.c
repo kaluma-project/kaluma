@@ -45,11 +45,13 @@ static void print_value_in_format(const char *format, jerry_value_t value) {
 // PUBLIC FUNCTIONS
 // --------------------------------------------------------------------------
 
-void runtime_init() {
-  jerry_init (JERRY_INIT_EMPTY);
+void runtime_init(bool run_main) {
+  jerry_init (JERRY_INIT_EMPTY | JERRY_INIT_MEM_STATS);
   global_init();
   jerry_gc();
-  runtime_run_main();  
+  if (run_main) {
+    runtime_run_main();
+  }
 }
 
 void runtime_deinit() {

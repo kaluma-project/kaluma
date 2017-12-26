@@ -37,8 +37,12 @@
 // --------------------------------------------------------------------------
 
 static void cmd_echo(repl_state_t *state, char *arg);
+static void cmd_clear(repl_state_t *state);
 static void cmd_flash(repl_state_t *state, char *arg);
 static void cmd_load(repl_state_t *state);
+static void cmd_mem(repl_state_t *state);
+static void cmd_gc(repl_state_t *state);
+static void cmd_help(repl_state_t *state);
 
 // --------------------------------------------------------------------------
 // PRIVATE VARIABLES
@@ -116,11 +120,17 @@ static void run_command() {
     if (strcmp(tokenv[0], ".echo") == 0) {
       cmd_echo(&state, tokenv[1]);
     } else if (strcmp(tokenv[0], ".clear") == 0) {
-      // TODO: cmd_clear();
+      cmd_clear(&state);
     } else if (strcmp(tokenv[0], ".flash") == 0) {
       cmd_flash(&state, tokenv[1]);
     } else if (strcmp(tokenv[0], ".load") == 0) {
       cmd_load(&state);
+    } else if (strcmp(tokenv[0], ".mem") == 0) {
+      cmd_mem(&state);
+    } else if (strcmp(tokenv[0], ".gc") == 0) {
+      cmd_gc(&state);
+    } else if (strcmp(tokenv[0], ".help") == 0) {
+      cmd_help(&state);
     } else { /* unknown command */
       repl_print_begin(REPL_OUTPUT_ERROR);
       repl_printf("Unknown command: %s\r\n", tokenv[0]);
@@ -344,6 +354,17 @@ static void cmd_echo(repl_state_t *state, char *arg) {
 }
 
 /**
+ * .clear command
+ */
+static void cmd_clear(repl_state_t *state) {
+  runtime_deinit();
+  runtime_init(false);
+  repl_print_begin(REPL_OUTPUT_LOG);
+  repl_printf("\r");
+  repl_print_end();
+}
+
+/**
  * State for flash command
  */
 static struct {
@@ -447,6 +468,47 @@ static void cmd_load(repl_state_t *state) {
   runtime_run_main();
   repl_print_begin(REPL_OUTPUT_LOG);
   repl_printf("\r");
+  repl_print_end();
+}
+
+/**
+ * .mem command
+ */
+static void cmd_mem(repl_state_t *state) {
+  jerry_heap_stats_t stats = {0};
+  bool stats_ret = jerry_get_memory_stats (&stats);
+  if (stats_ret) {
+    repl_print_begin(REPL_OUTPUT_LOG);
+    repl_printf("total: %u, occupied: %u, peak: %u\r\n", stats.size, stats.allocated_bytes, stats.peak_allocated_bytes);
+    repl_print_end();
+  } else {
+    repl_print_begin(REPL_OUTPUT_LOG);
+    repl_printf("Mem stat feature is not enabled.\r\n");
+    repl_print_end();    
+  }
+}
+
+/**
+ * .gc command
+ */
+static void cmd_gc(repl_state_t *state) {
+  jerry_gc();
+  repl_print_begin(REPL_OUTPUT_LOG);
+  repl_printf("\r");
+  repl_print_end();
+}
+
+/**
+ * .help command
+ */
+static void cmd_help(repl_state_t *state) {
+  repl_print_begin(REPL_OUTPUT_LOG);
+  repl_printf(".echo\tEcho on/off.\r\n");
+  repl_printf(".clear\tClear javascript context.\r\n");
+  repl_printf(".flash\tFlash program or get flash memory info.\r\n");
+  repl_printf(".load\tLoad program in flash memory.\r\n");
+  repl_printf(".mem\tGet heap memory status.\r\n");
+  repl_printf(".gc\tPerform garbage collection.\r\n");
   repl_print_end();
 }
 
