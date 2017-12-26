@@ -73,6 +73,7 @@ void runtime_run_main() {
 }
 
 void runtime_print_value(const jerry_value_t value, int depth) {
+  /*
   if (jerry_value_is_array(value)) {
     if (depth == 0) {
       repl_printf("[Array]");
@@ -131,4 +132,6 @@ void runtime_print_value(const jerry_value_t value, int depth) {
   } else {
     print_value_in_format("%s", value);
   }
+  */
+  print_value_in_format("%s", value);
 }

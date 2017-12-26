@@ -168,7 +168,9 @@ static void run_code() {
       jerry_value_t ret_value = jerry_run(parsed_code);
       if (jerry_value_has_error_flag(ret_value)) {
         repl_print_begin(REPL_OUTPUT_ERROR);
-        repl_printf("Error\r\n");
+        jerry_value_clear_error_flag(&ret_value);
+        repl_print_value(ret_value);
+        repl_printf("\r\n");
         repl_print_end();
       } else {
         repl_print_begin(REPL_OUTPUT_INFO);
