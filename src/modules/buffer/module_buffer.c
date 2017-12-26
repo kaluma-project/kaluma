@@ -58,14 +58,50 @@ static jerry_value_t buffer_alloc(const jerry_value_t func_value,
   native_buffer_t *native_buf = malloc(sizeof(native_buffer_t));
   native_buf->size = size;
   native_buf->buf = malloc(size);
-
   /* TODO: Fill the buf with `fill` param */
-
   jerry_set_object_native_pointer (object, native_buf, &native_buffer_type_info);
-
-  jerryxx_set_propery_number("length", size);
-
+  jerryxx_set_propery_number(object, "length", size);
   return object;
+}
+
+static jerry_value_t buffer_read_uint8(const jerry_value_t func_value,
+  const jerry_value_t this_val, const jerry_value_t args_p[],
+  const jerry_length_t args_cnt) {
+  // ASSERT(args_cnt == 1);
+  // ASSERT(jerry_value_is_number(args_p[0]))
+  int offset = (int) jerry_get_number_value(args_p[0]);
+  /* TODO: Check offset index out of bound */
+  void *native_p;
+  const jerry_object_native_info_t *type_p;
+  bool has_p = jerry_get_object_native_pointer(this_val, &native_p, &type_p);
+  if (has_p) {
+    native_buffer_t *native_buf = native_p;
+    uint8_t val = native_buf->buf[offset];
+    return jerry_create_number(val);
+  } else {
+    return jerry_create_undefined();
+  }
+}
+
+static jerry_value_t buffer_write_uint8(const jerry_value_t func_value,
+  const jerry_value_t this_val, const jerry_value_t args_p[],
+  const jerry_length_t args_cnt) {
+  // ASSERT(args_cnt == 2);
+  // ASSERT(jerry_value_is_number(args_p[0]))
+  // ASSERT(jerry_value_is_number(args_p[1]))
+  uint8_t val = (uint8_t) jerry_get_number_value(args_p[0]);
+  int offset = (int) jerry_get_number_value(args_p[1]);
+  /* TODO: Check offset index out of bound */
+  void *native_p;
+  const jerry_object_native_info_t *type_p;
+  bool has_p = jerry_get_object_native_pointer(this_val, &native_p, &type_p);
+  if (has_p) {
+    native_buffer_t *native_buf = native_p;
+    native_buf->buf[offset] = val;
+    return jerry_create_number(offset + 1);
+  } else {
+    return jerry_create_number(offset);
+  }  
 }
 
 jerry_value_t module_buffer_init() {
@@ -76,5 +112,7 @@ jerry_value_t module_buffer_init() {
   jerry_release_value (prototype);
 
   jerryxx_set_propery_function(ctor, "alloc", buffer_alloc);
+  jerryxx_set_propery_function(prototype, "readUint8", buffer_read_uint8);
+  jerryxx_set_propery_function(prototype, "writeUint8", buffer_write_uint8);
   return ctor;
 }
