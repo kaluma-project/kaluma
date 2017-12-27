@@ -44,6 +44,7 @@ global.delay = timers.delay;
 global.millis = timers.millis;
 
 global.console = Module.require('console');
+global.print = global.console.log;
 
 global.HIGH = gpio.HIGH;
 global.LOW = gpio.LOW;

@@ -135,7 +135,7 @@ static void register_global_constants() {
 }
 
 static void register_global_functions() {
-  jerryx_handler_register_global((const jerry_char_t *) "print", jerryx_handler_print);
+  // jerryx_handler_register_global((const jerry_char_t *) "print", jerryx_handler_print);
   // jerryx_handler_register_global((const jerry_char_t *) "setInterval", set_interval_handler);
   // jerryx_handler_register_global((const jerry_char_t *) "setTimeout", set_timeout_handler);
   // jerryx_handler_register_global((const jerry_char_t *) "clearInterval", clear_interval_handler);
