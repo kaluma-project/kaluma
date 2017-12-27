@@ -28,6 +28,4 @@ void runtime_init(bool run_main);
 void runtime_deinit();
 void runtime_run_main();
 
-void runtime_print_value(const jerry_value_t value, int depth);
-
 #endif /* __RUNTIME_H */

@@ -24,6 +24,7 @@
 #include <string.h>
 #include "jerryscript.h"
 #include "jerryxx.h"
+#include "tty.h"
 
 void jerryxx_set_propery_number(jerry_value_t object, const char *name, double value) {
   jerry_value_t val = jerry_create_number(value);
@@ -48,4 +49,13 @@ void jerryxx_set_propery_function(jerry_value_t object, const char *name, jerry_
   jerry_release_value(ret);
   jerry_release_value (prop);
   jerry_release_value(ext_fn);
+}
+
+void jerryxx_print_value(const char *format, jerry_value_t value) {
+  jerry_value_t str = jerry_value_to_string(value);
+  jerry_size_t str_sz = jerry_get_string_size (str);
+  jerry_char_t str_buf[str_sz + 1];
+  jerry_string_to_char_buffer (str, str_buf, str_sz);
+  str_buf[str_sz] = '\0';
+  tty_printf(format, (char *) str_buf);
 }

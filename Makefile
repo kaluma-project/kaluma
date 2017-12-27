@@ -88,6 +88,7 @@ JERRY_ARGS = \
 --mem-heap=78 \
 --mem-stats=ON \
 --snapshot-exec=ON \
+--profile=es2015-subset \
 --jerry-cmdline=OFF
 
 # -----------------------------------------------------------------------------

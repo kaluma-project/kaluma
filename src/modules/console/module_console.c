@@ -37,7 +37,7 @@ static jerry_value_t console_log(const jerry_value_t func_value,
       if (i > 0) {
         repl_printf(" ");
       }
-      repl_print_value(args_p[i]);
+      repl_print_value("%s", args_p[i]);
     }
     repl_printf("\r\n");
     repl_print_end();
@@ -57,7 +57,7 @@ static jerry_value_t console_error(const jerry_value_t func_value,
       if (i > 0) {
         repl_printf(" ");
       }
-      repl_print_value(args_p[i]);
+      repl_print_value("%s", args_p[i]);
     }
     repl_printf("\r\n");
     repl_printf("\33[0m"); // back to normal color

@@ -162,20 +162,19 @@ static void run_code() {
     jerry_value_t parsed_code = jerry_parse((const jerry_char_t *) data, strlen(data), false);
     if (jerry_value_has_error_flag (parsed_code)) {
       repl_print_begin(REPL_OUTPUT_ERROR);
-      repl_printf("%s\r\n", "Syntax error");
+      jerry_value_clear_error_flag(&parsed_code);
+      repl_print_value("%s\r\n", parsed_code);
       repl_print_end();
     } else {
       jerry_value_t ret_value = jerry_run(parsed_code);
       if (jerry_value_has_error_flag(ret_value)) {
         repl_print_begin(REPL_OUTPUT_ERROR);
         jerry_value_clear_error_flag(&ret_value);
-        repl_print_value(ret_value);
-        repl_printf("\r\n");
+        repl_print_value("%s\r\n", ret_value);
         repl_print_end();
       } else {
         repl_print_begin(REPL_OUTPUT_INFO);
-        repl_print_value(ret_value);
-        repl_printf("\r\n");
+        repl_print_value("%s\r\n", ret_value);
         repl_print_end();
       }
       jerry_release_value(ret_value);

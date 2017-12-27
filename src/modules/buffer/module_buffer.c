@@ -83,18 +83,13 @@ static jerry_value_t buffer_read_uint8(const jerry_value_t func_value,
   }
 }
 
-/*
-JSX_FUNC(buffer_write_uint8) {
-}
-*/
-
-JSX_FUN(buffer_write_uint8) {
-  JSX_CHECK_ARG_NUMBER_OPT(0)
-  JSX_CHECK_ARG_NUMBER_OPT(1)
-  JSX_CHECK_ARG_BOOLEAN_OPT(2)
-  uint8_t value = (uint8_t) JSX_GET_ARG_NUMBER_OPT(0, 0);
-  int offset = (int) JSX_GET_ARG_NUMBER_OPT(1, 0);
-  bool no_assert = JSX_GET_ARG_BOOLEAN_OPT(1, false);  
+JERRYXX_FUN(buffer_write_uint8) {
+  JERRYXX_CHECK_ARG_NUMBER_OPT(0)
+  JERRYXX_CHECK_ARG_NUMBER_OPT(1)
+  JERRYXX_CHECK_ARG_BOOLEAN_OPT(2)
+  uint8_t value = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
+  int offset = (int) JERRYXX_GET_ARG_NUMBER_OPT(1, 0);
+  bool no_assert = JERRYXX_GET_ARG_BOOLEAN_OPT(1, false);  
   // Get native buffer pointer
   void *native_p;
   const jerry_object_native_info_t *type_p;

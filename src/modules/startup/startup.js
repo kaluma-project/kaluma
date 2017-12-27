@@ -1,3 +1,6 @@
+/**
+ * Module class
+ */
 
 function Module(id) {
   this.id = id;
@@ -24,6 +27,10 @@ Module.prototype.loadBuiltin = function () {
   var fn = process.getBuiltinModule(this.id);
   fn(this.exports, Module.require, this);
 }
+
+/**
+ * Global variables and functions
+ */
 
 var timers = Module.require('timers');
 var gpio = Module.require('gpio');

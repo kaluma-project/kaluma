@@ -23,6 +23,7 @@
 #define __REPL_H
 
 #include "jerryscript.h"
+#include "jerryxx.h"
 
 #define MAX_BUFFER_LENGTH 1024
 #define MAX_COMMAND_HISTORY 10
@@ -65,7 +66,8 @@ void repl_error(const char *format, const char *str);
 
 void repl_print_begin(repl_output_t output);
 #define repl_printf(format,args...) tty_printf(format, ## args)
-#define repl_print_value(value) runtime_print_value(value, 1)
+#define repl_print_value(format,value) jerryxx_print_value(format,value)
+#define repl_print_value_form(value) jerryxx_print_value_form(value, 1)
 #define repl_putc(ch) tty_putc(ch)
 void repl_print_end();
 
