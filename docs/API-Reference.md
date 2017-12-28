@@ -1,128 +1,102 @@
-# API REFERENCE
+API REFERENCE
+=============
 
 ## Globals
 
 ### Constants
 
-* `HIGH` = 1 _(from gpio)_
-* `LOW` = 0 _(from gpio)_
-* `INPUT` _(from gpio)_
-* `OUTPUT` _(from gpio)_
-* ...
+* `LOW` = 0
+* `HIGH` = 1
+* `INPUT` = 0
+* `OUTPUT` = 1
+* `FALLING` = 0
+* `RISING` = 1
+* `CHANGE` = 2
 
 ### Functions
 
 Digital I/O
 
-* `digitalRead(pin)` _(from gpio)_
-* `digitalWrite(pin, value)` _(from gpio)_
-* `digitalToggle(pin)` _(from gpio)_
-* `pinMode(pin, mode)` _(from gpio)_
+* `pinMode(pin, mode)`
+* `digitalRead(pin) -> number`
+* `digitalWrite(pin, value)`
+* `digitalToggle(pin)`
 
 Analog I/O
 
 * `analogRead(pin)`
-* `analogWrite(pin, value)`
-* `analogReference()` -- ? (ref to Arduino)
+  * `pin {number}`
+  * `@return {number}` Return value in between 0.0 ~ 1.0 (when returns int value, it depends on hardware: 0~1023, 0~4095, ...)
+* `analogWrite(pin, value)` -- (How frequency will be set?)
+  * `pin {number}`
+  * `value {number}` -- Duty cycle between 0 and 1.
 
-~~Advanced I/O~~
+Additional I/O
 
-* ~~`tone(pin, frequency, duration, ?duty)`~~ (suspended)
-* ~~`noTone(pin)` ~~ (suspended)
-* ~~`pulseIn()`~~ (suspended)
-* ~~`pulseInLong()`~~ (suspended)
-* ~~`shiftIn()`~~ (suspended)
-* ~~`shiftOut()`~~ (suspended)
-
-Non-blocking I/O
-
-* `FALLING` = 0
-* `RISING` = 1
-* `CHANGE` = 2
+* `tone(pin, frequency, duration, ?duty)`
+* `noTone(pin)`
 * `setWatch(callback, pin, ?mode=CHANGE, ?debounce=0) -> id` _(from gpio)_
   * `callback {Function: () -> undefined}`
   * `pin {number}`
   * `?mode=CHANGE {number}` -- RISING | FALLING | CHANGE
   * `?debounce=0 {number}`
-* `clearWatch(id)` _(from gpio)_
+  * Returns an `id {number}` for watcher.
+* `clearWatch(id)`
 
 Time
 
-* `delay(msec)` _(from timers)_
-* `millis()` _(from timers)_
-* ~~`delayMicroseconds(microsec)`~~ (suspended)
-* ~~`micros()`~~ (suspended)
-* `setTimeout(callback, msec) -> id` _(from timers)_
-* `setInterval(callback, msec) -> id` _(from timers)_
-* `clearTimeout(id)` _(from timers)_
-* `clearInterval(id)` _(from timers)_
+* `delay(msec)`
+* `millis()`
+* `setTimeout(callback, msec) -> id`
+* `setInterval(callback, msec) -> id`
+* `clearTimeout(id)`
+* `clearInterval(id)`
 
 Etc.
 
 * `require(module)`
-* `print(value)` - equivalent to console.log
+* `print(value)` -- equivalent to console.log
 
 ### Objects
 
-* (class) `Buffer`
 * `global`
 * `console`
   * `log()`
-  * `warn()`
+  * ~~`warn()`~~
   * `error()`
 * `process`
   * `builtin_modules` - _array of builtin module names_
   * `binding(native_module_name)` - _load native modules_
     * `<native_module_name>` - _binding has native module names as properties_
-  * `arch`
-  * `platform`
-  * `version`
+  * `arch`-- ex) 'arm', 'x64', ...
+  * `platform` -- ex) 'linux', 'darwin', 'unknown', ...
+  * `version` -- semver format. ex) '0.1.0', ...
   * (event) `onUncaughtException`
-* `module` ?
-* `exports` ?
-* `__dirname` ?
-* `__filename` ?
-* `Serial`_n_
-* `SPI`_n_
-* `I2C`_n_
+* `board` -- board specific object
+  * `name` -- target board name. ex) 'stm32f4discovery', 'kameleon-core', ...
+  * `PIN_NUM`
+  * `PWM_NUM`
+  * `ADC_NUM`
+  * `LED_NUM`
+  * `SWITCH_NUM`
+  * `I2C_NUM`
+  * `SPI_NUM`
+  * `UART_NUM`
+  * `led(num)` -- return corresponding pin number
+  * `switch(num)` -- return corresponding pin number
+  * `pwm(num)` -- return corresponding pin number
+  * `adc(num)` -- return corresponding pin number
+  * `i2c(bus, options)` -- return I2C object initialized with the bus number
+  * `spi(bus, options)` -- return SPI object initialized with the bus number
+  * `uart(bus, options)` -- return UART object initialized with the bus number
 
 ## Builtin Modules
 
-* `console` (global)
-* `buffer` (global)
-* `timers` (global)
-* `assert`
 * `events`
-* `gpio` (global)
 * `pwm`
 * `i2c`
 * `spi`
 * `uart`
-* `fs`
-* `net`
-* `http`
-
-### Module: `console`
-
-* `log(...)`
-* ~~`info(...)`~~ (suspended)
-* ~~`warn(...)`~~ (suspended)
-* `error(...)`
-
-### Module: `buffer`
-
-* (class) `Buffer` _(=exports)_
-
-### Module: `timers`
-
-* `setInterval(callback, interval)`
-* `setTimeout(callback, timeout)`
-* `clearInterval(timerId)`
-* `clearTimeout(timerId)`
-
-### Module: `assert`
-
-* ...
 
 ### Module: `events`
 
@@ -133,24 +107,6 @@ Etc.
   * `once(eventName, listener)`
   * `removeAllListeners([eventName])`
   * `removeListener(eventName, listener)`
-  * ~~`eventNames()`~~ (suspended)
-  * ~~`getMaxListeners()`~~ (suspended)
-  * ~~`listenerCount(eventName)`~~ (suspended)
-  * ~~`listeners(eventName)`~~ (suspended)
-  * ~~`prependListener(eventName, listener)`~~ (suspended)
-  * ~~`prependOnceListener(eventName, listener)`~~ (suspended)
-  * ~~`setMaxListeners(n)`~~ (suspended)
-
-### Module: `gpio`
-
-* (const) `HIGH`
-* (const) `LOW`
-* (const) `INPUT`
-* (const) `OUTPUT`
-* `digitalRead(pin)`
-* `digitalWrite(pin, value)`
-* `digitalToggle(pin)`
-* `pinMode(pin, mode)`
 
 ### Module: `pwm`
 
@@ -178,44 +134,29 @@ Etc.
   pwm.close();
   ```
 
-### Module: `adc`
-
-* (class) `ADC`
-  * `setup(pin)`
-    * `pin {number}`
-  * `read() -> number`
-  * `close()`
-
-  __Example:__
-  ```js
-  var ADC = require('adc');
-  var adc = new ADC();
-  adc.setup(1);
-  var val = adc.read();
-  adc.close();
-  ```
-
 ### Module: `i2c`
 
 * (class) `I2C`
-  * `open(bus, ?address)`
+  * `setup(bus, ?address)`
     * `bus {number}` -- bus number 0, 1, 2...
     * `?address {number}` (optional) -- when use in slave mode. If given, open as slave mode
   * `write(data, ?timeout=0)` -- write data
-    * `data {Buffer|Array<number>}`  -- Data to write
-    * `timeout {number}`
-  * `read(data, length)` -- read bytes and send data to callback
-    * `data {Buffer|Array<number>}` -- Read and store in data
+    * `data {ArrayBuffer|Array<number>}`  -- Data to write
+    * `?timeout=0 {number}`
+  * `read(length, ?address, ?timeout=0) -> ArrayBuffer` -- read data as the length
     * `length {number}` -- data length
+    * `address {number}` -- address to receive data (in master mode only)
+    * `?timeout=0 {number}`
+    * Return the received data
   * `close()` -- close the bus
 
   __Example:__
   ```js
   var I2C = require('i2c');
   var i2c = new I2C();
-  i2c.open(0); // open bus number 0
+  i2c.setup(0); // open bus number 0
   i2c.write([0x66, 0x77]);
-  i2c.read(?); // how to do it?
+  var buf = i2c.read(10);
   i2c.close();
   ```
 
@@ -235,12 +176,17 @@ Etc.
     * `?phase {number}` -- 0 or 1
     * `?bits {number}` -- 8 or 9?
     * `?bitorder {number}` -- `SPI.MSB` or `SPI.LSB`
-  * `send(data, ?timeout=5000)`
-    * `data {Buffer|Array<Number>|string}`
+  * `transfer(data, ?timeout=5000)` -- Send and receive data simultaneously
+    * `data {ArrayBuffer|Array<Number>|string}`
     * `?timeout=5000 {number}`
-  * `recv(size, ?timeout=5000) -> Buffer`
-    * `size {number}`
+    * `@return {ArrayBuffer}` -- Received data
+  * `send(data, ?timeout=5000)` -- Send data
+    * `data {ArrayBuffer|Array<Number>|string}`
     * `?timeout=5000 {number}`
+  * `recv(length, ?timeout=5000)` -- Receive data as the length
+    * `length {number}`
+    * `?timeout=5000 {number}`
+    * `@return {ArrayBuffer}` -- Received data
   * `close()` -- close the bus
 
   __Example:__
@@ -248,17 +194,16 @@ Etc.
   var SPI = require('spi');
   var spi = new SPI();
   spi.setup(0, SPI.MASTER, 11 /*, ... */); // open bus number 0
-  spi.send("data...");
-  // ...
-  var buf = spi.recv(5);
-  // ...
+  var received = spi.transfer([0x88, 0x24]); // Send two bytes and receive two bytes
+  spi.send("data...");    // Send 7 bytes
+  var buf = spi.recv(5);  // Receive 5 bytes
   spi.close();
   ```
 
 ### Module: `uart`
 
 * (class) `UART`
-  * `open(bus, ?options)`
+  * `setup(bus, ?options)`
     * `bus` -- bus number
     * `?options` [Object] -- when use in slave mode. If given, open as slave mode
       * `.baudrate` [Number] -- default `9600`
@@ -268,10 +213,13 @@ Etc.
       * `.flow`
       * `.timeout`
   * `write(data)` -- write data
-    * `data` [String|Buffer|Number|Array of Number] -- Data to write
-  * `read(data, length)` -- read bytes and send data to callback
-    * `data` [Buffer|Array of Number] -- Read and store in data
-    * `length` -- data length
+    * `data {string|ArrayBuffer|Array<number>}` -- Data to write
+  * `available()` -- returns available data length to read
+  * `read(?length=1)` -- read bytes and send data to callback
+    * `?length=1 {number}` -- data length
+    * `@return {number|ArrayBuffer}`  -- Return a byte data when length is 1, or a buffer when length > 1.
+  * `listen(callback)` -- start to listen receiving data and callback is called when data received. if callback is `null|undefined`, stop to listen.
+    * `callback {function(ArrayBuffer)}`
   * `close()` -- close the bus
 
   __Example:__
@@ -279,19 +227,10 @@ Etc.
   var UART = require('uart');
   var uart = new UART();
   uart.open(0, {}); // open bus number 0
-  uart.write("data...");
-  // ...
+  uart.write("data..."); // send data
+  var buf = uart.read(10); // read 10 bytes (blocking)
+  uart.on('data', function (buf) {
+    // called when data received.
+  })
   uart.close();
   ```
-
-### Module: `fs`
-
-* ...
-
-### Module: `net`
-
-* ...
-
-### Module: `http`
-
-* ...
