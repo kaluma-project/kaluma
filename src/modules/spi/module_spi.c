@@ -19,6 +19,11 @@
  * SOFTWARE.
  */
 
+#include <stdlib.h>
 #include "jerryscript.h"
+#include "jerryxx.h"
 
-jerry_value_t module_gpio_init();
+jerry_value_t module_spi_init() {
+  jerry_value_t object = jerry_create_object();
+  return object;
+}

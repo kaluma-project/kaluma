@@ -144,27 +144,27 @@ TARGET_BIN = kameleon
 # Kameleon Modules
 # -----------------------------------------------------------------------------
 
-ifdef KAMELEON_MODULE_CONSOLE
-KAMELEON_SRC += src/modules/console/module_console.c
-KAMELEON_INC += -Isrc/modules/console
-endif
-
 ifdef KAMELEON_MODULE_EVENTS
 endif
 
-ifdef KAMELEON_MODULE_BUFFER
-KAMELEON_SRC += src/modules/buffer/module_buffer.c
-KAMELEON_INC += -Isrc/modules/buffer
+ifdef KAMELEON_MODULE_PWM
+KAMELEON_SRC += src/modules/pwm/module_pwm.c
+KAMELEON_INC += -Isrc/modules/pwm
 endif
 
-ifdef KAMELEON_MODULE_TIMERS
-KAMELEON_SRC += src/modules/timers/module_timers.c
-KAMELEON_INC += -Isrc/modules/timers
+ifdef KAMELEON_MODULE_I2C
+KAMELEON_SRC += src/modules/i2c/module_i2c.c
+KAMELEON_INC += -Isrc/modules/i2c
 endif
 
-ifdef KAMELEON_MODULE_GPIO
-KAMELEON_SRC += src/modules/gpio/module_gpio.c
-KAMELEON_INC += -Isrc/modules/gpio
+ifdef KAMELEON_MODULE_SPI
+KAMELEON_SRC += src/modules/spi/module_spi.c
+KAMELEON_INC += -Isrc/modules/spi
+endif
+
+ifdef KAMELEON_MODULE_UART
+KAMELEON_SRC += src/modules/uart/module_uart.c
+KAMELEON_INC += -Isrc/modules/uart
 endif
 
 # -----------------------------------------------------------------------------

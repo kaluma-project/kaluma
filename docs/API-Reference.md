@@ -43,12 +43,12 @@ Additional I/O
   * Returns an `id {number}` for watcher.
 * `clearWatch(id)`
 
-Time
+Timers
 
 * `delay(msec)`
 * `millis()`
-* `setTimeout(callback, msec) -> id`
-* `setInterval(callback, msec) -> id`
+* `setTimeout(callback, delay) -> id`
+* `setInterval(callback, delay) -> id`
 * `clearTimeout(id)`
 * `clearInterval(id)`
 
@@ -63,15 +63,17 @@ Etc.
 * `console`
   * `log()`
   * ~~`warn()`~~
+  * ~~`info()`~~
   * `error()`
 * `process`
-  * `builtin_modules` - _array of builtin module names_
-  * `binding(native_module_name)` - _load native modules_
-    * `<native_module_name>` - _binding has native module names as properties_
   * `arch`-- ex) 'arm', 'x64', ...
   * `platform` -- ex) 'linux', 'darwin', 'unknown', ...
   * `version` -- semver format. ex) '0.1.0', ...
-  * (event) `onUncaughtException`
+  * `builtin_modules` - _array of builtin module names_
+  * `getBuiltinModule(builtin_module_name)` - _load the builtin module and return the module as a function_
+  * `binding(native_module_name)` - _load native modules_
+    * `.<native_module_name>` - _binding has native module names as properties_
+  * (event) `onUncaughtException` (?)
 * `board` -- board specific object
   * `name` -- target board name. ex) 'stm32f4discovery', 'kameleon-core', ...
   * `PIN_NUM`
@@ -167,15 +169,16 @@ Etc.
   * (static) `SLAVE` = 1
   * (static) `MSB` = 0
   * (static) `LSB` = 1
-  * `setup(bus, mode, cs, ?baudrate=6000000, ?polarity=0, ?phase=0, ?bits=8, ?bitorder=MSB)`
+  * `setup(bus, options)`
     * `bus {number}`
-    * `mode {number}` -- `SPI.MASTER` or `SPI.SLAVE`
-    * `cs {number}` -- Chip select pin number
-    * `?baudrate {number}` -- baudrate
-    * `?polarity {number}` -- 0 or 1
-    * `?phase {number}` -- 0 or 1
-    * `?bits {number}` -- 8 or 9?
-    * `?bitorder {number}` -- `SPI.MSB` or `SPI.LSB`
+    * `options`
+      * `.mode {number}` -- `SPI.MASTER` (default) or `SPI.SLAVE`
+      * `.cs {number}` -- Chip select pin number
+      * `.baudrate {number}` -- baudrate
+      * `.polarity {number}` -- 0 or 1
+      * `.phase {number}` -- 0 or 1
+      * `.bits {number}` -- 8 or 9?
+      * `.bitorder {number}` -- `SPI.MSB` or `SPI.LSB`
   * `transfer(data, ?timeout=5000)` -- Send and receive data simultaneously
     * `data {ArrayBuffer|Array<Number>|string}`
     * `?timeout=5000 {number}`

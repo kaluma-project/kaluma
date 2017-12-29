@@ -11,6 +11,7 @@ TARGET_ASM += \
 $(TARGET_DIR)/src/startup_stm32f411xe.s
 
 TARGET_SRC += \
+$(TARGET_DIR)/src/board.c \
 $(TARGET_DIR)/src/buffer.c \
 $(TARGET_DIR)/src/system.c \
 $(TARGET_DIR)/src/gpio.c \
@@ -73,10 +74,10 @@ TARGET_INC += \
 # Kameleon modules
 # -----------------------------------------------------------------------------
 
-KAMELEON_MODULES='console events buffer timers gpio startup'
+KAMELEON_MODULES='events pwm i2c spi uart startup'
 
-KAMELEON_MODULE_CONSOLE = 1
 KAMELEON_MODULE_EVENTS = 1
-KAMELEON_MODULE_BUFFER = 1
-KAMELEON_MODULE_TIMERS = 1
-KAMELEON_MODULE_GPIO = 1
+KAMELEON_MODULE_PWM = 1
+KAMELEON_MODULE_I2C = 1
+KAMELEON_MODULE_SPI = 1
+KAMELEON_MODULE_UART = 1

@@ -22,36 +22,65 @@
 #ifndef __JERRYXX_H
 #define __JERRYXX_H
 
+#include <stdio.h>
 #include "jerryscript.h"
 
 #define JERRYXX_FUN(name) static jerry_value_t name(const jerry_value_t func_value, const jerry_value_t this_val, const jerry_value_t args_p[], const jerry_length_t args_cnt)
 
-#define JERRYXX_CHECK_ARG_NUMBER(index) \
+#define JERRYXX_CHECK_ARG_NUMBER(index, argname) \
   if ((args_cnt <= index) || (!jerry_value_is_number(args_p[index]))) { \
-      return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "Bad arguments"); \
+    char errmsg[255]; \
+    sprintf(errmsg, "\"%s\" argument must be a number", argname); \
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg); \
   }
 
-#define JERRYXX_CHECK_ARG_NUMBER_OPT(index) \
+#define JERRYXX_CHECK_ARG_NUMBER_OPT(index, argname) \
   if (args_cnt > index) { \
     if (!jerry_value_is_number(args_p[index])) { \
-      return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "Bad arguments"); \
+      char errmsg[255]; \
+      sprintf(errmsg, "\"%s\" argument must be a number", argname); \
+      return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg); \
     } \
   }
 
-#define JERRYXX_CHECK_ARG_BOOLEAN_OPT(index) \
+#define JERRYXX_CHECK_ARG_BOOLEAN_OPT(index, argname) \
   if (args_cnt > index) { \
     if (!jerry_value_is_boolean(args_p[index])) { \
-      return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "Bad arguments"); \
+      char errmsg[255]; \
+      sprintf(errmsg, "\"%s\" argument must be a boolean", argname); \
+      return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg); \
     } \
   }
 
+#define JERRYXX_CHECK_ARG_FUNCTION(index, argname) \
+  if ((args_cnt <= index) || (!jerry_value_is_function(args_p[index]))) { \
+    char errmsg[255]; \
+    sprintf(errmsg, "\"%s\" argument must be a function", argname); \
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg); \
+  }
+
+#define JERRYXX_CHECK_ARG_STRING(index, argname) \
+  if ((args_cnt <= index) || (!jerry_value_is_string(args_p[index]))) { \
+    char errmsg[255]; \
+    sprintf(errmsg, "\"%s\" argument must be a string", argname); \
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg); \
+  }
+
+#define JERRYXX_GET_ARG_COUNT args_cnt
+#define JERRYXX_GET_ARG(index) args_p[index]
 #define JERRYXX_GET_ARG_NUMBER(index) jerry_get_number_value(args_p[index])
 #define JERRYXX_GET_ARG_NUMBER_OPT(index, default) (args_cnt > index ? jerry_get_number_value(args_p[index]) : default)
 #define JERRYXX_GET_ARG_BOOLEAN_OPT(index, default) (args_cnt > index ? jerry_get_boolean_value(args_p[index]) : default)
+#define JERRYXX_GET_ARG_STRING_AS_CHAR(index, name) \
+  jerry_size_t name##_sz = jerry_get_string_size(args_p[0]); \
+  char name[name##_sz + 1]; \
+  jerry_string_to_char_buffer(args_p[0], name, name##_sz); \
+  name[name##_sz] = '\0';
 
-void jerryxx_set_propery_number(jerry_value_t object, const char *name, double value);
-void jerryxx_set_propery_object(jerry_value_t object, const char *name, jerry_value_t obj);
-void jerryxx_set_propery_function(jerry_value_t object, const char *name, jerry_external_handler_t fn);
+void jerryxx_set_property_number(jerry_value_t object, const char *name, double value);
+void jerryxx_set_property_object(jerry_value_t object, const char *name, jerry_value_t obj);
+void jerryxx_set_property_string(jerry_value_t object, const char *name, char *value);
+void jerryxx_set_property_function(jerry_value_t object, const char *name, jerry_external_handler_t fn);
 
 void jerryxx_print_value(const char *format, jerry_value_t value);
 

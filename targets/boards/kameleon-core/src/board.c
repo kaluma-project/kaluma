@@ -19,6 +19,21 @@
  * SOFTWARE.
  */
 
-#include "jerryscript.h"
+#include <stdint.h>
 
-jerry_value_t module_console_init();
+const char board_arch[] = "arm";
+const char board_platform[] = "unknown";
+const char board_name[] = "stm32f4discovery";
+
+const uint8_t pin_num = 16;
+const uint8_t led_num = 1;
+const uint8_t switch_num = 1;
+const uint8_t pwm_num = 2;
+const uint8_t adc_num = 2;
+const uint8_t i2c_num = 1;
+const uint8_t spi_num = 1;
+const uint8_t uart_num = 1;
+const uint8_t led_pins[] = { 17 };
+const uint8_t switch_pins[] = { 18 };
+const uint8_t pwm_pins[] = { 0 };
+const uint8_t adc_pins[] = { 0 };

@@ -26,7 +26,7 @@
 #include "jerryxx.h"
 #include "tty.h"
 
-void jerryxx_set_propery_number(jerry_value_t object, const char *name, double value) {
+void jerryxx_set_property_number(jerry_value_t object, const char *name, double value) {
   jerry_value_t val = jerry_create_number(value);
   jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
   jerry_value_t ret = jerry_set_property (object, prop, val);
@@ -35,14 +35,23 @@ void jerryxx_set_propery_number(jerry_value_t object, const char *name, double v
   jerry_release_value(val);
 }
 
-void jerryxx_set_propery_object(jerry_value_t object, const char *name, jerry_value_t obj) {
+void jerryxx_set_property_object(jerry_value_t object, const char *name, jerry_value_t obj) {
   jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
   jerry_value_t ret = jerry_set_property (object, prop, obj);
   jerry_release_value(ret);
   jerry_release_value (prop);
 }
 
-void jerryxx_set_propery_function(jerry_value_t object, const char *name, jerry_external_handler_t fn) {
+void jerryxx_set_property_string(jerry_value_t object, const char *name, char *value) {
+  jerry_value_t val = jerry_create_string((const jerry_char_t *) value);
+  jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
+  jerry_value_t ret = jerry_set_property (object, prop, val);
+  jerry_release_value(ret);
+  jerry_release_value (prop);
+  jerry_release_value(val);
+}
+
+void jerryxx_set_property_function(jerry_value_t object, const char *name, jerry_external_handler_t fn) {
   jerry_value_t ext_fn = jerry_create_external_function(fn);
   jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
   jerry_value_t ret = jerry_set_property (object, prop, ext_fn);

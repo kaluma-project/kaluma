@@ -21,4 +21,4 @@
 
 #include "jerryscript.h"
 
-jerry_value_t module_timers_init();
+jerry_value_t module_pwm_init();
