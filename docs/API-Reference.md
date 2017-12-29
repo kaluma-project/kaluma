@@ -21,6 +21,13 @@ Digital I/O
 * `digitalRead(pin) -> number`
 * `digitalWrite(pin, value)`
 * `digitalToggle(pin)`
+* `setWatch(callback, pin, ?mode=CHANGE, ?debounce=0) -> id` _(from gpio)_
+  * `callback {Function: () -> undefined}`
+  * `pin {number}`
+  * `?mode=CHANGE {number}` -- RISING | FALLING | CHANGE
+  * `?debounce=0 {number}`
+  * Returns an `id {number}` for watcher.
+* `clearWatch(id)`
 
 Analog I/O
 
@@ -30,18 +37,8 @@ Analog I/O
 * `analogWrite(pin, value)` -- (How frequency will be set?)
   * `pin {number}`
   * `value {number}` -- Duty cycle between 0 and 1.
-
-Additional I/O
-
 * `tone(pin, frequency, duration, ?duty)`
 * `noTone(pin)`
-* `setWatch(callback, pin, ?mode=CHANGE, ?debounce=0) -> id` _(from gpio)_
-  * `callback {Function: () -> undefined}`
-  * `pin {number}`
-  * `?mode=CHANGE {number}` -- RISING | FALLING | CHANGE
-  * `?debounce=0 {number}`
-  * Returns an `id {number}` for watcher.
-* `clearWatch(id)`
 
 Timers
 
