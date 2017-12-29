@@ -29,8 +29,7 @@
 #include "runtime.h"
 #include "jerryscript.h"
 #include "utils.h"
-
-#define CONFIG_KAMELEON_VERSION "0.1.0"
+#include "kameleon_config.h"
 
 // --------------------------------------------------------------------------
 // FORWARD DECLARATIONS

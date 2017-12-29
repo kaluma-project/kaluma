@@ -29,6 +29,7 @@
 #include "io.h"
 #include "gpio.h"
 #include "board.h"
+#include "kameleon_config.h"
 
 static void register_global_objects() {
   jerry_value_t global_object = jerry_get_global_object ();
@@ -306,7 +307,7 @@ static void register_global_process_object() {
   jerry_value_t process = jerry_create_object();
   jerryxx_set_property_string(process, "arch", board_arch);
   jerryxx_set_property_string(process, "platform", board_platform);
-  // TODO: jerryxx_set_property_string(process, "version", version);
+  jerryxx_set_property_string(process, "version", CONFIG_KAMELEON_VERSION);
 
   /* Add `process.binding` function and it's properties */
   jerry_value_t binding_fn = jerry_create_external_function(process_binding_fn);
