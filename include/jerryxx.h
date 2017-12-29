@@ -66,6 +66,11 @@
     return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg); \
   }
 
+#define JERRYXX_CHECK_INDEX_RANGE(name, lowerbound, upperbound) \
+  if (name < (lowerbound) || name > (upperbound)) { \
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) "Index out of range"); \
+  }
+
 #define JERRYXX_GET_ARG_COUNT args_cnt
 #define JERRYXX_GET_ARG(index) args_p[index]
 #define JERRYXX_GET_ARG_NUMBER(index) jerry_get_number_value(args_p[index])

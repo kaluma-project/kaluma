@@ -35,5 +35,5 @@ const uint8_t spi_num = 1;
 const uint8_t uart_num = 1;
 const uint8_t led_pins[] = { 17 };
 const uint8_t switch_pins[] = { 18 };
-const uint8_t pwm_pins[] = { 0 };
-const uint8_t adc_pins[] = { 0 };
+const uint8_t pwm_pins[] = { 2, 3 };
+const uint8_t adc_pins[] = { 0, 1 };

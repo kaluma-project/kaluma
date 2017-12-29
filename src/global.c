@@ -353,10 +353,49 @@ static void register_global_process_object() {
 /*                                                                          */
 /****************************************************************************/
 
+JERRYXX_FUN(board_led_fn) {
+  JERRYXX_CHECK_ARG_NUMBER_OPT(0, "index");
+  int index = (int) JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
+  JERRYXX_CHECK_INDEX_RANGE(index, 0, led_num-1)
+  return jerry_create_number(led_pins[index]);
+}
+
+JERRYXX_FUN(board_switch_fn) {
+  JERRYXX_CHECK_ARG_NUMBER_OPT(0, "index");
+  int index = (int) JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
+  JERRYXX_CHECK_INDEX_RANGE(index, 0, switch_num-1)
+  return jerry_create_number(switch_pins[index]);
+}
+
+JERRYXX_FUN(board_pwm_fn) {
+  JERRYXX_CHECK_ARG_NUMBER_OPT(0, "index");
+  int index = (int) JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
+  JERRYXX_CHECK_INDEX_RANGE(index, 0, pwm_num-1)
+  return jerry_create_number(pwm_pins[index]);
+}
+
+JERRYXX_FUN(board_adc_fn) {
+  JERRYXX_CHECK_ARG_NUMBER_OPT(0, "index");
+  int index = (int) JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
+  JERRYXX_CHECK_INDEX_RANGE(index, 0, adc_num-1)
+  return jerry_create_number(adc_pins[index]);
+}
+
 static void register_global_board_object() {
   jerry_value_t board = jerry_create_object();
   jerryxx_set_property_string(board, "name", board_name);
-  // ...
+  jerryxx_set_property_number(board, "PIN_NUM", pin_num);
+  jerryxx_set_property_number(board, "LED_NUM", led_num);
+  jerryxx_set_property_number(board, "SWITCH_NUM", switch_num);
+  jerryxx_set_property_number(board, "PWM_NUM", pwm_num);
+  jerryxx_set_property_number(board, "ADC_NUM", adc_num);
+  jerryxx_set_property_number(board, "I2C_NUM", i2c_num);
+  jerryxx_set_property_number(board, "SPI_NUM", spi_num);
+  jerryxx_set_property_number(board, "UART_NUM", uart_num);
+  jerryxx_set_property_function(board, "led", board_led_fn);
+  jerryxx_set_property_function(board, "switch", board_switch_fn);
+  jerryxx_set_property_function(board, "pwm", board_pwm_fn);
+  jerryxx_set_property_function(board, "adc", board_adc_fn);
   jerry_value_t global = jerry_get_global_object();
   jerryxx_set_property_object(global, "board", board);
   jerry_release_value(board);
