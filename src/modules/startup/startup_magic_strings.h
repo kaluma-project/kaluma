@@ -19,44 +19,12 @@
  * SOFTWARE.
  */
 
-#include <string.h>
-#include "tty.h"
-#include "flash.h"
-#include "jerryscript.h"
-#include "jerryscript-ext/handler.h"
-#include "global.h"
-#include "repl.h"
-#include "runtime.h"
-#include "kameleon_magic_strings.h"
+#ifndef __STARTUP_MAGIC_STRINGS_H
+#define __STARTUP_MAGIC_STRINGS_H
 
-// --------------------------------------------------------------------------
-// PUBLIC FUNCTIONS
-// --------------------------------------------------------------------------
+#define MSTR_STARTUP_MODULE "Module"
+#define MSTR_STARTUP_LOAD_BUILTIN "loadBuiltin"
+#define MSTR_STARTUP_PRINT "print"
+#define MSTR_STARTUP_REQUIRE "require"
 
-void runtime_init(bool run_main) {
-  jerry_init (JERRY_INIT_EMPTY | JERRY_INIT_MEM_STATS);
-  jerry_register_magic_strings (magic_string_items, num_magic_string_items, magic_string_lengths);
-  global_init();
-  jerry_gc();
-  if (run_main) {
-    runtime_run_main();
-  }
-}
-
-void runtime_deinit() {
-  jerry_cleanup ();  
-}
-
-void runtime_run_main() {
-  uint32_t size = flash_get_data_size();
-  if (size > 0) {
-    uint8_t *script = flash_get_data();
-    jerry_value_t parsed_code = jerry_parse (script, size, false);
-    if (!jerry_value_has_error_flag (parsed_code))
-    {
-      jerry_value_t ret_value = jerry_run (parsed_code);
-      jerry_release_value (ret_value);
-    }
-    jerry_release_value (parsed_code);  
-  }
-}
+#endif /* __STARTUP_MAGIC_STRINGS_H */

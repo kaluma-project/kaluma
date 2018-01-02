@@ -25,6 +25,7 @@
 #include "global.h"
 #include "jerryxx.h"
 #include "kameleon_modules.h"
+#include "magic_strings.h"
 #include "repl.h"
 #include "io.h"
 #include "gpio.h"
@@ -33,7 +34,7 @@
 
 static void register_global_objects() {
   jerry_value_t global_object = jerry_get_global_object ();
-  jerry_value_t prop_name = jerry_create_string ((const jerry_char_t *) "global");
+  jerry_value_t prop_name = jerry_create_string ((const jerry_char_t *) MSTR_GLOBAL);
   jerry_set_property (global_object, prop_name, global_object);
   jerry_release_value (prop_name);
   jerry_release_value (global_object);
@@ -122,19 +123,19 @@ JERRYXX_FUN(clear_watch_fn) {
 
 static void register_global_digital_io() {
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property_number(global, "HIGH", GPIO_HIGH);
-  jerryxx_set_property_number(global, "LOW", GPIO_LOW);
-  jerryxx_set_property_number(global, "INPUT", (double) GPIO_IO_MODE_INPUT);
-  jerryxx_set_property_number(global, "OUTPUT", (double) GPIO_IO_MODE_OUTPUT);
-  jerryxx_set_property_number(global, "CHANGE", (double) IO_WATCH_MODE_CHANGE);
-  jerryxx_set_property_number(global, "RISING", (double) IO_WATCH_MODE_RISING);
-  jerryxx_set_property_number(global, "FALLING", (double) IO_WATCH_MODE_FALLING);
-  jerryxx_set_property_function(global, "pinMode", pin_mode_fn);
-  jerryxx_set_property_function(global, "digitalRead", digital_read_fn);
-  jerryxx_set_property_function(global, "digitalWrite", digital_write_fn);
-  jerryxx_set_property_function(global, "digitalToggle", digital_toggle_fn);
-  jerryxx_set_property_function(global, "setWatch", set_watch_fn);
-  jerryxx_set_property_function(global, "clearWatch", clear_watch_fn);
+  jerryxx_set_property_number(global, MSTR_HIGH, GPIO_HIGH);
+  jerryxx_set_property_number(global, MSTR_LOW, GPIO_LOW);
+  jerryxx_set_property_number(global, MSTR_INPUT, (double) GPIO_IO_MODE_INPUT);
+  jerryxx_set_property_number(global, MSTR_OUTPUT, (double) GPIO_IO_MODE_OUTPUT);
+  jerryxx_set_property_number(global, MSTR_CHANGE, (double) IO_WATCH_MODE_CHANGE);
+  jerryxx_set_property_number(global, MSTR_RISING, (double) IO_WATCH_MODE_RISING);
+  jerryxx_set_property_number(global, MSTR_FALLING, (double) IO_WATCH_MODE_FALLING);
+  jerryxx_set_property_function(global, MSTR_PIN_MODE, pin_mode_fn);
+  jerryxx_set_property_function(global, MSTR_DIGITAL_READ, digital_read_fn);
+  jerryxx_set_property_function(global, MSTR_DIGITAL_WRITE, digital_write_fn);
+  jerryxx_set_property_function(global, MSTR_DIGITAL_TOGGLE, digital_toggle_fn);
+  jerryxx_set_property_function(global, MSTR_SET_WATCH, set_watch_fn);
+  jerryxx_set_property_function(global, MSTR_CLEAR_WATCH, clear_watch_fn);
   jerry_release_value(global);
 }
 
@@ -209,12 +210,12 @@ JERRYXX_FUN(millis_fn) {
 
 static void register_global_timers() {
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property_function(global, "setTimeout", set_timeout_fn);
-  jerryxx_set_property_function(global, "setInterval", set_interval_fn);
-  jerryxx_set_property_function(global, "clearTimeout", clear_timer_fn);
-  jerryxx_set_property_function(global, "clearInterval", clear_timer_fn);
-  jerryxx_set_property_function(global, "delay", delay_fn);
-  jerryxx_set_property_function(global, "millis", millis_fn);
+  jerryxx_set_property_function(global, MSTR_SET_TIMEOUT, set_timeout_fn);
+  jerryxx_set_property_function(global, MSTR_SET_INTERVAL, set_interval_fn);
+  jerryxx_set_property_function(global, MSTR_CLEAR_TIMEOUT, clear_timer_fn);
+  jerryxx_set_property_function(global, MSTR_CLEAR_INTERVAL, clear_timer_fn);
+  jerryxx_set_property_function(global, MSTR_DELAY, delay_fn);
+  jerryxx_set_property_function(global, MSTR_MILLIS, millis_fn);
   jerry_release_value(global);
 }
 
@@ -261,10 +262,10 @@ JERRYXX_FUN(console_error_fn) {
 
 static void register_global_console_object() {
   jerry_value_t console = jerry_create_object();
-  jerryxx_set_property_function(console, "log", console_log_fn);
-  jerryxx_set_property_function(console, "error", console_error_fn);
+  jerryxx_set_property_function(console, MSTR_LOG, console_log_fn);
+  jerryxx_set_property_function(console, MSTR_ERROR, console_error_fn);
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property_object(global, "console", console);
+  jerryxx_set_property_object(global, MSTR_CONSOLE, console);
   jerry_release_value(console);
   jerry_release_value(global);
 }
@@ -305,13 +306,13 @@ JERRYXX_FUN(process_get_builtin_module_fn) {
 
 static void register_global_process_object() {
   jerry_value_t process = jerry_create_object();
-  jerryxx_set_property_string(process, "arch", board_arch);
-  jerryxx_set_property_string(process, "platform", board_platform);
-  jerryxx_set_property_string(process, "version", CONFIG_KAMELEON_VERSION);
+  jerryxx_set_property_string(process, MSTR_ARCH, board_arch);
+  jerryxx_set_property_string(process, MSTR_PLATFORM, board_platform);
+  jerryxx_set_property_string(process, MSTR_VERSION, CONFIG_KAMELEON_VERSION);
 
   /* Add `process.binding` function and it's properties */
   jerry_value_t binding_fn = jerry_create_external_function(process_binding_fn);
-  jerry_value_t binding_prop = jerry_create_string((const jerry_char_t *) "binding");
+  jerry_value_t binding_prop = jerry_create_string((const jerry_char_t *) MSTR_BINDING);
   jerry_set_property (process, binding_prop, binding_fn);
   jerry_release_value (binding_prop);
   for (int i = 0; i < builtin_modules_length; i++) {
@@ -332,17 +333,17 @@ static void register_global_process_object() {
     jerry_release_value(ret);
     jerry_release_value(value);
   }
-  jerry_value_t prop_buildin_modules = jerry_create_string((const jerry_char_t *) "builtin_modules");
+  jerry_value_t prop_buildin_modules = jerry_create_string((const jerry_char_t *) MSTR_BUILTIN_MODULES);
   jerry_set_property(process, prop_buildin_modules, array_modules);
   jerry_release_value(prop_buildin_modules);
   jerry_release_value(array_modules);
 
   /* Add `process.getBuiltinModule` function */
-  jerryxx_set_property_function(process, "getBuiltinModule", process_get_builtin_module_fn);
+  jerryxx_set_property_function(process, MSTR_GET_BUILTIN_MODULE, process_get_builtin_module_fn);
 
   /* Register 'process' object to global */
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property_object(global, "process", process);  
+  jerryxx_set_property_object(global, MSTR_PROCESS, process);  
 
   jerry_release_value(process);
   jerry_release_value(global);
@@ -384,21 +385,21 @@ JERRYXX_FUN(board_adc_fn) {
 
 static void register_global_board_object() {
   jerry_value_t board = jerry_create_object();
-  jerryxx_set_property_string(board, "name", board_name);
-  jerryxx_set_property_number(board, "PIN_NUM", pin_num);
-  jerryxx_set_property_number(board, "LED_NUM", led_num);
-  jerryxx_set_property_number(board, "SWITCH_NUM", switch_num);
-  jerryxx_set_property_number(board, "PWM_NUM", pwm_num);
-  jerryxx_set_property_number(board, "ADC_NUM", adc_num);
-  jerryxx_set_property_number(board, "I2C_NUM", i2c_num);
-  jerryxx_set_property_number(board, "SPI_NUM", spi_num);
-  jerryxx_set_property_number(board, "UART_NUM", uart_num);
-  jerryxx_set_property_function(board, "led", board_led_fn);
-  jerryxx_set_property_function(board, "switch", board_switch_fn);
-  jerryxx_set_property_function(board, "pwm", board_pwm_fn);
-  jerryxx_set_property_function(board, "adc", board_adc_fn);
+  jerryxx_set_property_string(board, MSTR_NAME, board_name);
+  jerryxx_set_property_number(board, MSTR_PIN_NUM, pin_num);
+  jerryxx_set_property_number(board, MSTR_LED_NUM, led_num);
+  jerryxx_set_property_number(board, MSTR_SWITCH_NUM, switch_num);
+  jerryxx_set_property_number(board, MSTR_PWM_NUM, pwm_num);
+  jerryxx_set_property_number(board, MSTR_ADC_NUM, adc_num);
+  jerryxx_set_property_number(board, MSTR_I2C_NUM, i2c_num);
+  jerryxx_set_property_number(board, MSTR_SPI_NUM, spi_num);
+  jerryxx_set_property_number(board, MSTR_UART_NUM, uart_num);
+  jerryxx_set_property_function(board, MSTR_LED, board_led_fn);
+  jerryxx_set_property_function(board, MSTR_SWITCH, board_switch_fn);
+  jerryxx_set_property_function(board, MSTR_PWM, board_pwm_fn);
+  jerryxx_set_property_function(board, MSTR_ADC, board_adc_fn);
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property_object(global, "board", board);
+  jerryxx_set_property_object(global, MSTR_BOARD, board);
   jerry_release_value(board);
   jerry_release_value(global);
 }

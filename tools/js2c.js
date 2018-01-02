@@ -5,6 +5,7 @@ const path = require('path')
 const childProcess = require('child_process')
 const mustache = require('mustache')
 const minimist = require('minimist')
+const magicStrings = require('./magic_strings')
 
 var modulesPath = path.join(__dirname, '../src/modules')
 var wrappers = []
@@ -30,7 +31,8 @@ function generateAll() {
   generateSnapshots()
   generateSources()
   removeWrappers()
-  removeSnapshots()  
+  removeSnapshots()
+  magicStrings.generateMagicStrings(modules)
 }
 
 function generateSnapshots() {
