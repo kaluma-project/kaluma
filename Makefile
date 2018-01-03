@@ -218,11 +218,6 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)"
 # LDFLAGS
 #######################################
 
-# link script
-TARGET_LDSCRIPT = \
-$(TARGET_DIR)/src/STM32F407VGTx_FLASH.ld
-#$(TARGET_DIR)/src/STM32F411RETx_FLASH.ld
-
 # libraries
 LIBS = -ljerry-core -ljerry-ext -lc -lnosys -lm
 LIBDIR = -L$(JERRY_LIBDIR)
