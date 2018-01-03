@@ -23,7 +23,7 @@
 
 const char board_arch[] = "arm";
 const char board_platform[] = "unknown";
-const char board_name[] = "stm32f4discovery";
+const char board_name[] = "kameleon-core";
 
 const uint8_t pin_num = 16;
 const uint8_t led_num = 1;
