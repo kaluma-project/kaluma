@@ -57,13 +57,6 @@ $(SHARED_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c \
 $(SHARED_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c \
 $(SHARED_DIR)/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c \
 
-ifeq ($(TARGET), kameleon-core)
-$(SHARED_DIR)/middlewares/fatfs/ff13a/source/ff.c \
-$(SHARED_DIR)/middlewares/fatfs/ff13a/source/diskio.c \
-$(SHARED_DIR)/middlewares/fatfs/ff13a/source/ffunicode.c \
-$(SHARED_DIR)/middlewares/fatfs/fs_interface.c
-endif
-
 TARGET_INC += \
 -I$(TARGET_DIR)/include \
 -I$(SHARED_DIR)/drivers/STM32F4xx_HAL_Driver/Inc \
@@ -74,6 +67,8 @@ TARGET_INC += \
 -I$(SHARED_DIR)/middlewares/fatfs \
 -I$(SHARED_DIR)/drivers/CMSIS/Device/ST/STM32F4xx/Include \
 -I$(SHARED_DIR)/drivers/CMSIS/Include
+
+TARGET_LDSCRIPT = $(TARGET_DIR)/src/STM32F407VGTx_FLASH.ld
 
 # -----------------------------------------------------------------------------
 # Kameleon modules

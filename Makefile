@@ -219,14 +219,14 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)"
 #######################################
 
 # link script
-LDSCRIPT = \
+TARGET_LDSCRIPT = \
 $(TARGET_DIR)/src/STM32F407VGTx_FLASH.ld
 #$(TARGET_DIR)/src/STM32F411RETx_FLASH.ld
 
 # libraries
 LIBS = -ljerry-core -ljerry-ext -lc -lnosys -lm
 LIBDIR = -L$(JERRY_LIBDIR)
-LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+LDFLAGS = $(MCU) -specs=nano.specs -T$(TARGET_LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # -----------------------------------------------------------------------------
 # Default action: build all

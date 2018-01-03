@@ -70,6 +70,8 @@ TARGET_INC += \
 -I$(SHARED_DIR)/drivers/CMSIS/Device/ST/STM32F4xx/Include \
 -I$(SHARED_DIR)/drivers/CMSIS/Include
 
+TARGET_LDSCRIPT = $(TARGET_DIR)/src/STM32F411RETx_FLASH.ld
+
 # -----------------------------------------------------------------------------
 # Kameleon modules
 # -----------------------------------------------------------------------------
