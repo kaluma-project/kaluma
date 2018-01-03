@@ -9,7 +9,7 @@
 
 #include <string.h>
 #include "fs_interface.h"
-#include "stm32f4xx_hal.h"
+#include "stm32f4xx.h"
 #include "is25lq040b.h"
 
 static uint8_t is_sector_erased(uint32_t sector)

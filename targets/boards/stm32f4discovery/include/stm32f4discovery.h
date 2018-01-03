@@ -19,25 +19,22 @@
  * SOFTWARE.
  */
 
-#include <stdint.h>
-#include "stm32f4xx.h"
+#ifndef __STM32F4DISCOVERY_H
+#define __STM32F4DISCOVERY_H
 
-uint8_t button_is_pressed() {
-  uint8_t pressed = 0;
-  GPIO_PinState state = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
-  if (state == GPIO_PIN_SET) {
-    pressed = 1;
-  }
-  return pressed;
-}
+#define PLL_M 8
+#define PLL_N 336
+#define PLL_Q 7
 
-void button_test() {
-  while(1) {
-    if (button_is_pressed()) {
-      tty_printf("button is pressed \r\n");
-    } else {
-      tty_printf("button is not pressed \r\n");
-    }
-    delay(1000);
-  }    
-}
+#define FLASH_SIZE (1024 * 1024)
+#define FLASH_BASE_ADDR (0x08000000)
+
+#define SRAM_SIZE (128 * 1024)
+#define SRAM_BASE_ADDR (0x20000000)
+
+#define CCM_SIZE (64 * 1024)
+#define CCM_BASE_ADDR (0x10000000)
+
+#define GPIO_NUM  80
+
+#endif /* __STM32F4DISCOVERY_H */

@@ -20,7 +20,8 @@
  */
 
 #include <stdint.h>
-#include "stm32f4xx_hal.h"
+#include "stm32f4xx.h"
+#include "stm32f4discovery.h"
 #include "gpio.h"
 
 /**
@@ -32,49 +33,107 @@ static struct {
     GPIO_TypeDef * port;
     uint32_t pin;
  } gpio_port_pin[] = {
-   {GPIOA, GPIO_PIN_1},     // 0
-   {GPIOA, GPIO_PIN_4},     // 1
-   {GPIOA, GPIO_PIN_5},     // 2
-   {GPIOA, GPIO_PIN_6},     // 3
-   {GPIOA, GPIO_PIN_7},     // 4
-   {GPIOA, GPIO_PIN_9},     // 5
-   {GPIOA, GPIO_PIN_10},    // 6
-   {GPIOA, GPIO_PIN_15},    // 7
+   {GPIOC, GPIO_PIN_6},     // 0
+   {GPIOC, GPIO_PIN_8},     // 1
+   {GPIOC, GPIO_PIN_9},     // 2
+   {GPIOA, GPIO_PIN_8},     // 3
+   {GPIOA, GPIO_PIN_15},    // 4
+   {GPIOC, GPIO_PIN_11},    // 5
+   {GPIOD, GPIO_PIN_0},     // 6
+   {GPIOD, GPIO_PIN_1},     // 7
 
-   {GPIOB, GPIO_PIN_3},     // 8
-   {GPIOB, GPIO_PIN_4},     // 9
-   {GPIOB, GPIO_PIN_6},     // 10
-   {GPIOB, GPIO_PIN_7},     // 11
-   {GPIOC, GPIO_PIN_0},     // 12
-   {GPIOC, GPIO_PIN_1},     // 13
-   {GPIOC, GPIO_PIN_2},     // 14
-   {GPIOC, GPIO_PIN_3},     // 15
+   {GPIOD, GPIO_PIN_2},     // 8
+   {GPIOD, GPIO_PIN_3},     // 9
+   {GPIOD, GPIO_PIN_6},     // 10
+   {GPIOD, GPIO_PIN_7},     // 11
+   {GPIOB, GPIO_PIN_4},     // 12
+   {GPIOB, GPIO_PIN_5},     // 13
+   {GPIOB, GPIO_PIN_7},     // 14
+   {GPIOB, GPIO_PIN_8},     // 15
 
-   {GPIOA, GPIO_PIN_0},     // 16
-   {GPIOB, GPIO_PIN_13},    // 17 (LED)
-   {GPIOC, GPIO_PIN_8},     // 18 (KEY)
+   {GPIOE, GPIO_PIN_2},     // 16
+   {GPIOE, GPIO_PIN_4},     // 17
+   {GPIOE, GPIO_PIN_5},     // 18
+   {GPIOE, GPIO_PIN_6},     // 19
+   {GPIOC, GPIO_PIN_13},    // 20
+   {GPIOC, GPIO_PIN_14},    // 21
+   {GPIOC, GPIO_PIN_15},    // 22
+   {GPIOC, GPIO_PIN_1},     // 23
+   
+   {GPIOC, GPIO_PIN_2},     // 24
+   {GPIOA, GPIO_PIN_1},     // 25
+   {GPIOA, GPIO_PIN_3},     // 26
+   {GPIOA, GPIO_PIN_2},     // 27
+   {GPIOC, GPIO_PIN_5},     // 28
+   {GPIOC, GPIO_PIN_4},     // 29
+   {GPIOB, GPIO_PIN_1},     // 30
+   {GPIOB, GPIO_PIN_0},     // 31
+   
+   {GPIOB, GPIO_PIN_2},     // 32
+   {GPIOE, GPIO_PIN_7},     // 33
+   {GPIOE, GPIO_PIN_8},     // 34
+   {GPIOE, GPIO_PIN_9},     // 35
+   {GPIOE, GPIO_PIN_10},    // 36
+   {GPIOE, GPIO_PIN_11},    // 37
+   {GPIOE, GPIO_PIN_12},    // 38
+   {GPIOE, GPIO_PIN_13},    // 39
+
+   {GPIOE, GPIO_PIN_14},    // 40
+   {GPIOE, GPIO_PIN_15},    // 41
+   {GPIOB, GPIO_PIN_11},    // 42
+   {GPIOB, GPIO_PIN_12},    // 43
+   {GPIOB, GPIO_PIN_13},    // 44
+   {GPIOB, GPIO_PIN_14},    // 45
+   {GPIOB, GPIO_PIN_15},    // 46
+   {GPIOD, GPIO_PIN_8},     // 47
+   
+   {GPIOD, GPIO_PIN_9},     // 48
+   {GPIOD, GPIO_PIN_10},    // 49
+   {GPIOD, GPIO_PIN_11},    // 50 
+   {GPIOC, GPIO_PIN_7},     // 51 (START OF USED PINS)
+   {GPIOA, GPIO_PIN_9},     // 52
+   {GPIOA, GPIO_PIN_10},    // 53
+   {GPIOA, GPIO_PIN_13},    // 54
+   {GPIOA, GPIO_PIN_14},    // 55
+   
+   {GPIOC, GPIO_PIN_10},    // 56
+   {GPIOC, GPIO_PIN_12},    // 57
+   {GPIOD, GPIO_PIN_4},     // 58
+   {GPIOD, GPIO_PIN_5},     // 59
+   {GPIOB, GPIO_PIN_3},     // 60
+   {GPIOB, GPIO_PIN_6},     // 61
+   {GPIOB, GPIO_PIN_9},     // 62
+   {GPIOE, GPIO_PIN_0},     // 63
+   
+   {GPIOE, GPIO_PIN_1},     // 64
+   {GPIOE, GPIO_PIN_3},     // 65
+   {GPIOH, GPIO_PIN_0},     // 66
+   {GPIOH, GPIO_PIN_1},     // 67
+   {GPIOC, GPIO_PIN_0},     // 68
+   {GPIOC, GPIO_PIN_3},     // 69
+   {GPIOA, GPIO_PIN_0},     // 70 (BUTTON)
+   {GPIOA, GPIO_PIN_5},     // 71
+   
+   {GPIOA, GPIO_PIN_4},     // 72
+   {GPIOA, GPIO_PIN_7},     // 73
+   {GPIOA, GPIO_PIN_6},     // 74
+   {GPIOB, GPIO_PIN_10},    // 75
+   {GPIOD, GPIO_PIN_12},    // 76 (LED4)
+   {GPIOD, GPIO_PIN_13},    // 77 (LED3)
+   {GPIOD, GPIO_PIN_14},    // 78 (LED5)
+   {GPIOD, GPIO_PIN_15},    // 79 (LED6)
 };
 
 /** 
 */
 void gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode) {
-  GPIO_InitTypeDef GPIO_InitStruct;
-  
   assert_param(pin < GPIO_NUM);
   assert_param(mode==GPIO_IO_MODE_INPUT || mode==GPIO_IO_MODE_OUTPUT);
 
+  GPIO_InitTypeDef GPIO_InitStruct;
   GPIO_InitStruct.Pin = gpio_port_pin[pin].pin;
   GPIO_InitStruct.Mode = (mode == GPIO_IO_MODE_INPUT) ?  GPIO_MODE_INPUT:GPIO_MODE_OUTPUT_PP;
-
-  if (mode==GPIO_IO_MODE_OUTPUT) {
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-  } else {
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    /* if the pin is the key (should be modified in the future) */
-    if (pin == 18) {
-      GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-    } 
-  }   
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(gpio_port_pin[pin].port, &GPIO_InitStruct);   
 }
@@ -136,22 +195,36 @@ void gpio_spi_config(spi_clk_mode_t mode, uint32_t prescaler, uint32_t cs_pin) {
 
 
 void gpio_test() {
-#if 0
-  uint8_t pin = 17;
-  gpio_set_io_mode(pin, GPIO_IO_MODE_OUTPUT);
+#if 1
+  gpio_set_io_mode(76, GPIO_IO_MODE_OUTPUT);
+  gpio_set_io_mode(77, GPIO_IO_MODE_OUTPUT);
+  gpio_set_io_mode(78, GPIO_IO_MODE_OUTPUT);
+  gpio_set_io_mode(79, GPIO_IO_MODE_OUTPUT);
 
   while(1) {
     
-    gpio_write(pin, GPIO_HIGH);
+    gpio_write(77, GPIO_HIGH);
     delay(1000);
 
-    gpio_write(pin, GPIO_LOW);
+    gpio_write(76, GPIO_HIGH);
     delay(1000);
 
-    gpio_toggle(pin);
+    gpio_write(78, GPIO_HIGH);
     delay(1000);
 
-    gpio_toggle(pin);
+    gpio_write(79, GPIO_HIGH);
+    delay(1000);
+    
+    gpio_write(77, GPIO_LOW);
+    delay(1000);
+
+    gpio_write(76, GPIO_LOW);
+    delay(1000);
+
+    gpio_write(78, GPIO_LOW);
+    delay(1000);
+
+    gpio_write(79, GPIO_LOW);
     delay(1000);
   }
 

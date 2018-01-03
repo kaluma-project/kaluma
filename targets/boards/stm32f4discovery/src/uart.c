@@ -22,81 +22,17 @@
 #include "stm32f4xx.h"
 #include "uart.h"
 
-static UART_HandleTypeDef huart1;
 static UART_HandleTypeDef huart2;
+static UART_HandleTypeDef huart3;
 
-static UART_HandleTypeDef * uart_handle[] = {&huart1, &huart2};
-static USART_TypeDef * uart_ch[] = {USART1, USART2};
+static UART_HandleTypeDef * uart_handle[] = {&huart2, &huart3};
+static USART_TypeDef * uart_ch[] = {USART2, USART3};
 
 static const uint32_t uart_data_length[] = { UART_WORDLENGTH_8B, UART_WORDLENGTH_9B };
 static const uint32_t uart_parity[] = { UART_PARITY_NONE, UART_PARITY_ODD, UART_PARITY_EVEN };
 static const uint32_t uart_stop_bits[] = { UART_STOPBITS_1, UART_STOPBITS_2 };
 static const uint32_t uart_hw_control[] = { UART_HWCONTROL_NONE, UART_HWCONTROL_RTS, UART_HWCONTROL_CTS, UART_HWCONTROL_RTS_CTS };
 
-/**
-*/
-void HAL_UART_MspInit(UART_HandleTypeDef* huart) {
-  GPIO_InitTypeDef GPIO_InitStruct;
-  if (huart->Instance==USART1) {
-    /* Peripheral clock enable */
-    __HAL_RCC_USART1_CLK_ENABLE();
-  
-    /**USART1 GPIO Configuration    
-    PA9     ------> USART1_TX
-    PA10     ------> USART1_RX 
-    */
-    GPIO_InitStruct.Pin = GPIO_PIN_9|GPIO_PIN_10;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-  } else if (huart->Instance==USART2) {
-    /* Peripheral clock enable */
-    __HAL_RCC_USART2_CLK_ENABLE();
-  
-    /**USART2 GPIO Configuration    
-    PA2     ------> USART2_TX
-    PA3     ------> USART2_RX 
-    */
-    GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_3;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-  }
-}
-
-/**
-*/
-void HAL_UART_MspDeInit(UART_HandleTypeDef* huart) {
-  if (huart->Instance==USART1) {
-    /* Peripheral clock disable */
-    __HAL_RCC_USART1_CLK_DISABLE();
-  
-    /**USART1 GPIO Configuration    
-    PA9     ------> USART1_TX
-    PA10     ------> USART1_RX 
-    */
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_9|GPIO_PIN_10);
-  } else if (huart->Instance==USART2) {
-    /* Peripheral clock disable */
-    __HAL_RCC_USART2_CLK_DISABLE();
-  
-    /**USART2 GPIO Configuration    
-    PA2     ------> USART2_TX
-    PA3     ------> USART2_RX 
-    */
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_2|GPIO_PIN_3);
-
-    /* USART2 DMA DeInit */
-    HAL_DMA_DeInit(huart->hdmarx);
-
-    /* USART2 interrupt DeInit */
-    HAL_NVIC_DisableIRQ(USART2_IRQn);
-  }
-}
 
 /** UART Initialization
 */
@@ -191,9 +127,10 @@ int uart_close(uint8_t bus) {
 void uart_test()
 {
   int d;
-  uint8_t bus = 0;
+  uint8_t bus = 1;
   uint8_t buf[5];
   uint32_t timeout = 1000;
+  uint32_t sec = 0;
 
   uart_open(bus, 115200, UART_DATA_8_BIT, UART_PARITY_TYPE_NONE, UART_STOP_1_BIT, UART_FLOW_NONE);
 
@@ -204,7 +141,7 @@ void uart_test()
       uart_write_char(bus, (uint8_t)d, timeout);
     }
     else {
-      tty_printf("timeout-1 \r\n");
+      tty_printf("timeout-1 [%d] \r\n", sec++);
     }
 
     d = uart_read(bus, buf, 1, timeout);
@@ -212,7 +149,7 @@ void uart_test()
       uart_write(bus, buf, 1, timeout);
     }
     else {
-      tty_printf("timeout-2 \r\n");
+      tty_printf("timeout-2 [%d] \r\n", sec++);
     }
   }
   uart_close(bus);

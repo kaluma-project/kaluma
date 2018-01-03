@@ -20,18 +20,29 @@
  */
 
 #include <stdint.h>
-#include "stm32f4xx_hal.h"
+#include "stm32f4xx.h"
 
 
 void led_on() {
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_SET);
 }
 
 void led_off() {
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
 }
 
 void led_toggle() {
-  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
+  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15);
 }
 
+void led_test() {
+
+  led_on();
+  led_off();
+  
+  while(1) {
+    led_toggle();
+    delay(1000);    
+  }
+   
+}

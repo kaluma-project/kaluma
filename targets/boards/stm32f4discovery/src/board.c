@@ -21,19 +21,19 @@
 
 #include <stdint.h>
 
-const char board_arch[] = "arm";
+const char board_arch[] = "cortex-m4";
 const char board_platform[] = "unknown";
 const char board_name[] = "stm32f4discovery";
 
-const uint8_t pin_num = 16;
-const uint8_t led_num = 1;
+const uint8_t pin_num = 100;
+const uint8_t led_num = 4;
 const uint8_t switch_num = 1;
-const uint8_t pwm_num = 2;
-const uint8_t adc_num = 2;
+const uint8_t pwm_num = 4;
+const uint8_t adc_num = 4;
 const uint8_t i2c_num = 1;
 const uint8_t spi_num = 1;
-const uint8_t uart_num = 1;
-const uint8_t led_pins[] = { 17 };
-const uint8_t switch_pins[] = { 18 };
-const uint8_t pwm_pins[] = { 2, 3 };
-const uint8_t adc_pins[] = { 0, 1 };
+const uint8_t uart_num = 2;
+const uint8_t led_pins[] = { 76, 77, 78, 79 };
+const uint8_t switch_pins[] = { 70 };
+const uint8_t pwm_pins[] = { 14, 15, 18, 45 };
+const uint8_t adc_pins[] = { 23, 28, 29, 31 };

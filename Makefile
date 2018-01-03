@@ -220,7 +220,8 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)"
 
 # link script
 LDSCRIPT = \
-$(TARGET_DIR)/src/STM32F411RETx_FLASH.ld
+$(TARGET_DIR)/src/STM32F407VGTx_FLASH.ld
+#$(TARGET_DIR)/src/STM32F411RETx_FLASH.ld
 
 # libraries
 LIBS = -ljerry-core -ljerry-ext -lc -lnosys -lm
