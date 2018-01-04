@@ -29,6 +29,8 @@
 #include "repl.h"
 #include "io.h"
 #include "gpio.h"
+#include "adc.h"
+#include "pwm.h"
 #include "board.h"
 #include "kameleon_config.h"
 
@@ -136,6 +138,64 @@ static void register_global_digital_io() {
   jerryxx_set_property_function(global, MSTR_DIGITAL_TOGGLE, digital_toggle_fn);
   jerryxx_set_property_function(global, MSTR_SET_WATCH, set_watch_fn);
   jerryxx_set_property_function(global, MSTR_CLEAR_WATCH, clear_watch_fn);
+  jerry_release_value(global);
+}
+
+/****************************************************************************/
+/*                                                                          */
+/*                           ANALOG I/O FUNCTIONS                           */
+/*                                                                          */
+/****************************************************************************/
+
+// TODO: Calibrate return value to 0.0 ~ 1.0;
+JERRYXX_FUN(analog_read_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
+  uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
+  adc_setup(pin);
+  uint32_t value = adc_read(pin);
+  return jerry_create_number(value);
+}
+
+// TODO: Calibrate value parameter (duty).
+// TODO: Determine the default frequency.
+JERRYXX_FUN(analog_write_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(1, "value");
+  uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
+  uint32_t value = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 50);
+  uint32_t freq = 490; // Default 490Hz
+  pwm_setup(pin, freq, value);
+  pwm_start(pin);
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(tone_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(1, "frequency");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(2, "duration");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(3, "duty");
+  uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
+  uint32_t frequency = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 100);
+  uint32_t duration = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 0);
+  uint32_t duty = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 50);
+  pwm_setup(pin, frequency, duty);
+  pwm_start(pin);
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(no_tone_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
+  uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
+  pwm_stop(pin);
+  return jerry_create_undefined();
+}
+
+static void register_global_analog_io() {
+  jerry_value_t global = jerry_get_global_object();
+  jerryxx_set_property_function(global, MSTR_ANALOG_READ, analog_read_fn);
+  jerryxx_set_property_function(global, MSTR_ANALOG_WRITE, analog_write_fn);
+  jerryxx_set_property_function(global, MSTR_TONE, tone_fn);
+  jerryxx_set_property_function(global, MSTR_NO_TONE, no_tone_fn);
   jerry_release_value(global);
 }
 
@@ -417,6 +477,7 @@ static void run_startup_module() {
 void global_init() {
   register_global_objects();
   register_global_digital_io();
+  register_global_analog_io();
   register_global_timers();
   register_global_console_object();
   register_global_process_object();
