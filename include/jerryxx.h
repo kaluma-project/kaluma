@@ -71,6 +71,7 @@
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) "Index out of range"); \
   }
 
+#define JERRYXX_GET_THIS this_val
 #define JERRYXX_GET_ARG_COUNT args_cnt
 #define JERRYXX_GET_ARG(index) args_p[index]
 #define JERRYXX_GET_ARG_NUMBER(index) jerry_get_number_value(args_p[index])
@@ -82,10 +83,14 @@
   jerry_string_to_char_buffer(args_p[0], name, name##_sz); \
   name[name##_sz] = '\0';
 
+#define JERRXX_CREATE_ERROR(errmsg) jerry_create_error(JERRY_ERROR_COMMON, (const jerry_char_t *) errmsg)
+
 void jerryxx_set_property_number(jerry_value_t object, const char *name, double value);
 void jerryxx_set_property_object(jerry_value_t object, const char *name, jerry_value_t obj);
 void jerryxx_set_property_string(jerry_value_t object, const char *name, char *value);
 void jerryxx_set_property_function(jerry_value_t object, const char *name, jerry_external_handler_t fn);
+jerry_value_t jerryxx_get_property(jerry_value_t object, const char *name);
+double jerryxx_get_property_number(jerry_value_t object, const char *name);
 
 void jerryxx_print_value(const char *format, jerry_value_t value);
 

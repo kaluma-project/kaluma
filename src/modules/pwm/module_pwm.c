@@ -22,8 +22,121 @@
 #include <stdlib.h>
 #include "jerryscript.h"
 #include "jerryxx.h"
+#include "pwm_magic_strings.h"
+#include "pwm.h"
+#include "board.h"
+#include "target.h"
+
+#define PWM_DEFAULT_FREQUENCY 490
+#define PWM_DEFAULT_DUTY 1.0
+
+JERRYXX_FUN(pwm_ctor_fn) {
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(pwm_setup_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(1, "frequency");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(2, "duty");
+  uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
+  double frequency = JERRYXX_GET_ARG_NUMBER_OPT(1, PWM_DEFAULT_FREQUENCY);
+  double duty = JERRYXX_GET_ARG_NUMBER_OPT(2, PWM_DEFAULT_DUTY);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PWM_PIN, pin);
+  if (!is_pwm_pin(pin)) {
+    return JERRXX_CREATE_ERROR("The pin is not PWM capable.");
+  }
+  pwm_setup(pin, frequency, duty);
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(pwm_start_fn) {
+  jerry_value_t pin_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
+  if (!jerry_value_is_number(pin_value)) {
+    return JERRXX_CREATE_ERROR("PWM pin is not setup.");
+  }
+  uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
+  pwm_start(pin);
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(pwm_stop_fn) {
+  jerry_value_t pin_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
+  if (!jerry_value_is_number(pin_value)) {
+    return JERRXX_CREATE_ERROR("PWM pin is not setup.");
+  }
+  uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
+  pwm_stop(pin);
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(pwm_get_frequency_fn) {
+  jerry_value_t pin_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
+  if (!jerry_value_is_number(pin_value)) {
+    return JERRXX_CREATE_ERROR("PWM pin is not setup.");
+  }
+  uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
+  double frequency = pwm_get_frequency(pin);
+  return jerry_create_number(frequency);
+}
+
+JERRYXX_FUN(pwm_set_frequency_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "frequency");
+  double frequency = JERRYXX_GET_ARG_NUMBER(0);
+  jerry_value_t pin_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
+  if (!jerry_value_is_number(pin_value)) {
+    return JERRXX_CREATE_ERROR("PWM pin is not setup.");
+  }
+  uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
+  pwm_set_frequency(pin, frequency);
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(pwm_get_duty_fn) {
+  jerry_value_t pin_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
+  if (!jerry_value_is_number(pin_value)) {
+    return JERRXX_CREATE_ERROR("PWM pin is not setup.");
+  }
+  uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
+  double duty = pwm_get_duty(pin);
+  return jerry_create_number(duty);
+}
+
+JERRYXX_FUN(pwm_set_duty_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "duty");
+  double duty = JERRYXX_GET_ARG_NUMBER(0);
+  jerry_value_t pin_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
+  if (!jerry_value_is_number(pin_value)) {
+    return JERRXX_CREATE_ERROR("PWM pin is not setup.");
+  }
+  uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
+  pwm_set_duty(pin, duty);
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(pwm_close_fn) {
+  jerry_value_t pin_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
+  if (!jerry_value_is_number(pin_value)) {
+    return JERRXX_CREATE_ERROR("PWM pin is not setup.");
+  }
+  uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
+  pwm_stop(pin);
+  return jerry_create_undefined();
+}
 
 jerry_value_t module_pwm_init() {
-  jerry_value_t object = jerry_create_object();
-  return object;
+  /* PWM constructor */
+  jerry_value_t ctor = jerry_create_external_function(pwm_ctor_fn);
+  jerry_value_t prototype = jerry_create_object();
+  jerryxx_set_property_object(ctor, "prototype", prototype);
+  jerry_release_value (prototype);
+  /* PWM instance properties */
+  jerryxx_set_property_function(prototype, MSTR_PWM_SETUP, pwm_setup_fn);
+  jerryxx_set_property_function(prototype, MSTR_PWM_START, pwm_start_fn);
+  jerryxx_set_property_function(prototype, MSTR_PWM_STOP, pwm_stop_fn);
+  jerryxx_set_property_function(prototype, MSTR_PWM_GET_FREQUENCY, pwm_get_frequency_fn);
+  jerryxx_set_property_function(prototype, MSTR_PWM_SET_FREQUENCY, pwm_set_frequency_fn);
+  jerryxx_set_property_function(prototype, MSTR_PWM_GET_DUTY, pwm_get_duty_fn);
+  jerryxx_set_property_function(prototype, MSTR_PWM_SET_DUTY, pwm_set_duty_fn);
+  jerryxx_set_property_function(prototype, MSTR_PWM_CLOSE, pwm_close_fn);
+  return ctor;
 }

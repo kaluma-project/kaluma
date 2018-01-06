@@ -60,6 +60,22 @@ void jerryxx_set_property_function(jerry_value_t object, const char *name, jerry
   jerry_release_value(ext_fn);
 }
 
+jerry_value_t jerryxx_get_property(jerry_value_t object, const char *name) {
+  jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
+  jerry_value_t ret = jerry_get_property (object, prop);
+  jerry_release_value (prop);
+  return ret;
+}
+
+double jerryxx_get_property_number(jerry_value_t object, const char *name) {
+  jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
+  jerry_value_t ret = jerry_get_property (object, prop);
+  double value = jerry_get_number_value(ret);
+  jerry_release_value(ret);
+  jerry_release_value (prop);
+  return value;
+}
+
 void jerryxx_print_value(const char *format, jerry_value_t value) {
   jerry_value_t str = jerry_value_to_string(value);
   jerry_size_t str_sz = jerry_get_string_size (str);
