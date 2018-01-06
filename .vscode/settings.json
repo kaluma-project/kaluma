@@ -11,5 +11,8 @@
     "diskio.h": "c",
     "buffer.h": "c",
     "limits": "c"
-  }
+  },
+  "cpplint.filters" : [
+    "-build/include_subdir"
+  ]
 }

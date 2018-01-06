@@ -36,7 +36,7 @@ Required packages:
 
 Recommended tools:
 * Visual Studo Code: https://code.visualstudio.com/
-* VSCode Extensions: `C/C++`, `Native Debug` 
+* VSCode Extensions: `C/C++`, `Native Debug`, `cpplint`
 
 Build & Run
 ===========
