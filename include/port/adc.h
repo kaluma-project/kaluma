@@ -36,9 +36,9 @@ int adc_setup(uint8_t pin);
  * Read value from the ADC channel
  * 
  * @param {uint8_t} pin
- * @return {uint32_t}
+ * @return {double}
  */
-uint32_t adc_read(uint8_t pin);
+double adc_read(uint8_t pin);
 
 /**
  * Close the ADC channel

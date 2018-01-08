@@ -20,56 +20,49 @@
  */
 
 #include <stdint.h>
-#include "stm32f4xx.h"
-
-#define NUM_ADC_CHANNEL 4
+#include "stm32f4discovery.h"
 
 DMA_HandleTypeDef hdma_adc1;
 static uint16_t adc_buf[NUM_ADC_CHANNEL];
 static uint8_t adc_configured[NUM_ADC_CHANNEL];
 static ADC_HandleTypeDef hadc1;
-static struct {
+
+static const struct __adc_config {
+    uint8_t pin_number;
     GPIO_TypeDef * port;
     uint32_t pin;
-} adc_port_pin[] = {
-   {GPIOC, GPIO_PIN_1},     // 0
-   {GPIOC, GPIO_PIN_5},     // 1
-   {GPIOC, GPIO_PIN_4},     // 2
-   {GPIOB, GPIO_PIN_0},     // 3
+    uint32_t channel;
+} adc_config[] = {
+   {23, GPIOC, GPIO_PIN_1, ADC_CHANNEL_11},
+   {28, GPIOC, GPIO_PIN_5, ADC_CHANNEL_15},
+   {29, GPIOC, GPIO_PIN_4, ADC_CHANNEL_14},
+   {30, GPIOB, GPIO_PIN_1, ADC_CHANNEL_9},
+   {31, GPIOB, GPIO_PIN_0, ADC_CHANNEL_8},
 };
+
+
+/**
+*/
+static uint8_t get_adc_index(uint8_t pin) {
+  assert_param(IS_ADC_PINS(pin));
+
+  uint32_t n = sizeof(adc_config) / sizeof(struct __adc_config);
+  uint8_t index;
+
+  for (int k=0; k<n; k++) {
+    if (adc_config[k].pin_number == pin) {
+      index = k;
+      break;
+    }
+  }  
+  
+  return index;    
+}
 
 /** 
 */
 static void adc1_start_dma() {
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buf, NUM_ADC_CHANNEL);
-}
-
-/** 
-*/
-static void adc_pin_enable(uint8_t pin) {
-  assert_param(pin < NUM_ADC_CHANNEL);
-  GPIO_InitTypeDef GPIO_InitStruct;
-
-  /**ADC1 GPIO Configuration    
-  PC1     ------> ADC1_IN11
-  PC5     ------> ADC1_IN15
-  PC4     ------> ADC1_IN14
-  PB0     ------> ADC1_IN8 
-  */
-  GPIO_InitStruct.Pin = adc_port_pin[pin].pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(adc_port_pin[pin].port, &GPIO_InitStruct);
-  
-  adc_configured[pin] = 1;
-}
-
-/** 
-*/
-static void adc_pin_disable(uint8_t pin) {
-  assert_param(pin < NUM_ADC_CHANNEL);
-  HAL_GPIO_DeInit(adc_port_pin[pin].port, adc_port_pin[pin].pin);
-  adc_configured[pin] = 0;
 }
 
 /** 
@@ -117,39 +110,14 @@ static void adc1_init() {
 
   /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
   */
-  sConfig.Channel = ADC_CHANNEL_8;
-  sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
-  */
-  sConfig.Channel = ADC_CHANNEL_11;
-  sConfig.Rank = 2;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
-  */
-  sConfig.Channel = ADC_CHANNEL_14;
-  sConfig.Rank = 3;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
-  */
-  sConfig.Channel = ADC_CHANNEL_15;
-  sConfig.Rank = 4;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
+  for (int k=0; k<NUM_ADC_CHANNEL; k++) {
+    sConfig.Channel = adc_config[k].channel;
+    sConfig.Rank = k+1;
+    sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
+    if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+    {
+      _Error_Handler(__FILE__, __LINE__);
+    }
   }
 }
 
@@ -163,11 +131,11 @@ static void adc1_deinit() {
  * Read value from the ADC channel
  * 
  * @param {uint8_t} pin
- * @return {uint32_t}
+ * @return {double}
  */
-uint32_t adc_read(uint8_t pin) {
-  assert_param(pin < NUM_ADC_CHANNEL);
-  return (uint32_t)adc_buf[pin];
+double adc_read(uint8_t pin) {
+  uint8_t n = get_adc_index(pin);
+  return (double)adc_buf[n] / (1 << ADC_RESOLUTION_BIT);
 }
 
 /**
@@ -177,14 +145,19 @@ uint32_t adc_read(uint8_t pin) {
  * @return result status code
  */
 int adc_setup(uint8_t pin) {
-  assert_param(pin < NUM_ADC_CHANNEL);
-
   if (adc_need_init()) {
     adc1_init();
     adc1_start_dma();
   }
   
-  adc_pin_enable(pin);
+  uint8_t n = get_adc_index(pin);
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Pin = adc_config[n].pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(adc_config[n].port, &GPIO_InitStruct);
+  
+  adc_configured[n] = 1;
   return 0;
 }
 
@@ -192,9 +165,10 @@ int adc_setup(uint8_t pin) {
  * Close the ADC channel
  */
 void adc_close(uint8_t pin) {
-  assert_param(pin < NUM_ADC_CHANNEL);
-  adc_pin_disable(pin);  
-
+  uint8_t n = get_adc_index(pin);
+  HAL_GPIO_DeInit(adc_config[n].port, adc_config[n].pin);
+  adc_configured[n] = 0;
+  
   if (adc_need_deinit()) {  
     adc1_deinit();
   }
@@ -202,30 +176,37 @@ void adc_close(uint8_t pin) {
 
 void adc_test()
 {
-   adc_setup(0);
-   adc_setup(1);
-   adc_setup(2);
-   adc_setup(3);
+   uint8_t n=0;
+ 
+  double a = 1.21;
+  tty_printf("adc test starts. %f\r\n", a);
+ 
+   adc_setup(adc_config[n].pin_number); n++;
+   adc_setup(adc_config[n].pin_number); n++;
+   adc_setup(adc_config[n].pin_number); n++;
+   adc_setup(adc_config[n].pin_number); n++;
+   adc_setup(adc_config[n].pin_number); n++;
+
    for(int k=0; k<1000; k++)
    {
-      tty_printf("%d \r\n", adc_read(0));
-      printf("%d \r\n", adc_read(0));
+      for(int m=0; m<5; m++) 
+      {
+          double val = adc_read( adc_config[m].pin_number );
+          tty_printf("%d %f \r\n", (int)(val * 1000), val);
+          //printf("%f \r\n", val);
+      }
+      tty_printf("\r\n\n");
+      //printf("\r\n\n");
       
-      tty_printf("%d \r\n", adc_read(1));
-      printf("%d \r\n", adc_read(1));
-
-      tty_printf("%d \r\n", adc_read(2));
-      printf("%d \r\n", adc_read(2));
-
-      tty_printf("%d \r\n\n", adc_read(3));
-      printf("%d \r\n\n", adc_read(3));
-
       delay(1000);
    }
-   adc_close(0);
-   adc_close(1);
-   adc_close(2);
-   adc_close(3);
+
+   n=0;
+   adc_close(adc_config[n].pin_number); n++;
+   adc_close(adc_config[n].pin_number); n++;
+   adc_close(adc_config[n].pin_number); n++;
+   adc_close(adc_config[n].pin_number); n++;
+   adc_close(adc_config[n].pin_number); n++;
    
    while(1);
 }
