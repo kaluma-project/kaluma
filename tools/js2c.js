@@ -8,26 +8,19 @@ const minimist = require('minimist')
 const magicStrings = require('./magic_strings')
 
 var modulesPath = path.join(__dirname, '../src/modules')
-var wrappers = []
-var snapshots = []
 
 // Parse modules for generate
 var argv = minimist(process.argv.slice(2))
 
 // modules
-var modules = argv.modules.trim().split(' ')
-
-// modules which can be imported by `require()`
-var requireModules = []
-
-// modules which has native C implementation
-var nativeModules = []
+var modules = []
 
 generateAll();
 
 function generateAll() {
   console.log('Generating modules for build...')
   console.log()
+  identifyModules();
   generateSnapshots()
   generateSources()
   removeWrappers()
@@ -35,26 +28,36 @@ function generateAll() {
   magicStrings.generateMagicStrings(modules)
 }
 
-function generateSnapshots() {
-  modules.forEach(moduleName => {
+function identifyModules() {
+  var moduleNames = argv.modules.trim().split(' ')
+  moduleNames.forEach(moduleName => {
     console.log('module: ' + moduleName + ' ------------------------------')
     const modpath = path.join(modulesPath, moduleName)
     const config = JSON.parse(fs.readFileSync(path.join(modpath + '/module.json')))
-    console.log(config)
-    if (config.require) {
-      requireModules.push(moduleName)
+    var module = {
+      path: modpath,
+      name: moduleName,
+      nameUC: moduleName.toUpperCase(),
+      js: config.js,
+      native: config.native,
+      require: config.require,
+      size: 0
+    };
+    modules.push(module);
+  })
+}
+
+function generateSnapshots() {
+  modules.forEach(mod => {
+    if (mod.js) {
+      const src = path.join(mod.path, mod.name + '.js')
+      const wrapped = path.join(mod.path, mod.name + '.wrapped')
+      const snapshot = path.join(mod.path, mod.name + '.snapshot')
+      mod.wrapped = wrapped;
+      mod.snapshot = snapshot;
+      createWrapper(src, wrapped)
+      createSnapshot(wrapped, snapshot)
     }
-    if (config.native) {
-      nativeModules.push(moduleName)
-    }
-    const src = path.join(modpath, moduleName + '.js')
-    const wrapped = path.join(modpath, moduleName + '.wrapped')
-    const snapshot = path.join(modpath, moduleName + '.snapshot')
-    createWrapper(src, wrapped)
-    wrappers.push(wrapped)
-    createSnapshot(wrapped, snapshot)
-    snapshots.push(snapshot)
-    console.log()
   })
 }
 
@@ -70,62 +73,49 @@ function createSnapshot(src, dest) {
 }
 
 function removeWrappers() {
-  wrappers.forEach(item => {
-    fs.unlinkSync(item)
+  modules.forEach(mod => {
+    if (mod.wrapped) {
+      fs.unlinkSync(mod.wrapped)
+    }
   })  
 }
 
 function removeSnapshots() {
-  snapshots.forEach(item => {
-    fs.unlinkSync(item)
+  modules.forEach(mod => {
+    if (mod.snapshot) {
+      fs.unlinkSync(mod.snapshot)
+    }
   })
 }
 
 function generateSources() {
   const template_h = fs.readFileSync(__dirname + '/kameleon_modules.h.mustache', 'utf8')
   const template_c = fs.readFileSync(__dirname + '/kameleon_modules.c.mustache', 'utf8')
-  var view = {
-    modules: [],
-    requireModules: [],
-    nativeModules: []
-  }
-  snapshots.forEach(snapshot => {
-    var buffer = fs.readFileSync(snapshot)
-    var hex = buffer.toString('hex')
-    var segments = hex.match(/.{1,20}/g)
-    var moduleView = {
-      name: path.basename(snapshot, '.snapshot'),
-      nameUC: path.basename(snapshot, '.snapshot').toUpperCase(),
-      size: buffer.length,
-      segments: []
+  // Convert snapshot to an array of byte.
+  modules.forEach(mod => {
+    if (mod.snapshot) {
+      var buffer = fs.readFileSync(mod.snapshot)
+      var hex = buffer.toString('hex')
+      var segments = hex.match(/.{1,20}/g)
+      mod.size = buffer.length;
+      mod.segments = [];
+      segments.forEach((segment, index) => {
+        var bytes = segment.match(/.{1,2}/g).map(item => ({ value: item }))
+        if (index == segments.length - 1) {
+          bytes[bytes.length - 1].last = true
+        }
+        mod.segments.push({ bytes: bytes })
+      })  
     }
-    segments.forEach((segment, index) => {
-      var bytes = segment.match(/.{1,2}/g).map(item => ({ value: item }))
-      if (index == segments.length - 1) {
-        bytes[bytes.length - 1].last = true
-      }
-      moduleView.segments.push({ bytes: bytes })
-    })
-    view.modules.push(moduleView)
   })
-
-  requireModules.forEach(mod => {
-    view.requireModules.push({
-      name: mod,
-      nameUC: mod.toUpperCase(),
-      native: (nativeModules.indexOf(mod) >= 0) ? true : false
-    })
+  modules[modules.length - 1].lastModule = true
+  var builtinModules = [];
+  modules.forEach(mod => {
+    if (mod.require) {
+      builtinModules.push(mod);
+    }
   })
-  view.requireModules[view.requireModules.length - 1].lastModule = true
-
-  nativeModules.forEach(mod => {
-    view.nativeModules.push({
-      name: mod,
-      nameUC: mod.toUpperCase()
-    })
-  })
-  view.nativeModules[view.nativeModules.length - 1].lastModule = true
-
+  var view = { modules: modules, builtinModules: builtinModules };
   var rendered_h = mustache.render(template_h, view)
   var rendered_c = mustache.render(template_c, view)
   var genPath = path.join(__dirname, '../src/gen')

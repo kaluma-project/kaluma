@@ -72,5 +72,7 @@
 #define MSTR_SWITCH "switch"
 #define MSTR_PWM "pwm"
 #define MSTR_ADC "adc"
+#define MSTR_ID "id"
+#define MSTR_EXPORTS "exports"
 
 #endif /* __MAGIC_STRINGS_H */

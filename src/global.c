@@ -360,18 +360,44 @@ JERRYXX_FUN(process_binding_fn) {
   return jerry_create_undefined();
 }
 
+JERRYXX_FUN(native_module_wrapper_fn) {
+  jerry_value_t exports = JERRYXX_GET_ARG(0);
+  jerry_value_t require = JERRYXX_GET_ARG(1);
+  jerry_value_t module = JERRYXX_GET_ARG(2);
+  /* Get module name by module.id */
+  jerry_value_t id = jerryxx_get_property(module, MSTR_ID);
+  jerry_size_t module_name_sz = jerry_get_string_size(id);
+  char module_name[module_name_sz + 1];
+  jerry_string_to_char_buffer(id, module_name, module_name_sz);
+  module_name[module_name_sz] = '\0';
+  jerry_release_value(id);
+  /* Find corresponding native module */
+  for (int i = 0; i < builtin_modules_length; i++) {
+    if (strcmp(builtin_modules[i].name, module_name) == 0 && builtin_modules[i].fn != NULL) {
+      jerry_value_t res = builtin_modules[i].fn();
+      jerryxx_set_property_object(module, MSTR_EXPORTS, res);
+      jerry_release_value(res);
+    }
+  }
+  return jerry_create_undefined();
+}
 
 JERRYXX_FUN(process_get_builtin_module_fn) {
   JERRYXX_CHECK_ARG_STRING(0, "builtin_module_name")
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, builtin_module_name)
-  /* Find and return a builtin module */
+  /* Find a builtin js module, return the module function */
   for (int i = 0; i < builtin_modules_length; i++) {
     if (strcmp(builtin_modules[i].name, builtin_module_name) == 0) {
-      jerry_value_t fn = jerry_exec_snapshot(builtin_modules[i].code, builtin_modules[i].size, true);
-      return fn;
+      if (builtin_modules[i].size > 0) { /* has js module */
+        jerry_value_t fn = jerry_exec_snapshot(builtin_modules[i].code, builtin_modules[i].size, true);
+        return fn;
+      } else if (builtin_modules[i].fn != NULL) { /* has native module */
+        jerry_value_t fn = jerry_create_external_function(native_module_wrapper_fn);
+        return fn;
+      }
     }
   }
-  /* If no corresponding module, return undefined */
+  /* return undefined */
   return jerry_create_undefined();
 }
 

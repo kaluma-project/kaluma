@@ -22,9 +22,9 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "kameleon_modules.h"
-{{#nativeModules}}
-#include "module_{{name}}.h"
-{{/nativeModules}}
+{{#modules}}
+{{#native}}#include "module_{{name}}.h"{{/native}}
+{{/modules}}
 
 {{#modules}}
 #define MODULE_{{nameUC}}_SIZE {{size}}
@@ -37,11 +37,11 @@ const uint8_t module_{{name}}_code[] = {
 };
 
 {{/modules}}
-/* builtin modules importable by `require()` */
-#define BUILTIN_MODULES_SIZE {{requireModules.length}}
+/* builtin modules */
+#define BUILTIN_MODULES_SIZE {{builtinModules.length}}
 const size_t builtin_modules_length = BUILTIN_MODULES_SIZE;
 const kameleon_builtin_module builtin_modules[] = {
-{{#requireModules}}
+{{#builtinModules}}
   { module_{{name}}_name, module_{{name}}_code, MODULE_{{nameUC}}_SIZE, {{#native}}module_{{name}}_init{{/native}}{{^native}}NULL{{/native}} }{{^lastModule}}, {{/lastModule}}
-{{/requireModules}}
+{{/builtinModules}}
 };

@@ -15,12 +15,11 @@ Module.require = function (id) {
   }
   if (process.builtin_modules.indexOf(id) >= 0) {
     var mod = new Module(id);
-    Module.cache[id] = mod;
     mod.loadBuiltin();
-    return mod.exports;
-  } else {
-    print('Try to load non-native module: ' + id);
+    Module.cache[id] = mod;
+    return mod.exports;        
   }
+  throw new Error('Failed to load module: ' + id);
 }
 
 Module.prototype.loadBuiltin = function () {

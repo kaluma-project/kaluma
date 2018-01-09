@@ -1,4 +1,5 @@
 {
   "require": false,
+  "js": true,
   "native": false
 }
