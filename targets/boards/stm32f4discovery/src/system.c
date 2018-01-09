@@ -190,8 +190,8 @@ void system_init() {
   HAL_Init();
   SystemClock_Config();
   GpioClock_Config();
-  Led_Config();
-  Button_Config();
+//  Led_Config();
+//  Button_Config();
   DMA_Config();
   UsbDevice_Config();
 }
