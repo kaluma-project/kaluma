@@ -147,17 +147,15 @@ static void register_global_digital_io() {
 /*                                                                          */
 /****************************************************************************/
 
-// TODO: Calibrate return value to 0.0 ~ 1.0;
 JERRYXX_FUN(analog_read_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   adc_setup(pin);
+  delay(1); // To prevent issue #55
   double value = adc_read(pin);
   return jerry_create_number(value);
 }
 
-// TODO: Calibrate value parameter (duty).
-// TODO: Determine the default frequency.
 JERRYXX_FUN(analog_write_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   JERRYXX_CHECK_ARG_NUMBER_OPT(1, "value");
