@@ -5,13 +5,13 @@
       "name": "Debug",
       "type": "gdb",
       "request": "attach",
-      "executable": "${workspaceRoot}/build/kameleon-core.elf",
+      "executable": "${workspaceRoot}/build/kameleon.elf",
       "target": ":4242",
       "remote": true,
       "cwd": "${workspaceRoot}",
       "gdbpath": "arm-none-eabi-gdb",
       "autorun": [
-        "load ./build/kameleon-core.elf"
+        "load ./build/kameleon.elf"
       ]
     }    
   ]

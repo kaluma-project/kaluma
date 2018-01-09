@@ -73,6 +73,7 @@ struct io_timer_handle_s {
   uint64_t clamped_timeout;
   uint64_t interval;
   bool repeat;
+  uint32_t tag; // for application use
 };
 
 /* TTY handle types */

@@ -152,7 +152,7 @@ JERRYXX_FUN(analog_read_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   adc_setup(pin);
-  uint32_t value = adc_read(pin);
+  double value = adc_read(pin);
   return jerry_create_number(value);
 }
 
@@ -161,12 +161,18 @@ JERRYXX_FUN(analog_read_fn) {
 JERRYXX_FUN(analog_write_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   JERRYXX_CHECK_ARG_NUMBER_OPT(1, "value");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(2, "frequency");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  uint32_t value = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 50);
-  uint32_t freq = 490; // Default 490Hz
-  pwm_setup(pin, freq, value);
+  double value = JERRYXX_GET_ARG_NUMBER_OPT(1, 0.5);
+  double frequency = JERRYXX_GET_ARG_NUMBER_OPT(2, 490); // Default 490Hz
+  pwm_setup(pin, frequency, value);
   pwm_start(pin);
   return jerry_create_undefined();
+}
+
+static void tone_timeout_cb(io_timer_handle_t *timer) {
+  uint8_t pin = timer->tag;
+  pwm_stop(pin);
 }
 
 JERRYXX_FUN(tone_fn) {
@@ -175,11 +181,18 @@ JERRYXX_FUN(tone_fn) {
   JERRYXX_CHECK_ARG_NUMBER_OPT(2, "duration");
   JERRYXX_CHECK_ARG_NUMBER_OPT(3, "duty");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  uint32_t frequency = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 100);
-  uint32_t duration = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 0);
-  uint32_t duty = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 50);
+  double frequency = JERRYXX_GET_ARG_NUMBER_OPT(1, 261.626); // C key frequency
+  uint32_t duration = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(2, 0);
+  double duty = JERRYXX_GET_ARG_NUMBER_OPT(3, 0.5);
   pwm_setup(pin, frequency, duty);
   pwm_start(pin);
+  // setup timer for duration
+  if (duration > 0) {
+    io_timer_handle_t *timer = malloc(sizeof(io_timer_handle_t));
+    io_timer_init(timer);
+    timer->tag = pin;
+    io_timer_start(timer, tone_timeout_cb, duration, false);
+  }
   return jerry_create_undefined();
 }
 

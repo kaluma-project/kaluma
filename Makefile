@@ -222,7 +222,8 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)"
 # libraries
 LIBS = -ljerry-core -ljerry-ext -lc -lnosys -lm
 LIBDIR = -L$(JERRY_LIBDIR)
-LDFLAGS = $(MCU) -specs=nano.specs -T$(TARGET_LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+LDFLAGS = $(MCU) -specs=nano.specs -u _printf_float -T$(TARGET_LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+
 
 # -----------------------------------------------------------------------------
 # Default action: build all
