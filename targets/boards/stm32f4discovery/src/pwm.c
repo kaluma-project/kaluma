@@ -411,7 +411,7 @@ int pwm_setup(uint8_t pin, double frequency, double duty) {
   tick_freq = get_tick_frequency(n);
   ch = pwm_config[n].channel;
   arr = (uint32_t)(tick_freq / frequency + 0.5f) - 1;
-  pulse = (uint32_t)(duty * (arr + 1) + 0.5f) - 1;
+  pulse = (uint32_t)(duty * (arr + 1) + 0.5f);
   pwm_config[n].setup(ch, arr, pulse);
   
   return 0;
@@ -445,7 +445,7 @@ double pwm_get_duty(uint8_t pin) {
   uint8_t n = get_pwm_index(pin);
   uint32_t arr = __HAL_TIM_GET_AUTORELOAD(pwm_config[n].handle);
   uint32_t pulse = __HAL_TIM_GET_COMPARE(pwm_config[n].handle, pwm_config[n].channel);
-  return (double)(pulse+1)/(arr+1);
+  return (double)(pulse)/(arr+1);
 }
 
 /**
@@ -453,7 +453,7 @@ double pwm_get_duty(uint8_t pin) {
 void pwm_set_duty(uint8_t pin, double duty) {
   uint8_t n = get_pwm_index(pin);
   uint32_t arr = __HAL_TIM_GET_AUTORELOAD(pwm_config[n].handle);
-  uint32_t pulse = (uint32_t)(duty * (arr + 1) + 0.5f) - 1;  
+  uint32_t pulse = (uint32_t)(duty * (arr + 1) + 0.5f);  
   __HAL_TIM_SET_COMPARE(pwm_config[n].handle, pwm_config[n].channel, pulse);
 }
 
@@ -464,7 +464,7 @@ void pwm_set_frequency(uint8_t pin, double frequency) {
 
   uint8_t n = get_pwm_index(pin);
   uint32_t arr = (uint32_t)(get_tick_frequency(n)/frequency + 0.5f) - 1;
-  uint32_t pulse = (uint32_t)(previous_duty * (arr + 1) + 0.5f) - 1;  
+  uint32_t pulse = (uint32_t)(previous_duty * (arr + 1) + 0.5f);  
   
   /* The previous duty ratio must be hold up regardless of changing frequency */
   __HAL_TIM_SET_COMPARE(pwm_config[n].handle, pwm_config[n].channel, pulse);
@@ -483,10 +483,15 @@ void pwm_close(uint8_t pin) {
 
 
 void pwm_test()
-{
+{  
+  pwm_setup(2, 21000, 0);
+  pwm_start(2);
+  
+  delay(10000);
+  
   pwm_setup(0, 21000, 0.50);
-  pwm_setup(2, 2000, 0.20);
-  pwm_setup(4, 4000, 0.30);
+  pwm_setup(2, 2000, 0.50);
+  pwm_setup(4, 4000, 0.50);
   pwm_setup(14, 8000, 0.40);
   pwm_setup(15, 16000, 0.50);
   pwm_setup(18, 32000, 0.60);

@@ -42,7 +42,7 @@
 #define APB1    0
 #define APB2    1
 
-#define NUM_ADC_CHANNEL 5
+#define NUM_ADC_CHANNEL 8
 #define ADC_RESOLUTION_BIT 12
 
 #define IS_PWM_PINS(PIN) (((PIN) == 0) || \
@@ -55,9 +55,12 @@
                          ((PIN) == 45))
 
 #define IS_ADC_PINS(PIN) (((PIN) == 23) || \
+                         ((PIN) == 25) || \
                          ((PIN) == 28) || \
                          ((PIN) == 29) || \
                          ((PIN) == 30) || \
-                         ((PIN) == 31))
+                         ((PIN) == 31) || \
+                         ((PIN) == 69) || \
+                         ((PIN) == 70))
 
 #endif /* __STM32F4DISCOVERY_H */
