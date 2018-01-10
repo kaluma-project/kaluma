@@ -45,7 +45,7 @@ typedef enum {
  * @param {uint8_t} phase
  * @param {uint8_t} bits
  * @param {uint8_t} bit_order
- * @return result status code
+ * @return {int} result status code
  */
 int spi_setup(uint8_t bus, spi_mode_t mode, uint8_t cs_pin, uint32_t baudrate,
   uint8_t polarity, uint8_t phase, uint8_t bits, spi_bitorder_t bit_order);
@@ -55,22 +55,22 @@ int spi_setup(uint8_t bus, spi_mode_t mode, uint8_t cs_pin, uint32_t baudrate,
  * 
  * @param {uint8_t} bus
  * @param {uint8_t*} buf
- * @param {uint32_t} len
+ * @param {size_t} len
  * @param {uint32_t} timeout
  * @return the number of bytes written or -1 on timeout or nothing written.
  */
-int spi_send(uint8_t bus, uint8_t *buf, uint32_t len, uint32_t timeout);
+int spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
 
 /**
  * Receive data from the SPI bus and store them into a given buffer.
  * 
  * @param {uint8_t} bus
  * @param {uint8_t*} buf
- * @param {uint32_t} len
+ * @param {size_t} len
  * @param {uint32_t} timeout
- * @return the number of bytes read
+ * @return {int} the number of bytes read
  */
-int spi_recv(uint8_t bus, uint8_t *buf, uint32_t len, uint32_t timeout);
+int spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
 
 /**
  * Close the SPI bus

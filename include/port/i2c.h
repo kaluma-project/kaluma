@@ -30,21 +30,21 @@ typedef enum {
 }i2c_mode_t;
 
 /**
- * Open a I2C bus as master
+ * Setup a I2C bus as master
  * 
  * @param {uint8_t} bus
- * @return result status code
+ * @return {int} result status code
  */
-int i2c_open_master(uint8_t bus);
+int i2c_setup_master(uint8_t bus);
 
 /**
- * Open a I2C bus as slave
+ * Setup a I2C bus as slave
  * 
  * @param {uint8_t} bus
  * @param {uint8_t} address
- * @return result status code
+ * @return {int} result status code
  */
-int i2c_open_slave(uint8_t bus, uint8_t address);
+int i2c_setup_slave(uint8_t bus, uint8_t address);
 
 /**
  * Write a given buffer to the bus.
@@ -52,11 +52,12 @@ int i2c_open_slave(uint8_t bus, uint8_t address);
  * @param {uint8_t} bus
  * @param {uint8_t} address
  * @param {uint8_t*} buf
- * @param {uint32_t} len
+ * @param {size_t} len
  * @param {uint32_t} timeout
- * @return the number of bytes written or -1 on timeout or nothing written.
+ * @return {int} the number of bytes written or -1 on timeout or nothing written.
  */
-int i2c_write(uint8_t bus, uint8_t address, uint8_t *buf, uint32_t len, uint32_t timeout);
+int i2c_write(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
+  uint32_t timeout);
 
 /**
  * Write a given buffer to the bus.
@@ -65,7 +66,7 @@ int i2c_write(uint8_t bus, uint8_t address, uint8_t *buf, uint32_t len, uint32_t
  * @param {uint8_t} address
  * @param {uint8_t} ch
  * @param {uint32_t} timeout
- * @return the number of bytes written or -1 on timeout or nothing written.
+ * @return {int} the number of bytes written or -1 on timeout or nothing written.
  */
 int i2c_write_char(uint8_t bus, uint8_t address, uint8_t ch, uint32_t timeout);
 
@@ -75,22 +76,24 @@ int i2c_write_char(uint8_t bus, uint8_t address, uint8_t ch, uint32_t timeout);
  * @param {uint8_t} bus
  * @param {uint8_t} address
  * @param {uint8_t*} buf
- * @param {uint32_t} len
- * @return the number of bytes read
+ * @param {size_t} len
+ * @return {int} the number of bytes read
  */
-int i2c_read(uint8_t bus, uint8_t address, uint8_t *buf, uint32_t len, uint32_t timeout);
+int i2c_read(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
+  uint32_t timeout);
 
 /**
  * Read a character from the bus.
  * 
- * @return a character read
+ * @return {int} a character read
  */
 int i2c_read_char(uint8_t bus, uint8_t address, uint32_t timeout);
 
 /**
  * Close the I2C bus
+ * 
+ * @return {int}
  */
 int i2c_close(uint8_t bus);
 
 #endif /* __I2C_H */
-

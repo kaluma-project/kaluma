@@ -13,6 +13,6 @@
     "limits": "c"
   },
   "cpplint.filters" : [
-    "-build/include_subdir"
+    "-build/include_subdir", "-build/header_guard"
   ]
 }

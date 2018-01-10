@@ -39,6 +39,8 @@ void inc_tick();
 
 /**
  * Delay in milliseconds
+ * 
+ * @param {uint64_t} msec
  */
 void delay(uint64_t msec);
 
@@ -49,6 +51,8 @@ uint64_t gettime();
 
 /**
  * Set current time (UNIX timestamp in milliseconds)
+ * 
+ * @param {uint64_t} msec
  */
 void settime(uint64_t time);
 
