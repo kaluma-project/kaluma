@@ -1,6 +1,13 @@
 Digital I/O
 ===========
 
+* [pinMode(pin[, mode])]()
+* [digitalRead(pin)]()
+* [digitalWrite(pin[, value])]()
+* [digitalToggle(pin)]()
+* [setWatch(callback, pin[, mode[, debounce]])]()
+* [clearWatch(id)]()
+
 ## pinMode(pin[, mode])
 
 * __`pin`__ `{number}` Pin number.
