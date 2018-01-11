@@ -25,6 +25,26 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+typedef enum {
+  BOARD_PIN_FUNCTION_GPIO_INPUT,
+  BOARD_PIN_FUNCTION_GPIO_OUTPUT,
+  BOARD_PIN_FUNCTION_ADC,
+  BOARD_PIN_FUNCTION_PWM,
+  BOARD_PIN_FUNCTION_I2C,
+  BOARD_PIN_FUNCTION_SPI,
+  BOARD_PIN_FUNCTION_UART
+} board_pin_function_t;
+
+typedef struct {
+  board_pin_function_t function;
+  uint8_t bus;  // Used to denote bus number for I2C, SPI, UART
+} board_pin_state_t;
+
+extern board_pin_state_t board_pin_states[];
+
+void board_init();
+void board_deinit();
+
 bool is_led_pin(uint8_t pin);
 bool is_switch_pin(uint8_t pin);
 bool is_pwm_pin(uint8_t pin);
