@@ -42,6 +42,7 @@
 #define APB1    0
 #define APB2    1
 
+#define NUM_UART_CHANNEL 2
 #define NUM_ADC_CHANNEL 8
 #define ADC_RESOLUTION_BIT 12
 

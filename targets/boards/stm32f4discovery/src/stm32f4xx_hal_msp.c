@@ -254,6 +254,10 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
       GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
       HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
     }
+    
+    /* USART2 interrupt Init */
+    HAL_NVIC_SetPriority(USART2_IRQn, 1, 0);
+    HAL_NVIC_EnableIRQ(USART2_IRQn);
   }
   else if(huart->Instance==USART3)
   {
@@ -277,6 +281,10 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF7_USART3;
     HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+    
+    /* USART3 interrupt Init */
+    HAL_NVIC_SetPriority(USART3_IRQn, 1, 0);
+    HAL_NVIC_EnableIRQ(USART3_IRQn);
   }
 }
 

@@ -28,6 +28,7 @@ $(TARGET_DIR)/src/stm32f4xx_hal_msp.c \
 $(TARGET_DIR)/src/is25lq040b.c \
 $(TARGET_DIR)/src/flash.c \
 $(TARGET_DIR)/src/uart.c \
+$(TARGET_DIR)/src/uart_low_level.c \
 $(TARGET_DIR)/src/i2c.c \
 $(SHARED_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c \
 $(SHARED_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c \

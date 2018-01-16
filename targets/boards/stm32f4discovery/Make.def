@@ -27,6 +27,7 @@ $(TARGET_DIR)/src/system.c \
 $(TARGET_DIR)/src/tty_low_level.c \
 $(TARGET_DIR)/src/tty.c \
 $(TARGET_DIR)/src/uart.c \
+$(TARGET_DIR)/src/uart_low_level.c \
 $(TARGET_DIR)/src/usb_device.c \
 $(TARGET_DIR)/src/usbd_cdc_if.c \
 $(TARGET_DIR)/src/usbd_conf.c \

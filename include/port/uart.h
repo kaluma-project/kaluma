@@ -23,6 +23,7 @@
 #define __UART_H
 
 #include <stdint.h>
+#include "uart_low_level.h"
 
 enum {
   UART_PARITY_TYPE_NONE,
@@ -48,7 +49,7 @@ enum {
 };
 
 /**
- * Open a UART bus
+ * Setup a UART bus. This have to manage an internal read buffer.
  * 
  * @param {uint8_t} bus
  * @param {uint32_t} baudrate
@@ -56,47 +57,56 @@ enum {
  * @param {uint32_t} parity
  * @param {uint32_t} stop
  * @param {uint32_t} flow
- * @return
+ * @param {size_t} buffer_size The size of read buffer
+ * @return {int} Positive number if successfully setup, negative otherwise.
  */
-int uart_open(uint8_t bus, uint32_t baudrate, uint32_t bits, 
-  uint32_t parity, uint32_t stop, uint32_t flow);
+int uart_setup(uint8_t bus, uint32_t baudrate, uint32_t bits,
+  uint32_t parity, uint32_t stop, uint32_t flow, size_t buffer_size);
 
 /**
  * Write a character to the bus.
  * 
  * @param {uint8_t} bus
  * @param {uint8_t} ch
- * @return the number of bytes written or -1 on timeout or nothing written.
+ * @return {int} the number of bytes written or -1 if nothing written.
  */
-int uart_write_char(uint8_t bus, uint8_t ch, uint32_t timeout);
+int uart_write_char(uint8_t bus, uint8_t ch);
 
 /**
  * Write a given buffer to the bus.
  * 
  * @param {uint8_t} bus
  * @param {uint8_t*} buf
- * @param {uint32_t} len
- * @return the number of bytes written or -1 on timeout or nothing written.
+ * @param {size_t} len
+ * @return {int} the number of bytes written or -1 if nothing written.
  */
-int uart_write(uint8_t bus, uint8_t *buf, uint32_t len, uint32_t timeout);
+int uart_write(uint8_t bus, uint8_t *buf, size_t len);
+
+/**
+ * Check the number of bytes available to read.
+ * 
+ * @param {uint8_t} bus
+ * @return {int} the number of bytes in read buffer.
+ */
+uint32_t uart_available(uint8_t bus);
 
 /**
  * Read a character from the bus.
  * 
  * @param {uint8_t} bus
- * @return a character read or -1 on timeout
+ * @return {uint8_t} a character read
  */
-int uart_read_char(uint8_t bus, uint32_t timeout);
+uint8_t uart_read_char(uint8_t bus);
 
 /**
  * Read bytes from the bus and store them into a given buffer.
  * 
  * @param {uint8_t} bus
  * @param {uint8_t*} buf
- * @param {uint32_t} len
- * @return the number of bytes read or -1 on timeout
+ * @param {size_t} len
+ * @return {int} the number of bytes read
  */
-int uart_read(uint8_t bus, uint8_t *buf, uint32_t len, uint32_t timeout);
+uint32_t uart_read(uint8_t bus, uint8_t *buf, size_t len);
 
 /**
  * Close the UART bus
@@ -106,4 +116,5 @@ int uart_read(uint8_t bus, uint8_t *buf, uint32_t len, uint32_t timeout);
 int uart_close(uint8_t bus);
 
 #endif /* __UART_H */
+
 
