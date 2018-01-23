@@ -96,9 +96,14 @@ uint32_t uart_available(uint8_t bus) {
 
 /** 
 */
-uint8_t uart_read_char(uint8_t bus) {
+int uart_read_char(uint8_t bus) {
   assert_param(bus==0 || bus==1);
-  return uart_read_char_ringbuffer(bus);
+  
+  if (uart_available(bus)==0) {
+    return -1;
+  } else {
+    return (int)uart_read_char_ringbuffer(bus);
+  }
 }
 
 /** 

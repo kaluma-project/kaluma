@@ -54,8 +54,7 @@ extern DMA_HandleTypeDef hdma_adc1;
 /**
   * Initializes the Global MSP.
   */
-void HAL_MspInit(void)
-{
+void HAL_MspInit(void) {
   /* USER CODE BEGIN MspInit 0 */
 
   /* USER CODE END MspInit 0 */
@@ -102,8 +101,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc) {
     hdma_adc1.Init.Mode = DMA_CIRCULAR;
     hdma_adc1.Init.Priority = DMA_PRIORITY_LOW;
     hdma_adc1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-    if (HAL_DMA_Init(&hdma_adc1) != HAL_OK)
-    {
+    if (HAL_DMA_Init(&hdma_adc1) != HAL_OK) {
       _Error_Handler(__FILE__, __LINE__);
     }
 
@@ -126,7 +124,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc) {
 void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi) {
 
   GPIO_InitTypeDef GPIO_InitStruct;
-  if(hspi->Instance==SPI1) {
+  if (hspi->Instance==SPI1) {
   /* USER CODE BEGIN SPI1_MspInit 0 */
 
   /* USER CODE END SPI1_MspInit 0 */
@@ -148,12 +146,41 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi) {
   /* USER CODE BEGIN SPI1_MspInit 1 */
 
   /* USER CODE END SPI1_MspInit 1 */
+  } else if(hspi->Instance==SPI2) {
+  /* USER CODE BEGIN SPI2_MspInit 0 */
+
+  /* USER CODE END SPI2_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_SPI2_CLK_ENABLE();
+  
+    /**SPI2 GPIO Configuration    
+    PC2     ------> SPI2_MISO
+    PB13     ------> SPI2_SCK
+    PB15     ------> SPI2_MOSI 
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_2;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_15;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /* USER CODE BEGIN SPI2_MspInit 1 */
+
+  /* USER CODE END SPI2_MspInit 1 */
   }
 }
 
 void HAL_SPI_MspDeInit(SPI_HandleTypeDef* hspi) {
 
-  if(hspi->Instance==SPI1) {
+  if (hspi->Instance==SPI1) {
   /* USER CODE BEGIN SPI1_MspDeInit 0 */
 
   /* USER CODE END SPI1_MspDeInit 0 */
@@ -170,6 +197,24 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* hspi) {
   /* USER CODE BEGIN SPI1_MspDeInit 1 */
 
   /* USER CODE END SPI1_MspDeInit 1 */
+  } else if (hspi->Instance==SPI2) {
+  /* USER CODE BEGIN SPI2_MspDeInit 0 */
+
+  /* USER CODE END SPI2_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_SPI2_CLK_DISABLE();
+  
+    /**SPI2 GPIO Configuration    
+    PC2     ------> SPI2_MISO
+    PB13     ------> SPI2_SCK
+    PB15     ------> SPI2_MOSI 
+    */
+    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_2);
+    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_13|GPIO_PIN_15);
+
+  /* USER CODE BEGIN SPI2_MspDeInit 1 */
+
+  /* USER CODE END SPI2_MspDeInit 1 */
   }
 
 }
@@ -179,8 +224,7 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* hspi) {
 void HAL_I2C_MspInit(I2C_HandleTypeDef* hi2c) {
 
   GPIO_InitTypeDef GPIO_InitStruct;
-  if(hi2c->Instance==I2C1)
-  {
+  if (hi2c->Instance==I2C1) {
     /**I2C1 GPIO Configuration    
     PB6     ------> I2C1_SCL
     PB9     ------> I2C1_SDA 
@@ -217,8 +261,7 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* hi2c) {
 void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 {
   GPIO_InitTypeDef GPIO_InitStruct;
-  if(huart->Instance==USART2)
-  {
+  if (huart->Instance==USART2) {
     /* Peripheral clock enable */
     __HAL_RCC_USART2_CLK_ENABLE();
   
@@ -258,9 +301,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     /* USART2 interrupt Init */
     HAL_NVIC_SetPriority(USART2_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(USART2_IRQn);
-  }
-  else if(huart->Instance==USART3)
-  {
+  } else if (huart->Instance==USART3) {
     /* Peripheral clock enable */
     __HAL_RCC_USART3_CLK_ENABLE();
   
@@ -288,10 +329,8 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
   }
 }
 
-void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
-{
-  if(huart->Instance==USART2)
-  {
+void HAL_UART_MspDeInit(UART_HandleTypeDef* huart) {
+  if (huart->Instance==USART2) {
     /* Peripheral clock disable */
     __HAL_RCC_USART2_CLK_DISABLE();
   
@@ -310,9 +349,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
     if (huart->Init.HwFlowCtl==UART_HWCONTROL_CTS || huart->Init.HwFlowCtl==UART_HWCONTROL_RTS_CTS) {
       HAL_GPIO_DeInit(GPIOD, GPIO_PIN_3);
     }
-  }
-  else if(huart->Instance==USART3)
-  {
+  } else if (huart->Instance==USART3) {
     /* Peripheral clock disable */
     __HAL_RCC_USART3_CLK_DISABLE();
   
@@ -325,11 +362,9 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
   }
 }
 
-void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
-{
+void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm) {
 
-  if(htim_pwm->Instance==TIM1)
-  {
+  if (htim_pwm->Instance==TIM1) {
   /* USER CODE BEGIN TIM1_MspInit 0 */
 
   /* USER CODE END TIM1_MspInit 0 */
@@ -338,9 +373,7 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
   /* USER CODE BEGIN TIM1_MspInit 1 */
 
   /* USER CODE END TIM1_MspInit 1 */
-  }
-  else if(htim_pwm->Instance==TIM2)
-  {
+  } else if (htim_pwm->Instance==TIM2) {
   /* USER CODE BEGIN TIM2_MspInit 0 */
 
   /* USER CODE END TIM2_MspInit 0 */
@@ -349,9 +382,7 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
   /* USER CODE BEGIN TIM2_MspInit 1 */
 
   /* USER CODE END TIM2_MspInit 1 */
-  }
-  else if(htim_pwm->Instance==TIM3)
-  {
+  } else if (htim_pwm->Instance==TIM3) {
   /* USER CODE BEGIN TIM3_MspInit 0 */
 
   /* USER CODE END TIM3_MspInit 0 */
@@ -360,9 +391,7 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
   /* USER CODE BEGIN TIM3_MspInit 1 */
 
   /* USER CODE END TIM3_MspInit 1 */
-  }
-  else if(htim_pwm->Instance==TIM4)
-  {
+  } else if (htim_pwm->Instance==TIM4) {
   /* USER CODE BEGIN TIM4_MspInit 0 */
 
   /* USER CODE END TIM4_MspInit 0 */
@@ -371,9 +400,7 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
   /* USER CODE BEGIN TIM4_MspInit 1 */
 
   /* USER CODE END TIM4_MspInit 1 */
-  }
-  else if(htim_pwm->Instance==TIM8)
-  {
+  } else if (htim_pwm->Instance==TIM8) {
   /* USER CODE BEGIN TIM8_MspInit 0 */
 
   /* USER CODE END TIM8_MspInit 0 */
@@ -382,9 +409,7 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
   /* USER CODE BEGIN TIM8_MspInit 1 */
 
   /* USER CODE END TIM8_MspInit 1 */
-  }
-  else if(htim_pwm->Instance==TIM9)
-  {
+  } else if (htim_pwm->Instance==TIM9) {
   /* USER CODE BEGIN TIM9_MspInit 0 */
 
   /* USER CODE END TIM9_MspInit 0 */
@@ -393,9 +418,7 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
   /* USER CODE BEGIN TIM9_MspInit 1 */
 
   /* USER CODE END TIM9_MspInit 1 */
-  }
-  else if(htim_pwm->Instance==TIM12)
-  {
+  } else if (htim_pwm->Instance==TIM12) {
   /* USER CODE BEGIN TIM12_MspInit 0 */
 
   /* USER CODE END TIM12_MspInit 0 */
@@ -408,10 +431,8 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
 
 }
 
-void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
-{
-  if(htim_base->Instance==TIM10)
-  {
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base) {
+  if (htim_base->Instance==TIM10) {
   /* USER CODE BEGIN TIM10_MspInit 0 */
 
   /* USER CODE END TIM10_MspInit 0 */
@@ -423,12 +444,10 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
   }
 }
 
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
-{
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim) {
 
   GPIO_InitTypeDef GPIO_InitStruct;
-  if(htim->Instance==TIM1)
-  {
+  if (htim->Instance==TIM1) {
   /* USER CODE BEGIN TIM1_MspPostInit 0 */
 
   /* USER CODE END TIM1_MspPostInit 0 */
@@ -445,9 +464,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
   /* USER CODE BEGIN TIM1_MspPostInit 1 */
 
   /* USER CODE END TIM1_MspPostInit 1 */
-  }
-  else if(htim->Instance==TIM2)
-  {
+  } else if (htim->Instance==TIM2) {
   /* USER CODE BEGIN TIM2_MspPostInit 0 */
 
   /* USER CODE END TIM2_MspPostInit 0 */
@@ -465,9 +482,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
   /* USER CODE BEGIN TIM2_MspPostInit 1 */
 
   /* USER CODE END TIM2_MspPostInit 1 */
-  }
-  else if(htim->Instance==TIM3)
-  {
+  } else if (htim->Instance==TIM3) {
   /* USER CODE BEGIN TIM3_MspPostInit 0 */
 
   /* USER CODE END TIM3_MspPostInit 0 */
@@ -485,9 +500,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
   /* USER CODE BEGIN TIM3_MspPostInit 1 */
 
   /* USER CODE END TIM3_MspPostInit 1 */
-  }
-  else if(htim->Instance==TIM4)
-  {
+  } else if (htim->Instance==TIM4) {
   /* USER CODE BEGIN TIM4_MspPostInit 0 */
 
   /* USER CODE END TIM4_MspPostInit 0 */
@@ -505,9 +518,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
   /* USER CODE BEGIN TIM4_MspPostInit 1 */
 
   /* USER CODE END TIM4_MspPostInit 1 */
-  }
-  else if(htim->Instance==TIM8)
-  {
+  } else if (htim->Instance==TIM8) {
   /* USER CODE BEGIN TIM8_MspPostInit 0 */
 
   /* USER CODE END TIM8_MspPostInit 0 */
@@ -525,9 +536,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
   /* USER CODE BEGIN TIM8_MspPostInit 1 */
 
   /* USER CODE END TIM8_MspPostInit 1 */
-  }
-  else if(htim->Instance==TIM9)
-  {
+  } else if (htim->Instance==TIM9) {
   /* USER CODE BEGIN TIM9_MspPostInit 0 */
 
   /* USER CODE END TIM9_MspPostInit 0 */
@@ -545,9 +554,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
   /* USER CODE BEGIN TIM9_MspPostInit 1 */
 
   /* USER CODE END TIM9_MspPostInit 1 */
-  }
-  else if(htim->Instance==TIM10)
-  {
+  } else if (htim->Instance==TIM10) {
   /* USER CODE BEGIN TIM10_MspPostInit 0 */
 
   /* USER CODE END TIM10_MspPostInit 0 */
@@ -565,9 +572,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
   /* USER CODE BEGIN TIM10_MspPostInit 1 */
 
   /* USER CODE END TIM10_MspPostInit 1 */
-  }
-  else if(htim->Instance==TIM12)
-  {
+  } else if (htim->Instance==TIM12) {
   /* USER CODE BEGIN TIM12_MspPostInit 0 */
 
   /* USER CODE END TIM12_MspPostInit 0 */
@@ -589,11 +594,9 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
 
 }
 
-void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
-{
+void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm) {
 
-  if(htim_pwm->Instance==TIM1)
-  {
+  if (htim_pwm->Instance==TIM1) {
   /* USER CODE BEGIN TIM1_MspDeInit 0 */
 
   /* USER CODE END TIM1_MspDeInit 0 */
@@ -602,9 +605,7 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
   /* USER CODE BEGIN TIM1_MspDeInit 1 */
 
   /* USER CODE END TIM1_MspDeInit 1 */
-  }
-  else if(htim_pwm->Instance==TIM2)
-  {
+  } else if (htim_pwm->Instance==TIM2) {
   /* USER CODE BEGIN TIM2_MspDeInit 0 */
 
   /* USER CODE END TIM2_MspDeInit 0 */
@@ -613,9 +614,7 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
   /* USER CODE BEGIN TIM2_MspDeInit 1 */
 
   /* USER CODE END TIM2_MspDeInit 1 */
-  }
-  else if(htim_pwm->Instance==TIM3)
-  {
+  } else if (htim_pwm->Instance==TIM3) {
   /* USER CODE BEGIN TIM3_MspDeInit 0 */
 
   /* USER CODE END TIM3_MspDeInit 0 */
@@ -624,9 +623,7 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
   /* USER CODE BEGIN TIM3_MspDeInit 1 */
 
   /* USER CODE END TIM3_MspDeInit 1 */
-  }
-  else if(htim_pwm->Instance==TIM4)
-  {
+  } else if (htim_pwm->Instance==TIM4) {
   /* USER CODE BEGIN TIM4_MspDeInit 0 */
 
   /* USER CODE END TIM4_MspDeInit 0 */
@@ -635,9 +632,7 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
   /* USER CODE BEGIN TIM4_MspDeInit 1 */
 
   /* USER CODE END TIM4_MspDeInit 1 */
-  }
-  else if(htim_pwm->Instance==TIM8)
-  {
+  } else if(htim_pwm->Instance==TIM8) {
   /* USER CODE BEGIN TIM8_MspDeInit 0 */
 
   /* USER CODE END TIM8_MspDeInit 0 */
@@ -646,9 +641,7 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
   /* USER CODE BEGIN TIM8_MspDeInit 1 */
 
   /* USER CODE END TIM8_MspDeInit 1 */
-  }
-  else if(htim_pwm->Instance==TIM9)
-  {
+  } else if (htim_pwm->Instance==TIM9) {
   /* USER CODE BEGIN TIM9_MspDeInit 0 */
 
   /* USER CODE END TIM9_MspDeInit 0 */
@@ -657,9 +650,7 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
   /* USER CODE BEGIN TIM9_MspDeInit 1 */
 
   /* USER CODE END TIM9_MspDeInit 1 */
-  }
-  else if(htim_pwm->Instance==TIM12)
-  {
+  } else if (htim_pwm->Instance==TIM12) {
   /* USER CODE BEGIN TIM12_MspDeInit 0 */
 
   /* USER CODE END TIM12_MspDeInit 0 */
@@ -672,10 +663,8 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
 
 }
 
-void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
-{
-  if(htim_base->Instance==TIM10)
-  {
+void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base) {
+  if (htim_base->Instance==TIM10) {
   /* USER CODE BEGIN TIM10_MspDeInit 0 */
 
   /* USER CODE END TIM10_MspDeInit 0 */

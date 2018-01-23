@@ -94,9 +94,9 @@ uint32_t uart_available(uint8_t bus);
  * Read a character from the bus.
  * 
  * @param {uint8_t} bus
- * @return {uint8_t} a character read
+ * @return {int} a character read or -1
  */
-uint8_t uart_read_char(uint8_t bus);
+int uart_read_char(uint8_t bus);
 
 /**
  * Read bytes from the bus and store them into a given buffer.
