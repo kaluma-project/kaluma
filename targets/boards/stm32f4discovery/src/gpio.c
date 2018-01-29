@@ -68,37 +68,6 @@ void gpio_toggle(uint8_t pin) {
   HAL_GPIO_TogglePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
 }
 
-/** 
-*/
-void gpio_set_spi_mode(uint8_t pin) {
-  assert_param(IS_GPIO_SPI_PIN(pin));
-
-  // todo
-}
-
-/** 
-*/
-void gpio_spi_config(spi_clk_mode_t mode, uint32_t prescaler, uint32_t cs_pin) {
-  uint32_t polarity, phase;
-
-  if (mode == POLARITY_LOW_PHASE_1EDGE) {
-    polarity = SPI_POLARITY_LOW;
-    phase = SPI_PHASE_1EDGE;
-  } else if (mode == POLARITY_LOW_PHASE_2EDGE) {
-    polarity = SPI_POLARITY_LOW;
-    phase = SPI_PHASE_2EDGE;
-  } else if (mode == POLARITY_HIGH_PHASE_1EDGE) {
-    polarity = SPI_POLARITY_HIGH;
-    phase = SPI_PHASE_1EDGE;
-  } else if (mode == POLARITY_HIGH_PHASE_2EDGE) {
-    polarity = SPI_POLARITY_HIGH;
-    phase = SPI_PHASE_2EDGE;
-  }
-
-  // todo
-}
-
-
 void gpio_test() {
 #if 1
   gpio_set_io_mode(76, GPIO_IO_MODE_OUTPUT);
