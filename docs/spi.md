@@ -32,7 +32,7 @@ spi.close();
 * __`options`__ `{Object}`
   * `mode` `{number}` -- `SPI.MASTER` (default) or `SPI.SLAVE`
   * `cs` `{number}` -- Chip select pin number
-  * `baudrate` `{number}` -- baudrate
+  * `clock` `{number}` -- clock
   * `polarity` `{number}` -- 0 or 1
   * `phase` `{number}` -- 0 or 1
   * `bits` `{number}` -- 8 or 9?
