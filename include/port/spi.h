@@ -34,6 +34,16 @@ typedef enum {
   SPI_BITORDER_LSB
 } spi_bitorder_t;
 
+typedef enum {
+  SPI_CLOCK_POLARITY_LOW,
+  SPI_CLOCK_POLARITY_HIGH,
+} spi_clock_polarity_t;
+
+typedef enum {
+  SPI_CLOCK_PHASE_1_EDGE,
+  SPI_CLOCK_PHASE_2_EDGE,
+} spi_clock_phase_t;
+
 /**
  * Setup SPI bus
  * 
@@ -41,14 +51,27 @@ typedef enum {
  * @param {spi_mode_t} mode
  * @param {uint8_t} cs_pin
  * @param {uint32_t} baudrate
- * @param {uint8_t} polarity
- * @param {uint8_t} phase
+ * @param {spi_clock_polarity_t} polarity
+ * @param {spi_clock_phase_t} phase
  * @param {uint8_t} bits
  * @param {uint8_t} bit_order
  * @return {int} result status code
  */
 int spi_setup(uint8_t bus, spi_mode_t mode, uint8_t cs_pin, uint32_t baudrate,
-  uint8_t polarity, uint8_t phase, uint8_t bits, spi_bitorder_t bit_order);
+  spi_clock_polarity_t polarity, spi_clock_phase_t phase, uint8_t bits, spi_bitorder_t bit_order);
+
+
+/**
+ * Send and receive data simultaneously to the SPI bus
+ * 
+ * @param {uint8_t} bus
+ * @param {uint8_t*} tx_buf
+ * @param {uint8_t*} rx_buf
+ * @param {uint32_t} len
+ * @param {uint32_t} timeout
+ * @return the number of bytes read or -1 on timeout or nothing written.
+ */
+int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, uint32_t len, uint32_t timeout);
 
 /**
  * Send data to the SPI bus
@@ -75,6 +98,6 @@ int spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
 /**
  * Close the SPI bus
  */
-void spi_close(uint8_t bus);
+int spi_close(uint8_t bus);
 
 #endif /* __SPI_H */

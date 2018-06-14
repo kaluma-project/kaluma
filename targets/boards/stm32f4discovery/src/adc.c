@@ -34,10 +34,13 @@ static const struct __adc_config {
     uint32_t channel;
 } adc_config[] = {
    {23, GPIOC, GPIO_PIN_1, ADC_CHANNEL_11},
+   {25, GPIOA, GPIO_PIN_1, ADC_CHANNEL_1},
    {28, GPIOC, GPIO_PIN_5, ADC_CHANNEL_15},
    {29, GPIOC, GPIO_PIN_4, ADC_CHANNEL_14},
    {30, GPIOB, GPIO_PIN_1, ADC_CHANNEL_9},
    {31, GPIOB, GPIO_PIN_0, ADC_CHANNEL_8},
+   {69, GPIOC, GPIO_PIN_3, ADC_CHANNEL_13},
+   {70, GPIOA, GPIO_PIN_0, ADC_CHANNEL_0},
 };
 
 
@@ -149,14 +152,14 @@ int adc_setup(uint8_t pin) {
     adc1_init();
     adc1_start_dma();
   }
-  
+
   uint8_t n = get_adc_index(pin);
   GPIO_InitTypeDef GPIO_InitStruct;
   GPIO_InitStruct.Pin = adc_config[n].pin;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(adc_config[n].port, &GPIO_InitStruct);
-  
+
   adc_configured[n] = 1;
   return 0;
 }
@@ -176,32 +179,47 @@ void adc_close(uint8_t pin) {
 
 void adc_test()
 {
+#if 0  
+   adc_setup(23);
+   delay(1);
+   while(1)
+   {
+          double val = adc_read( 23 );
+          printf("%f \r\n", val);
+          delay(1000);
+   }
+#endif  
+  
+   // 
    uint8_t n=0;
- 
-  double a = 1.21;
-  tty_printf("adc test starts. %f\r\n", a);
- 
+   adc_setup(adc_config[n].pin_number); n++;
+   adc_setup(adc_config[n].pin_number); n++;
+   adc_setup(adc_config[n].pin_number); n++;
    adc_setup(adc_config[n].pin_number); n++;
    adc_setup(adc_config[n].pin_number); n++;
    adc_setup(adc_config[n].pin_number); n++;
    adc_setup(adc_config[n].pin_number); n++;
    adc_setup(adc_config[n].pin_number); n++;
 
+   delay(1);
+
    for(int k=0; k<1000; k++)
    {
-      for(int m=0; m<5; m++) 
+      for(int m=0; m<n; m++) 
       {
           double val = adc_read( adc_config[m].pin_number );
-          tty_printf("%d %f \r\n", (int)(val * 1000), val);
-          //printf("%f \r\n", val);
+          tty_printf("%f \r\n", val);
+          printf("%f \r\n", val);
       }
       tty_printf("\r\n\n");
-      //printf("\r\n\n");
+      printf("\r\n\n");
       
       delay(1000);
    }
 
    n=0;
+   adc_close(adc_config[n].pin_number); n++;
+   adc_close(adc_config[n].pin_number); n++;
    adc_close(adc_config[n].pin_number); n++;
    adc_close(adc_config[n].pin_number); n++;
    adc_close(adc_config[n].pin_number); n++;
