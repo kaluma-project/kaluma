@@ -17,11 +17,8 @@ $(TARGET_DIR)/src/buffer.c \
 $(TARGET_DIR)/src/button.c \
 $(TARGET_DIR)/src/flash.c \
 $(TARGET_DIR)/src/gpio.c \
-<<<<<<< HEAD
-=======
 $(TARGET_DIR)/src/gpio_low_level.c \
 $(TARGET_DIR)/src/i2c.c \
->>>>>>> stm32f4discovery
 $(TARGET_DIR)/src/led.c \
 $(TARGET_DIR)/src/pwm.c \
 $(TARGET_DIR)/src/spi.c \
@@ -31,11 +28,8 @@ $(TARGET_DIR)/src/system_stm32f4xx.c \
 $(TARGET_DIR)/src/system.c \
 $(TARGET_DIR)/src/tty_low_level.c \
 $(TARGET_DIR)/src/tty.c \
-<<<<<<< HEAD
-=======
 $(TARGET_DIR)/src/uart.c \
 $(TARGET_DIR)/src/uart_low_level.c \
->>>>>>> stm32f4discovery
 $(TARGET_DIR)/src/usb_device.c \
 $(TARGET_DIR)/src/usbd_cdc_if.c \
 $(TARGET_DIR)/src/usbd_conf.c \

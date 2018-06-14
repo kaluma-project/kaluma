@@ -88,25 +88,15 @@ int uart_write(uint8_t bus, uint8_t *buf, size_t len);
  * @param {uint8_t} bus
  * @return {int} the number of bytes in read buffer.
  */
-<<<<<<< HEAD
-int uart_available(uint8_t bus);
-=======
 uint32_t uart_available(uint8_t bus);
->>>>>>> stm32f4discovery
 
 /**
  * Read a character from the bus.
  * 
  * @param {uint8_t} bus
-<<<<<<< HEAD
- * @return {uint8_t} a character read
- */
-uint8_t uart_read_char(uint8_t bus);
-=======
  * @return {int} a character read or -1
  */
 int uart_read_char(uint8_t bus);
->>>>>>> stm32f4discovery
 
 /**
  * Read bytes from the bus and store them into a given buffer.
@@ -114,15 +104,9 @@ int uart_read_char(uint8_t bus);
  * @param {uint8_t} bus
  * @param {uint8_t*} buf
  * @param {size_t} len
-<<<<<<< HEAD
- * @return {int} the number of bytes read or -1 on timeout
- */
-int uart_read(uint8_t bus, uint8_t *buf, size_t len);
-=======
  * @return {int} the number of bytes read
  */
 uint32_t uart_read(uint8_t bus, uint8_t *buf, size_t len);
->>>>>>> stm32f4discovery
 
 /**
  * Close the UART bus
