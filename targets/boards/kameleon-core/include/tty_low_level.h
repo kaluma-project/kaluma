@@ -36,4 +36,5 @@ uint32_t tty_put_bytes(uint8_t * buf, uint32_t nToWrite);
 uint32_t tty_get_tx_freespace(void);
 uint32_t tty_get_rx_freespace(void);
 
+
 #endif /* __TTY_LOW_LEVEL_H */

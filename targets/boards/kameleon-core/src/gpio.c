@@ -20,61 +20,25 @@
  */
 
 #include <stdint.h>
-#include "stm32f4xx_hal.h"
+#include "stm32f4xx.h"
+#include "kameleon_core.h"
 #include "gpio.h"
 
-/**
- * Initialze GPIO pins
- * ~ : means PWM (e.g. ~4, ~5, ~6...)
- * @ : means analog (e.g. @1, @2, @3, ...)
- */
-static struct {
+extern struct {
     GPIO_TypeDef * port;
     uint32_t pin;
- } gpio_port_pin[] = {
-   {GPIOA, GPIO_PIN_1},     // 0
-   {GPIOA, GPIO_PIN_4},     // 1
-   {GPIOA, GPIO_PIN_5},     // 2
-   {GPIOA, GPIO_PIN_6},     // 3
-   {GPIOA, GPIO_PIN_7},     // 4
-   {GPIOA, GPIO_PIN_9},     // 5
-   {GPIOA, GPIO_PIN_10},    // 6
-   {GPIOA, GPIO_PIN_15},    // 7
-
-   {GPIOB, GPIO_PIN_3},     // 8
-   {GPIOB, GPIO_PIN_4},     // 9
-   {GPIOB, GPIO_PIN_6},     // 10
-   {GPIOB, GPIO_PIN_7},     // 11
-   {GPIOC, GPIO_PIN_0},     // 12
-   {GPIOC, GPIO_PIN_1},     // 13
-   {GPIOC, GPIO_PIN_2},     // 14
-   {GPIOC, GPIO_PIN_3},     // 15
-
-   {GPIOA, GPIO_PIN_0},     // 16
-   {GPIOB, GPIO_PIN_13},    // 17 (LED)
-   {GPIOC, GPIO_PIN_8},     // 18 (KEY)
-};
+} gpio_port_pin[];
 
 /** 
 */
 void gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode) {
-  GPIO_InitTypeDef GPIO_InitStruct;
-  
   assert_param(pin < GPIO_NUM);
   assert_param(mode==GPIO_IO_MODE_INPUT || mode==GPIO_IO_MODE_OUTPUT);
 
+  GPIO_InitTypeDef GPIO_InitStruct;
   GPIO_InitStruct.Pin = gpio_port_pin[pin].pin;
   GPIO_InitStruct.Mode = (mode == GPIO_IO_MODE_INPUT) ?  GPIO_MODE_INPUT:GPIO_MODE_OUTPUT_PP;
-
-  if (mode==GPIO_IO_MODE_OUTPUT) {
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-  } else {
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    /* if the pin is the key (should be modified in the future) */
-    if (pin == 18) {
-      GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-    } 
-  }   
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(gpio_port_pin[pin].port, &GPIO_InitStruct);   
 }
@@ -104,54 +68,16 @@ void gpio_toggle(uint8_t pin) {
   HAL_GPIO_TogglePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
 }
 
-/** 
-*/
-void gpio_set_spi_mode(uint8_t pin) {
-  assert_param(IS_GPIO_SPI_PIN(pin));
-
-  // todo
-}
-
-/** 
-*/
-void gpio_spi_config(spi_clk_mode_t mode, uint32_t prescaler, uint32_t cs_pin) {
-  uint32_t polarity, phase;
-
-  if (mode == POLARITY_LOW_PHASE_1EDGE) {
-    polarity = SPI_POLARITY_LOW;
-    phase = SPI_PHASE_1EDGE;
-  } else if (mode == POLARITY_LOW_PHASE_2EDGE) {
-    polarity = SPI_POLARITY_LOW;
-    phase = SPI_PHASE_2EDGE;
-  } else if (mode == POLARITY_HIGH_PHASE_1EDGE) {
-    polarity = SPI_POLARITY_HIGH;
-    phase = SPI_PHASE_1EDGE;
-  } else if (mode == POLARITY_HIGH_PHASE_2EDGE) {
-    polarity = SPI_POLARITY_HIGH;
-    phase = SPI_PHASE_2EDGE;
-  }
-
-  // todo
-}
-
-
 void gpio_test() {
-#if 0
-  uint8_t pin = 17;
+#if 1
+  uint8_t pin = 2;
   gpio_set_io_mode(pin, GPIO_IO_MODE_OUTPUT);
 
   while(1) {
-    
     gpio_write(pin, GPIO_HIGH);
     delay(1000);
 
     gpio_write(pin, GPIO_LOW);
-    delay(1000);
-
-    gpio_toggle(pin);
-    delay(1000);
-
-    gpio_toggle(pin);
     delay(1000);
   }
 

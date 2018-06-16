@@ -21,19 +21,20 @@
 
 #include <stdint.h>
 
-const char board_arch[] = "arm";
+const char board_arch[] = "cortex-m4";
 const char board_platform[] = "unknown";
 const char board_name[] = "kameleon-core";
 
-const uint8_t pin_num = 16;
+const uint8_t pin_num = 22;
 const uint8_t led_num = 1;
 const uint8_t switch_num = 1;
-const uint8_t pwm_num = 2;
-const uint8_t adc_num = 2;
-const uint8_t i2c_num = 1;
-const uint8_t spi_num = 1;
-const uint8_t uart_num = 1;
-const uint8_t led_pins[] = { 17 };
-const uint8_t switch_pins[] = { 18 };
-const uint8_t pwm_pins[] = { 0 };
-const uint8_t adc_pins[] = { 0 };
+const uint8_t pwm_num = 6;
+const uint8_t adc_num = 7;
+const uint8_t i2c_num = 2;
+const uint8_t spi_num = 2;
+const uint8_t uart_num = 2;
+const uint8_t led_pins[] = { 20 };
+const uint8_t switch_pins[] = { 21 };
+const uint8_t pwm_pins[] = { 8, 9, 13, 14, 15, 16 };
+const uint8_t adc_pins[] = { 2, 3, 4, 5, 10, 11, 12 };
+

@@ -132,7 +132,7 @@ KAMELEON_INC = \
 # -----------------------------------------------------------------------------
 
 ifndef TARGET 
-TARGET = stm32f4discovery
+TARGET = kameleon-core
 endif
 
 TARGET_DIR = targets/boards/$(TARGET)

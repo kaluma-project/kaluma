@@ -20,11 +20,12 @@
  */
 
 #include "stm32f4xx.h"
+#include "kameleon_core.h"
 #include "flash.h"
 #include "tty.h"
 
-#define ADDR_FLASH_USER_AREA            ((uint32_t)0x08060000)
 #define SIZE_FLASH_USER_AREA            (128 * 1024)
+#define ADDR_FLASH_USER_AREA            (FLASH_BASE_ADDR + FLASH_SIZE - SIZE_FLASH_USER_AREA)
 #define ADDR_FLASH_USER_CODE_SIZE       (ADDR_FLASH_USER_AREA + 0)
 #define ADDR_FLASH_USER_CODE_CHECKSUM   (ADDR_FLASH_USER_AREA + 4)
 #define ADDR_FLASH_USER_CODE            (ADDR_FLASH_USER_AREA + 8)
@@ -32,6 +33,8 @@
 
 uint32_t code_offset;
 
+/** 
+*/
 static void flush_cache() {
   /* Note: If an erase operation in Flash memory also concerns data in the data or instruction cache,
      you have to make sure that these data are rewritten before they are accessed during code
@@ -47,6 +50,8 @@ static void flush_cache() {
   __HAL_FLASH_DATA_CACHE_ENABLE();
 }
 
+/** 
+*/
 static void flash_erase() {
   FLASH_EraseInitTypeDef EraseInitStruct;
   uint32_t SectorError = 0;
@@ -59,7 +64,7 @@ static void flash_erase() {
   EraseInitStruct.VoltageRange = FLASH_VOLTAGE_RANGE_3;
   EraseInitStruct.Sector = SECTOR_FLASH_USER_AREA;
   EraseInitStruct.NbSectors = 1;
-  if(HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError) != HAL_OK) { 
+  if (HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError) != HAL_OK) { 
     /* 
       Error occurred while sector erase. 
       User can add here some code to deal with this error. 
@@ -76,6 +81,8 @@ static void flash_erase() {
   HAL_FLASH_Lock();    
 }
 
+/** 
+*/
 static uint32_t calculate_checksum(uint8_t * pbuf, uint32_t size) {
   uint32_t calcurated_checksum = 0;
 
@@ -85,18 +92,26 @@ static uint32_t calculate_checksum(uint8_t * pbuf, uint32_t size) {
   return (calcurated_checksum ^ (uint32_t)-1) + 1;
 }
 
+/** 
+*/
 void flash_clear() {
   flash_erase();
 }
 
+/** 
+*/
 uint8_t * flash_get_data() {
   return (uint8_t *)ADDR_FLASH_USER_CODE;
 }
 
+/** 
+*/
 uint32_t flash_size() {
   return SIZE_FLASH_USER_AREA - (ADDR_FLASH_USER_CODE - ADDR_FLASH_USER_AREA);
 }
 
+/** 
+*/
 uint32_t flash_get_data_size() {
   uint32_t size = 0;
   uint32_t * p = (uint32_t *)ADDR_FLASH_USER_AREA;
@@ -108,11 +123,15 @@ uint32_t flash_get_data_size() {
   return size;
 }
 
+/** 
+*/
 void flash_program_begin() {
   code_offset = 0;
   flash_erase();
 }
 
+/** 
+*/
 flash_status_t flash_program(uint8_t * buf, uint32_t size) {
   flash_status_t status = FLASH_SUCCESS;
   uint32_t address, start_address, end_address;
@@ -147,6 +166,8 @@ flash_status_t flash_program(uint8_t * buf, uint32_t size) {
   return status;
 }
 
+/** 
+*/
 flash_status_t flash_program_byte(uint8_t val) {
   flash_status_t status = FLASH_SUCCESS;
   uint32_t address;
@@ -172,6 +193,8 @@ flash_status_t flash_program_byte(uint8_t val) {
   return status;
 }
 
+/** 
+*/
 void flash_program_end() {
   uint32_t checksum;
 
@@ -190,6 +213,8 @@ void flash_program_end() {
   HAL_FLASH_Lock();
 }
 
+/** 
+*/
 uint32_t flash_get_checksum() {
   return  *(uint32_t *)ADDR_FLASH_USER_CODE_CHECKSUM;
 }

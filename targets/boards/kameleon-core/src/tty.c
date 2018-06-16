@@ -26,14 +26,19 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include "tty.h"
 #include "system.h"
-#include "tty_low_level.h"
 #include "usbd_cdc_if.h"
 
+
+/**
+*/
 void tty_init() {
 	tty_init_ringbuffer();
 }
 
+/**
+*/
 void tty_putc(char ch) {
 	/* (ring)buffering the string instead of transmitting it via usb channel */
 	if (tty_get_tx_freespace() > 1) {
@@ -42,6 +47,8 @@ void tty_putc(char ch) {
 	SetPendSV(); 
 }
 
+/**
+*/
 void tty_printf(const char *fmt, ...) {
 	va_list ap;
 	char string[256];
@@ -57,6 +64,8 @@ void tty_printf(const char *fmt, ...) {
 	SetPendSV();
 }
 
+/**
+*/
 bool tty_has_data() {
 	uint32_t n = tty_get_rx_data_length();
 	if (n) {
@@ -67,6 +76,8 @@ bool tty_has_data() {
 	}
 }
 
+/**
+*/
 uint32_t tty_data_size() {
 	return tty_get_rx_data_length();
 }
@@ -88,7 +99,8 @@ uint8_t tty_getch() {
 	return tty_get_byte();
 }
 
-
+/**
+*/
 void tty_getstring(char * string) {
 	char *string2 = string;
 	char c;
@@ -107,6 +119,8 @@ void tty_getstring(char * string) {
 	tty_putc('\r');   tty_putc('\n');
 }
 
+/**
+*/
 int tty_getintnum() {
 	char str[256];
 	char *string = str;

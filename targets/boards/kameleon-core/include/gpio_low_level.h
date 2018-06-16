@@ -19,25 +19,12 @@
  * SOFTWARE.
  */
 
-#include <stdint.h>
-#include "stm32f4xx.h"
+#ifndef __GPIO_LOW_LEVEL_H
+#define __GPIO_LOW_LEVEL_H
 
-uint8_t button_is_pressed() {
-  uint8_t pressed = 0;
-  GPIO_PinState state = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4);
-  if (state == GPIO_PIN_RESET) {
-    pressed = 1;
-  }
-  return pressed;
-}
 
-void button_test() {
-  while(1) {
-    if (button_is_pressed()) {
-      tty_printf("button is pressed \r\n");
-    } else {
-      tty_printf("button is not pressed \r\n");
-    }
-    delay(1000);
-  }    
-}
+GPIO_TypeDef * get_gpio_port(uint8_t pin);
+uint32_t get_gpio_pin(uint8_t pin);
+
+
+#endif /* __GPIO_LOW_LEVEL_H */

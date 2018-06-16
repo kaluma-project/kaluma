@@ -11,10 +11,14 @@ TARGET_ASM += \
 $(TARGET_DIR)/src/startup_stm32f411xe.s
 
 TARGET_SRC += \
+$(TARGET_DIR)/src/adc.c \
 $(TARGET_DIR)/src/board.c \
+$(TARGET_DIR)/src/button.c \
 $(TARGET_DIR)/src/buffer.c \
 $(TARGET_DIR)/src/system.c \
+$(TARGET_DIR)/src/gpio_low_level.c \
 $(TARGET_DIR)/src/gpio.c \
+$(TARGET_DIR)/src/pwm.c \
 $(TARGET_DIR)/src/led.c \
 $(TARGET_DIR)/src/tty.c \
 $(TARGET_DIR)/src/tty_low_level.c \
@@ -25,11 +29,11 @@ $(TARGET_DIR)/src/usbd_desc.c \
 $(TARGET_DIR)/src/usbd_cdc_if.c \
 $(TARGET_DIR)/src/system_stm32f4xx.c \
 $(TARGET_DIR)/src/stm32f4xx_hal_msp.c \
-$(TARGET_DIR)/src/is25lq040b.c \
 $(TARGET_DIR)/src/flash.c \
 $(TARGET_DIR)/src/uart.c \
 $(TARGET_DIR)/src/uart_low_level.c \
 $(TARGET_DIR)/src/i2c.c \
+$(TARGET_DIR)/src/spi.c \
 $(SHARED_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c \
 $(SHARED_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c \
 $(SHARED_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c \
@@ -54,11 +58,7 @@ $(SHARED_DIR)/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c \
 $(SHARED_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c \
 $(SHARED_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c \
 $(SHARED_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c \
-$(SHARED_DIR)/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c \
-$(SHARED_DIR)/middlewares/fatfs/ff13a/source/ff.c \
-$(SHARED_DIR)/middlewares/fatfs/ff13a/source/diskio.c \
-$(SHARED_DIR)/middlewares/fatfs/ff13a/source/ffunicode.c \
-$(SHARED_DIR)/middlewares/fatfs/fs_interface.c
+$(SHARED_DIR)/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c
 
 TARGET_INC += \
 -I$(TARGET_DIR)/include \
@@ -66,12 +66,10 @@ TARGET_INC += \
 -I$(SHARED_DIR)/drivers/STM32F4xx_HAL_Driver/Inc/Legacy \
 -I$(SHARED_DIR)/middlewares/ST/STM32_USB_Device_Library/Core/Inc \
 -I$(SHARED_DIR)/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc \
--I$(SHARED_DIR)/middlewares/fatfs/ff13a/source \
--I$(SHARED_DIR)/middlewares/fatfs \
 -I$(SHARED_DIR)/drivers/CMSIS/Device/ST/STM32F4xx/Include \
 -I$(SHARED_DIR)/drivers/CMSIS/Include
 
-TARGET_LDSCRIPT = $(TARGET_DIR)/src/STM32F411RETx_FLASH.ld
+TARGET_LDSCRIPT = $(TARGET_DIR)/src/STM32F411CETx_FLASH.ld
 
 # -----------------------------------------------------------------------------
 # Kameleon modules

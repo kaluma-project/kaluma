@@ -8,10 +8,10 @@
 //  C-Implementation on RING BUFFER
 //
 typedef struct {
-	uint8_t * buf;
-  uint32_t	length;
-	uint32_t	r_ptr;
-	uint32_t  w_ptr;
+  uint8_t * buf;
+  uint32_t length;
+  uint32_t r_ptr;
+  uint32_t w_ptr;
 } ringbuffer_t;
 
 uint32_t	GetDataLenInRingBuffer(ringbuffer_t *);

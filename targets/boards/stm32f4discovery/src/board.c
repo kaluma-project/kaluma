@@ -21,11 +21,11 @@
 
 #include <stdint.h>
 
-const char board_arch[] = "arm";
+const char board_arch[] = "cortex-m4";
 const char board_platform[] = "unknown";
 const char board_name[] = "stm32f4discovery";
 
-const uint8_t pin_num = 50;
+const uint8_t pin_num = 100;
 const uint8_t led_num = 4;
 const uint8_t switch_num = 1;
 const uint8_t pwm_num = 8;

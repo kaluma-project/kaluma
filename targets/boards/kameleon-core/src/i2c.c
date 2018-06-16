@@ -18,54 +18,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-#include "stm32f4xx.h"
+#include "kameleon_core.h"
+#include "system.h"
 #include "i2c.h"
+#include "tty.h"
 
 static i2c_mode_t mode;
 static I2C_HandleTypeDef hi2c1;
 
 /**
-*/
-void HAL_I2C_MspInit(I2C_HandleTypeDef* hi2c) {
-
-  GPIO_InitTypeDef GPIO_InitStruct;
-  if (hi2c->Instance==I2C1) {
-    /**I2C1 GPIO Configuration    
-    PB6     ------> I2C1_SCL
-    PB7     ------> I2C1_SDA 
-    */
-    GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-    /* Peripheral clock enable */
-    __HAL_RCC_I2C1_CLK_ENABLE();
-  }
-}
-
-/**
-*/
-void HAL_I2C_MspDeInit(I2C_HandleTypeDef* hi2c) {
-
-  if (hi2c->Instance==I2C1) {
-    /* Peripheral clock disable */
-    __HAL_RCC_I2C1_CLK_DISABLE();
-  
-    /**I2C1 GPIO Configuration    
-    PB6     ------> I2C1_SCL
-    PB7     ------> I2C1_SDA 
-    */
-    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_6|GPIO_PIN_7);
-  }
-}
-
-/**
  */
-int i2c_write(uint8_t bus, uint8_t address, uint8_t *buf, uint32_t len, uint32_t timeout) {
+int i2c_write(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uint32_t timeout) {
   assert_param(bus==0);
   HAL_StatusTypeDef hal_status;
   
@@ -107,7 +70,7 @@ int i2c_write_char(uint8_t bus, uint8_t address, uint8_t ch, uint32_t timeout) {
 
 /**
  */
-int i2c_read(uint8_t bus, uint8_t address, uint8_t *buf, uint32_t len, uint32_t timeout) {
+int i2c_read(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uint32_t timeout) {
   assert_param(bus==0);
   HAL_StatusTypeDef hal_status;
 
@@ -162,7 +125,7 @@ int i2c_close(uint8_t bus) {
 
 /**
  */
-int i2c_open_master(uint8_t bus) {
+int i2c_setup_master(uint8_t bus) {
   assert_param(bus==0);
   mode = I2C_MODE_MASTER;
 
@@ -186,7 +149,7 @@ int i2c_open_master(uint8_t bus) {
 
 /**
  */
-int i2c_open_slave(uint8_t bus, uint8_t address) {
+int i2c_setup_slave(uint8_t bus, uint8_t address) {
   assert_param(bus==0);
   mode = I2C_MODE_SLAVE;
 
@@ -211,6 +174,117 @@ int i2c_open_slave(uint8_t bus, uint8_t address) {
 //
 //
 //
-void i2c_test() {
-  i2c_open_master(0);
+void i2c_master_test() 
+{
+  uint8_t bus = 0;
+  uint8_t address = 0x12 << 1;
+  int32_t d;
+  
+  i2c_setup_master(bus);
+  
+  uint8_t ch = 0;
+  while(1)
+  {
+    i2c_write_char(bus, address, ch, (uint32_t)-1);
+    ch = (ch + 1) & 0x0F;
+    
+    d = i2c_read_char(bus, address, (uint32_t)-1);
+    printf("%#04x \r\n", d);
+    
+    delay(1000);
+  }
+  
+  i2c_close(bus);
 }
+
+void i2c_master_test2() 
+{
+#if 0
+  // Reset CS43L22 
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Pin = GPIO_PIN_4;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);   
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_4, GPIO_PIN_SET);
+
+  uint8_t bus = 0;
+  uint8_t address = 0x4A << 1;
+  int32_t d;
+  
+  i2c_setup_master(bus);
+  i2c_write_char(bus, address, 0x01, (uint32_t)-1);
+  d = i2c_read_char(bus, address, (uint32_t)-1);
+  printf("%#04x \r\n", d);
+  
+  i2c_close(bus);
+
+#else
+
+  // MPU6050 Testing
+  uint8_t bus = 0;
+  uint8_t address = 0x68 << 1;
+  uint8_t buf[6];
+  int32_t d;
+  
+  i2c_setup_master(bus);
+  
+  // wake up from sleep
+  buf[0]=0x6B;   buf[1]=0x00;
+  i2c_write(bus, address, buf, 2, (uint32_t)-1);
+
+  i2c_write_char(bus, address, 0x75, (uint32_t)-1);
+  d = i2c_read_char(bus, address, (uint32_t)-1);
+  
+  //printf("id : %#04x \r\n", d);
+  tty_printf("id : %#04x \r\n", d);
+  
+  while(1)
+  {      
+      i2c_write_char(bus, address, 0x3B, (uint32_t)-1);
+      i2c_read(bus, address, buf, 6, (uint32_t)-1);
+            
+      int32_t x, y, z;
+      
+      x = (buf[0] << 8) | buf[1];
+      y = (buf[2] << 8) | buf[3];
+      z = (buf[4] << 8) | buf[5];
+      
+      if(x >= 32768) x = x - 65536;
+      if(y >= 32768) y = y - 65536;
+      if(z >= 32768) z = z - 65536;
+      
+      //printf("x[%d], y[%d], z[%d] \r\n", x, y, z);
+      tty_printf("x[%d], y[%d], z[%d] \r\n", x, y, z);
+      delay(1000);
+  }
+
+  i2c_close(bus);
+
+#endif  
+}
+
+void i2c_slave_test() 
+{
+    uint8_t bus = 0;
+    uint8_t address = 0x12;
+    
+    i2c_setup_slave(bus, address);
+    
+    while(1)
+    {
+      int d = i2c_read_char(bus, address, (uint32_t)-1);
+
+      // send data as soon as possible (very important !!!)
+      uint8_t ch = 0x80 | d;
+      i2c_write_char(bus, address, ch, (uint32_t)-1);
+
+      printf("%#04x \r\n", d);
+    }
+}
+
+
+
+
+

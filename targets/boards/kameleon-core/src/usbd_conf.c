@@ -71,11 +71,9 @@ void SystemClock_Config(void);
 *******************************************************************************/
 /* MSP Init */
 
-void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle)
-{
+void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle){
   GPIO_InitTypeDef GPIO_InitStruct;
-  if(pcdHandle->Instance==USB_OTG_FS)
-  {
+  if(pcdHandle->Instance==USB_OTG_FS) {
   /* USER CODE BEGIN USB_OTG_FS_MspInit 0 */
 
   /* USER CODE END USB_OTG_FS_MspInit 0 */
@@ -103,10 +101,8 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle)
   }
 }
 
-void HAL_PCD_MspDeInit(PCD_HandleTypeDef* pcdHandle)
-{
-  if(pcdHandle->Instance==USB_OTG_FS)
-  {
+void HAL_PCD_MspDeInit(PCD_HandleTypeDef* pcdHandle) {
+  if(pcdHandle->Instance==USB_OTG_FS) {
   /* USER CODE BEGIN USB_OTG_FS_MspDeInit 0 */
 
   /* USER CODE END USB_OTG_FS_MspDeInit 0 */

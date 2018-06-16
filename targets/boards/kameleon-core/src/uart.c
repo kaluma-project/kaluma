@@ -19,11 +19,11 @@
  * SOFTWARE.
  */
 
-#include "stm32f4xx.h"
+#include "kameleon_core.h"
 #include "uart.h"
 
-static UART_HandleTypeDef huart1;
-static UART_HandleTypeDef huart2;
+UART_HandleTypeDef huart1;
+UART_HandleTypeDef huart2;
 
 static UART_HandleTypeDef * uart_handle[] = {&huart1, &huart2};
 static USART_TypeDef * uart_ch[] = {USART1, USART2};
@@ -33,74 +33,9 @@ static const uint32_t uart_parity[] = { UART_PARITY_NONE, UART_PARITY_ODD, UART_
 static const uint32_t uart_stop_bits[] = { UART_STOPBITS_1, UART_STOPBITS_2 };
 static const uint32_t uart_hw_control[] = { UART_HWCONTROL_NONE, UART_HWCONTROL_RTS, UART_HWCONTROL_CTS, UART_HWCONTROL_RTS_CTS };
 
-/**
-*/
-void HAL_UART_MspInit(UART_HandleTypeDef* huart) {
-  GPIO_InitTypeDef GPIO_InitStruct;
-  if (huart->Instance==USART1) {
-    /* Peripheral clock enable */
-    __HAL_RCC_USART1_CLK_ENABLE();
-  
-    /**USART1 GPIO Configuration    
-    PA9     ------> USART1_TX
-    PA10     ------> USART1_RX 
-    */
-    GPIO_InitStruct.Pin = GPIO_PIN_9|GPIO_PIN_10;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-  } else if (huart->Instance==USART2) {
-    /* Peripheral clock enable */
-    __HAL_RCC_USART2_CLK_ENABLE();
-  
-    /**USART2 GPIO Configuration    
-    PA2     ------> USART2_TX
-    PA3     ------> USART2_RX 
-    */
-    GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_3;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-  }
-}
-
-/**
-*/
-void HAL_UART_MspDeInit(UART_HandleTypeDef* huart) {
-  if (huart->Instance==USART1) {
-    /* Peripheral clock disable */
-    __HAL_RCC_USART1_CLK_DISABLE();
-  
-    /**USART1 GPIO Configuration    
-    PA9     ------> USART1_TX
-    PA10     ------> USART1_RX 
-    */
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_9|GPIO_PIN_10);
-  } else if (huart->Instance==USART2) {
-    /* Peripheral clock disable */
-    __HAL_RCC_USART2_CLK_DISABLE();
-  
-    /**USART2 GPIO Configuration    
-    PA2     ------> USART2_TX
-    PA3     ------> USART2_RX 
-    */
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_2|GPIO_PIN_3);
-
-    /* USART2 DMA DeInit */
-    HAL_DMA_DeInit(huart->hdmarx);
-
-    /* USART2 interrupt DeInit */
-    HAL_NVIC_DisableIRQ(USART2_IRQn);
-  }
-}
-
 /** UART Initialization
 */
-int uart_open(uint8_t bus, uint32_t baudrate, uint32_t bits, uint32_t parity, uint32_t stop, uint32_t flow) {
+int uart_setup(uint8_t bus, uint32_t baudrate, uint32_t bits, uint32_t parity, uint32_t stop, uint32_t flow, size_t buffer_size) {
   assert_param(bus==0 || bus==1);
   UART_HandleTypeDef * puart = uart_handle[bus];
 
@@ -113,10 +48,16 @@ int uart_open(uint8_t bus, uint32_t baudrate, uint32_t bits, uint32_t parity, ui
   puart->Init.HwFlowCtl = uart_hw_control[flow];
   puart->Init.Mode = UART_MODE_TX_RX;
   puart->Init.OverSampling = UART_OVERSAMPLING_16;
-
+  
+  int n = uart_init_ringbuffer(bus, buffer_size);
+  if (n==0) {
+    return -1;
+  }
+  
   HAL_StatusTypeDef hal_status = HAL_UART_Init(puart);
   if (hal_status == HAL_OK) {
-    return 0;
+    __HAL_UART_ENABLE_IT(puart, UART_IT_RXNE);
+    return bus;
   } else {
     return -1;
   }
@@ -124,9 +65,9 @@ int uart_open(uint8_t bus, uint32_t baudrate, uint32_t bits, uint32_t parity, ui
 
 /** 
 */
-int uart_write_char(uint8_t bus, uint8_t ch, uint32_t timeout) {
+int uart_write_char(uint8_t bus, uint8_t ch) {
   assert_param(bus==0 || bus==1);
-  HAL_StatusTypeDef hal_status = HAL_UART_Transmit(uart_handle[bus], &ch, 1, timeout);
+  HAL_StatusTypeDef hal_status = HAL_UART_Transmit(uart_handle[bus], &ch, 1, (uint32_t)-1);
   if (hal_status == HAL_OK) {
     return 1;
   } else {
@@ -136,9 +77,9 @@ int uart_write_char(uint8_t bus, uint8_t ch, uint32_t timeout) {
 
 /** 
 */
-int uart_write(uint8_t bus, uint8_t *buf, uint32_t len, uint32_t timeout) {
+int uart_write(uint8_t bus, uint8_t *buf, size_t len) {
   assert_param(bus==0 || bus==1);
-  HAL_StatusTypeDef hal_status = HAL_UART_Transmit(uart_handle[bus], buf, len, timeout);
+  HAL_StatusTypeDef hal_status = HAL_UART_Transmit(uart_handle[bus], buf, len, (uint32_t)-1);
   if (hal_status == HAL_OK) {
     return len;
   } else {
@@ -148,42 +89,46 @@ int uart_write(uint8_t bus, uint8_t *buf, uint32_t len, uint32_t timeout) {
 
 /** 
 */
-int uart_read_char(uint8_t bus, uint32_t timeout) {
+uint32_t uart_available(uint8_t bus) {
   assert_param(bus==0 || bus==1);
-  uint8_t ch;
-  HAL_StatusTypeDef hal_status = HAL_UART_Receive(uart_handle[bus], &ch, 1, timeout);
-  if (hal_status == HAL_OK) {
-    return (ch & 0x0ff);
-  } else {
-    return -1;
-  } 
+  return uart_available_ringbuffer(bus);
 }
 
 /** 
 */
-int uart_read(uint8_t bus, uint8_t *buf, uint32_t len, uint32_t timeout) {
+int uart_read_char(uint8_t bus) {
   assert_param(bus==0 || bus==1);
-  uint8_t ch;
-  HAL_StatusTypeDef hal_status = HAL_UART_Receive(uart_handle[bus], buf, len, timeout);
-  if (hal_status == HAL_OK) {
-    return len;
-  } else {
+  
+  if (uart_available(bus)==0) {
     return -1;
+  } else {
+    return (int)uart_read_char_ringbuffer(bus);
   }
+}
+
+/** 
+*/
+uint32_t uart_read(uint8_t bus, uint8_t *buf, size_t len) {
+  assert_param(bus==0 || bus==1);
+  return uart_read_ringbuffer(bus, buf, len);
 }
 
 /** 
 */
 int uart_close(uint8_t bus) {
   assert_param(bus==0 || bus==1);
+  
+  uart_deinit_ringbuffer(bus);
+  
   HAL_StatusTypeDef hal_status = HAL_UART_DeInit(uart_handle[bus]);
   if (hal_status == HAL_OK) {
-    return 0;
+    UART_HandleTypeDef * puart = uart_handle[bus];
+    __HAL_UART_DISABLE_IT(puart, UART_IT_RXNE);
+    return bus;
   } else {
     return -1;
   }
 }
-
 
 //
 //
@@ -193,27 +138,28 @@ void uart_test()
   int d;
   uint8_t bus = 0;
   uint8_t buf[5];
-  uint32_t timeout = 1000;
+  uint32_t sec = 0;
 
-  uart_open(bus, 115200, UART_DATA_8_BIT, UART_PARITY_TYPE_NONE, UART_STOP_1_BIT, UART_FLOW_NONE);
+  uart_setup(bus, 115200, UART_DATA_8_BIT, UART_PARITY_TYPE_NONE, UART_STOP_1_BIT, UART_FLOW_NONE, 1024);
 
   while(1)
   {
-    d = uart_read_char(bus, timeout);
-    if (d != -1) {
-      uart_write_char(bus, (uint8_t)d, timeout);
+    if (uart_available(bus)) {
+      d = uart_read_char(bus);
+      if (d != -1) {
+        uart_write_char(bus, (uint8_t)d);
+      }
     }
-    else {
-      tty_printf("timeout-1 \r\n");
-    }
-
-    d = uart_read(bus, buf, 1, timeout);
-    if(d != -1 ) {
-      uart_write(bus, buf, 1, timeout);
-    }
-    else {
-      tty_printf("timeout-2 \r\n");
-    }
+    delay(10);
   }
+
+  uint32_t len;
+  while( uart_available(bus) < sizeof(buf) );
+  len = uart_read(bus, buf, sizeof(buf));
+  uart_write(bus, buf, len);    
+
   uart_close(bus);
 }
+
+
+
