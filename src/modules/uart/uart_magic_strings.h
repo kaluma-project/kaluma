@@ -23,5 +23,14 @@
 #define __UART_MAGIC_STRINGS_H
 
 #define MSTR_UART_UART "UART"
+#define MSTR_UART_SETUP "setup"
+#define MSTR_UART_BUS "bus"
+#define MSTR_UART_BAUDRATE "baudrate"
+#define MSTR_UART_BITS "bits"
+#define MSTR_UART_PARITY "parity"
+#define MSTR_UART_STOP "stop"
+#define MSTR_UART_FLOW "flow"
+#define MSTR_UART_BUFFERSIZE "bufferSize"
+#define MSTR_UART_WRITE "write"
 
 #endif /* __UART_MAGIC_STRINGS_H */

@@ -58,3 +58,24 @@ bool is_adc_pin(uint8_t pin) {
   }
   return false;
 }
+
+bool is_uart_bus(uint8_t bus) {
+  if (0 <= bus && bus < uart_num) {
+    return true;
+  }
+  return false;
+}
+
+bool is_i2c_bus(uint8_t bus) {
+  if (0 <= bus && bus < i2c_num) {
+    return true;
+  }
+  return false;
+}
+
+bool is_spi_bus(uint8_t bus) {
+  if (0 <= bus && bus < spi_num) {
+    return true;
+  }
+  return false;
+}

@@ -27,6 +27,13 @@
 
 #define JERRYXX_FUN(name) static jerry_value_t name(const jerry_value_t func_value, const jerry_value_t this_val, const jerry_value_t args_p[], const jerry_length_t args_cnt)
 
+#define JERRYXX_CHECK_ARG(index, argname) \
+  if (args_cnt <= index) { \
+    char errmsg[255]; \
+    sprintf(errmsg, "\"%s\" argument required", argname); \
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg); \
+  }
+
 #define JERRYXX_CHECK_ARG_NUMBER(index, argname) \
   if ((args_cnt <= index) || (!jerry_value_is_number(args_p[index]))) { \
     char errmsg[255]; \
@@ -66,6 +73,15 @@
     return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg); \
   }
 
+#define JERRYXX_CHECK_ARG_OBJECT_OPT(index, argname) \
+  if (args_cnt > index) { \
+    if (!jerry_value_is_object(args_p[index])) { \
+      char errmsg[255]; \
+      sprintf(errmsg, "\"%s\" argument must be an object", argname); \
+      return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg); \
+    } \
+  }
+
 #define JERRYXX_CHECK_INDEX_RANGE(name, lowerbound, upperbound) \
   if (name < (lowerbound) || name > (upperbound)) { \
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) "Index out of range"); \
@@ -74,6 +90,7 @@
 #define JERRYXX_GET_THIS this_val
 #define JERRYXX_GET_ARG_COUNT args_cnt
 #define JERRYXX_GET_ARG(index) args_p[index]
+#define JERRYXX_GET_ARG_OPT(index, default) (args_cnt > index ? args_p[index] : default)
 #define JERRYXX_GET_ARG_NUMBER(index) jerry_get_number_value(args_p[index])
 #define JERRYXX_GET_ARG_NUMBER_OPT(index, default) (args_cnt > index ? jerry_get_number_value(args_p[index]) : default)
 #define JERRYXX_GET_ARG_BOOLEAN_OPT(index, default) (args_cnt > index ? jerry_get_boolean_value(args_p[index]) : default)
@@ -90,7 +107,7 @@ void jerryxx_set_property_object(jerry_value_t object, const char *name, jerry_v
 void jerryxx_set_property_string(jerry_value_t object, const char *name, char *value);
 void jerryxx_set_property_function(jerry_value_t object, const char *name, jerry_external_handler_t fn);
 jerry_value_t jerryxx_get_property(jerry_value_t object, const char *name);
-double jerryxx_get_property_number(jerry_value_t object, const char *name);
+double jerryxx_get_property_number(jerry_value_t object, const char *name, double default_value);
 
 void jerryxx_print_value(const char *format, jerry_value_t value);
 

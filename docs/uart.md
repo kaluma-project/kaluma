@@ -61,11 +61,37 @@ Read data from read buffer as many as length. If no data in buffer, returns `nul
 // ...
 ```
 
-
 ### close()
 
 Close the UART bus.
 
+### bus
+
+* `{number}`
+
+### baudrate
+
+* `{number}`
+
+### bits
+
+* `{number}`
+
+### parity
+
+* `{number}`
+
+### stop
+
+* `{number}`
+
+### flow
+
+* `{number}`
+
+### bufferSize
+
+* `{number}`
 
 ### Event: 'data'
 
@@ -80,26 +106,26 @@ console.log("Received data: " + data.toString());
 ```
 
 
-### PARITY_NONE
+### Class Property: UART.PARITY_NONE
 
 * `{number}`
 
 
-### PARITY_EVEN
+### Class Property: UART.PARITY_EVEN
 
 * `{number}`
 
 
-### PARITY_ODD
+### Class Property: UART.PARITY_ODD
 
 * `{number}`
 
 
-### RTS
+### Class Property: UART.RTS
 
 * `{number}`
 
 
-### CTS
+### Class Property: UART.CTS
 
 * `{number}`

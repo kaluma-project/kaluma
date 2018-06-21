@@ -67,10 +67,13 @@ jerry_value_t jerryxx_get_property(jerry_value_t object, const char *name) {
   return ret;
 }
 
-double jerryxx_get_property_number(jerry_value_t object, const char *name) {
+double jerryxx_get_property_number(jerry_value_t object, const char *name, double default_value) {
   jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
   jerry_value_t ret = jerry_get_property (object, prop);
-  double value = jerry_get_number_value(ret);
+  double value = default_value;
+  if (!jerry_value_is_undefined(ret)) {
+    value = jerry_get_number_value(ret);
+  }
   jerry_release_value(ret);
   jerry_release_value (prop);
   return value;

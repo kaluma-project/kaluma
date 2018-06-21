@@ -49,5 +49,8 @@ bool is_led_pin(uint8_t pin);
 bool is_switch_pin(uint8_t pin);
 bool is_pwm_pin(uint8_t pin);
 bool is_adc_pin(uint8_t pin);
+bool is_uart_bus(uint8_t bus);
+bool is_i2c_bus(uint8_t bus);
+bool is_spi_bus(uint8_t bus);
 
 #endif /* __TARGET_H */
