@@ -22,6 +22,85 @@
 #include <stdlib.h>
 #include "jerryscript.h"
 #include "jerryxx.h"
+#include "i2c_magic_strings.h"
+#include "i2c.h"
+
+JERRYXX_FUN(i2c_ctor_fn) {
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(i2c_setup_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "bus");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(1, "address");
+  uint8_t bus = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_BUS, bus);
+  if (!is_i2c_bus(bus)) {
+    return JERRXX_CREATE_ERROR("Not supported I2C bus");
+  }
+  if (JERRYXX_GET_ARG_COUNT > 1) { /* slave mode */
+    uint8_t address = (uint8_t) JERRYXX_GET_ARG_NUMBER(1);
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_ADDRESS, address);
+    int ret = i2c_setup_slave(bus, address);
+    // TODO: Handle result state code (ret)
+  } else { /* master mode */
+    int ret = i2c_setup_master(bus);
+    // TODO: Handle result state code (ret)
+  }
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(i2c_write_fn) {
+  JERRYXX_CHECK_ARG(0, "data");
+  jerry_value_t data = JERRYXX_GET_ARG(0);
+  // Get bus number
+  uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
+  if (!jerry_value_is_number(bus_value)) {
+    return JERRXX_CREATE_ERROR("UART bus is not setup.");
+  }
+  uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
+  uint8_t address_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_ADDRESS);
+  if (jerry_value_is_number(address_value)) {
+    /* slave mode */
+    JERRYXX_CHECK_ARG_NUMBER_OPT(1, "timeout");
+    uint32_t timeout = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 5000);
+
+  } else {
+    /* master mode */
+    JERRYXX_CHECK_ARG_NUMBER(1, "address");
+    JERRYXX_CHECK_ARG_NUMBER_OPT(2, "timeout");
+    uint8_t address = (uint8_t) JERRYXX_GET_ARG_NUMBER(1);
+    uint32_t timeout = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(2, 5000);
+  }
+
+  // TODO: support string, arraybuffer
+  if (jerry_value_is_array(data)) {
+    uint32_t len = jerry_get_array_length(data);
+    uint8_t buf[len];
+    for (int i = 0; i < len; i++) {
+      jerry_value_t item = jerry_get_property_by_index(data, i);
+      if (jerry_value_is_number(item)) {
+        buf[i] = (uint8_t) jerry_get_number_value(item);
+      } else {
+        // TODO: data array has non-number object element
+      }
+    }
+    i2c_write(bus, address, buf, len, timeout);
+  }
+  // TODO: impl for ArrayBuffer and Array<number>.
+  return jerry_create_undefined();
+}
+
+jerry_value_t module_i2c_init() {
+  /* I2C constructor */
+  jerry_value_t ctor = jerry_create_external_function(i2c_ctor_fn);
+  jerry_value_t prototype = jerry_create_object();
+  jerryxx_set_property_object(ctor, "prototype", prototype);
+  jerry_release_value (prototype);
+  /* I2C instance properties */
+  jerryxx_set_property_function(prototype, MSTR_I2C_SETUP, i2c_setup_fn);
+  return ctor;
+}
+
 
 jerry_value_t module_i2c_init() {
   jerry_value_t object = jerry_create_object();
