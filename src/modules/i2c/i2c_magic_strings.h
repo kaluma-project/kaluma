@@ -26,5 +26,8 @@
 #define MSTR_I2C_SETUP "setup"
 #define MSTR_I2C_BUS "bus"
 #define MSTR_I2C_ADDRESS "address"
+#define MSTR_I2C_WRITE "write"
+#define MSTR_I2C_READ "read"
+#define MSTR_I2C_CLOSE "close"
 
 #endif /* __I2C_MAGIC_STRINGS_H */
