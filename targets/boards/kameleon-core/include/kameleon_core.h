@@ -35,27 +35,17 @@
 #define SRAM_BASE_ADDR (0x20000000)
 
 #define GPIO_NUM  22
+#define ADC_NUM 7
+#define PWM_NUM 6
+#define I2C_NUM 2
+#define SPI_NUM 2
+#define UART_NUM 2
+#define LED_NUM 1
+#define SWITCH_NUM 1
 
 #define APB1    0
 #define APB2    1
 
-#define NUM_UART_CHANNEL 2
-#define NUM_ADC_CHANNEL 7
 #define ADC_RESOLUTION_BIT 12
-
-#define IS_PWM_PINS(PIN) (((PIN) == 8) || \
-                         ((PIN) == 9) || \
-                         ((PIN) == 13) || \
-                         ((PIN) == 14) || \
-                         ((PIN) == 15) || \
-                         ((PIN) == 16))
-
-#define IS_ADC_PINS(PIN) (((PIN) == 2) || \
-                         ((PIN) == 3) || \
-                         ((PIN) == 4) || \
-                         ((PIN) == 5) || \
-                         ((PIN) == 10) || \
-                         ((PIN) == 11) || \
-                         ((PIN) == 12))
 
 #endif /* __KAMELEON_CORE_H */

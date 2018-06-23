@@ -23,8 +23,8 @@
 #include "stm32f4discovery.h"
 
 DMA_HandleTypeDef hdma_adc1;
-static uint16_t adc_buf[NUM_ADC_CHANNEL];
-static uint8_t adc_configured[NUM_ADC_CHANNEL];
+static uint16_t adc_buf[ADC_NUM];
+static uint8_t adc_configured[ADC_NUM];
 static ADC_HandleTypeDef hadc1;
 
 static const struct __adc_config {
@@ -47,8 +47,6 @@ static const struct __adc_config {
 /**
 */
 static uint8_t get_adc_index(uint8_t pin) {
-  assert_param(IS_ADC_PINS(pin));
-
   uint32_t n = sizeof(adc_config) / sizeof(struct __adc_config);
   uint8_t index;
 
@@ -65,14 +63,14 @@ static uint8_t get_adc_index(uint8_t pin) {
 /** 
 */
 static void adc1_start_dma() {
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buf, NUM_ADC_CHANNEL);
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buf, ADC_NUM);
 }
 
 /** 
 */
 static uint8_t adc_need_init() {
   uint32_t sum=0;
-  for (uint32_t k=0; k<NUM_ADC_CHANNEL; k++) {
+  for (uint32_t k=0; k<ADC_NUM; k++) {
     sum = sum + adc_configured[k];
   }  
   return (sum==0) ? 1:0;
@@ -82,7 +80,7 @@ static uint8_t adc_need_init() {
 */
 static uint8_t adc_need_deinit() {
   uint32_t sum=0;
-  for (uint32_t k=0; k<NUM_ADC_CHANNEL; k++) {
+  for (uint32_t k=0; k<ADC_NUM; k++) {
     sum = sum + adc_configured[k];
   }  
   return (sum==0) ? 1:0;
@@ -103,7 +101,7 @@ static void adc1_init() {
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = NUM_ADC_CHANNEL;
+  hadc1.Init.NbrOfConversion = ADC_NUM;
   hadc1.Init.DMAContinuousRequests = ENABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SEQ_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
@@ -113,7 +111,7 @@ static void adc1_init() {
 
   /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
   */
-  for (int k=0; k<NUM_ADC_CHANNEL; k++) {
+  for (int k=0; k<ADC_NUM; k++) {
     sConfig.Channel = adc_config[k].channel;
     sConfig.Rank = k+1;
     sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;

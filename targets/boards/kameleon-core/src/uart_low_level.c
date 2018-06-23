@@ -22,7 +22,7 @@
 #include "kameleon_core.h"
 #include "uart.h"
 
-static ringbuffer_t uart_rx_ringbuffer[NUM_UART_CHANNEL];
+static ringbuffer_t uart_rx_ringbuffer[UART_NUM];
 static uint8_t * read_buffer[] = {NULL, NULL}; 
 
 /** 

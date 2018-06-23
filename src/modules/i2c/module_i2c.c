@@ -84,7 +84,7 @@ JERRYXX_FUN(i2c_write_fn) {
         // TODO: data array has non-number object element
       }
     }
-    i2c_write(bus, address, buf, len, timeout);
+    // i2c_write(bus, address, buf, len, timeout);
   }
   // TODO: impl for ArrayBuffer and Array<number>.
   return jerry_create_undefined();
@@ -99,10 +99,4 @@ jerry_value_t module_i2c_init() {
   /* I2C instance properties */
   jerryxx_set_property_function(prototype, MSTR_I2C_SETUP, i2c_setup_fn);
   return ctor;
-}
-
-
-jerry_value_t module_i2c_init() {
-  jerry_value_t object = jerry_create_object();
-  return object;
 }

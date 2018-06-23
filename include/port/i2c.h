@@ -47,7 +47,7 @@ int i2c_setup_master(uint8_t bus);
 int i2c_setup_slave(uint8_t bus, uint8_t address);
 
 /**
- * Write a given buffer to the bus.
+ * Write a given buffer to the bus (in master mode)
  * 
  * @param {uint8_t} bus
  * @param {uint8_t} address
@@ -56,22 +56,22 @@ int i2c_setup_slave(uint8_t bus, uint8_t address);
  * @param {uint32_t} timeout
  * @return {int} the number of bytes written or -1 on timeout or nothing written.
  */
-int i2c_write(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
+int i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
   uint32_t timeout);
 
 /**
- * Write a given buffer to the bus.
+ * Write a given buffer to the bus (in slave mode)
  * 
  * @param {uint8_t} bus
- * @param {uint8_t} address
- * @param {uint8_t} ch
+ * @param {uint8_t*} buf
+ * @param {size_t} len
  * @param {uint32_t} timeout
  * @return {int} the number of bytes written or -1 on timeout or nothing written.
  */
-int i2c_write_char(uint8_t bus, uint8_t address, uint8_t ch, uint32_t timeout);
+int i2c_write_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
 
 /**
- * Read bytes from the bus and store them into a given buffer.
+ * Read bytes from the bus and store them into a given buffer (in master mode)
  * 
  * @param {uint8_t} bus
  * @param {uint8_t} address
@@ -79,15 +79,19 @@ int i2c_write_char(uint8_t bus, uint8_t address, uint8_t ch, uint32_t timeout);
  * @param {size_t} len
  * @return {int} the number of bytes read
  */
-int i2c_read(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
+int i2c_read_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
   uint32_t timeout);
 
 /**
- * Read a character from the bus.
+ * Read bytes from the bus and store them into a given buffer (in slave mode)
  * 
- * @return {int} a character read
+ * @param {uint8_t} bus
+ * @param {uint8_t*} buf
+ * @param {size_t} len
+ * @return {int} the number of bytes read
  */
-int i2c_read_char(uint8_t bus, uint8_t address, uint32_t timeout);
+int i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
+
 
 /**
  * Close the I2C bus

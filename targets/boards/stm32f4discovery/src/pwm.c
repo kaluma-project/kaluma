@@ -76,8 +76,6 @@ static const uint32_t tick_freq_div=4;
 /**
 */
 static uint8_t get_pwm_index(uint8_t pin) {
-  assert_param(IS_PWM_PINS(pin));
-
   uint32_t n = sizeof(pwm_config) / sizeof(struct __pwm_config);
   uint8_t index;
 

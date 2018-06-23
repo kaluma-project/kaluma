@@ -38,30 +38,12 @@
 #define CCM_BASE_ADDR (0x10000000)
 
 #define GPIO_NUM  80
+#define ADC_NUM 8
+#define UART_NUM 2
 
 #define APB1    0
 #define APB2    1
 
-#define NUM_UART_CHANNEL 2
-#define NUM_ADC_CHANNEL 8
 #define ADC_RESOLUTION_BIT 12
-
-#define IS_PWM_PINS(PIN) (((PIN) == 0) || \
-                         ((PIN) == 2) || \
-                         ((PIN) == 4) || \
-                         ((PIN) == 14) || \
-                         ((PIN) == 15) || \
-                         ((PIN) == 18) || \
-                         ((PIN) == 35) || \
-                         ((PIN) == 45))
-
-#define IS_ADC_PINS(PIN) (((PIN) == 23) || \
-                         ((PIN) == 25) || \
-                         ((PIN) == 28) || \
-                         ((PIN) == 29) || \
-                         ((PIN) == 30) || \
-                         ((PIN) == 31) || \
-                         ((PIN) == 69) || \
-                         ((PIN) == 70))
 
 #endif /* __STM32F4DISCOVERY_H */
