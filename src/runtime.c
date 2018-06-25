@@ -37,7 +37,7 @@ void runtime_init(bool run_main) {
   jerry_init (JERRY_INIT_EMPTY | JERRY_INIT_MEM_STATS);
   jerry_register_magic_strings (magic_string_items, num_magic_string_items, magic_string_lengths);
   global_init();
-  jerry_gc();
+  jerry_gc(JERRY_GC_SEVERITY_HIGH);
   if (run_main) {
     runtime_run_main();
   }
@@ -51,8 +51,8 @@ void runtime_run_main() {
   uint32_t size = flash_get_data_size();
   if (size > 0) {
     uint8_t *script = flash_get_data();
-    jerry_value_t parsed_code = jerry_parse (script, size, false);
-    if (!jerry_value_has_error_flag (parsed_code))
+    jerry_value_t parsed_code = jerry_parse (NULL, 0, script, size, JERRY_PARSE_STRICT_MODE);
+    if (!jerry_value_is_error (parsed_code))
     {
       jerry_value_t ret_value = jerry_run (parsed_code);
       jerry_release_value (ret_value);

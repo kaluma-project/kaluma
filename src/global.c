@@ -84,7 +84,7 @@ static void set_watch_cb(io_watch_handle_t *watch) {
   if (jerry_value_is_function(watch->watch_js_cb)) {
     jerry_value_t this_val = jerry_create_undefined ();
     jerry_value_t ret_val = jerry_call_function (watch->watch_js_cb, this_val, NULL, 0);
-    if (!jerry_value_has_error_flag (ret_val)) {
+    if (!jerry_value_is_error (ret_val)) {
       // TODO: handle error and return value
     }
     jerry_release_value (ret_val);
@@ -220,7 +220,7 @@ static void set_timer_cb(io_timer_handle_t *timer) {
   if (jerry_value_is_function(timer->timer_js_cb)) {
     jerry_value_t this_val = jerry_create_undefined ();
     jerry_value_t ret_val = jerry_call_function (timer->timer_js_cb, this_val, NULL, 0);
-    if (!jerry_value_has_error_flag (ret_val)) {
+    if (!jerry_value_is_error(ret_val)) {
       // handle return value
     }
     jerry_release_value (ret_val);
@@ -389,7 +389,7 @@ JERRYXX_FUN(process_get_builtin_module_fn) {
   for (int i = 0; i < builtin_modules_length; i++) {
     if (strcmp(builtin_modules[i].name, builtin_module_name) == 0) {
       if (builtin_modules[i].size > 0) { /* has js module */
-        jerry_value_t fn = jerry_exec_snapshot(builtin_modules[i].code, builtin_modules[i].size, true);
+        jerry_value_t fn = jerry_exec_snapshot(builtin_modules[i].code, builtin_modules[i].size, 0, JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
         return fn;
       } else if (builtin_modules[i].fn != NULL) { /* has native module */
         jerry_value_t fn = jerry_create_external_function(native_module_wrapper_fn);
@@ -503,7 +503,7 @@ static void register_global_board_object() {
 
 
 static void run_startup_module() {
-  jerry_value_t res = jerry_exec_snapshot(module_startup_code, module_startup_size, false);
+  jerry_value_t res = jerry_exec_snapshot(module_startup_code, module_startup_size, 0, JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
   jerry_value_t this_val = jerry_create_undefined ();
   jerry_value_t ret_val = jerry_call_function (res, this_val, NULL, 0);
   jerry_release_value (ret_val);

@@ -45,6 +45,7 @@ JERRYXX_FUN(i2c_setup_fn) {
   } else { /* master mode */
     int ret = i2c_setup_master(bus);
     // TODO: Handle result state code (ret)
+    tty_printf("%d\r\n", ret);
   }
   return jerry_create_undefined();
 }
@@ -116,10 +117,12 @@ JERRYXX_FUN(i2c_read_fn) {
     JERRYXX_CHECK_ARG_NUMBER_OPT(2, "timeout");
     address = (uint8_t) JERRYXX_GET_ARG_NUMBER(1);
     timeout = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(2, 5000);
-    i2c_read_master(bus, address, buf, length, timeout);
+    int ret = i2c_read_master(bus, address, buf, length, timeout);
+    tty_printf("i2c read master ret: %d\r\n", ret);  
   }
-  // TODO: return ArrayBuffer of buf array.
-  return jerry_create_undefined();
+  jerry_value_t array_buffer = jerry_create_arraybuffer(length);
+  jerry_arraybuffer_write(array_buffer, 0, buf, length);
+  return array_buffer;
 }
 
 JERRYXX_FUN(i2c_close_fn) {

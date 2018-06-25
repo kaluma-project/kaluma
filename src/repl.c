@@ -158,18 +158,20 @@ static void run_code() {
     history_push(data);
 
     /* evaluate code */
-    jerry_value_t parsed_code = jerry_parse((const jerry_char_t *) data, strlen(data), false);
-    if (jerry_value_has_error_flag (parsed_code)) {
+    jerry_value_t parsed_code = jerry_parse(NULL, 0, (const jerry_char_t *) data, strlen(data), JERRY_PARSE_STRICT_MODE);
+    if (jerry_value_is_error(parsed_code)) {
       repl_print_begin(REPL_OUTPUT_ERROR);
-      jerry_value_clear_error_flag(&parsed_code);
-      repl_print_value("%s\r\n", parsed_code);
+      jerry_value_t err = jerry_get_value_from_error(parsed_code, true);
+      repl_print_value("%s\r\n", err);
+      jerry_release_value(err);
       repl_print_end();
     } else {
       jerry_value_t ret_value = jerry_run(parsed_code);
-      if (jerry_value_has_error_flag(ret_value)) {
+      if (jerry_value_is_error(ret_value)) {
         repl_print_begin(REPL_OUTPUT_ERROR);
-        jerry_value_clear_error_flag(&ret_value);
-        repl_print_value("%s\r\n", ret_value);
+        jerry_value_t err = jerry_get_value_from_error(ret_value, true);
+        repl_print_value("%s\r\n", err);
+        jerry_release_value(err);
         repl_print_end();
       } else {
         repl_print_begin(REPL_OUTPUT_INFO);
@@ -492,7 +494,7 @@ static void cmd_mem(repl_state_t *state) {
  * .gc command
  */
 static void cmd_gc(repl_state_t *state) {
-  jerry_gc();
+  jerry_gc(JERRY_GC_SEVERITY_HIGH);
   repl_print_begin(REPL_OUTPUT_LOG);
   repl_printf("\r");
   repl_print_end();
