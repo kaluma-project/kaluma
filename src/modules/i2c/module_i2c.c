@@ -45,7 +45,7 @@ JERRYXX_FUN(i2c_setup_fn) {
   } else { /* master mode */
     int ret = i2c_setup_master(bus);
     // TODO: Handle result state code (ret)
-    tty_printf("%d\r\n", ret);
+    tty_printf("i2c setup ret = %d\r\n", ret);
   }
   return jerry_create_undefined();
 }
@@ -70,7 +70,7 @@ JERRYXX_FUN(i2c_write_fn) {
     JERRYXX_CHECK_ARG_NUMBER(1, "address");
     JERRYXX_CHECK_ARG_NUMBER_OPT(2, "timeout");
     address = (uint8_t) JERRYXX_GET_ARG_NUMBER(1);
-    timeout = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(2, 5000);
+    timeout = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(2, 5000);
   }
   if (jerry_value_is_array(data)) {
     uint32_t len = jerry_get_array_length(data);
@@ -86,7 +86,8 @@ JERRYXX_FUN(i2c_write_fn) {
     if (is_slave_mode) {
       i2c_write_slave(bus, buf, len, timeout);
     } else {
-      i2c_write_master(bus, address, buf, len, timeout);
+      int ret = i2c_write_master(bus, address, buf, len, timeout);
+      tty_printf("i2c write master ret = %d\r\n", ret);
     }
   } else {
     // TODO: support string, arraybuffer

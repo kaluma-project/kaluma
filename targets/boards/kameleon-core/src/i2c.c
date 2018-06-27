@@ -24,19 +24,29 @@
 #include "i2c.h"
 #include "tty.h"
 
-static I2C_HandleTypeDef hi2c[I2C_NUM];
+static i2c_mode_t mode;
+static I2C_HandleTypeDef hi2c1;
+static I2C_HandleTypeDef hi2c2;
+static I2C_HandleTypeDef * handle[] = {&hi2c1, &hi2c2};
+static I2C_TypeDef * instance[] = {I2C1, I2C2};
 
-int i2c_setup_master(uint8_t bus) {
-  hi2c[bus].Instance = I2C1;
-  hi2c[bus].Init.ClockSpeed = 100000;
-  hi2c[bus].Init.DutyCycle = I2C_DUTYCYCLE_2;
-  hi2c[bus].Init.OwnAddress1 = 0;
-  hi2c[bus].Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-  hi2c[bus].Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c[bus].Init.OwnAddress2 = 0;
-  hi2c[bus].Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  hi2c[bus].Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  HAL_StatusTypeDef hal_status = HAL_I2C_Init(&hi2c[bus]);
+/**
+ */
+int i2c_setup_master(uint8_t bus) {  
+  mode = I2C_MODE_MASTER;
+  assert_param(bus==0 || bus==1);
+
+  handle[bus]->Instance = instance[bus];
+  handle[bus]->Init.ClockSpeed = 100000;
+  handle[bus]->Init.DutyCycle = I2C_DUTYCYCLE_2;
+  handle[bus]->Init.OwnAddress1 = 0;
+  handle[bus]->Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  handle[bus]->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  handle[bus]->Init.OwnAddress2 = 0;
+  handle[bus]->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  handle[bus]->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;  
+
+  HAL_StatusTypeDef hal_status = HAL_I2C_Init(handle[bus]);
   if (hal_status == HAL_OK) {
     return 0;
   } else {
@@ -44,27 +54,45 @@ int i2c_setup_master(uint8_t bus) {
   }
 }
 
+/**
+ */
 int i2c_setup_slave(uint8_t bus, uint8_t address) {
-  hi2c[bus].Instance = I2C1;
-  hi2c[bus].Init.ClockSpeed = 100000;
-  hi2c[bus].Init.DutyCycle = I2C_DUTYCYCLE_2;
-  hi2c[bus].Init.OwnAddress1 = (address << 1);
-  hi2c[bus].Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-  hi2c[bus].Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c[bus].Init.OwnAddress2 = 0;
-  hi2c[bus].Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  hi2c[bus].Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  HAL_StatusTypeDef hal_status = HAL_I2C_Init(&hi2c[bus]);
+  mode = I2C_MODE_SLAVE;
+  assert_param(bus==0 || bus==1);
+
+  handle[bus]->Instance = instance[bus];
+  handle[bus]->Init.ClockSpeed = 100000;
+  handle[bus]->Init.DutyCycle = I2C_DUTYCYCLE_2;
+  handle[bus]->Init.OwnAddress1 = (address << 1);
+  handle[bus]->Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  handle[bus]->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  handle[bus]->Init.OwnAddress2 = 0;
+  handle[bus]->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  handle[bus]->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;  
+
+  HAL_StatusTypeDef hal_status = HAL_I2C_Init(handle[bus]);
   if (hal_status == HAL_OK) {
     return 0;
   } else {
     return -1;
   }
 }
+
 
 int i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uint32_t timeout) {
-  HAL_StatusTypeDef hal_status;  
-  hal_status = HAL_I2C_Master_Transmit(&hi2c[bus], address, buf, len, timeout);
+  HAL_StatusTypeDef hal_status;
+  
+  assert_param(bus==0 || bus==1);
+
+  tty_printf("bus=%d\r\n", bus);
+  tty_printf("address=%d\r\n", address);
+  tty_printf("buf[0]=%d\r\n", buf[0]);
+  tty_printf("buf[1]=%d\r\n", buf[1]);
+  tty_printf("len=%d\r\n", len);
+  tty_printf("timeout=%d\r\n", timeout);
+
+  hal_status = HAL_I2C_Master_Transmit(handle[bus], address << 1, buf, len, timeout);
+  
   if (hal_status == HAL_OK) {
     return len;
   } else {
@@ -73,9 +101,12 @@ int i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uin
 }
 
 int i2c_write_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
-  HAL_StatusTypeDef hal_status;  
+  HAL_StatusTypeDef hal_status;
+  
+  assert_param(bus==0 || bus==1);
   /* in the case of slave mode, the parameter address is ignored. */
-  hal_status = HAL_I2C_Slave_Transmit(&hi2c[bus], buf, len, timeout);  
+  hal_status = HAL_I2C_Slave_Transmit(handle[bus], buf, len, timeout);
+  
   if (hal_status == HAL_OK) {
     return len;
   } else {
@@ -85,7 +116,11 @@ int i2c_write_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
 
 int i2c_read_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uint32_t timeout) {
   HAL_StatusTypeDef hal_status;
-  hal_status = HAL_I2C_Master_Receive(&hi2c[bus], address, buf, len, timeout);
+
+  assert_param(bus==0 || bus==1);
+  /* in the case of master mode */
+  hal_status = HAL_I2C_Master_Receive(handle[bus], address << 1, buf, len, timeout);
+
   if (hal_status == HAL_OK) {
     return len;
   } else {
@@ -95,8 +130,11 @@ int i2c_read_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uint
 
 int i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   HAL_StatusTypeDef hal_status;
+
+  assert_param(bus==0 || bus==1);
   /* in the case of slave mode, the parameter address is ignored. */
-  hal_status = HAL_I2C_Slave_Receive(&hi2c[bus], buf, len, timeout);
+  hal_status = HAL_I2C_Slave_Receive(handle[bus], buf, len, timeout);
+
   if (hal_status == HAL_OK) {
     return len;
   } else {
@@ -105,7 +143,9 @@ int i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
 }
 
 int i2c_close(uint8_t bus) {
-  HAL_StatusTypeDef hal_status = HAL_I2C_DeInit(&hi2c[bus]);
+  assert_param(bus==0 || bus==1);
+  HAL_StatusTypeDef hal_status = HAL_I2C_DeInit(handle[bus]);
+
   if (hal_status == HAL_OK) {
     return 0;
   } else {

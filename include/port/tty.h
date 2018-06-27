@@ -24,7 +24,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "tty_low_level.h"
 
 typedef enum {
   tty_state_ok = 0,

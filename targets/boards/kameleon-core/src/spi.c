@@ -21,13 +21,13 @@
 
 #include "kameleon_core.h"
 #include "spi.h"
-#include "gpio_low_level.h"
+#include "gpio.h"
 
 SPI_HandleTypeDef hspi1;
-SPI_HandleTypeDef hspi2;
+SPI_HandleTypeDef hspi3;
 
-static SPI_HandleTypeDef * spi_handle[] = {&hspi1, &hspi2};
-static SPI_TypeDef * spi_ch[] = {SPI1, SPI2};
+static SPI_HandleTypeDef * spi_handle[] = {&hspi1, &hspi3};
+static SPI_TypeDef * spi_ch[] = {SPI1, SPI3};
 
 static const uint32_t spi_mode[] = {SPI_MODE_MASTER, SPI_MODE_SLAVE};
 static const uint32_t spi_clock_polarity[] = {SPI_POLARITY_LOW, SPI_POLARITY_HIGH};
@@ -37,22 +37,20 @@ static const uint32_t spi_prescaler[] = {SPI_BAUDRATEPRESCALER_2, SPI_BAUDRATEPR
                                          SPI_BAUDRATEPRESCALER_32, SPI_BAUDRATEPRESCALER_64,
                                          SPI_BAUDRATEPRESCALER_128, SPI_BAUDRATEPRESCALER_256,
                                         };
+
 static const uint32_t spi_firstbit[] = { SPI_FIRSTBIT_MSB, SPI_FIRSTBIT_LSB };
-
-static GPIO_TypeDef * spi_cs_port;
-static uint32_t spi_cs_pin;
-
+static uint8_t spi_cs_pin;
 
 /**
 */
 static void enable_cs() {
-  HAL_GPIO_WritePin(spi_cs_port, spi_cs_pin, GPIO_PIN_RESET);
+  gpio_write(spi_cs_pin, GPIO_LOW);
 }
 
 /**
 */
 static void disable_cs() {
-  HAL_GPIO_WritePin(spi_cs_port, spi_cs_pin, GPIO_PIN_SET);
+  gpio_write(spi_cs_pin, GPIO_HIGH);
 }
 
 /**
@@ -112,23 +110,16 @@ int spi_setup(uint8_t bus, spi_mode_t mode, uint8_t cs_pin, uint32_t baudrate,
 
   /* configure cs pin as gpio-output
   */
-  spi_cs_port = get_gpio_port(cs_pin);
-  spi_cs_pin = get_gpio_pin(cs_pin);
-  
-  GPIO_InitTypeDef GPIO_InitStruct;
-  GPIO_InitStruct.Pin = spi_cs_pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(spi_cs_port, &GPIO_InitStruct);   
+  spi_cs_pin = cs_pin;
+  gpio_set_io_mode(cs_pin, GPIO_IO_MODE_OUTPUT);  
   disable_cs();
-  
+
   return 0;
 }
 
 /**
 */
-int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, uint32_t len, uint32_t timeout) {
+int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint32_t timeout) {
   assert_param(bus==0 || bus==1);
 
   SPI_HandleTypeDef * hspi = spi_handle[bus];
@@ -146,7 +137,7 @@ int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, uint32_t len, ui
 
 /**
 */
-int spi_send(uint8_t bus, uint8_t *buf, uint32_t len, uint32_t timeout) {
+int spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   assert_param(bus==0 || bus==1);
 
   SPI_HandleTypeDef * hspi = spi_handle[bus];
@@ -164,7 +155,7 @@ int spi_send(uint8_t bus, uint8_t *buf, uint32_t len, uint32_t timeout) {
 
 /**
 */
-int spi_recv(uint8_t bus, uint8_t *buf, uint32_t len, uint32_t timeout) {
+int spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   assert_param(bus==0 || bus==1);
 
   SPI_HandleTypeDef * hspi = spi_handle[bus];
@@ -185,49 +176,4 @@ int spi_close(uint8_t bus) {
     return -1;
   }
 }
-
-//
-//
-//
-void spi_test()
-{
-  uint8_t bus = 0;
-  
-  spi_setup(bus, SPI_SETUP_MODE_MASTER, 0, 4000000, 
-            SPI_CLOCK_POLARITY_LOW, SPI_CLOCK_PHASE_1_EDGE, 8,
-            SPI_BITORDER_MSB);
-  
-  // L3G4200D (WHO AM I ==> 0xD3)
-  uint8_t tx_buf[] = {0x80|0x0F, 0xFF};
-  uint8_t rx_buf[] = {0, 0};
-  int n = spi_sendrecv(bus, tx_buf, rx_buf, 2, (uint32_t)-1);
-
-  tx_buf[0] = 0x20;
-  tx_buf[1] = 0x0F;
-  n = spi_sendrecv(bus, tx_buf, rx_buf, 2, (uint32_t)-1);
-
-  while(1)
-  {
-    uint16_t x, y, z;
-    
-    tx_buf[0] = 0x80 | 0x29;
-    tx_buf[1] = 0x00;
-    spi_sendrecv(bus, tx_buf, rx_buf, 2, (uint32_t)-1);
-    x = rx_buf[1] << 8;
-    
-    tx_buf[0] = 0x80 | 0x28;
-    tx_buf[1] = 0x00;
-    spi_sendrecv(bus, tx_buf, rx_buf, 2, (uint32_t)-1);
-    x = x | rx_buf[1];
-
-    printf("X : %d \r\n", x);
-    
-    delay(1000);
-  }
-  
-  
-  spi_close(bus);
-}
-
-
 

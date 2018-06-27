@@ -71,7 +71,7 @@ int spi_setup(uint8_t bus, spi_mode_t mode, uint8_t cs_pin, uint32_t baudrate,
  * @param {uint32_t} timeout
  * @return the number of bytes read or -1 on timeout or nothing written.
  */
-int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, uint32_t len, uint32_t timeout);
+int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint32_t timeout);
 
 /**
  * Send data to the SPI bus
@@ -82,7 +82,7 @@ int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, uint32_t len, ui
  * @param {uint32_t} timeout
  * @return the number of bytes written or -1 on timeout or nothing written.
  */
-int spi_send(uint8_t bus, uint8_t *buf, uint32_t len, uint32_t timeout);
+int spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
 
 /**
  * Receive data from the SPI bus and store them into a given buffer.
@@ -93,7 +93,7 @@ int spi_send(uint8_t bus, uint8_t *buf, uint32_t len, uint32_t timeout);
  * @param {uint32_t} timeout
  * @return {int} the number of bytes read
  */
-int spi_recv(uint8_t bus, uint8_t *buf, uint32_t len, uint32_t timeout);
+int spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
 
 /**
  * Close the SPI bus

@@ -33,7 +33,6 @@ static const struct __adc_config {
     uint32_t pin;
     uint32_t channel;
 } adc_config[] = {
-   {2, GPIOA, GPIO_PIN_0, ADC_CHANNEL_0},
    {3, GPIOA, GPIO_PIN_1, ADC_CHANNEL_1},
    {4, GPIOA, GPIO_PIN_2, ADC_CHANNEL_2},
    {5, GPIOA, GPIO_PIN_3, ADC_CHANNEL_3},
@@ -135,6 +134,18 @@ double adc_read(uint8_t pin) {
  * @return result status code
  */
 int adc_setup(uint8_t pin) {
+  
+  uint8_t adc_need_init=1;
+  for (int k=0; k<ADC_NUM; k++) {
+    if (adc_configured[k]) {
+      adc_need_init = 0;
+      break;
+    } 
+  }  
+  if (adc_need_init) {
+    adc1_init();
+  }   
+  
   uint8_t n = get_adc_index(pin);
   GPIO_InitTypeDef GPIO_InitStruct;
   GPIO_InitStruct.Pin = adc_config[n].pin;
@@ -153,58 +164,16 @@ void adc_close(uint8_t pin) {
   uint8_t n = get_adc_index(pin);
   HAL_GPIO_DeInit(adc_config[n].port, adc_config[n].pin);
   adc_configured[n] = 0;
-}
-
-void adc_test()
-{
-#if 1  
-   uint8_t pin = 2;
-   
-   adc_setup(pin);
-   delay(1);
-   while(1)
-   {
-          double val = adc_read( 2 );
-          printf("%f \r\n", val);
-          delay(1000);
-   }
-#endif  
   
-   // 
-   uint8_t n=0;
-   adc_setup(adc_config[n].pin_number); n++;
-   adc_setup(adc_config[n].pin_number); n++;
-   adc_setup(adc_config[n].pin_number); n++;
-   adc_setup(adc_config[n].pin_number); n++;
-   adc_setup(adc_config[n].pin_number); n++;
-   adc_setup(adc_config[n].pin_number); n++;
-   adc_setup(adc_config[n].pin_number); n++;
-   adc_setup(adc_config[n].pin_number); n++;
-
-   delay(1);
-
-   for(int k=0; k<1000; k++)
-   {
-      for(int m=0; m<n; m++) 
-      {
-          double val = adc_read( adc_config[m].pin_number );
-          tty_printf("%f \r\n", val);
-          printf("%f \r\n", val);
-      }
-      tty_printf("\r\n\n");
-      printf("\r\n\n");
-      
-      delay(1000);
-   }
-
-   n=0;
-   adc_close(adc_config[n].pin_number); n++;
-   adc_close(adc_config[n].pin_number); n++;
-   adc_close(adc_config[n].pin_number); n++;
-   adc_close(adc_config[n].pin_number); n++;
-   adc_close(adc_config[n].pin_number); n++;
-   adc_close(adc_config[n].pin_number); n++;
-   adc_close(adc_config[n].pin_number); n++;
-   
-   while(1);
+  uint8_t adc_need_deinit=1;
+  for (int k=0; k<ADC_NUM; k++) {
+    if (adc_configured[k]) {
+      adc_need_deinit = 0;
+      break;
+    } 
+  }  
+  if (adc_need_deinit) {
+    adc1_deinit();
+  }   
 }
+

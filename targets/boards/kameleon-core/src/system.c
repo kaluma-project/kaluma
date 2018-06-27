@@ -124,12 +124,6 @@ void UsbDevice_Config() {
   USBD_Start(&hUsbDeviceFS);
 }
 
-/** ADC Configuation
-*/
-void Adc_Config() {
-  adc1_init();
-}
-
 /** LED Configuation
 */
 void Led_Config() {
@@ -172,7 +166,6 @@ void system_init() {
   SystemClock_Config();
   GpioClock_Config();
   Led_Config();
-  Adc_Config();
   Button_Config();
   UsbDevice_Config();
 }

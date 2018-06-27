@@ -35,14 +35,3 @@ void led_toggle() {
   HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 }
 
-void led_test() {
-
-  led_on();
-  led_off();
-  
-  while(1) {
-    led_toggle();
-    delay(1000);    
-  }
-   
-}

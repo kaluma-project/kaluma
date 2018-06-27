@@ -30,14 +30,3 @@ uint8_t button_is_pressed() {
   }
   return pressed;
 }
-
-void button_test() {
-  while(1) {
-    if (button_is_pressed()) {
-      tty_printf("button is pressed \r\n");
-    } else {
-      tty_printf("button is not pressed \r\n");
-    }
-    delay(1000);
-  }    
-}

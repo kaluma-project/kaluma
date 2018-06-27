@@ -23,7 +23,6 @@
 #define __UART_H
 
 #include <stdint.h>
-#include "uart_low_level.h"
 
 enum {
   UART_PARITY_TYPE_NONE,

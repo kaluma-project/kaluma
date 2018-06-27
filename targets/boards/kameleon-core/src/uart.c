@@ -18,9 +18,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
+#include <stdlib.h>
 #include "kameleon_core.h"
 #include "uart.h"
+#include "buffer.h"
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
@@ -32,6 +33,61 @@ static const uint32_t uart_data_length[] = { UART_WORDLENGTH_8B, UART_WORDLENGTH
 static const uint32_t uart_parity[] = { UART_PARITY_NONE, UART_PARITY_ODD, UART_PARITY_EVEN };
 static const uint32_t uart_stop_bits[] = { UART_STOPBITS_1, UART_STOPBITS_2 };
 static const uint32_t uart_hw_control[] = { UART_HWCONTROL_NONE, UART_HWCONTROL_RTS, UART_HWCONTROL_CTS, UART_HWCONTROL_RTS_CTS };
+static ringbuffer_t uart_rx_ringbuffer[UART_NUM];
+static uint8_t * read_buffer[] = {NULL, NULL}; 
+
+/** 
+*/
+int uart_init_ringbuffer(uint8_t bus, uint32_t size) {
+  read_buffer[bus] = (uint8_t *)malloc(size);
+  
+  if (read_buffer[bus] == NULL) {
+    return 0;
+  } else {
+    InitRingBuffer(&uart_rx_ringbuffer[bus], read_buffer[bus], size);
+    return size;
+  }
+}
+
+/** 
+*/
+void uart_deinit_ringbuffer(uint8_t bus) {
+  if (read_buffer[bus]) {
+    free(read_buffer[bus]);
+    read_buffer[bus] = (uint8_t *)NULL;
+  }
+}
+
+/** 
+*/
+uint32_t uart_available_ringbuffer(uint8_t bus) {
+  return GetDataLenInRingBuffer(&uart_rx_ringbuffer[bus]);  
+}
+
+/** 
+*/
+uint8_t uart_read_char_ringbuffer(uint8_t bus) {
+  uint8_t ch;
+  ReadRingBuffer(&uart_rx_ringbuffer[bus], &ch, sizeof(ch));
+  return ch;
+}
+
+/** 
+*/
+uint32_t uart_read_ringbuffer(uint8_t bus, uint8_t * buf, uint32_t len) {
+  uint32_t n = uart_available_ringbuffer(bus);
+  if (n > len) {
+    n = len;
+  }  
+  ReadRingBuffer(&uart_rx_ringbuffer[bus], buf, n);
+  return n;
+}
+
+/** 
+*/
+void uart_fill_ringbuffer(uint8_t bus, uint8_t ch) {
+  FillRingBuffer(&uart_rx_ringbuffer[bus], &ch, sizeof(ch));  
+}
 
 /** UART Initialization
 */
@@ -129,37 +185,4 @@ int uart_close(uint8_t bus) {
     return -1;
   }
 }
-
-//
-//
-//
-void uart_test()
-{
-  int d;
-  uint8_t bus = 0;
-  uint8_t buf[5];
-  uint32_t sec = 0;
-
-  uart_setup(bus, 115200, UART_DATA_8_BIT, UART_PARITY_TYPE_NONE, UART_STOP_1_BIT, UART_FLOW_NONE, 1024);
-
-  while(1)
-  {
-    if (uart_available(bus)) {
-      d = uart_read_char(bus);
-      if (d != -1) {
-        uart_write_char(bus, (uint8_t)d);
-      }
-    }
-    delay(10);
-  }
-
-  uint32_t len;
-  while( uart_available(bus) < sizeof(buf) );
-  len = uart_read(bus, buf, sizeof(buf));
-  uart_write(bus, buf, len);    
-
-  uart_close(bus);
-}
-
-
 

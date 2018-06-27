@@ -24,10 +24,35 @@
 #include "kameleon_core.h"
 #include "gpio.h"
 
-extern struct {
+const struct {
     GPIO_TypeDef * port;
     uint32_t pin;
-} gpio_port_pin[];
+ } gpio_port_pin[] = {
+   {GPIOB, GPIO_PIN_0},     // 0
+   {GPIOB, GPIO_PIN_1},     // 1
+   {GPIOA, GPIO_PIN_0},     // 2
+   {GPIOA, GPIO_PIN_1},     // 3
+   {GPIOA, GPIO_PIN_2},     // 4
+   {GPIOA, GPIO_PIN_3},     // 5
+   {GPIOA, GPIO_PIN_9},     // 6
+   {GPIOA, GPIO_PIN_10},    // 7
+
+   {GPIOB, GPIO_PIN_6},     // 8
+   {GPIOB, GPIO_PIN_7},     // 9
+   {GPIOA, GPIO_PIN_5},     // 10
+   {GPIOA, GPIO_PIN_6},     // 11
+   {GPIOA, GPIO_PIN_7},     // 12
+   {GPIOB, GPIO_PIN_4},     // 13
+   {GPIOB, GPIO_PIN_5},     // 14
+   {GPIOB, GPIO_PIN_10},    // 15
+
+   {GPIOB, GPIO_PIN_9},     // 16
+   {GPIOB, GPIO_PIN_3},     // 17
+   {GPIOB, GPIO_PIN_12},    // 18
+   {GPIOC, GPIO_PIN_15},    // 19
+   {GPIOB, GPIO_PIN_14},    // 20 (LED)
+   {GPIOA, GPIO_PIN_4},     // 21 (BUTTON)
+};
 
 /** 
 */
@@ -68,39 +93,3 @@ void gpio_toggle(uint8_t pin) {
   HAL_GPIO_TogglePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
 }
 
-void gpio_test() {
-#if 1
-  uint8_t pin = 2;
-  gpio_set_io_mode(pin, GPIO_IO_MODE_OUTPUT);
-
-  while(1) {
-    gpio_write(pin, GPIO_HIGH);
-    delay(1000);
-
-    gpio_write(pin, GPIO_LOW);
-    delay(1000);
-  }
-
-#else
-  uint8_t pin_key = 18;
-  gpio_set_io_mode(pin_key, GPIO_IO_MODE_INPUT);
-
-  uint8_t pin_led = 17;
-  gpio_set_io_mode(pin_led, GPIO_IO_MODE_OUTPUT);
-
-  while(1) {
-    
-    uint8_t val = gpio_read(pin_key);
-    
-    if(val == GPIO_LOW) 
-    {
-      gpio_write(pin_led, GPIO_LOW);
-      //tty_printf("key is pressed \r\n");
-    }
-    else
-    {
-      gpio_write(pin_led, GPIO_HIGH);
-    }
-  }
-#endif  
-}

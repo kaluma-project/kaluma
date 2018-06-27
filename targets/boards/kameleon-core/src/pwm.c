@@ -22,13 +22,19 @@
 #include <stdint.h>
 #include "kameleon_core.h"
 
+extern void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
+static void tim1_pwm_setup(uint32_t, uint32_t, uint32_t);
 static void tim2_pwm_setup(uint32_t, uint32_t, uint32_t);
 static void tim3_pwm_setup(uint32_t, uint32_t, uint32_t);
 static void tim4_pwm_setup(uint32_t, uint32_t, uint32_t);
+static void tim5_pwm_setup(uint32_t, uint32_t, uint32_t);
 
+static TIM_HandleTypeDef htim1;
 static TIM_HandleTypeDef htim2;
 static TIM_HandleTypeDef htim3;
 static TIM_HandleTypeDef htim4;
+static TIM_HandleTypeDef htim5;
 
 /**
 * APB1 BUS CLOCK (48MHz max)
@@ -45,12 +51,15 @@ static const struct __pwm_config {
     TIM_TypeDef * instance;
     uint32_t channel;
     void (*setup)(uint32_t, uint32_t, uint32_t);
+    HAL_StatusTypeDef (*start)(TIM_HandleTypeDef *, uint32_t);
+    HAL_StatusTypeDef (*stop)(TIM_HandleTypeDef *, uint32_t);
     uint8_t bus;
 } pwm_config[] = {
-   {13, GPIOB, GPIO_PIN_4, &htim3, TIM3, TIM_CHANNEL_1, tim3_pwm_setup, APB1},
-   {14, GPIOB, GPIO_PIN_5, &htim3, TIM3, TIM_CHANNEL_2, tim3_pwm_setup, APB1},
-   {15, GPIOB, GPIO_PIN_10, &htim2, TIM2, TIM_CHANNEL_3, tim2_pwm_setup, APB1},
-   {16, GPIOB, GPIO_PIN_9, &htim4, TIM4, TIM_CHANNEL_4, tim4_pwm_setup, APB1},
+   {1, GPIOB, GPIO_PIN_1, &htim1, TIM1, TIM_CHANNEL_3, tim1_pwm_setup, HAL_TIMEx_OCN_Start, HAL_TIMEx_OCN_Stop, APB2},
+   {2, GPIOA, GPIO_PIN_0, &htim5, TIM5, TIM_CHANNEL_1, tim5_pwm_setup, HAL_TIM_PWM_Start, HAL_TIM_PWM_Stop, APB1},
+   {14, GPIOB, GPIO_PIN_5, &htim3, TIM3, TIM_CHANNEL_2, tim3_pwm_setup, HAL_TIM_PWM_Start, HAL_TIM_PWM_Stop, APB1},
+   {15, GPIOB, GPIO_PIN_10, &htim2, TIM2, TIM_CHANNEL_3, tim2_pwm_setup, HAL_TIM_PWM_Start, HAL_TIM_PWM_Stop, APB1},
+   {16, GPIOB, GPIO_PIN_9, &htim4, TIM4, TIM_CHANNEL_4, tim4_pwm_setup, HAL_TIM_PWM_Start, HAL_TIM_PWM_Stop, APB1},
 };
 
 /**
@@ -91,6 +100,58 @@ static uint32_t get_tick_frequency(uint8_t n) {
 
 /**
 */
+static void tim1_pwm_setup(uint32_t channel, uint32_t arr, uint32_t pulse) {
+  TIM_MasterConfigTypeDef sMasterConfig;
+  TIM_OC_InitTypeDef sConfigOC;
+  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
+
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = tick_freq_div - 1;;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = arr;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = pulse;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+  sBreakDeadTimeConfig.DeadTime = 0;
+  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+  if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  HAL_TIM_MspPostInit(&htim1);
+}
+
+/**
+*/
 static void tim2_pwm_setup(uint32_t channel, uint32_t arr, uint32_t pulse) {
   TIM_MasterConfigTypeDef sMasterConfig;
   TIM_OC_InitTypeDef sConfigOC;
@@ -122,7 +183,6 @@ static void tim2_pwm_setup(uint32_t channel, uint32_t arr, uint32_t pulse) {
   }
 
   HAL_TIM_MspPostInit(&htim2);
-
 }
 
 /**
@@ -198,6 +258,41 @@ static void tim4_pwm_setup(uint32_t channel, uint32_t arr, uint32_t pulse) {
 
 /**
 */
+static void tim5_pwm_setup(uint32_t channel, uint32_t arr, uint32_t pulse) {
+  TIM_MasterConfigTypeDef sMasterConfig;
+  TIM_OC_InitTypeDef sConfigOC;
+
+  htim5.Instance = TIM5;
+  htim5.Init.Prescaler = tick_freq_div - 1;;
+  htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim5.Init.Period = arr;
+  htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  if (HAL_TIM_PWM_Init(&htim5) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim5, &sMasterConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = pulse;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim5, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  HAL_TIM_MspPostInit(&htim5);
+}
+
+/**
+*/
 int pwm_setup(uint8_t pin, double frequency, double duty) {
   uint32_t tick_freq, ch, arr, pulse;
   uint8_t n = get_pwm_index(pin);
@@ -215,14 +310,14 @@ int pwm_setup(uint8_t pin, double frequency, double duty) {
 */
 void pwm_start(uint8_t pin) {
   uint8_t n = get_pwm_index(pin);
-  HAL_TIM_PWM_Start(pwm_config[n].handle, pwm_config[n].channel);
+  pwm_config[n].start(pwm_config[n].handle, pwm_config[n].channel);
 }
 
 /**
 */
 void pwm_stop(uint8_t pin) {
   uint8_t n = get_pwm_index(pin);
-  HAL_TIM_PWM_Stop(pwm_config[n].handle, pwm_config[n].channel);
+  pwm_config[n].stop(pwm_config[n].handle, pwm_config[n].channel);
 }
 
 /**
@@ -273,72 +368,4 @@ void pwm_set_frequency(uint8_t pin, double frequency) {
 void pwm_close(uint8_t pin) {
   uint8_t n = get_pwm_index(pin);
   HAL_TIM_PWM_DeInit(pwm_config[n].handle);  
-}
-
-
-void pwm_test()
-{  
-  /*
-  * 13��, 14���� TIM3�� ���� ����Ǿ� �����Ƿ� PWM ���ļ� ������ �ٸ��� �� �� ����
-  * �������� ������ ���ļ��� �ݿ���
-  */
-  pwm_setup(13, 1000, 0.10);
-  pwm_setup(14, 2000, 0.20);
-  pwm_setup(15, 4000, 0.40);
-  pwm_setup(16, 8000, 0.80);
-
-  pwm_set_duty(13, 0.1);
-  pwm_set_duty(14, 0.2);
-  
-  pwm_start(13);
-  pwm_start(14);
-  pwm_start(15);
-  pwm_start(16);
-
-  printf("%f \r\n", pwm_get_frequency(13));
-  printf("%f \r\n", pwm_get_frequency(14));
-  printf("%f \r\n", pwm_get_frequency(15));
-  printf("%f \r\n", pwm_get_frequency(16));
-  
-  printf("%f \r\n", pwm_get_duty(13));
-  printf("%f \r\n", pwm_get_duty(14));
-  printf("%f \r\n", pwm_get_duty(15));
-  printf("%f \r\n", pwm_get_duty(16));
-
-  delay(10000);
-
-  pwm_set_frequency(13, 10000);
-  pwm_set_frequency(14, 20000);
-  pwm_set_frequency(15, 40000);
-  pwm_set_frequency(16, 80000);
-  
-  pwm_set_duty(13, 0.8);
-  pwm_set_duty(14, 0.4);
-  pwm_set_duty(15, 0.2);
-  pwm_set_duty(16, 0.1);
-
-  printf("%f \r\n", pwm_get_frequency(13));
-  printf("%f \r\n", pwm_get_frequency(14));
-  printf("%f \r\n", pwm_get_frequency(15));
-  printf("%f \r\n", pwm_get_frequency(16));
-  
-  printf("%f \r\n", pwm_get_duty(13));
-  printf("%f \r\n", pwm_get_duty(14));
-  printf("%f \r\n", pwm_get_duty(15));
-  printf("%f \r\n", pwm_get_duty(16));
-    
-  delay(10000);
-
-  pwm_stop(13);
-  pwm_stop(14);
-  pwm_stop(15);
-  pwm_stop(16);
-  
-  pwm_close(13);
-  pwm_close(14);
-  pwm_close(15);
-  pwm_close(16);
-  
-  while(1);
-  
 }
