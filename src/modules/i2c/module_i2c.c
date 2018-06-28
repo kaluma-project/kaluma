@@ -138,14 +138,19 @@ JERRYXX_FUN(i2c_close_fn) {
 }
 
 jerry_value_t module_i2c_init() {
-  /* I2C constructor */
-  jerry_value_t ctor = jerry_create_external_function(i2c_ctor_fn);
-  jerry_value_t prototype = jerry_create_object();
-  jerryxx_set_property_object(ctor, "prototype", prototype);
-  jerry_release_value (prototype);
-  /* I2C instance properties */
-  jerryxx_set_property_function(prototype, MSTR_I2C_SETUP, i2c_setup_fn);
-  jerryxx_set_property_function(prototype, MSTR_I2C_WRITE, i2c_write_fn);
-  jerryxx_set_property_function(prototype, MSTR_I2C_READ, i2c_read_fn);
-  return ctor;
+  /* I2C class */
+  jerry_value_t i2c_ctor = jerry_create_external_function(i2c_ctor_fn);
+  jerry_value_t i2c_prototype = jerry_create_object();
+  jerryxx_set_property_object(i2c_ctor, "prototype", i2c_prototype);
+  jerry_release_value (i2c_prototype);
+  jerryxx_set_property_function(i2c_prototype, MSTR_I2C_SETUP, i2c_setup_fn);
+  jerryxx_set_property_function(i2c_prototype, MSTR_I2C_WRITE, i2c_write_fn);
+  jerryxx_set_property_function(i2c_prototype, MSTR_I2C_READ, i2c_read_fn);
+
+  /* i2c module exports */
+  jerry_value_t exports = jerry_create_object();
+  jerryxx_set_property_function(exports, MSTR_I2C_I2C, i2c_ctor);
+  jerry_release_value (i2c_ctor);
+
+  return exports;
 }

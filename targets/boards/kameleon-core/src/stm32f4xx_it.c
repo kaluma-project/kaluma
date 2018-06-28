@@ -39,6 +39,7 @@
 #include "system.h"
 
 /* USER CODE BEGIN 0 */
+void uart_fill_ringbuffer(uint8_t bus, uint8_t ch);
 
 /* USER CODE END 0 */
 

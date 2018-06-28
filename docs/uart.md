@@ -9,10 +9,10 @@ var UART = require('uart');
 ## Class: UART
 
 
-### setup(bus[, options])
+### setup(port[, options])
 
-* __`bus`__ `{number}` UART bus number.
-* __`options`__ `{Object}` Options for the UART bus.
+* __`port`__ `{number}` UART port number.
+* __`options`__ `{Object}` Options for the UART port.
   * __`baudrate`__ `{number}` Baud rate. One of the `[0, 50, 75, 110, 134, 150, 200, 300, 600, 1200, 1800, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400]`. Default is `9600`
   * __`bits`__ `{number}` Number of bits per a character. One of the `[7, 8, 9]`. Default is`8`
   * __`parity`__ `{number}`. The parity is one of the `UART.PARITY_NONE (=-1)`, `UART.PARITY_EVEN (=0)` or `UART.PARITY_ODD (=1)`. Default is `UART.PARITY_NONE`.
@@ -25,7 +25,7 @@ var UART = require('uart');
 ```js
 var UART = require('uart');
 var uart = new UART();
-uart.setup(0, {}); // open bus number 0
+uart.setup(0, {}); // open port number 0
 uart.write("data..."); // send data
 var buf = uart.read(10); // read 10 bytes (blocking)
 uart.on('data', function (buf) {
@@ -37,7 +37,7 @@ uart.close();
 
 ### write(data)
 
-Writes data to the UART bus.
+Writes data to the UART port.
 
 The write operation is non-blocking.
 
@@ -63,9 +63,9 @@ Read data from read buffer as many as length. If no data in buffer, returns `nul
 
 ### close()
 
-Close the UART bus.
+Close the UART port.
 
-### bus
+### port
 
 * `{number}`
 

@@ -166,14 +166,18 @@ static void run_code() {
       jerry_release_value(err);
       repl_print_end();
     } else {
+      tty_printf("before run\r\n");
       jerry_value_t ret_value = jerry_run(parsed_code);
+      tty_printf("after run\r\n");
       if (jerry_value_is_error(ret_value)) {
+        tty_printf("error...\r\n");
         repl_print_begin(REPL_OUTPUT_ERROR);
         jerry_value_t err = jerry_get_value_from_error(ret_value, true);
         repl_print_value("%s\r\n", err);
         jerry_release_value(err);
         repl_print_end();
       } else {
+        tty_printf("no error...\r\n");
         repl_print_begin(REPL_OUTPUT_INFO);
         repl_print_value("%s\r\n", ret_value);
         repl_print_end();

@@ -31,7 +31,7 @@ int main(void) {
   system_init();
   tty_init();
   io_init();
-  runtime_init(true);
+  runtime_init(false);
   repl_init();
   io_run();
 }

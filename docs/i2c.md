@@ -1,72 +1,149 @@
 I2C
 ===
 
+The `i2c` module provides ...
+
+Use `require('i2c')` to access this module.
+
+* [open(bus[, address])]()
 * [Class: I2C]()
-  * [setup(bus[, address])]()
+  * [new I2C(bus[, address])]()
   * [write(data, address[, timeout])]()
   * [write(data[, timeout])]()
   * [read(length[, address[, timeout]])]()
   * [read(length[, timeout])]()
   * [close()]()
 
+## open(bus[, address])
+
+* __`bus`__ `{number}` Bus number.
+* __`address`__ `{number}` Optional. Setup as slave mode with the given address. If not provided, setup as master mode.
+* Returns: `{I2C}` Return an initalized instance of `I2C`.
+
+```js
+var i2c = require('i2c');
+var bus0 = i2c.open(0);
+// read or write ...
+bus0.close();
+```
 
 ## Class: I2C
 
-```js
-var I2C = require('i2c');
-var i2c = new I2C();
-i2c.setup(0); // open bus number 0 in master mode
-i2c.write([0x66, 0x77], 0x0c, 3000); // send data to the address 0x0c with timeout 3 seconds.
-var buf = i2c.read(10, 0x0c); // read 10 bytes from the address 0x0c
-i2c.close();
-```
+An instances of `I2C` represents a I2C bus.
+
+### new I2C(bus[, address])
+
+* __`bus`__ `{number}` Bus number.
+* __`address`__ `{number}` Optional. Setup as slave mode with the given address. If not provided, setup as master mode.
+
+This method setup an I2C bus or throws an exception if failed to setup. If the `address` parameter is given, setup as slave mode. Otherwise, setup as master mode.
 
 ```js
-var I2C = require('i2c');
-var i2c = new I2C();
-i2c.setup(0, 0x7a); // open bus number 0 in slave mode (address 0x7a)
-i2c.write([0x66, 0x77], 3000);
-var buf = i2c.read(10);
-i2c.close();
+var i2c = require('i2c');
+
+// open bus 0 in master mode
+var i2c0 = new i2c.I2C(0); // equals to i2c.open(0)
+// read or write ...
+i2c0.close();
+
+// open bus 1 in slave mode (address=0x7a)
+var i2c1 = new i2c.I2C(1, 0x7a); // equals to i2c.open(1, 0x7a);
+//  read or write ...
+i2c1.close();
 ```
-
-### setup(bus[, address])
-
-* __`bus`__ `{number}` bus number 0, 1, 2...
-* __`address`__ `{number}` Optional. If given, open as slave mode. Otherwise, open as master mode.
 
 ### write(data, address[, timeout])
 
-* __`data`__ `{string|ArrayBuffer|Array<number>}` Data to write
-* __`address`__ `{number}` Address of slave device
-* __`timeout`__ `{number}` Optional. Default is 5000.
+* __`data`__ `{string|ArrayBuffer|Array<number>}` Data to write.
+* __`address`__ `{number}` Address to write data.
+* __`timeout`__ `{number}` Optional. Timeout in milliseconds. Default: `5000`.
+* Returns: `{number}` The number of bytes written, `-1` if failed to write or timeout.
 
-Write data to the specified address (slave device). This method can be called only in master mode.
+This method writes data to the specified address (slave device) and returns the number of bytes written. This method can be called only in master mode.
+
+```js
+var i2c = require('i2c');
+var i2c0 = i2c.open(0); // master mode
+
+// Writes 2 bytes with array of numbers
+var array = [0x6b, 0x00];
+i2c0.write(array, 0x68);
+
+// Writes 2 bytes with array buffer
+var arrayBuffer = new Uint8Array([0x6b, 0x00]);
+i2c0.write(arrayBuffer.buffer, 0x68);
+
+// Writes 2 bytes with a string
+var str = 'abcdef';
+i2c0.write(str, 0x68);
+
+i2c0.close();
+```
 
 ### write(data[, timeout]])
 
 * __`data`__ `{string|ArrayBuffer|Array<number>}` Data to write
-* __`timeout`__ `{number}` Optional. Default is 5000.
+* __`timeout`__ `{number}` Optional. Timeout in milliseconds. Default: `5000`.
+* Returns: `{number}` The number of bytes written, `-1` if failed to write or timeout.
 
-Write data to master device. This method can be called only in slave mode.
+This method writes data to master device and returns the number of bytes written. This method can be called only in slave mode.
+
+```js
+var I2C = require('i2c');
+var i2c0 = i2c.open(0, 0x7a); // slave mode
+
+// Writes 2 bytes with array of numbers
+var array = [0x6b, 0x00];
+i2c0.write(array);
+
+// Writes 2 bytes with array buffer
+var arrayBuffer = new Uint8Array([0x6b, 0x00]);
+i2c0.write(arrayBuffer.buffer);
+
+// Writes 2 bytes with a string
+var str = 'abcdef';
+i2c0.write(str);
+
+i2c0.close();
+```
 
 ### read(length, address[, timeout])
 
-* __`length`__ `{number}` data length to read.
-* __`address`__ `{number}` Optional. address to receive data (in master mode only).
-* __`timeout`__ `{number}` Optional. Default is 5000.
-* Returns: `{ArrayBuffer}` the received data
+* __`length`__ `{number}` Data length to read.
+* __`address`__ `{number}` Address to read data from (in master mode only).
+* __`timeout`__ `{number}` Optional. Timeout in milliseconds. Default: `5000`.
+* Returns: `{ArrayBuffer}` The data read.
 
-Read data from the specified address (slave device). This method can be called only in master mode.
+This method read data from the specified address (slave device) and returns an array buffer object. This method can be called only in master mode.
+
+```js
+var I2C = require('i2c');
+var i2c0 = i2c.open(0); 
+var buf = i2c0.read(14, 0x68); // Read 14 bytes from the address 0x68.
+i2c0.close();
+var data = new Uint8Array(buf);
+console.log(data.length); // 14
+console.log(data[0]); // first byte
+```
 
 ### read(length[, timeout])
 
-* __`length`__ `{number}` data length to read.
-* __`timeout`__ `{number}` Optional. Default is 5000.
-* Returns: `{ArrayBuffer}` the received data
+* __`length`__ `{number}` Data length to read.
+* __`timeout`__ `{number}` Optional. Timeout in milliseconds. Default: `5000`.
+* Returns: `{ArrayBuffer}` The data read.
 
-Read data from master device. This method can be called only in slave mode.
+This method read data from master device and returns an array buffer object. This method can be called only in slave mode.
+
+```js
+var I2C = require('i2c');
+var i2c0 = i2c.open(0, 0x7a); 
+var buf = i2c0.read(10); // Read 10 bytes from the master.
+i2c0.close();
+var data = new Uint8Array(buf);
+console.log(data.length); // 10
+console.log(data[0]); // first byte
+```
 
 ### close()
 
-Close the bus.
+This method closes the bus.

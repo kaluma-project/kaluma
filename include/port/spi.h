@@ -67,7 +67,7 @@ int spi_setup(uint8_t bus, spi_mode_t mode, uint8_t cs_pin, uint32_t baudrate,
  * @param {uint8_t} bus
  * @param {uint8_t*} tx_buf
  * @param {uint8_t*} rx_buf
- * @param {uint32_t} len
+ * @param {size_t} len
  * @param {uint32_t} timeout
  * @return the number of bytes read or -1 on timeout or nothing written.
  */

@@ -30,7 +30,7 @@ spi.close();
 
 * __`bus`__ `{number}`
 * __`options`__ `{Object}`
-  * `mode` `{number}` -- `SPI.MASTER` (default) or `SPI.SLAVE`
+  * `mode` `{number}` -- `SPI.MASTER` (default) or `SPI.SLAVE` (not supported yet)
   * `cs` `{number}` -- Chip select pin number
   * `clock` `{number}` -- clock
   * `polarity` `{number}` -- 0 or 1

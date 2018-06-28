@@ -3,22 +3,21 @@ Board
 
 * [Object: board]()
   * [name]()
-  * [PIN_NUM]()
-  * [PWM_NUM]()
-  * [ADC_NUM]()
-  * [LED_NUM]()
-  * [SWITCH_NUM]()
-  * [I2C_NUM]()
-  * [SPI_NUM]()
-  * [UART_NUM]()
+  * [PIN_COUNT]()
+  * [PWM_COUNT]()
+  * [ADC_COUNT]()
+  * [LED_COUNT]()
+  * [BUTTON_COUNT]()
+  * [I2C_COUNT]()
+  * [SPI_COUNT]()
+  * [UART_COUNT]()
   * [led(num)]()
   * [switch(num)]()
   * [pwm(num)]()
   * [adc(num)]()
   * [i2c(bus[, options])]()
   * [spi(bus[, options])]()
-  * [uart(bus[, options])]()
-
+  * [uart(port[, options])]()
 
 ##  board
 
@@ -31,37 +30,37 @@ board specific object
 target board name. ex) 'stm32f4discovery', 'kameleon-core', ...
 
 
-### PIN_NUM
+### PIN_COUNT
 
-* `{number}`
+* `{number}` Total number of pins.
 
-### PWM_NUM
+### PWM_COUNT
 
-* `{number}`
+* `{number}` Total number of PWM channels.
 
-### ADC_NUM
+### ADC_COUNT
 
-* `{number}`
+* `{number}` Total number of ADCs.
 
-### LED_NUM
+### LED_COUNT
 
-* `{number}`
+* `{number}` Total number of LEDs.
 
-### SWITCH_NUM
+### BUTTON_COUNT
 
-* `{number}`
+* `{number}` Total number of buttons.
 
-### I2C_NUM
+### I2C_COUNT
 
-* `{number}`
+* `{number}` Total number of I2C buses.
 
-### SPI_NUM
+### SPI_COUNT
 
-* `{number}`
+* `{number}` Total number of SPI buses.
 
-### UART_NUM
+### UART_COUNT
 
-* `{number}`
+* `{number}` Total number of UART ports.
 
 ### led(index)
 
@@ -105,10 +104,10 @@ Return I2C object initialized with the bus number
 Return SPI object initialized with the bus number
 
 
-### uart(bus[, options])
+### uart(port[, options])
 
-* __`bus`__ `{number}`
+* __`port`__ `{number}`
 * __`options`__ `{Object}` Same options object to the `setup()` method.
-* Returns: `{UART}` An initialized UART instance corresponds to the bus number. Once initialized, the same object will be returned.
+* Returns: `{UART}` An initialized UART instance corresponds to the port number. Once initialized, the same object will be returned.
 
-Return UART object initialized with the bus number
+Return UART object initialized with the port number
