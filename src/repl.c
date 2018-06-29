@@ -161,23 +161,19 @@ static void run_code() {
     jerry_value_t parsed_code = jerry_parse(NULL, 0, (const jerry_char_t *) data, strlen(data), JERRY_PARSE_STRICT_MODE);
     if (jerry_value_is_error(parsed_code)) {
       repl_print_begin(REPL_OUTPUT_ERROR);
-      jerry_value_t err = jerry_get_value_from_error(parsed_code, true);
-      repl_print_value("%s\r\n", err);
-      jerry_release_value(err);
+      jerry_value_t parse_err = jerry_get_value_from_error(parsed_code, false);
+      repl_print_value("%s\r\n", parse_err);
+      jerry_release_value(parse_err);
       repl_print_end();
     } else {
-      tty_printf("before run\r\n");
       jerry_value_t ret_value = jerry_run(parsed_code);
-      tty_printf("after run\r\n");
       if (jerry_value_is_error(ret_value)) {
-        tty_printf("error...\r\n");
         repl_print_begin(REPL_OUTPUT_ERROR);
-        jerry_value_t err = jerry_get_value_from_error(ret_value, true);
+        jerry_value_t err = jerry_get_value_from_error(ret_value, false);
         repl_print_value("%s\r\n", err);
         jerry_release_value(err);
         repl_print_end();
       } else {
-        tty_printf("no error...\r\n");
         repl_print_begin(REPL_OUTPUT_INFO);
         repl_print_value("%s\r\n", ret_value);
         repl_print_end();
