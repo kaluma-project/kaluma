@@ -102,12 +102,13 @@
 
 #define JERRXX_CREATE_ERROR(errmsg) jerry_create_error(JERRY_ERROR_COMMON, (const jerry_char_t *) errmsg)
 
+void jerryxx_set_property(jerry_value_t object, const char *name, jerry_value_t value);
 void jerryxx_set_property_number(jerry_value_t object, const char *name, double value);
-void jerryxx_set_property_object(jerry_value_t object, const char *name, jerry_value_t obj);
 void jerryxx_set_property_string(jerry_value_t object, const char *name, char *value);
 void jerryxx_set_property_function(jerry_value_t object, const char *name, jerry_external_handler_t fn);
 jerry_value_t jerryxx_get_property(jerry_value_t object, const char *name);
 double jerryxx_get_property_number(jerry_value_t object, const char *name, double default_value);
+bool jerryxx_delete_property(jerry_value_t object, const char *name);
 
 void jerryxx_print_value(const char *format, jerry_value_t value);
 

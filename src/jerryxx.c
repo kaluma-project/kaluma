@@ -26,6 +26,13 @@
 #include "jerryxx.h"
 #include "tty.h"
 
+void jerryxx_set_property(jerry_value_t object, const char *name, jerry_value_t value) {
+  jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
+  jerry_value_t ret = jerry_set_property (object, prop, value);
+  jerry_release_value(ret);
+  jerry_release_value (prop);
+}
+
 void jerryxx_set_property_number(jerry_value_t object, const char *name, double value) {
   jerry_value_t val = jerry_create_number(value);
   jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
@@ -33,13 +40,6 @@ void jerryxx_set_property_number(jerry_value_t object, const char *name, double 
   jerry_release_value(ret);
   jerry_release_value (prop);
   jerry_release_value(val);
-}
-
-void jerryxx_set_property_object(jerry_value_t object, const char *name, jerry_value_t obj) {
-  jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
-  jerry_value_t ret = jerry_set_property (object, prop, obj);
-  jerry_release_value(ret);
-  jerry_release_value (prop);
 }
 
 void jerryxx_set_property_string(jerry_value_t object, const char *name, char *value) {
@@ -77,6 +77,13 @@ double jerryxx_get_property_number(jerry_value_t object, const char *name, doubl
   jerry_release_value(ret);
   jerry_release_value (prop);
   return value;
+}
+
+bool jerryxx_delete_property(jerry_value_t object, const char *name) {
+  jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
+  bool ret = jerry_delete_property(object, prop);
+  jerry_release_value (prop);
+  return ret;
 }
 
 void jerryxx_print_value(const char *format, jerry_value_t value) {

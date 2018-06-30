@@ -112,7 +112,7 @@ i2c0.close();
 * __`length`__ `{number}` Data length to read.
 * __`address`__ `{number}` Address to read data from (in master mode only).
 * __`timeout`__ `{number}` Optional. Timeout in milliseconds. Default: `5000`.
-* Returns: `{ArrayBuffer}` The data read.
+* Returns: `{ArrayBuffer}` An array buffer having data read, `null` if failed to read.
 
 This method read data from the specified address (slave device) and returns an array buffer object. This method can be called only in master mode.
 
@@ -121,9 +121,11 @@ var I2C = require('i2c');
 var i2c0 = i2c.open(0); 
 var buf = i2c0.read(14, 0x68); // Read 14 bytes from the address 0x68.
 i2c0.close();
-var data = new Uint8Array(buf);
-console.log(data.length); // 14
-console.log(data[0]); // first byte
+if (buf) {
+  var data = new Uint8Array(buf);
+  console.log(data.length); // 14
+  console.log(data[0]); // first byte
+}
 ```
 
 ### read(length[, timeout])

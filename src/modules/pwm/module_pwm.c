@@ -127,7 +127,7 @@ jerry_value_t module_pwm_init() {
   /* PWM constructor */
   jerry_value_t ctor = jerry_create_external_function(pwm_ctor_fn);
   jerry_value_t prototype = jerry_create_object();
-  jerryxx_set_property_object(ctor, "prototype", prototype);
+  jerryxx_set_property(ctor, "prototype", prototype);
   jerry_release_value (prototype);
   /* PWM instance properties */
   jerryxx_set_property_function(prototype, MSTR_PWM_SETUP, pwm_setup_fn);

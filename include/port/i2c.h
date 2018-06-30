@@ -24,79 +24,77 @@
 
 #include <stdint.h>
 
-typedef enum {
-  I2C_MODE_MASTER,
-  I2C_MODE_SLAVE
-}i2c_mode_t;
-
 /**
- * Setup a I2C bus as master
+ * Setup a I2C bus as master.
  * 
- * @param {uint8_t} bus
- * @return {int} result status code
+ * @param bus The bus number.
+ * @return Returns 0 on success or -1 on failure.
  */
 int i2c_setup_master(uint8_t bus);
 
 /**
- * Setup a I2C bus as slave
+ * Setup a I2C bus as slave.
  * 
- * @param {uint8_t} bus
- * @param {uint8_t} address
- * @return {int} result status code
+ * @param bus The bus number.
+ * @param address Address of the slave.
+ * @return Returns 0 on success or -1 on failure.
  */
 int i2c_setup_slave(uint8_t bus, uint8_t address);
 
 /**
- * Write a given buffer to the bus (in master mode)
+ * Write a given buffer to the bus (in master mode).
  * 
- * @param {uint8_t} bus
- * @param {uint8_t} address
- * @param {uint8_t*} buf
- * @param {size_t} len
- * @param {uint32_t} timeout
- * @return {int} the number of bytes written or -1 on timeout or nothing written.
+ * @param bus The bus number.
+ * @param address Where the data sent to.
+ * @param buf Buffer to write.
+ * @param len The size of the buffer.
+ * @param timeout Timeout in milliseconds.
+ * @return The number of bytes written or -1 on timeout or failed to write.
  */
 int i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
   uint32_t timeout);
 
 /**
- * Write a given buffer to the bus (in slave mode)
+ * Write a given buffer to the bus (in slave mode).
  * 
- * @param {uint8_t} bus
- * @param {uint8_t*} buf
- * @param {size_t} len
- * @param {uint32_t} timeout
- * @return {int} the number of bytes written or -1 on timeout or nothing written.
+ * @param bus The bus number.
+ * @param buf Buffer to write.
+ * @param len The size of the buffer.
+ * @param timeout Timeout in milliseconds.
+ * @return The number of bytes written or -1 on timeout or failed to write.
  */
 int i2c_write_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
 
 /**
- * Read bytes from the bus and store them into a given buffer (in master mode)
+ * Read bytes from the bus and store them into a given buffer (in master mode).
  * 
- * @param {uint8_t} bus
- * @param {uint8_t} address
- * @param {uint8_t*} buf
- * @param {size_t} len
- * @return {int} the number of bytes read
+ * @param bus The bus number.
+ * @param address Where the data read from.
+ * @param buf Data buffer where the read data to be stored.
+ * @param len The size of the data buffer.
+ * @param timeout Timeout in milliseconds.
+ * @return The number of bytes read or -1 on timeout or failed to read.
  */
 int i2c_read_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
   uint32_t timeout);
 
 /**
- * Read bytes from the bus and store them into a given buffer (in slave mode)
+ * Read bytes from the bus and store them into a given buffer (in slave mode).
  * 
- * @param {uint8_t} bus
- * @param {uint8_t*} buf
- * @param {size_t} len
- * @return {int} the number of bytes read
+ * @param bus The bus number.
+ * @param buf Buffer where the read data to be stored.
+ * @param len The size of the buffer.
+ * @param timeout Timeout in milliseconds.
+ * @return The number of bytes read or -1 on timeout or failed to read.
  */
 int i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
 
 
 /**
- * Close the I2C bus
+ * Close the I2C bus.
  * 
- * @return {int}
+ * @param bus The bus number.
+ * @return Returns 0 on success or -1 on failure.
  */
 int i2c_close(uint8_t bus);
 

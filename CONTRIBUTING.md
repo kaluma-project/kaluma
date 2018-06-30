@@ -6,6 +6,7 @@ CONTRIBUTING
 Required packages:
 * __GNU ARM Toolchain__ (6-2017-q1-update) : https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 * __ST-Link tool__ : https://github.com/texane/stlink
+* __CMake__
 * __Node.js__ : https://nodejs.org
 
 Recommended tools:
@@ -64,8 +65,10 @@ You can use REPL via terminal program.
 # Press RESET button on board
 
 # for MacOS
-$ screen /dev/tty.usbmodem1441 115200
+$ screen /dev/tty.usbmodem? 115200
 
 # or for Linux
 $ sudo screen /dev/ttyACM? 115200
+
+# To quit the screen session, press ctrl+a, k, y.
 ```

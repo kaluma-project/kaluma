@@ -336,7 +336,7 @@ static void register_global_console_object() {
   jerryxx_set_property_function(console, MSTR_LOG, console_log_fn);
   jerryxx_set_property_function(console, MSTR_ERROR, console_error_fn);
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property_object(global, MSTR_CONSOLE, console);
+  jerryxx_set_property(global, MSTR_CONSOLE, console);
   jerry_release_value(console);
   jerry_release_value(global);
 }
@@ -375,7 +375,7 @@ JERRYXX_FUN(native_module_wrapper_fn) {
   for (int i = 0; i < builtin_modules_length; i++) {
     if (strcmp(builtin_modules[i].name, module_name) == 0 && builtin_modules[i].fn != NULL) {
       jerry_value_t res = builtin_modules[i].fn();
-      jerryxx_set_property_object(module, MSTR_EXPORTS, res);
+      jerryxx_set_property(module, MSTR_EXPORTS, res);
       jerry_release_value(res);
     }
   }
@@ -440,7 +440,7 @@ static void register_global_process_object() {
 
   /* Register 'process' object to global */
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property_object(global, MSTR_PROCESS, process);  
+  jerryxx_set_property(global, MSTR_PROCESS, process);  
 
   jerry_release_value(process);
   jerry_release_value(global);
@@ -496,7 +496,7 @@ static void register_global_board_object() {
   jerryxx_set_property_function(board, MSTR_PWM, board_pwm_fn);
   jerryxx_set_property_function(board, MSTR_ADC, board_adc_fn);
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property_object(global, MSTR_BOARD, board);
+  jerryxx_set_property(global, MSTR_BOARD, board);
   jerry_release_value(board);
   jerry_release_value(global);
 }

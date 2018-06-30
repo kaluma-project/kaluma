@@ -92,7 +92,7 @@ jerry_value_t module_uart_init() {
   /* UART constructor */
   jerry_value_t ctor = jerry_create_external_function(uart_ctor_fn);
   jerry_value_t prototype = jerry_create_object();
-  jerryxx_set_property_object(ctor, "prototype", prototype);
+  jerryxx_set_property(ctor, "prototype", prototype);
   jerry_release_value (prototype);
   /* UART instance properties */
   jerryxx_set_property_function(prototype, MSTR_UART_SETUP, uart_setup_fn);
