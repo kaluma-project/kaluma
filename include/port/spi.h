@@ -25,8 +25,10 @@
 #include <stdint.h>
 
 typedef enum {
-  SPI_SETUP_MODE_MASTER,
-  SPI_SETUP_MODE_SLAVE
+  SPI_MODE_0, // (CPOL=0/CPHA=0)
+  SPI_MODE_1, // (CPOL=0/CPHA=1)
+  SPI_MODE_2, // (CPOL=1/CPHA=0)
+  SPI_MODE_3  // (CPOL=1/CPHA=1)
 } spi_mode_t;
 
 typedef enum {
@@ -34,41 +36,27 @@ typedef enum {
   SPI_BITORDER_LSB
 } spi_bitorder_t;
 
-typedef enum {
-  SPI_CLOCK_POLARITY_LOW,
-  SPI_CLOCK_POLARITY_HIGH,
-} spi_clock_polarity_t;
-
-typedef enum {
-  SPI_CLOCK_PHASE_1_EDGE,
-  SPI_CLOCK_PHASE_2_EDGE,
-} spi_clock_phase_t;
-
 /**
- * Setup SPI bus
+ * Setup SPI bus as the master device
  * 
- * @param {uint8_t} bus
- * @param {spi_mode_t} mode
- * @param {uint8_t} cs_pin
- * @param {uint32_t} baudrate
- * @param {spi_clock_polarity_t} polarity
- * @param {spi_clock_phase_t} phase
- * @param {uint8_t} bits
- * @param {uint8_t} bit_order
- * @return {int} result status code
+ * @param bus The bus number.
+ * @param mode SPI mode of clock polarity and phase.
+ * @param baudrate Baud rate.
+ * @param bit_order Bit order (MSB or LSB).
+ * @param bits Number of bits in each transferred word.
+ * @return Returns 0 on success or -1 on failure.
  */
-int spi_setup(uint8_t bus, spi_mode_t mode, uint8_t cs_pin, uint32_t baudrate,
-  spi_clock_polarity_t polarity, spi_clock_phase_t phase, uint8_t bits, spi_bitorder_t bit_order);
+int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bitorder, uint8_t bits);
 
 
 /**
  * Send and receive data simultaneously to the SPI bus
  * 
- * @param {uint8_t} bus
- * @param {uint8_t*} tx_buf
- * @param {uint8_t*} rx_buf
- * @param {size_t} len
- * @param {uint32_t} timeout
+ * @param bus
+ * @param tx_buf
+ * @param rx_buf
+ * @param len
+ * @param timeout
  * @return the number of bytes read or -1 on timeout or nothing written.
  */
 int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint32_t timeout);
@@ -76,10 +64,10 @@ int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint
 /**
  * Send data to the SPI bus
  * 
- * @param {uint8_t} bus
- * @param {uint8_t*} buf
- * @param {size_t} len
- * @param {uint32_t} timeout
+ * @param bus
+ * @param buf
+ * @param len
+ * @param timeout
  * @return the number of bytes written or -1 on timeout or nothing written.
  */
 int spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);

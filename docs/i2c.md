@@ -1,7 +1,7 @@
 I2C
 ===
 
-The `i2c` module provides ...
+The `i2c` module supports communication with I2C (Inter-Integrated Circuit) / TWI (Two Wire Interface) deivces.
 
 Use `require('i2c')` to access this module.
 
@@ -54,7 +54,7 @@ i2c1.close();
 
 ### write(data, address[, timeout])
 
-* __`data`__ `{string|ArrayBuffer|Array<number>}` Data to write.
+* __`data`__ `{ArrayBuffer|TypedArray|Array<number>|string}` Data to write.
 * __`address`__ `{number}` Address to write data.
 * __`timeout`__ `{number}` Optional. Timeout in milliseconds. Default: `5000`.
 * Returns: `{number}` The number of bytes written, `-1` if failed to write or timeout.
@@ -65,13 +65,14 @@ This method writes data to the specified address (slave device) and returns the 
 var i2c = require('i2c');
 var i2c0 = i2c.open(0); // master mode
 
-// Writes 2 bytes with array of numbers
+// Writes 2 bytes with an array of numbers
 var array = [0x6b, 0x00];
 i2c0.write(array, 0x68);
 
-// Writes 2 bytes with array buffer
-var arrayBuffer = new Uint8Array([0x6b, 0x00]);
-i2c0.write(arrayBuffer.buffer, 0x68);
+// Writes 2 bytes with an instance of TypedArray or ArrayBuffer
+var typedArray = new Uint8Array([0x6b, 0x00]);
+i2c0.write(typedArray, 0x68); // pass a typed array
+i2c0.write(typedArray.buffer, 0x68); // or, pass an array buffer
 
 // Writes 2 bytes with a string
 var str = 'abcdef';
@@ -82,7 +83,7 @@ i2c0.close();
 
 ### write(data[, timeout]])
 
-* __`data`__ `{string|ArrayBuffer|Array<number>}` Data to write
+* __`data`__ `{ArrayBuffer|TypedArray|Array<number>|string}` Data to write
 * __`timeout`__ `{number}` Optional. Timeout in milliseconds. Default: `5000`.
 * Returns: `{number}` The number of bytes written, `-1` if failed to write or timeout.
 
@@ -92,13 +93,14 @@ This method writes data to master device and returns the number of bytes written
 var I2C = require('i2c');
 var i2c0 = i2c.open(0, 0x7a); // slave mode
 
-// Writes 2 bytes with array of numbers
+// Writes 2 bytes with an array of numbers
 var array = [0x6b, 0x00];
 i2c0.write(array);
 
-// Writes 2 bytes with array buffer
-var arrayBuffer = new Uint8Array([0x6b, 0x00]);
-i2c0.write(arrayBuffer.buffer);
+// Writes 2 bytes with an instance of TypedArray or ArrayBuffer
+var typedArray = new Uint8Array([0x6b, 0x00]);
+i2c0.write(typedArray); // pass a typed array
+i2c0.write(typedArray.buffer); // or, pass an array buffer
 
 // Writes 2 bytes with a string
 var str = 'abcdef';

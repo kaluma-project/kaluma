@@ -19,14 +19,18 @@
  * SOFTWARE.
  */
 
-#ifndef __I2C_MAGIC_STRINGS_H
-#define __I2C_MAGIC_STRINGS_H
+#ifndef __SPI_MAGIC_STRINGS_H
+#define __SPI_MAGIC_STRINGS_H
 
-#define MSTR_I2C_I2C "I2C"
-#define MSTR_I2C_BUS "bus"
-#define MSTR_I2C_ADDRESS "address"
-#define MSTR_I2C_WRITE "write"
-#define MSTR_I2C_READ "read"
-#define MSTR_I2C_CLOSE "close"
+#define MSTR_SPI_SPI "SPI"
+#define MSTR_SPI_BUS "bus"
+#define MSTR_SPI_MODE "mode"
+#define MSTR_SPI_BAUDRATE "baudrate"
+#define MSTR_SPI_BITORDER "bitorder"
+#define MSTR_SPI_BITS "bits"
+#define MSTR_SPI_TRANSFER "transfer"
+#define MSTR_SPI_SEND "send"
+#define MSTR_SPI_RECV "recv"
+#define MSTR_SPI_CLOSE "close"
 
-#endif /* __I2C_MAGIC_STRINGS_H */
+#endif /* __SPI_MAGIC_STRINGS_H */

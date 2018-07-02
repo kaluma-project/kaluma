@@ -29,9 +29,6 @@ SPI_HandleTypeDef hspi3;
 static SPI_HandleTypeDef * spi_handle[] = {&hspi1, &hspi3};
 static SPI_TypeDef * spi_ch[] = {SPI1, SPI3};
 
-static const uint32_t spi_mode[] = {SPI_MODE_MASTER, SPI_MODE_SLAVE};
-static const uint32_t spi_clock_polarity[] = {SPI_POLARITY_LOW, SPI_POLARITY_HIGH};
-static const uint32_t spi_clock_phase[] = {SPI_PHASE_1EDGE, SPI_PHASE_2EDGE};
 static const uint32_t spi_prescaler[] = {SPI_BAUDRATEPRESCALER_2, SPI_BAUDRATEPRESCALER_4,
                                          SPI_BAUDRATEPRESCALER_8, SPI_BAUDRATEPRESCALER_16,
                                          SPI_BAUDRATEPRESCALER_32, SPI_BAUDRATEPRESCALER_64,
@@ -39,22 +36,7 @@ static const uint32_t spi_prescaler[] = {SPI_BAUDRATEPRESCALER_2, SPI_BAUDRATEPR
                                         };
 
 static const uint32_t spi_firstbit[] = { SPI_FIRSTBIT_MSB, SPI_FIRSTBIT_LSB };
-static uint8_t spi_cs_pin;
 
-/**
-*/
-static void enable_cs() {
-  gpio_write(spi_cs_pin, GPIO_LOW);
-}
-
-/**
-*/
-static void disable_cs() {
-  gpio_write(spi_cs_pin, GPIO_HIGH);
-}
-
-/**
-*/
 static uint32_t get_prescaler_factor(uint8_t bus, uint32_t baudrate) {
 
   uint32_t k;
@@ -82,9 +64,7 @@ static uint32_t get_prescaler_factor(uint8_t bus, uint32_t baudrate) {
 
 /** SPI Setup
 */
-int spi_setup(uint8_t bus, spi_mode_t mode, uint8_t cs_pin, uint32_t baudrate, 
-              spi_clock_polarity_t polarity, spi_clock_phase_t phase, uint8_t bits, 
-              spi_bitorder_t bit_order) {
+int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bitorder, uint8_t bits) {
                 
   assert_param(bus==0 || bus==1);
   assert_param(bits==8 || bits==16);
@@ -92,11 +72,28 @@ int spi_setup(uint8_t bus, spi_mode_t mode, uint8_t cs_pin, uint32_t baudrate,
   SPI_HandleTypeDef * pspi = spi_handle[bus];
     
   pspi->Instance = spi_ch[bus];
-  pspi->Init.Mode = spi_mode[mode];        
-  pspi->Init.CLKPolarity = spi_clock_polarity[polarity];
-  pspi->Init.CLKPhase = spi_clock_phase[phase];
+  pspi->Init.Mode = SPI_MODE_MASTER;
+  switch (mode)
+  {
+    case SPI_MODE_0:
+      pspi->Init.CLKPolarity = SPI_POLARITY_LOW;
+      pspi->Init.CLKPhase = SPI_PHASE_1EDGE;
+      break;
+    case SPI_MODE_1:
+      pspi->Init.CLKPolarity = SPI_POLARITY_LOW;
+      pspi->Init.CLKPhase = SPI_PHASE_2EDGE;
+      break;
+    case SPI_MODE_2:
+      pspi->Init.CLKPolarity = SPI_POLARITY_HIGH;
+      pspi->Init.CLKPhase = SPI_PHASE_1EDGE;
+      break;
+    case SPI_MODE_3:
+      pspi->Init.CLKPolarity = SPI_POLARITY_HIGH;
+      pspi->Init.CLKPhase = SPI_PHASE_2EDGE;
+      break;
+  }
   pspi->Init.BaudRatePrescaler = get_prescaler_factor(bus, baudrate);
-  pspi->Init.FirstBit = spi_firstbit[bit_order];
+  pspi->Init.FirstBit = spi_firstbit[bitorder];
   pspi->Init.Direction = SPI_DIRECTION_2LINES;
   pspi->Init.NSS = SPI_NSS_SOFT;    
   pspi->Init.TIMode = SPI_TIMODE_DISABLE;
@@ -104,30 +101,19 @@ int spi_setup(uint8_t bus, spi_mode_t mode, uint8_t cs_pin, uint32_t baudrate,
   pspi->Init.CRCPolynomial = 10;
   pspi->Init.DataSize = ((bits==8) ? SPI_DATASIZE_8BIT:SPI_DATASIZE_16BIT);
 
-  if (HAL_SPI_Init(pspi) != HAL_OK) {
-    _Error_Handler(__FILE__, __LINE__);
+  if (HAL_SPI_Init(pspi) == HAL_OK) {
+    return 0;
+  } else {
+    return -1;
   }
-
-  /* configure cs pin as gpio-output
-  */
-  spi_cs_pin = cs_pin;
-  gpio_set_io_mode(cs_pin, GPIO_IO_MODE_OUTPUT);  
-  disable_cs();
-
-  return 0;
 }
 
-/**
-*/
 int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint32_t timeout) {
   assert_param(bus==0 || bus==1);
 
-  SPI_HandleTypeDef * hspi = spi_handle[bus];
-  
-  enable_cs();
+  SPI_HandleTypeDef * hspi = spi_handle[bus];  
   HAL_StatusTypeDef status = HAL_SPI_TransmitReceive(hspi, tx_buf, rx_buf, (uint16_t)len, timeout);
-  disable_cs();
-  
+
   if (status != HAL_OK) {
     return -1;
   } else {
@@ -135,16 +121,11 @@ int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint
   }  
 }
 
-/**
-*/
 int spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   assert_param(bus==0 || bus==1);
 
-  SPI_HandleTypeDef * hspi = spi_handle[bus];
-  
-  enable_cs();
+  SPI_HandleTypeDef * hspi = spi_handle[bus];  
   HAL_StatusTypeDef status = HAL_SPI_Transmit(hspi, buf, (uint16_t)len, timeout);
-  disable_cs();
   
   if (status != HAL_OK) {
     return -1;
@@ -153,8 +134,6 @@ int spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   }  
 }
 
-/**
-*/
 int spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   assert_param(bus==0 || bus==1);
 
@@ -164,8 +143,6 @@ int spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
 }
 
 
-/**
-*/
 int spi_close(uint8_t bus) {
   assert_param(bus==0 || bus==1);
 
@@ -176,4 +153,3 @@ int spi_close(uint8_t bus) {
     return -1;
   }
 }
-
