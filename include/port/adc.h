@@ -27,22 +27,25 @@
 /**
  * Setup a ADC channel
  * 
- * @param {uint8_t} pin
- * @return result status code
+ * @param pin Pin number.
+ * @return Returns 0 on success or -1 on failure.
  */
 int adc_setup(uint8_t pin);
 
 /**
- * Read value from the ADC channel
+ * Read value from a ADC channel
  * 
- * @param {uint8_t} pin
- * @return {double}
+ * @param pin Pin number.
+ * @return Return a value read between 0 and 1.
  */
 double adc_read(uint8_t pin);
 
 /**
  * Close the ADC channel
+ * 
+ * @param pin Pin number.
+ * @return Returns 0 on success or -1 on failure.
  */
-void adc_close(uint8_t pin);
+int adc_close(uint8_t pin);
 
 #endif /* __ADC_H */

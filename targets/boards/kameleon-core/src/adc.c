@@ -127,12 +127,6 @@ double adc_read(uint8_t pin) {
   return (double)adc_buf[n] / (1 << ADC_RESOLUTION_BIT);
 }
 
-/**
- * Setup a ADC channel
- * 
- * @param {uint8_t} pin
- * @return result status code
- */
 int adc_setup(uint8_t pin) {
   
   uint8_t adc_need_init=1;
@@ -157,10 +151,7 @@ int adc_setup(uint8_t pin) {
   return 0;
 }
 
-/**
- * Close the ADC channel
- */
-void adc_close(uint8_t pin) {
+int adc_close(uint8_t pin) {
   uint8_t n = get_adc_index(pin);
   HAL_GPIO_DeInit(adc_config[n].port, adc_config[n].pin);
   adc_configured[n] = 0;
@@ -176,4 +167,3 @@ void adc_close(uint8_t pin) {
     adc1_deinit();
   }   
 }
-

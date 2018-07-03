@@ -35,32 +35,3 @@ int main(void) {
   repl_init();
   io_run();
 }
-
-
-/**
- * @brief  This function is executed in case of error occurrence.
- * @param  None
- * @retval None
- */
-void _Error_Handler(uint8_t * file, uint32_t line) {
-  /* User can add his own implementation to report the HAL error return state */
-  while(1) {
-    tty_printf("_Error_Handler : file[%s], line[%d] \r\n", file, line);
-    while(1);
-  }
-}
-
-#ifdef USE_FULL_ASSERT
-
-/**
-   * @brief Reports the name of the source file and the source line number
-   * where the assert_param error has occurred.
-   * @param file: pointer to the source file name
-   * @param line: assert_param error line source number
-   * @retval None
-   */
-void assert_failed(uint8_t* file, uint32_t line) {
-  _Error_Handler(file, line);
-}
-
-#endif
