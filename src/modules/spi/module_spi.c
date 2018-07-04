@@ -233,6 +233,28 @@ JERRYXX_FUN(spi_recv_fn) {
   return jerry_create_null();
 }
 
+/** 
+ * SPI.prototype.close() function
+ */
+JERRYXX_FUN(spi_close_fn) {
+  // check this.bus number
+  uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
+  if (!jerry_value_is_number(bus_value)) {
+    return JERRXX_CREATE_ERROR("SPI bus is not initialized.");
+  }
+  uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
+
+  // close the bus
+  int ret = spi_close(bus);
+  if (ret < 0) {
+    return JERRXX_CREATE_ERROR("Failed to close SPI bus.");
+  }
+
+  // delete this.bus property
+  jerryxx_delete_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
+
+  return jerry_create_undefined();
+}
 
 /** 
  * Initialize 'spi' module and return exports
@@ -245,6 +267,7 @@ jerry_value_t module_spi_init() {
   jerryxx_set_property_function(spi_prototype, MSTR_SPI_TRANSFER, spi_transfer_fn);
   jerryxx_set_property_function(spi_prototype, MSTR_SPI_SEND, spi_send_fn);
   jerryxx_set_property_function(spi_prototype, MSTR_SPI_RECV, spi_recv_fn);
+  jerryxx_set_property_function(spi_prototype, MSTR_SPI_CLOSE, spi_close_fn);
   jerry_release_value (spi_prototype);
 
   /* spi module exports */
