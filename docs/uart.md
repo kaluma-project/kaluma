@@ -110,9 +110,9 @@ var buf = serial0.read(size);
 
 ### listen(callback[, trigger])
 
-* __`callback`__ `{function(data)}` A function to be called whenever the internal read buffer is full or `trigger` condition has met.
-  * __`data`__ `{ArrayBuffer}`
-* __`trigger`__ `{number|string}` Optional. If a character is given, callback is called whenever the given character has arrived. If a number is given, callback is called whenever buffer length is reached to the given number. For example: `'\n'`, `10`. Default is `'\n'` (???). This means try to trigger 'data' event whenever data is arrived.
+* __`callback`__ `{function(data)|null}` A function to be called whenever data is arrived (buffer size may varies) or `trigger` condition has met. If there was already a callback, then the previous callback is removed and register the new callback. Passing `null` means just to remove the previous callback.
+  * __`data`__ `{ArrayBuffer}` Received data buffer.
+* __`trigger`__ `{string|number}` Optional. If a character (string) is given (e.g. `'\n'`), callback is called whenever the given character has arrived. If a number is given (e.g. `10`), callback is called whenever buffer length is reached to the given number.
 
 Callback function is called when data has arrived.
 

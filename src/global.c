@@ -89,7 +89,7 @@ static void set_watch_cb(io_watch_handle_t *watch) {
     }
     jerry_release_value (ret_val);
     jerry_release_value (this_val);
-  } 
+  }
 }
 
 JERRYXX_FUN(set_watch_fn) {

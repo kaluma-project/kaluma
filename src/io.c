@@ -35,6 +35,7 @@ io_loop_t loop;
 static void io_timer_run();
 static void io_tty_run();
 static void io_watch_run();
+static void io_poll_run();
 
 /* general handle functions */
 
@@ -85,6 +86,7 @@ void io_init() {
   list_init(&loop.tty_handles);
   list_init(&loop.timer_handles);
   list_init(&loop.watch_handles);
+  list_init(&loop.poll_handles);
   list_init(&loop.closing_handles);
 }
 
@@ -94,6 +96,7 @@ void io_run() {
     io_timer_run();
     io_tty_run();
     io_watch_run();
+    io_poll_run();
     io_handle_closing();
   }
 }
@@ -244,3 +247,33 @@ static void io_watch_run() {
     handle = (io_watch_handle_t *) ((list_node_t *) handle)->next;
   }
 }
+
+/* IO poll functions */
+
+void io_poll_init(io_poll_handle_t *poll) {
+  io_handle_init((io_handle_t *) poll, IO_POLL);
+}
+
+void io_poll_read_start(io_poll_handle_t *poll, io_poll_read_cb read_cb) {
+  IO_SET_FLAG_ON(poll->base.flags, IO_FLAG_ACTIVE);
+  poll->read_cb = read_cb;
+  list_append(&loop.poll_handles, (list_node_t *) poll);
+}
+
+void io_poll_read_stop(io_poll_handle_t *poll) {
+  IO_SET_FLAG_OFF(poll->base.flags, IO_FLAG_ACTIVE);
+  list_remove(&loop.poll_handles, (list_node_t *) poll);
+}
+
+static void io_poll_run() {
+  io_poll_handle_t *handle = (io_poll_handle_t *) loop.poll_handles.head;
+  while (handle != NULL) {
+    if (IO_HAS_FLAG(handle->base.flags, IO_FLAG_ACTIVE)) {
+      // 1. is buffer full?
+      // 2. buffer size reached a certain size
+      // 3. arrived a certain end char?
+    }
+    handle = (io_poll_handle_t *) ((list_node_t *) handle)->next;
+  }
+}
+

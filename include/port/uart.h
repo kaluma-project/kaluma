@@ -90,6 +90,15 @@ int uart_write(uint8_t port, uint8_t *buf, size_t len);
 uint32_t uart_available(uint8_t port);
 
 /**
+ * Look a character at the index in read buffer.
+ * 
+ * @param {uint8_t} port
+ * @param {uint32_t} index
+ * @return {uint8_t} a character at the index in read buffer.
+ */
+uint8_t uart_available_at(uint8_t port, uint32_t index);
+
+/**
  * Read a character from the port.
  * 
  * @param {uint8_t} port

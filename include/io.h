@@ -34,6 +34,7 @@ typedef struct io_handle_list_s io_handle_list_t;
 typedef struct io_timer_handle_s io_timer_handle_t;
 typedef struct io_tty_handle_s io_tty_handle_t;
 typedef struct io_watch_handle_s io_watch_handle_t;
+typedef struct io_poll_handle_s io_poll_handle_t;
 
 /* handle flags */
 
@@ -49,7 +50,8 @@ typedef struct io_watch_handle_s io_watch_handle_t;
 typedef enum io_type {
   IO_TIMER,
   IO_TTY,
-  IO_WATCH
+  IO_WATCH,
+  IO_POLL
 } io_type_t;
 
 typedef void (* io_close_cb)(io_handle_t *);
@@ -107,6 +109,16 @@ struct io_watch_handle_s {
   jerry_value_t watch_js_cb;
 };
 
+/* IO poll handle type */
+
+typedef void (* io_poll_read_cb)(io_poll_handle_t *);
+
+struct io_poll_handle_s {
+  io_handle_t base;
+  io_poll_read_cb read_cb;
+  jerry_value_t js_cb;
+};
+
 /* loop type */
 
 struct io_loop_s {
@@ -115,6 +127,7 @@ struct io_loop_s {
   list_t timer_handles;
   list_t tty_handles;
   list_t watch_handles;
+  list_t poll_handles;
   list_t closing_handles;
 };
 
@@ -148,5 +161,11 @@ void io_watch_init(io_watch_handle_t *watch);
 void io_watch_start(io_watch_handle_t *watch, io_watch_cb watch_cb, uint8_t pin, io_watch_mode_t mode, uint32_t debounce);
 void io_watch_stop(io_watch_handle_t *watch);
 io_watch_handle_t *io_watch_get_by_id(int id);
+
+/* IO poll functions */
+
+void io_poll_init(io_poll_handle_t *poll);
+void io_poll_start(io_poll_handle_t *poll);
+void io_poll_stop(io_poll_handle_t *poll);
 
 #endif /* __IO_H */

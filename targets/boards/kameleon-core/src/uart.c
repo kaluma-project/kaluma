@@ -150,6 +150,10 @@ uint32_t uart_available(uint8_t port) {
   return uart_available_ringbuffer(port);
 }
 
+uint8_t uart_available_at(uint8_t port, uint32_t index) {
+  // TODO: ...
+}
+
 /** 
 */
 int uart_read_char(uint8_t port) {

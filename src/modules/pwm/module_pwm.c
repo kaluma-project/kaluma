@@ -43,7 +43,7 @@ JERRYXX_FUN(pwm_setup_fn) {
   double duty = JERRYXX_GET_ARG_NUMBER_OPT(2, PWM_DEFAULT_DUTY);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PWM_PIN, pin);
   if (!is_pwm_pin(pin)) {
-    return JERRXX_CREATE_ERROR("The pin is not PWM capable.");
+    return JERRYXX_CREATE_ERROR("The pin is not PWM capable.");
   }
   pwm_setup(pin, frequency, duty);
   return jerry_create_undefined();
@@ -52,7 +52,7 @@ JERRYXX_FUN(pwm_setup_fn) {
 JERRYXX_FUN(pwm_start_fn) {
   jerry_value_t pin_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
   if (!jerry_value_is_number(pin_value)) {
-    return JERRXX_CREATE_ERROR("PWM pin is not setup.");
+    return JERRYXX_CREATE_ERROR("PWM pin is not setup.");
   }
   uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
   pwm_start(pin);
@@ -62,7 +62,7 @@ JERRYXX_FUN(pwm_start_fn) {
 JERRYXX_FUN(pwm_stop_fn) {
   jerry_value_t pin_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
   if (!jerry_value_is_number(pin_value)) {
-    return JERRXX_CREATE_ERROR("PWM pin is not setup.");
+    return JERRYXX_CREATE_ERROR("PWM pin is not setup.");
   }
   uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
   pwm_stop(pin);
@@ -72,7 +72,7 @@ JERRYXX_FUN(pwm_stop_fn) {
 JERRYXX_FUN(pwm_get_frequency_fn) {
   jerry_value_t pin_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
   if (!jerry_value_is_number(pin_value)) {
-    return JERRXX_CREATE_ERROR("PWM pin is not setup.");
+    return JERRYXX_CREATE_ERROR("PWM pin is not setup.");
   }
   uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
   double frequency = pwm_get_frequency(pin);
@@ -84,7 +84,7 @@ JERRYXX_FUN(pwm_set_frequency_fn) {
   double frequency = JERRYXX_GET_ARG_NUMBER(0);
   jerry_value_t pin_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
   if (!jerry_value_is_number(pin_value)) {
-    return JERRXX_CREATE_ERROR("PWM pin is not setup.");
+    return JERRYXX_CREATE_ERROR("PWM pin is not setup.");
   }
   uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
   pwm_set_frequency(pin, frequency);
@@ -94,7 +94,7 @@ JERRYXX_FUN(pwm_set_frequency_fn) {
 JERRYXX_FUN(pwm_get_duty_fn) {
   jerry_value_t pin_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
   if (!jerry_value_is_number(pin_value)) {
-    return JERRXX_CREATE_ERROR("PWM pin is not setup.");
+    return JERRYXX_CREATE_ERROR("PWM pin is not setup.");
   }
   uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
   double duty = pwm_get_duty(pin);
@@ -106,7 +106,7 @@ JERRYXX_FUN(pwm_set_duty_fn) {
   double duty = JERRYXX_GET_ARG_NUMBER(0);
   jerry_value_t pin_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
   if (!jerry_value_is_number(pin_value)) {
-    return JERRXX_CREATE_ERROR("PWM pin is not setup.");
+    return JERRYXX_CREATE_ERROR("PWM pin is not setup.");
   }
   uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
   pwm_set_duty(pin, duty);
@@ -116,7 +116,7 @@ JERRYXX_FUN(pwm_set_duty_fn) {
 JERRYXX_FUN(pwm_close_fn) {
   jerry_value_t pin_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
   if (!jerry_value_is_number(pin_value)) {
-    return JERRXX_CREATE_ERROR("PWM pin is not setup.");
+    return JERRYXX_CREATE_ERROR("PWM pin is not setup.");
   }
   uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
   pwm_stop(pin);

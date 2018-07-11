@@ -56,7 +56,7 @@ JERRYXX_FUN(spi_ctor_fn) {
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BITORDER, bitorder);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BITS, bits);
   if (!is_spi_bus(bus)) {
-    return JERRXX_CREATE_ERROR("Not supported SPI bus.");
+    return JERRYXX_CREATE_ERROR("Not supported SPI bus.");
   }
 
   // initialize the bus
@@ -76,7 +76,7 @@ JERRYXX_FUN(spi_transfer_fn) {
   // check this.bus number
   uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
   if (!jerry_value_is_number(bus_value)) {
-    return JERRXX_CREATE_ERROR("SPI bus is not initialized.");
+    return JERRYXX_CREATE_ERROR("SPI bus is not initialized.");
   }
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
 
@@ -145,7 +145,7 @@ JERRYXX_FUN(spi_transfer_fn) {
       return jerry_create_null();
     }
   } else {
-    return JERRXX_CREATE_ERROR("The data argument must be one of string, Array<number>, ArrayBuffer or TypedArray.");
+    return JERRYXX_CREATE_ERROR("The data argument must be one of string, Array<number>, ArrayBuffer or TypedArray.");
   }
 }
 
@@ -161,7 +161,7 @@ JERRYXX_FUN(spi_send_fn) {
   // check this.bus number
   uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
   if (!jerry_value_is_number(bus_value)) {
-    return JERRXX_CREATE_ERROR("SPI bus is not initialized.");
+    return JERRYXX_CREATE_ERROR("SPI bus is not initialized.");
   }
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
 
@@ -199,7 +199,7 @@ JERRYXX_FUN(spi_send_fn) {
     jerry_string_to_char_buffer(data, tx_buf, len);
     ret = spi_send(bus, tx_buf, len, timeout);
   } else {
-    return JERRXX_CREATE_ERROR("The data argument must be one of string, Array<number>, ArrayBuffer or TypedArray.");
+    return JERRYXX_CREATE_ERROR("The data argument must be one of string, Array<number>, ArrayBuffer or TypedArray.");
   }
   return jerry_create_number(ret);
 }
@@ -216,7 +216,7 @@ JERRYXX_FUN(spi_recv_fn) {
   // check this.bus number
   uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
   if (!jerry_value_is_number(bus_value)) {
-    return JERRXX_CREATE_ERROR("I2C bus is not initialized.");
+    return JERRYXX_CREATE_ERROR("I2C bus is not initialized.");
   }
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
 
@@ -240,14 +240,14 @@ JERRYXX_FUN(spi_close_fn) {
   // check this.bus number
   uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
   if (!jerry_value_is_number(bus_value)) {
-    return JERRXX_CREATE_ERROR("SPI bus is not initialized.");
+    return JERRYXX_CREATE_ERROR("SPI bus is not initialized.");
   }
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
 
   // close the bus
   int ret = spi_close(bus);
   if (ret < 0) {
-    return JERRXX_CREATE_ERROR("Failed to close SPI bus.");
+    return JERRYXX_CREATE_ERROR("Failed to close SPI bus.");
   }
 
   // delete this.bus property

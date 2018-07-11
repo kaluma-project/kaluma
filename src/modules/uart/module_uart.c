@@ -24,6 +24,7 @@
 #include "jerryxx.h"
 #include "uart_magic_strings.h"
 #include "uart.h"
+#include "io.h"
 
 #define UART_DEFAULT_BAUDRATE 9600
 #define UART_DEFAULT_BITS 8
@@ -64,7 +65,7 @@ JERRYXX_FUN(uart_ctor_fn) {
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_FLOW, flow);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_BUFFERSIZE, buffer_size);
   if (!is_uart_port(port)) {
-    return JERRXX_CREATE_ERROR("Not supported UART port");
+    return JERRYXX_CREATE_ERROR("Not supported UART port");
   }
 
   // initialize the port
@@ -79,7 +80,7 @@ JERRYXX_FUN(uart_write_fn) {
   // check this.port
   uint8_t port_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
   if (!jerry_value_is_number(port_value)) {
-    return JERRXX_CREATE_ERROR("UART port is not initialized.");
+    return JERRYXX_CREATE_ERROR("UART port is not initialized.");
   }
   uint8_t port = (uint8_t) jerry_get_number_value(port_value);
 
@@ -117,10 +118,8 @@ JERRYXX_FUN(uart_write_fn) {
     jerry_string_to_char_buffer(data, buf, len);
     ret = uart_write(port, buf, len);
   } else {
-    return JERRXX_CREATE_ERROR("The data argument must be one of string, Array<number>, ArrayBuffer or TypedArray.");
+    return JERRYXX_CREATE_ERROR("The data argument must be one of string, Array<number>, ArrayBuffer or TypedArray.");
   }
-
-  // TODO: impl for ArrayBuffer and Array<number>.
   return jerry_create_undefined();
 }
 
@@ -132,7 +131,7 @@ JERRYXX_FUN(uart_available_fn) {
   // check this.port
   uint8_t port_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
   if (!jerry_value_is_number(port_value)) {
-    return JERRXX_CREATE_ERROR("UART port is not initialized.");
+    return JERRYXX_CREATE_ERROR("UART port is not initialized.");
   }
   uint8_t port = (uint8_t) jerry_get_number_value(port_value);
 
@@ -152,7 +151,7 @@ JERRYXX_FUN(uart_read_fn) {
   // check this.port
   uint8_t port_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
   if (!jerry_value_is_number(port_value)) {
-    return JERRXX_CREATE_ERROR("UART port is not initialized.");
+    return JERRYXX_CREATE_ERROR("UART port is not initialized.");
   }
   uint8_t port = (uint8_t) jerry_get_number_value(port_value);
 
@@ -168,24 +167,70 @@ JERRYXX_FUN(uart_read_fn) {
 
 
 /** 
+ * UART.prototype.listen() function
+ */
+JERRYXX_FUN(uart_listen_fn) {
+  JERRYXX_CHECK_ARG_FUNCTION(0, "callback");
+  jerry_value_t callback = JERRYXX_GET_ARG(0);
+  uint8_t trigger_type = 1; // 0 = buffer_size, 1 = end_char
+  uint32_t trigger_buffer_size = 1;
+  uint8_t trigger_end_char = '\n';
+  if (JERRYXX_GET_ARG_COUNT > 1) {
+    jerry_value_t trigger = JERRYXX_GET_ARG(1);
+    if (jerry_value_is_number(trigger)) {
+      trigger_buffer_size = (uint32_t) jerry_get_number_value(trigger);
+      trigger_type = 0;
+    } else if (jerry_value_is_string(trigger)) {
+      JERRYXX_GET_ARG_STRING_AS_CHAR(1, trigger_string);
+      if (trigger_string_sz > 0) {
+        trigger_end_char = trigger_string[0];
+      }
+    }
+  }
+
+  // check this.port
+  uint8_t port_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
+  if (!jerry_value_is_number(port_value)) {
+    return JERRYXX_CREATE_ERROR("UART port is not initialized.");
+  }
+  uint8_t port = (uint8_t) jerry_get_number_value(port_value);
+
+  // check this._handle_id
+  // if exists, stop and close the handle.
+
+  io_poll_handle_t *poll = malloc(sizeof(io_poll_handle_t));
+  io_poll_init(poll);
+  // watch->watch_js_cb = callback;
+  io_poll_read_start(poll);
+
+  // set this._handle_id = poll->base.id;
+
+  return jerry_create_undefined();
+}
+
+
+/** 
  * UART.prototype.close() function
  */
 JERRYXX_FUN(uart_close_fn) {
   // check this.port
   uint8_t port_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
   if (!jerry_value_is_number(port_value)) {
-    return JERRXX_CREATE_ERROR("UART port is not initialized.");
+    return JERRYXX_CREATE_ERROR("UART port is not initialized.");
   }
   uint8_t port = (uint8_t) jerry_get_number_value(port_value);
 
   // close the port
   int ret = uart_close(port);
   if (ret < 0) {
-    return JERRXX_CREATE_ERROR("Failed to close UART port.");
+    return JERRYXX_CREATE_ERROR("Failed to close UART port.");
   }
 
   // delete this.port
   jerryxx_delete_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
+
+  // TODO: check this._handle_id
+  // if exists, stop and close the handle.
 
   return jerry_create_undefined();
 }
@@ -201,7 +246,7 @@ jerry_value_t module_uart_init() {
   jerryxx_set_property_function(uart_prototype, MSTR_UART_WRITE, uart_write_fn);
   jerryxx_set_property_function(uart_prototype, MSTR_UART_AVAILABLE, uart_available_fn);
   jerryxx_set_property_function(uart_prototype, MSTR_UART_READ, uart_read_fn);
-  // jerryxx_set_property_function(uart_prototype, MSTR_UART_LISTEN, uart_listen_fn);
+  jerryxx_set_property_function(uart_prototype, MSTR_UART_LISTEN, uart_listen_fn);
   jerryxx_set_property_function(uart_prototype, MSTR_UART_CLOSE, uart_close_fn);
   jerry_release_value (uart_prototype);
 

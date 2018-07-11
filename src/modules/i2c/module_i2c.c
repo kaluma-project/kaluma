@@ -37,7 +37,7 @@ JERRYXX_FUN(i2c_ctor_fn) {
   uint8_t bus = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_BUS, bus);
   if (!is_i2c_bus(bus)) {
-    return JERRXX_CREATE_ERROR("Not supported I2C bus.");
+    return JERRYXX_CREATE_ERROR("Not supported I2C bus.");
   }
 
   // initialize the bus
@@ -46,12 +46,12 @@ JERRYXX_FUN(i2c_ctor_fn) {
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_ADDRESS, address);
     int ret = i2c_setup_slave(bus, address);
     if (ret < 0) {
-      return JERRXX_CREATE_ERROR("Failed to initialize I2C bus.");
+      return JERRYXX_CREATE_ERROR("Failed to initialize I2C bus.");
     }
   } else { /* master mode */
     int ret = i2c_setup_master(bus);
     if (ret < 0) {
-      return JERRXX_CREATE_ERROR("Failed to initialize I2C bus.");
+      return JERRYXX_CREATE_ERROR("Failed to initialize I2C bus.");
     }
   }
   return jerry_create_undefined();
@@ -68,7 +68,7 @@ JERRYXX_FUN(i2c_write_fn) {
   // check this.bus number
   uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
   if (!jerry_value_is_number(bus_value)) {
-    return JERRXX_CREATE_ERROR("I2C bus is not initialized.");
+    return JERRYXX_CREATE_ERROR("I2C bus is not initialized.");
   }
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
 
@@ -153,7 +153,7 @@ JERRYXX_FUN(i2c_read_fn) {
   // check this.bus number
   uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
   if (!jerry_value_is_number(bus_value)) {
-    return JERRXX_CREATE_ERROR("I2C bus is not initialized.");
+    return JERRYXX_CREATE_ERROR("I2C bus is not initialized.");
   }
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
 
@@ -195,14 +195,14 @@ JERRYXX_FUN(i2c_close_fn) {
   // check this.bus number
   uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
   if (!jerry_value_is_number(bus_value)) {
-    return JERRXX_CREATE_ERROR("I2C bus is not initialized.");
+    return JERRYXX_CREATE_ERROR("I2C bus is not initialized.");
   }
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
 
   // close the bus
   int ret = i2c_close(bus);
   if (ret < 0) {
-    return JERRXX_CREATE_ERROR("Failed to close I2C bus.");
+    return JERRYXX_CREATE_ERROR("Failed to close I2C bus.");
   }
 
   // delete this.bus property
