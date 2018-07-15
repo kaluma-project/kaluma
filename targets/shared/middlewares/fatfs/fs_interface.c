@@ -311,39 +311,3 @@ const static void *gFsTestFunction[][2]=
     (void *)FS_EnumerateFilesInRootTest,   "Enumerate files in root Test",
     0,0
 };
-
-void
-FS_Test()
-{
-    while(1)
-    {
-        int i = 0;
-        int sel = 0;
-
-        tty_printf("+-------------------------------------------------+\r\n");
-        while(1)
-        {
-            tty_printf("| %2d:%s \r\n",i+1,gFsTestFunction[i][1]);
-            i++;
-            if((int)(gFsTestFunction[i][0])==0)
-            {
-                    break;
-            }
-        }
-
-        tty_printf("+-------------------------------------------------+\r\n");
-        tty_printf(" Select the number to test : ");
-        sel = tty_getintnum();
-        sel--;
-        tty_printf("+-------------------------------------------------+\r\n\n\n");
-
-        if(sel>=0 && sel<i )
-        {
-            ( (void (*)(void)) (gFsTestFunction[sel][0]) )();
-        }
-        else
-        {
-            tty_printf("Wrong number seleted.. Try again!! \r\n\n\n");
-        }
-    }
-}

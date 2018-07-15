@@ -25,19 +25,51 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef enum {
-  tty_state_ok = 0,
-  tty_state_busy,
-  tty_state_fail,
-} tty_state_t;
 
+/**
+ * Initialize TTY
+ */
 void tty_init();
+
+/**
+ * Test whether data is available in TTY buffer.
+ * 
+ * @return
+ */
 bool tty_has_data();
-void tty_getstring(char *);
-void tty_putc(char);
-void tty_printf(const char *, ...);
-uint32_t tty_data_size();
+
+/**
+ * Get a char in non-blocking
+ * 
+ * @return char
+ */
 uint8_t tty_getc();
+
+/**
+ * Get a char in blocking
+ * 
+ * @return char
+ */
 uint8_t tty_getch();
+
+/**
+ * 
+ */
+void tty_getstring(char *string);
+
+/**
+ * 
+ */
+void tty_putc(char ch);
+
+/**
+ * 
+ */
+void tty_printf(const char *fmt, ...);
+
+/**
+ * 
+ */
+uint32_t tty_data_size();
 
 #endif /* __TTY_H */
