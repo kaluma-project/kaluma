@@ -25,4 +25,5 @@ Supported Targets
 =================
 
 * Kameleon Core (to be released)
-* ~~[STM32F4-Discovery](targets/boards/stm32f4discovery/README.md)~~ (contribution needed)
+* Contribution required for other boards
+

@@ -29,7 +29,7 @@
 #include "tty.h"
 #include "system.h"
 #include "usbd_cdc_if.h"
-#include "buffer.h"
+#include "ringbuffer.h"
 
 #define TTY_TX_RINGBUFFER_SIZE 1024
 #define TTY_RX_RINGBUFFER_SIZE 1024
@@ -42,8 +42,8 @@ static ringbuffer_t tty_rx_ringbuffer;
 /**
 */
 void tty_init_ringbuffer() {
-  InitRingBuffer(&tty_tx_ringbuffer, tty_tx_buffer, sizeof(tty_tx_buffer));
-  InitRingBuffer(&tty_rx_ringbuffer, tty_rx_buffer, sizeof(tty_rx_buffer));
+  ringbuffer_init(&tty_tx_ringbuffer, tty_tx_buffer, sizeof(tty_tx_buffer));
+  ringbuffer_init(&tty_rx_ringbuffer, tty_rx_buffer, sizeof(tty_rx_buffer));
 }
 
 /*
@@ -53,10 +53,10 @@ void tty_init_ringbuffer() {
 void tty_transmit_data() {   
   /* if the previous data is under transmitting, just return to avoid blocking */
   if (CDC_Transmit_IsReady()) {
-    uint32_t len = GetDataLenInRingBuffer(&tty_tx_ringbuffer);
+    uint32_t len = ringbuffer_length(&tty_tx_ringbuffer);
     if (len) {
       uint8_t buf[TTY_TX_RINGBUFFER_SIZE];
-      ReadRingBuffer(&tty_tx_ringbuffer, buf, len);      
+      ringbuffer_read(&tty_tx_ringbuffer, buf, len);      
       CDC_Transmit_FS(buf, len);
     }
   }
@@ -65,32 +65,32 @@ void tty_transmit_data() {
 /**
 */
 uint32_t tty_get_tx_freespace() {
-  return GetFreeSpaceInRingBuffer(&tty_tx_ringbuffer);
+  return ringbuffer_freespace(&tty_tx_ringbuffer);
 }
 
 /**
 */
 uint32_t tty_get_rx_freespace() {
-  return GetFreeSpaceInRingBuffer(&tty_rx_ringbuffer);
+  return ringbuffer_freespace(&tty_rx_ringbuffer);
 }
 
 /**
 */
 uint32_t tty_get_rx_data_length() {
-  return GetDataLenInRingBuffer(&tty_rx_ringbuffer);
+  return ringbuffer_length(&tty_rx_ringbuffer);
 }
 
 /**
 */
 uint32_t tty_get_tx_data_length() {
-  return GetDataLenInRingBuffer(&tty_tx_ringbuffer);
+  return ringbuffer_length(&tty_tx_ringbuffer);
 }
 
 /**
 */
 uint8_t tty_get_byte() {
   uint8_t c;
-  ReadRingBuffer(&tty_rx_ringbuffer, &c, 1);
+  ringbuffer_read(&tty_rx_ringbuffer, &c, 1);
   return c;
 }
 
@@ -108,7 +108,7 @@ uint32_t tty_get_bytes(uint8_t * buf, uint32_t nToRead) {
   }
   
   __set_BASEPRI(0);
-  ReadRingBuffer(&tty_rx_ringbuffer, buf, nToRead);
+  ringbuffer_read(&tty_rx_ringbuffer, buf, nToRead);
   return nToRead;
 }
 
@@ -126,14 +126,14 @@ uint32_t tty_fill_rx_bytes(uint8_t * buf, uint32_t nToWrite) {
   }
   __set_BASEPRI(0);
   
-  FillRingBuffer(&tty_rx_ringbuffer, buf, nToWrite);
+  ringbuffer_write(&tty_rx_ringbuffer, buf, nToWrite);
   return nToWrite;
 }
 
 /**
 */
 void tty_put_byte(uint8_t c) {
-  FillRingBuffer(&tty_tx_ringbuffer, (uint8_t *)&c, 1);
+  ringbuffer_write(&tty_tx_ringbuffer, (uint8_t *)&c, 1);
 }
 
 /**
@@ -150,7 +150,7 @@ uint32_t tty_put_bytes(uint8_t * buf, uint32_t nToWrite) {
   }
   __set_BASEPRI(0);
   
-  FillRingBuffer(&tty_tx_ringbuffer, buf, nToWrite);
+  ringbuffer_write(&tty_tx_ringbuffer, buf, nToWrite);
   return nToWrite;
 }
 

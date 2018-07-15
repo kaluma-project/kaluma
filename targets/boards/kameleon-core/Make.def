@@ -14,7 +14,7 @@ TARGET_SRC += \
 $(TARGET_DIR)/src/adc.c \
 $(TARGET_DIR)/src/board.c \
 $(TARGET_DIR)/src/button.c \
-$(TARGET_DIR)/src/buffer.c \
+$(TARGET_DIR)/src/ringbuffer.c \
 $(TARGET_DIR)/src/system.c \
 $(TARGET_DIR)/src/gpio.c \
 $(TARGET_DIR)/src/pwm.c \

@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include "kameleon_core.h"
 #include "uart.h"
-#include "buffer.h"
+#include "ringbuffer.h"
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
@@ -41,7 +41,7 @@ static uint8_t * read_buffer[] = {NULL, NULL};
  * This function called by IRQ Handler
  */
 void uart_fill_ringbuffer(uint8_t port, uint8_t ch) {
-  FillRingBuffer(&uart_rx_ringbuffer[port], &ch, sizeof(ch));  
+  ringbuffer_write(&uart_rx_ringbuffer[port], &ch, sizeof(ch));  
 }
 
 
@@ -63,7 +63,7 @@ int uart_setup(uint8_t port, uint32_t baudrate, uint32_t bits, uint32_t parity, 
   if (read_buffer[port] == NULL) {
     return -1;
   } else {
-    InitRingBuffer(&uart_rx_ringbuffer[port], read_buffer[port], buffer_size);
+    ringbuffer_init(&uart_rx_ringbuffer[port], read_buffer[port], buffer_size);
   }
   
   HAL_StatusTypeDef hal_status = HAL_UART_Init(puart);
@@ -89,30 +89,30 @@ int uart_write(uint8_t port, uint8_t *buf, size_t len) {
 
 uint32_t uart_available(uint8_t port) {
   assert_param(port==0 || port==1);
-  return GetDataLenInRingBuffer(&uart_rx_ringbuffer[port]);
+  return ringbuffer_length(&uart_rx_ringbuffer[port]);
 }
 
 
 uint8_t uart_available_at(uint8_t port, uint32_t offset) {
   assert_param(port==0 || port==1);
-  return LookRingBufferAt(&uart_rx_ringbuffer[port], offset);
+  return ringbuffer_look_at(&uart_rx_ringbuffer[port], offset);
 }
 
 
 uint32_t uart_buffer_size(uint8_t port) {
   assert_param(port==0 || port==1);
-  uint32_t size = GetRingBufferSize(&uart_rx_ringbuffer[port]);
+  uint32_t size = ringbuffer_size(&uart_rx_ringbuffer[port]);
   return size;
 }
 
 
 uint32_t uart_read(uint8_t port, uint8_t *buf, size_t len) {
   assert_param(port==0 || port==1);
-  uint32_t n = GetDataLenInRingBuffer(&uart_rx_ringbuffer[port]);
+  uint32_t n = ringbuffer_length(&uart_rx_ringbuffer[port]);
   if (n > len) {
     n = len;
   }  
-  ReadRingBuffer(&uart_rx_ringbuffer[port], buf, n);
+  ringbuffer_read(&uart_rx_ringbuffer[port], buf, n);
   return n;
 }
 
