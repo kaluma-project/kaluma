@@ -65,15 +65,6 @@ int uart_setup(uint8_t port, uint32_t baudrate, uint32_t bits,
   uint32_t parity, uint32_t stop, uint32_t flow, size_t buffer_size);
 
 /**
- * Write a character to the port.
- * 
- * @param port
- * @param ch
- * @return the number of bytes written or -1 if nothing written.
- */
-int uart_write_char(uint8_t port, uint8_t ch);
-
-/**
  * Write a given buffer to the port.
  * 
  * @param port
@@ -109,14 +100,6 @@ uint8_t uart_available_at(uint8_t port, uint32_t offset);
 uint32_t uart_buffer_size(uint8_t port);
 
 /**
- * Read a character from the port.
- * 
- * @param port
- * @return a character read or -1
- */
-int uart_read_char(uint8_t port);
-
-/**
  * Read bytes from the port and store them into a given buffer.
  * 
  * @param port
@@ -134,5 +117,3 @@ uint32_t uart_read(uint8_t port, uint8_t *buf, size_t len);
 int uart_close(uint8_t port);
 
 #endif /* __UART_H */
-
-

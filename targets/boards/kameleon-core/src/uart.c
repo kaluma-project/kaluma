@@ -36,61 +36,15 @@ static const uint32_t uart_hw_control[] = { UART_HWCONTROL_NONE, UART_HWCONTROL_
 static ringbuffer_t uart_rx_ringbuffer[UART_NUM];
 static uint8_t * read_buffer[] = {NULL, NULL}; 
 
-/** 
-*/
-int uart_init_ringbuffer(uint8_t port, uint32_t size) {
-  read_buffer[port] = (uint8_t *)malloc(size);
-  
-  if (read_buffer[port] == NULL) {
-    return 0;
-  } else {
-    InitRingBuffer(&uart_rx_ringbuffer[port], read_buffer[port], size);
-    return size;
-  }
-}
 
 /** 
-*/
-void uart_deinit_ringbuffer(uint8_t port) {
-  if (read_buffer[port]) {
-    free(read_buffer[port]);
-    read_buffer[port] = (uint8_t *)NULL;
-  }
-}
-
-/** 
-*/
-uint32_t uart_available_ringbuffer(uint8_t port) {
-  return GetDataLenInRingBuffer(&uart_rx_ringbuffer[port]);  
-}
-
-/** 
-*/
-uint8_t uart_read_char_ringbuffer(uint8_t port) {
-  uint8_t ch;
-  ReadRingBuffer(&uart_rx_ringbuffer[port], &ch, sizeof(ch));
-  return ch;
-}
-
-/** 
-*/
-uint32_t uart_read_ringbuffer(uint8_t port, uint8_t * buf, uint32_t len) {
-  uint32_t n = uart_available_ringbuffer(port);
-  if (n > len) {
-    n = len;
-  }  
-  ReadRingBuffer(&uart_rx_ringbuffer[port], buf, n);
-  return n;
-}
-
-/** 
-*/
+ * This function called by IRQ Handler
+ */
 void uart_fill_ringbuffer(uint8_t port, uint8_t ch) {
   FillRingBuffer(&uart_rx_ringbuffer[port], &ch, sizeof(ch));  
 }
 
-/** UART Initialization
-*/
+
 int uart_setup(uint8_t port, uint32_t baudrate, uint32_t bits, uint32_t parity, uint32_t stop, uint32_t flow, size_t buffer_size) {
   assert_param(port==0 || port==1);
   UART_HandleTypeDef * puart = uart_handle[port];
@@ -105,9 +59,11 @@ int uart_setup(uint8_t port, uint32_t baudrate, uint32_t bits, uint32_t parity, 
   puart->Init.Mode = UART_MODE_TX_RX;
   puart->Init.OverSampling = UART_OVERSAMPLING_16;
   
-  int n = uart_init_ringbuffer(port, buffer_size);
-  if (n==0) {
+  read_buffer[port] = (uint8_t *)malloc(buffer_size);
+  if (read_buffer[port] == NULL) {
     return -1;
+  } else {
+    InitRingBuffer(&uart_rx_ringbuffer[port], read_buffer[port], buffer_size);
   }
   
   HAL_StatusTypeDef hal_status = HAL_UART_Init(puart);
@@ -119,20 +75,7 @@ int uart_setup(uint8_t port, uint32_t baudrate, uint32_t bits, uint32_t parity, 
   }
 }
 
-/** 
-*/
-int uart_write_char(uint8_t port, uint8_t ch) {
-  assert_param(port==0 || port==1);
-  HAL_StatusTypeDef hal_status = HAL_UART_Transmit(uart_handle[port], &ch, 1, (uint32_t)-1);
-  if (hal_status == HAL_OK) {
-    return 1;
-  } else {
-    return -1;
-  }  
-}
 
-/** 
-*/
 int uart_write(uint8_t port, uint8_t *buf, size_t len) {
   assert_param(port==0 || port==1);
   HAL_StatusTypeDef hal_status = HAL_UART_Transmit(uart_handle[port], buf, len, (uint32_t)-1);
@@ -143,17 +86,18 @@ int uart_write(uint8_t port, uint8_t *buf, size_t len) {
   } 
 }
 
-/** 
-*/
+
 uint32_t uart_available(uint8_t port) {
   assert_param(port==0 || port==1);
-  return uart_available_ringbuffer(port);
+  return GetDataLenInRingBuffer(&uart_rx_ringbuffer[port]);
 }
+
 
 uint8_t uart_available_at(uint8_t port, uint32_t offset) {
   assert_param(port==0 || port==1);
   return LookRingBufferAt(&uart_rx_ringbuffer[port], offset);
 }
+
 
 uint32_t uart_buffer_size(uint8_t port) {
   assert_param(port==0 || port==1);
@@ -161,31 +105,25 @@ uint32_t uart_buffer_size(uint8_t port) {
   return size;
 }
 
-/** 
-*/
-int uart_read_char(uint8_t port) {
-  assert_param(port==0 || port==1);
-  
-  if (uart_available(port)==0) {
-    return -1;
-  } else {
-    return (int)uart_read_char_ringbuffer(port);
-  }
-}
 
-/** 
-*/
 uint32_t uart_read(uint8_t port, uint8_t *buf, size_t len) {
   assert_param(port==0 || port==1);
-  return uart_read_ringbuffer(port, buf, len);
+  uint32_t n = GetDataLenInRingBuffer(&uart_rx_ringbuffer[port]);
+  if (n > len) {
+    n = len;
+  }  
+  ReadRingBuffer(&uart_rx_ringbuffer[port], buf, n);
+  return n;
 }
 
-/** 
-*/
+
 int uart_close(uint8_t port) {
   assert_param(port==0 || port==1);
   
-  uart_deinit_ringbuffer(port);
+  if (read_buffer[port]) {
+    free(read_buffer[port]);
+    read_buffer[port] = (uint8_t *)NULL;
+  }
   
   HAL_StatusTypeDef hal_status = HAL_UART_DeInit(uart_handle[port]);
   if (hal_status == HAL_OK) {
@@ -196,4 +134,3 @@ int uart_close(uint8_t port) {
     return -1;
   }
 }
-
