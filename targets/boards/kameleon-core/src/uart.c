@@ -29,9 +29,7 @@ UART_HandleTypeDef huart2;
 static UART_HandleTypeDef * uart_handle[] = {&huart1, &huart2};
 static USART_TypeDef * uart_ch[] = {USART1, USART2};
 
-static const uint32_t uart_data_length[] = { UART_WORDLENGTH_8B, UART_WORDLENGTH_9B };
 static const uint32_t uart_parity[] = { UART_PARITY_NONE, UART_PARITY_ODD, UART_PARITY_EVEN };
-static const uint32_t uart_stop_bits[] = { UART_STOPBITS_1, UART_STOPBITS_2 };
 static const uint32_t uart_hw_control[] = { UART_HWCONTROL_NONE, UART_HWCONTROL_RTS, UART_HWCONTROL_CTS, UART_HWCONTROL_RTS_CTS };
 static ringbuffer_t uart_rx_ringbuffer[UART_NUM];
 static uint8_t * read_buffer[] = {NULL, NULL}; 
@@ -45,15 +43,17 @@ void uart_fill_ringbuffer(uint8_t port, uint8_t ch) {
 }
 
 
-int uart_setup(uint8_t port, uint32_t baudrate, uint32_t bits, uint32_t parity, uint32_t stop, uint32_t flow, size_t buffer_size) {
+int uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
+    uart_parity_type_t parity, uint8_t stop, uart_flow_control_t flow,
+    size_t buffer_size) {
   assert_param(port==0 || port==1);
   UART_HandleTypeDef * puart = uart_handle[port];
 
   /* UART Configuration  */  
   puart->Instance = uart_ch[port];
   puart->Init.BaudRate = baudrate;
-  puart->Init.WordLength = uart_data_length[bits];
-  puart->Init.StopBits = uart_stop_bits[stop];
+  puart->Init.WordLength = (bits == 9 ? UART_WORDLENGTH_9B : UART_WORDLENGTH_8B);
+  puart->Init.StopBits = (stop == 2 ? UART_STOPBITS_2 : UART_STOPBITS_1);
   puart->Init.Parity = uart_parity[parity];
   puart->Init.HwFlowCtl = uart_hw_control[flow];
   puart->Init.Mode = UART_MODE_TX_RX;

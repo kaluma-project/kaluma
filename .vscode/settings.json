@@ -10,7 +10,8 @@
     "tty.h": "c",
     "diskio.h": "c",
     "buffer.h": "c",
-    "limits": "c"
+    "limits": "c",
+    "kameleon_core.h": "c"
   },
   "cpplint.filters" : [
     "-build/include_subdir", "-build/header_guard"

@@ -22,12 +22,14 @@ UART.prototype.close = function () {
   this._native.close();
 }
 
-UART.PARITY_NONE = 0;
-UART.PARITY_ODD = 1;
-UART.PARITY_EVEN = 2;
+UART.PARITY_NONE = this._native.PARITY_NONE;
+UART.PARITY_ODD = this._native.PARITY_ODD;
+UART.PARITY_EVEN = this._native.PARITY_EVEN;
 
-UART.RTS = 1;
-UART.CTS = 2;
+UART.FLOW_NONE = this._native.FLOW_NONE;
+UART.FLOW_RTS = this._native.FLOW_RTS;
+UART.FLOW_CTS = this._native.FLOW_CTS;
+UART.FLOW_RTS_CTS = this._native.FLOW_RTS_CTS;
 
 function open(bus, options) {
   return new UART(bus, options);

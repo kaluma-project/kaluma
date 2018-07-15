@@ -24,45 +24,34 @@
 
 #include <stdint.h>
 
-enum {
-  UART_PARITY_TYPE_NONE,
+typedef enum {
+  UART_PARITY_TYPE_NONE = 0,
   UART_PARITY_TYPE_ODD,
   UART_PARITY_TYPE_EVEN
-};
+} uart_parity_type_t;
 
-enum {
-  UART_FLOW_NONE,
+typedef enum {
+  UART_FLOW_NONE = 0,
   UART_FLOW_RTS,
   UART_FLOW_CTS,
   UART_FLOW_RTS_CTS
-};
-
-enum {
-  UART_STOP_1_BIT,
-  UART_STOP_2_BIT
-};
-
-enum {
-  UART_DATA_8_BIT,
-  UART_DATA_9_BIT
-};
-
-// TODO: Need to use or remove enum types
+} uart_flow_control_t;
 
 /**
  * Setup a UART port. This have to manage an internal read buffer.
  * 
  * @param port
  * @param baudrate
- * @param bits
+ * @param bits databits 8 or 9
  * @param parity
- * @param stop
+ * @param stop stopbits 1 or 2
  * @param flow
  * @param buffer_size The size of read buffer
  * @return Positive number if successfully setup, negative otherwise.
  */
-int uart_setup(uint8_t port, uint32_t baudrate, uint32_t bits,
-  uint32_t parity, uint32_t stop, uint32_t flow, size_t buffer_size);
+int uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
+  uart_parity_type_t parity, uint8_t stop, uart_flow_control_t flow,
+  size_t buffer_size);
 
 /**
  * Write a given buffer to the port.

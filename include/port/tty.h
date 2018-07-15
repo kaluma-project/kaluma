@@ -29,7 +29,7 @@ typedef enum {
   tty_state_ok = 0,
   tty_state_busy,
   tty_state_fail,
-}tty_state_t;
+} tty_state_t;
 
 void tty_init();
 bool tty_has_data();

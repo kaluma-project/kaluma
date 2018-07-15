@@ -14,9 +14,11 @@ Use `require('uart')` to access this module.
   * [Class Property: UART.PARITY_NONE]()
   * [Class Property: UART.PARITY_ODD]()
   * [Class Property: UART.PARITY_EVEN]()
-  * [Class Property: UART.RTS]()
-  * [Class Property: UART.CTS]()
-
+  * [Class Property: UART.FLOW_NONE]()
+  * [Class Property: UART.FLOW_RTS]()
+  * [Class Property: UART.FLOW_CTS]()
+  * [Class Property: UART.FLOW_RTS_CTS]()
+  
 ## open(port[, options])
 
 * __`port`__ `{number}` UART port number.
@@ -39,10 +41,10 @@ An instances of `UART` represents a UART port.
 * __`port`__ `{number}` UART port number.
 * __`options`__ `{Object}` Optional. Options for the UART port.
   * __`baudrate`__ `{number}` Optional. Baud rate. One of the `[0, 50, 75, 110, 134, 150, 200, 300, 600, 1200, 1800, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400]`. Default is `9600`
-  * __`bits`__ `{number}` Optional. Number of bits per a character. One of the `[7, 8, 9]`. Default is`8`
+  * __`bits`__ `{number}` Optional. Number of bits per a character. One of the `[8, 9]`. Default is`8`
   * __`parity`__ `{number}`. Optional. The parity is one of the `UART.PARITY_NONE (=0)`, `UART.PARITY_ODD (=1)`, or `UART.PARITY_EVEN (=2)`. Default is `UART.PARITY_NONE`.
   * __`stop`__ `{number}` Optional. Number of stop bits. One of the `[1, 2]`. Default is `1`.
-  * __`flow`__ `{number}` Optional. Flow control type. One of the `0`, `UART.RTS (=1)`, `UART.CTS (=2)`, or `UART.RTS | UART.CTS (=3)`. Default is `0`.
+  * __`flow`__ `{number}` Optional. Flow control type. One of the `UART.FLOW_NONE (=0)`, `UART.FLOW_RTS (=1)`, `UART.FLOW_CTS (=2)`, or `UART.FLOW_RTS_CTS (=3)`. Default is `0`.
   * __`bufferSize`__ `{number}` Optional. The size of internal read buffer. Default is `1024`.
   * __`dataEvent`__ `{string|number}` Optional. A condition when the `data` event is emitted.
 
@@ -121,11 +123,18 @@ serial0.on('data', function (data) {
 
 * `{number}` Value is `2`.
 
-### Class Property: UART.RTS
+### Class Property: UART.FLOW_NONE
+
+* `{number}` Value is `0`.
+
+### Class Property: UART.FLOW_RTS
 
 * `{number}` Value is `1`.
 
-
-### Class Property: UART.CTS
+### Class Property: UART.FLOW_CTS
 
 * `{number}` Value is `2`.
+
+### Class Property: UART.FLOW_RTS_CTS
+
+* `{number}` Value is `3`.
