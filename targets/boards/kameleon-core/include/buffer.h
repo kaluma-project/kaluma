@@ -18,6 +18,7 @@ uint32_t	GetDataLenInRingBuffer(ringbuffer_t *);
 uint32_t    GetFreeSpaceInRingBuffer(ringbuffer_t *pRingBuffer);
 void		ReadRingBuffer(ringbuffer_t *, uint8_t *, uint32_t);
 void		FillRingBuffer(ringbuffer_t *, uint8_t *, uint32_t);
+uint8_t LookRingBufferAt(ringbuffer_t * pRingBuffer, uint32_t offset);
 void		LookRingBuffer(ringbuffer_t *, uint8_t *, uint32_t);
 void            FlushRingBuffer(ringbuffer_t *pRingBuffer, uint32_t);
 void            LookFromOffsetRingBuffer(ringbuffer_t *pRingBuffer, uint8_t * pbuf, uint32_t len, uint32_t offset);

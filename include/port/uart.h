@@ -47,17 +47,19 @@ enum {
   UART_DATA_9_BIT
 };
 
+// TODO: Need to use or remove enum types
+
 /**
  * Setup a UART port. This have to manage an internal read buffer.
  * 
- * @param {uint8_t} port
- * @param {uint32_t} baudrate
- * @param {uint32_t} bits
- * @param {uint32_t} parity
- * @param {uint32_t} stop
- * @param {uint32_t} flow
- * @param {size_t} buffer_size The size of read buffer
- * @return {int} Positive number if successfully setup, negative otherwise.
+ * @param port
+ * @param baudrate
+ * @param bits
+ * @param parity
+ * @param stop
+ * @param flow
+ * @param buffer_size The size of read buffer
+ * @return Positive number if successfully setup, negative otherwise.
  */
 int uart_setup(uint8_t port, uint32_t baudrate, uint32_t bits,
   uint32_t parity, uint32_t stop, uint32_t flow, size_t buffer_size);
@@ -65,61 +67,69 @@ int uart_setup(uint8_t port, uint32_t baudrate, uint32_t bits,
 /**
  * Write a character to the port.
  * 
- * @param {uint8_t} port
- * @param {uint8_t} ch
- * @return {int} the number of bytes written or -1 if nothing written.
+ * @param port
+ * @param ch
+ * @return the number of bytes written or -1 if nothing written.
  */
 int uart_write_char(uint8_t port, uint8_t ch);
 
 /**
  * Write a given buffer to the port.
  * 
- * @param {uint8_t} port
- * @param {uint8_t*} buf
- * @param {size_t} len
- * @return {int} the number of bytes written or -1 if nothing written.
+ * @param port
+ * @param buf
+ * @param len
+ * @return the number of bytes written or -1 if nothing written.
  */
 int uart_write(uint8_t port, uint8_t *buf, size_t len);
 
 /**
  * Check the number of bytes available to read.
  * 
- * @param {uint8_t} port
- * @return {int} the number of bytes in read buffer.
+ * @param port
+ * @return the number of bytes in read buffer.
  */
 uint32_t uart_available(uint8_t port);
 
 /**
- * Look a character at the index in read buffer.
+ * Look a character at the offset in read buffer.
  * 
- * @param {uint8_t} port
- * @param {uint32_t} index
- * @return {uint8_t} a character at the index in read buffer.
+ * @param port
+ * @param offset
+ * @return a character at the offset in read buffer.
  */
-uint8_t uart_available_at(uint8_t port, uint32_t index);
+uint8_t uart_available_at(uint8_t port, uint32_t offset);
+
+/**
+ * Get the size of read buffer.
+ * 
+ * @param port
+ * @return size of read buffer.
+ */
+uint32_t uart_buffer_size(uint8_t port);
 
 /**
  * Read a character from the port.
  * 
- * @param {uint8_t} port
- * @return {int} a character read or -1
+ * @param port
+ * @return a character read or -1
  */
 int uart_read_char(uint8_t port);
 
 /**
  * Read bytes from the port and store them into a given buffer.
  * 
- * @param {uint8_t} port
- * @param {uint8_t*} buf
- * @param {size_t} len
- * @return {int} the number of bytes read
+ * @param port
+ * @param buf
+ * @param len
+ * @return the number of bytes read
  */
 uint32_t uart_read(uint8_t port, uint8_t *buf, size_t len);
 
 /**
  * Close the UART port
  * 
- * @param {uint8_t} port
+ * @param port
  */
 int uart_close(uint8_t port);
 

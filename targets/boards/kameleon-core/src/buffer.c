@@ -24,6 +24,13 @@ void ReadRingBuffer(ringbuffer_t * pRingBuffer, uint8_t *pbuf, uint32_t len) {
 	pRingBuffer->r_ptr = r_ptr;
 }
 
+uint8_t LookRingBufferAt(ringbuffer_t * pRingBuffer, uint32_t offset) {
+	uint32_t r_ptr;
+	r_ptr = pRingBuffer->r_ptr;
+	r_ptr = (r_ptr + offset) % pRingBuffer->length;
+	return pRingBuffer->buf[r_ptr];
+}
+
 void LookRingBuffer(ringbuffer_t * pRingBuffer, uint8_t * pbuf, uint32_t len) {
 	uint32_t k;
 	uint32_t r_ptr;

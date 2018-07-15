@@ -34,7 +34,7 @@ typedef struct io_handle_list_s io_handle_list_t;
 typedef struct io_timer_handle_s io_timer_handle_t;
 typedef struct io_tty_handle_s io_tty_handle_t;
 typedef struct io_watch_handle_s io_watch_handle_t;
-typedef struct io_poll_handle_s io_poll_handle_t;
+typedef struct io_uart_handle_s io_uart_handle_t;
 
 /* handle flags */
 
@@ -45,13 +45,13 @@ typedef struct io_poll_handle_s io_poll_handle_t;
 #define IO_SET_FLAG_OFF(field, flag) ((field) &= ~(flag))
 #define IO_HAS_FLAG(field, flag) ((field) & (flag))
 
-/* General handle types */
+/* general handle types */
 
 typedef enum io_type {
   IO_TIMER,
   IO_TTY,
   IO_WATCH,
-  IO_POLL
+  IO_UART
 } io_type_t;
 
 typedef void (* io_close_cb)(io_handle_t *);
@@ -64,7 +64,7 @@ struct io_handle_s {
   io_close_cb close_cb;
 };
 
-/* Timer handle types */
+/* timer handle types */
 
 typedef void (* io_timer_cb)(io_timer_handle_t *);
 
@@ -87,7 +87,7 @@ struct io_tty_handle_s {
   io_tty_read_cb read_cb;
 };
 
-/* IO watch handle types */
+/* GPIO watch handle types */
 
 typedef enum {
   IO_WATCH_MODE_FALLING,
@@ -109,14 +109,18 @@ struct io_watch_handle_s {
   jerry_value_t watch_js_cb;
 };
 
-/* IO poll handle type */
+/* UART handle type */
 
-typedef void (* io_poll_read_cb)(io_poll_handle_t *);
+typedef int (* io_uart_available_cb)(io_uart_handle_t *);
+typedef void (* io_uart_read_cb)(io_uart_handle_t *, uint8_t *, size_t);
 
-struct io_poll_handle_s {
+struct io_uart_handle_s {
   io_handle_t base;
-  io_poll_read_cb read_cb;
-  jerry_value_t js_cb;
+  uint8_t port;
+  io_uart_available_cb available_cb;
+  io_uart_read_cb read_cb;
+  jerry_value_t read_js_cb;
+  int temp;
 };
 
 /* loop type */
@@ -127,7 +131,7 @@ struct io_loop_s {
   list_t timer_handles;
   list_t tty_handles;
   list_t watch_handles;
-  list_t poll_handles;
+  list_t uart_handles;
   list_t closing_handles;
 };
 
@@ -147,7 +151,7 @@ io_handle_t *io_handle_get_by_id(uint32_t id, list_t *handle_list);
 void io_timer_init(io_timer_handle_t *timer);
 void io_timer_start(io_timer_handle_t *timer, io_timer_cb timer_cb, uint64_t interval, bool repeat);
 void io_timer_stop(io_timer_handle_t *timer);
-io_timer_handle_t *io_timer_get_by_id(int id);
+io_timer_handle_t *io_timer_get_by_id(uint32_t id);
 
 /* TTY functions */
 
@@ -155,17 +159,18 @@ void io_tty_init(io_tty_handle_t *tty);
 void io_tty_read_start(io_tty_handle_t *tty, io_tty_read_cb read_cb);
 void io_tty_read_stop(io_tty_handle_t *tty);
 
-/* IO watch functions */
+/* GPIO watch functions */
 
 void io_watch_init(io_watch_handle_t *watch);
 void io_watch_start(io_watch_handle_t *watch, io_watch_cb watch_cb, uint8_t pin, io_watch_mode_t mode, uint32_t debounce);
 void io_watch_stop(io_watch_handle_t *watch);
-io_watch_handle_t *io_watch_get_by_id(int id);
+io_watch_handle_t *io_watch_get_by_id(uint32_t id);
 
-/* IO poll functions */
+/* UART function */
 
-void io_poll_init(io_poll_handle_t *poll);
-void io_poll_start(io_poll_handle_t *poll);
-void io_poll_stop(io_poll_handle_t *poll);
+void io_uart_init(io_uart_handle_t *uart);
+void io_uart_read_start(io_uart_handle_t *uart, uint8_t port, io_uart_available_cb available_cb, io_uart_read_cb read_cb);
+void io_uart_read_stop(io_uart_handle_t *uart);
+io_uart_handle_t *io_uart_get_by_id(uint32_t id);
 
 #endif /* __IO_H */

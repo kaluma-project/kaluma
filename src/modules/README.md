@@ -1,4 +1,4 @@
-Defingin a Builtin Module
+Defining a Builtin Module
 =========================
 
 1. Create a module folder: `src/modules/<module_name>`
@@ -15,4 +15,3 @@ Defingin a Builtin Module
    
    If `.native=true`, there should be `module_<module_name>.h` and `module_<module_name>.c`. When user try to load this module by `require()`, Firstly js module will be loaded if `.js=true`. If `.js=false` and `.native=true`, the native module will be loaded.
 3. Create a `<module_name>_magic_strings.h` file for magic string definitions.
-

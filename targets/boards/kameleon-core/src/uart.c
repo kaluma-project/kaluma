@@ -150,8 +150,15 @@ uint32_t uart_available(uint8_t port) {
   return uart_available_ringbuffer(port);
 }
 
-uint8_t uart_available_at(uint8_t port, uint32_t index) {
-  // TODO: ...
+uint8_t uart_available_at(uint8_t port, uint32_t offset) {
+  assert_param(port==0 || port==1);
+  return LookRingBufferAt(&uart_rx_ringbuffer[port], offset);
+}
+
+uint32_t uart_buffer_size(uint8_t port) {
+  assert_param(port==0 || port==1);
+  uint32_t size = GetRingBufferSize(&uart_rx_ringbuffer[port]);
+  return size;
 }
 
 /** 

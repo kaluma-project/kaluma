@@ -30,6 +30,7 @@
 #define MSTR_UART_STOP "stop"
 #define MSTR_UART_FLOW "flow"
 #define MSTR_UART_BUFFERSIZE "bufferSize"
+#define MSTR_UART_DATAEVENT "dataEvent"
 #define MSTR_UART_WRITE "write"
 #define MSTR_UART_AVAILABLE "available"
 #define MSTR_UART_READ "read"

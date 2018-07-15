@@ -8,13 +8,12 @@ Use `require('uart')` to access this module.
 * [open(port[, options])]()
 * [Class: UART]()
   * [new UART(port[, options])]()
-  * write(data)
-  * read([length])
-  * [listen(callback[, trigger])]()
+  * [write(data)]()
   * [close()]()
+  * [Event: 'data']()
   * [Class Property: UART.PARITY_NONE]()
-  * [Class Property: UART.PARITY_EVEN]()
   * [Class Property: UART.PARITY_ODD]()
+  * [Class Property: UART.PARITY_EVEN]()
   * [Class Property: UART.RTS]()
   * [Class Property: UART.CTS]()
 
@@ -27,7 +26,7 @@ Use `require('uart')` to access this module.
 ```js
 var uart = require('uart');
 var serial0 = uart.open(0);
-// read or write data...
+// ...
 serial0.close();
 ```
 
@@ -45,6 +44,7 @@ An instances of `UART` represents a UART port.
   * __`stop`__ `{number}` Optional. Number of stop bits. One of the `[1, 2]`. Default is `1`.
   * __`flow`__ `{number}` Optional. Flow control type. One of the `0`, `UART.RTS (=1)`, `UART.CTS (=2)`, or `UART.RTS | UART.CTS (=3)`. Default is `0`.
   * __`bufferSize`__ `{number}` Optional. The size of internal read buffer. Default is `1024`.
+  * __`dataEvent`__ `{string|number}` Optional. A condition when the `data` event is emitted.
 
 
 ```js
@@ -75,110 +75,57 @@ serial0.write('Hello, world\n');
 serial0.close();
 ```
 
-### available()
-
-* Returns: `{number}` Returns the length of data in the read buffer.
-
-Returns the length of data in read buffer.
-
-```js
-var uart = require('uart');
-var serial0 = uart.open(0, { baudrate: 9600 });
-while (true) {
-  if (serial0.availabe()) {
-    var buf = serial0.read();
-    console.log(buf[0]);
-  }
-}
-```
-
-### read([length])
-
-Read data from read buffer as many as length. If no data in buffer, returns `null`.
-
-* __`length`__ `{number}` Data length to read. Default is 1.
-* Returns: `{null|ArrayBuffer}` -- Return data in the read buffer.
-
-```js
-var uart = require('uart');
-var serial0 = uart.open(0, { baudrate: 9600 });
-
-// Read all data in the read buffer
-var size = serial0.available();
-var buf = serial0.read(size);
-```
-
-### listen(callback[, trigger])
-
-* __`callback`__ `{function(data)|null}` A function to be called whenever data is arrived (buffer size may varies) or `trigger` condition has met. If there was already a callback, then the previous callback is removed and register the new callback. Passing `null` means just to remove the previous callback.
-  * __`data`__ `{ArrayBuffer}` Received data buffer.
-* __`trigger`__ `{string|number}` Optional. If a character (string) is given (e.g. `'\n'`), callback is called whenever the given character has arrived. If a number is given (e.g. `10`), callback is called whenever buffer length is reached to the given number.
-
-Callback function is called when data has arrived.
-
-```js
-var uart = require('uart');
-var serial0 = uart.open(0, { baudrate: 9600 });
-
-// Callback is called whenever newline char ('\n') arrived.
-serial0.listen(function (data) {
-  var line = String.fromCharCode.apply(null, new Uint8Array(data));
-  console.log(line);
-}, '\n');
-```
-
 ### close()
 
 Close the UART port.
 
-### port
+### Event: 'data'
 
-* `{number}`
+* __`data`__ `{ArrayBuffer}` Received data buffer.
 
-### baudrate
+The `data` event is emitted whenever data is arrived (buffer size may varies).
 
-* `{number}`
+If the `dataEvent` option is given with a character (e.g. `'\n'`), this event is emitted whenever the given character has arrived. If the character is not arrived until the buffer is full, you will lose the data in the buffer.
 
-### bits
+If the `dataEvent` option is given with a number (e.g. `10`), this event is emitted whenever buffer length has reached to the given number. The number should be less then the buffer size.
 
-* `{number}`
+```js
+var uart = require('uart');
 
-### parity
+var options = {
+  baudrate: 9600,
+  dataEvent: '\n'
+};
 
-* `{number}`
+var serial0 = uart.open(0, options);
 
-### stop
+// The `data` event is emitted whenever '\n' is arrived.
+serial0.on('data', function (data) {
+  var line = String.fromCharCode.apply(null, new Uint8Array(data));
+  console.log(line);
+});
+```
 
-* `{number}`
-
-### flow
-
-* `{number}`
-
-### bufferSize
-
-* `{number}`
 
 ### Class Property: UART.PARITY_NONE
 
-* `{number}`
-
-
-### Class Property: UART.PARITY_EVEN
-
-* `{number}`
+* `{number}` Value is `0`.
 
 
 ### Class Property: UART.PARITY_ODD
 
-* `{number}`
+* `{number}` Value is `1`.
 
+
+### Class Property: UART.PARITY_EVEN
+
+* `{number}` Value is `2`.
 
 ### Class Property: UART.RTS
 
-* `{number}`
+* `{number}` Value is `1`.
 
 
 ### Class Property: UART.CTS
 
-* `{number}`
+* `{number}` Value is `2`.
