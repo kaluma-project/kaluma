@@ -24,6 +24,8 @@ endif
 DEBUG = 1
 # optimization
 OPT = -Og
+# with bootloader
+BOOTLOADER = 0
 
 #######################################
 # paths

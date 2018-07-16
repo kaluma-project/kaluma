@@ -151,6 +151,7 @@ const uint8_t APBPrescTable[8]  = {0, 0, 0, 0, 1, 2, 3, 4};
 /**
   * @}
   */
+extern uint32_t g_pfnVectors[];
 
 /** @addtogroup STM32F4xx_System_Private_Functions
   * @{
@@ -192,12 +193,8 @@ void SystemInit(void)
   SystemInit_ExtMemCtl(); 
 #endif /* DATA_IN_ExtSRAM || DATA_IN_ExtSDRAM */
 
-  /* Configure the Vector Table location add offset address ------------------*/
-#ifdef VECT_TAB_SRAM
-  SCB->VTOR = SRAM_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM */
-#else
-  SCB->VTOR = FLASH_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH */
-#endif
+  SCB->VTOR = (uint32_t)g_pfnVectors;
+  return;
 }
 
 /**

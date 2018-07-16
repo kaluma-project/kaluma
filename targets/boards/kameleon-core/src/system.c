@@ -187,6 +187,13 @@ void settime(uint64_t time) {
   __set_PRIMASK(0);
 }
 
+/**
+*/
+void request_firmup() {
+  *(uint32_t *)(*(uint32_t *)0x08000000) = 0x12345678;
+  NVIC_SystemReset();
+}
+
 /** 
  * Kameleon Hardware System Initializations
  */

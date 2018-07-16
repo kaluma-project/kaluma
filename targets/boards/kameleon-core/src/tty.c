@@ -63,34 +63,25 @@ uint32_t tty_get_tx_data_length() {
 
 
 uint32_t tty_get_bytes(uint8_t * buf, uint32_t nToRead) {
-  /* interrupt level masking */
-  uint32_t pri_group = HAL_NVIC_GetPriorityGrouping();
-  uint32_t pre_emption, sub_priority;
-  HAL_NVIC_GetPriority(PendSV_IRQn, pri_group, &pre_emption, &sub_priority);
-  __set_BASEPRI(pre_emption << 4);
+  __set_PRIMASK(1);
   
   uint32_t len = ringbuffer_length(&tty_rx_ringbuffer);
   if (len < nToRead) {
     nToRead = len;
   }
   
-  __set_BASEPRI(0);
+  __set_PRIMASK(0);
   ringbuffer_read(&tty_rx_ringbuffer, buf, nToRead);
   return nToRead;
 }
 
 uint32_t tty_fill_rx_bytes(uint8_t * buf, uint32_t nToWrite) {
-  /* interrupt level masking */
-  uint32_t pri_group = HAL_NVIC_GetPriorityGrouping();
-  uint32_t pre_emption, sub_priority;
-  HAL_NVIC_GetPriority(PendSV_IRQn, pri_group, &pre_emption, &sub_priority);
-  __set_BASEPRI(pre_emption << 4);
-  
+  __set_PRIMASK(1);
   uint32_t space = ringbuffer_freespace(&tty_rx_ringbuffer);
   if (space < nToWrite) {
     nToWrite = space;
   }
-  __set_BASEPRI(0);
+  __set_PRIMASK(0);
   
   ringbuffer_write(&tty_rx_ringbuffer, buf, nToWrite);
   return nToWrite;
@@ -98,17 +89,12 @@ uint32_t tty_fill_rx_bytes(uint8_t * buf, uint32_t nToWrite) {
 
 
 uint32_t tty_put_bytes(uint8_t * buf, uint32_t nToWrite) {
-  /* interrupt level masking */
-  uint32_t pri_group = HAL_NVIC_GetPriorityGrouping();
-  uint32_t pre_emption, sub_priority;
-  HAL_NVIC_GetPriority(PendSV_IRQn, pri_group, &pre_emption, &sub_priority);
-  __set_BASEPRI(pre_emption << 4);
-  
+  __set_PRIMASK(1);  
   uint32_t space = ringbuffer_freespace(&tty_tx_ringbuffer);
   if (space < nToWrite) {
     nToWrite = space;
   }
-  __set_BASEPRI(0);
+  __set_PRIMASK(0);
   
   ringbuffer_write(&tty_tx_ringbuffer, buf, nToWrite);
   return nToWrite;
