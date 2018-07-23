@@ -64,9 +64,9 @@ static repl_state_t state;
 /**
  * Inject a char to REPL
  */
-static void tty_read_cb(char ch) {
+static void tty_read_cb(uint8_t *buf, size_t len) {
   if (state.handler != NULL) {
-    (*state.handler)(&state, ch); /* call handler */
+    (*state.handler)(&state, buf, len); /* call handler */
   }
 }
 
@@ -322,14 +322,17 @@ static void handle_escape(char ch) {
 /**
  * Default handler
  */
-static void default_handler(repl_state_t *state, char ch) {
-  switch (state->mode) {
-    case REPL_MODE_NORMAL:
-      handle_normal(ch);
-      break;
-    case REPL_MODE_ESCAPE:
-      handle_escape(ch);
-      break;
+static void default_handler(repl_state_t *state, uint8_t *buf, size_t len) {
+  for (int i = 0; i < len; i++) {
+    char ch = buf[i];
+    switch (state->mode) {
+      case REPL_MODE_NORMAL:
+        handle_normal(ch);
+        break;
+      case REPL_MODE_ESCAPE:
+        handle_escape(ch);
+        break;
+    }
   }
 }
 
@@ -367,7 +370,7 @@ static void cmd_clear(repl_state_t *state) {
 }
 
 /**
- * State for flash command
+ * State for .flash command
  */
 static struct {
   char buffer[2];
@@ -377,37 +380,40 @@ static struct {
 /**
  * Handler for .flash command
  */
-static void cmd_flash_handler(repl_state_t *state, char ch) {
-  switch (ch) {
-    case 0x1a: /* Ctrl+Z */
-      flash_program_end();
-      set_handler(NULL);
-      repl_print_begin(REPL_OUTPUT_LOG);
-      repl_printf("\r\n");
-      repl_print_end();
-      break;
-    default:
-      cmd_flash_state.buffer[cmd_flash_state.buffer_length] = ch;
-      cmd_flash_state.buffer_length++;
-      if (state->echo) {
-        repl_putc(ch);
-      }
-      if (cmd_flash_state.buffer_length == 2) {
+static void cmd_flash_handler(repl_state_t *state, uint8_t *buf, size_t len) {
+  for (int i = 0; i < len; i++) {
+    uint8_t ch = buf[i];
+    switch (ch) {
+      case 0x1a: /* Ctrl+Z */
+        flash_program_end();
+        set_handler(NULL);
+        repl_print_begin(REPL_OUTPUT_LOG);
+        repl_printf("\r\n");
+        repl_print_end();
+        break;
+      default:
+        cmd_flash_state.buffer[cmd_flash_state.buffer_length] = ch;
+        cmd_flash_state.buffer_length++;
         if (state->echo) {
-          repl_putc(' ');
+          repl_putc(ch);
         }
-        uint8_t dat = hex2bin(cmd_flash_state.buffer);
-        flash_status_t flash_status = flash_program(&dat, 1);
-        if (FLASH_SUCCESS != flash_status) {
-          repl_print_begin(REPL_OUTPUT_ERROR);
-          repl_printf("%s\r\n", "Failed during data writing to file.");
-          repl_print_end();
-          flash_program_end();
-          set_handler(NULL);
+        if (cmd_flash_state.buffer_length == 2) {
+          if (state->echo) {
+            repl_putc(' ');
+          }
+          uint8_t dat = hex2bin(cmd_flash_state.buffer);
+          flash_status_t flash_status = flash_program(&dat, 1);
+          if (FLASH_SUCCESS != flash_status) {
+            repl_print_begin(REPL_OUTPUT_ERROR);
+            repl_printf("%s\r\n", "Failed during data writing to file.");
+            repl_print_end();
+            flash_program_end();
+            set_handler(NULL);
+          }
+          cmd_flash_state.buffer_length = 0;
         }
-        cmd_flash_state.buffer_length = 0;
-      }
-      break;
+        break;
+    }
   }
 }
 
@@ -435,7 +441,7 @@ static void cmd_flash(repl_state_t *state, char *arg) {
     repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf("%u\r\n", data_size);
     repl_print_end();
-  } else if (strcmp(arg, "-r") == 0) { /* read data */
+  } else if (strcmp(arg, "-r") == 0) { /* read data from flash */
     uint32_t sz = flash_get_data_size();
     uint8_t *ptr = flash_get_data();
     repl_print_begin(REPL_OUTPUT_LOG);
@@ -454,7 +460,7 @@ static void cmd_flash(repl_state_t *state, char *arg) {
     repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf(".flash command options:\r\n");
     repl_printf("-w\tWrite data in hex format\r\n");
-    repl_printf("-e\tErase the flash\r\n");
+    repl_printf("-e\tErase the data in flash\r\n");
     repl_printf("-c\tGet checksum\r\n");
     repl_printf("-t\tGet total size of flash\r\n");
     repl_printf("-s\tGet data size in flash\r\n");
@@ -507,8 +513,8 @@ static void cmd_help(repl_state_t *state) {
   repl_print_begin(REPL_OUTPUT_LOG);
   repl_printf(".echo\tEcho on/off.\r\n");
   repl_printf(".clear\tClear javascript context.\r\n");
-  repl_printf(".flash\tFlash program or get flash memory info.\r\n");
-  repl_printf(".load\tLoad program in flash memory.\r\n");
+  repl_printf(".flash\tCommands for the internal flash.\r\n");
+  repl_printf(".load\tLoad program from the internal flash.\r\n");
   repl_printf(".mem\tGet heap memory status.\r\n");
   repl_printf(".gc\tPerform garbage collection.\r\n");
   repl_print_end();

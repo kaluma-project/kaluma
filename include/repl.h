@@ -40,7 +40,7 @@ typedef enum {
 } repl_output_t;
 
 typedef struct repl_state_s repl_state_t;
-typedef void (*repl_handler_t)(repl_state_t *, char);
+typedef void (*repl_handler_t)(repl_state_t *, uint8_t *, size_t);
 
 struct repl_state_s {
   repl_mode_t mode;

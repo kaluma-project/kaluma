@@ -170,11 +170,14 @@ static void io_tty_run() {
   io_tty_handle_t *handle = (io_tty_handle_t *) loop.tty_handles.head;
   while (handle != NULL) {
     if (IO_HAS_FLAG(handle->base.flags, IO_FLAG_ACTIVE)) {
-      if (handle->read_cb != NULL && tty_has_data()) {
-        unsigned int size = tty_data_size();
-        for (int i = 0; i < size; i++) {
-          handle->read_cb(tty_getc());
-        }
+      uint32_t len = tty_available();
+      if (handle->read_cb != NULL && len > 0) {
+        // for (int i = 0; i < size; i++) {
+        //   handle->read_cb(tty_getc());
+        //}
+        uint8_t buf[len];
+        tty_read(buf, len);
+        handle->read_cb(buf, len);
       }
     }
     handle = (io_tty_handle_t *) ((list_node_t *) handle)->next;

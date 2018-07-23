@@ -80,7 +80,7 @@ struct io_timer_handle_s {
 
 /* TTY handle types */
 
-typedef void (* io_tty_read_cb)(char);
+typedef void (* io_tty_read_cb)(uint8_t *, size_t);
 
 struct io_tty_handle_s {
   io_handle_t base;

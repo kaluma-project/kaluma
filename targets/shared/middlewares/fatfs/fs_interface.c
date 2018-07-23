@@ -137,13 +137,37 @@ static void FS_Format()
     FS_Mount();
 }
 
+static uint8_t __tty_getch() {
+  while(tty_available() == 0);
+  return tty_getc();
+}
+
+static void __tty_getstring(char *string) {
+  char *string2 = string;
+  char c;
+  while ((c = __tty_getch()) != '\r') {
+    if(c == '\b' || c == 127) {
+      if ((int) string2 < (int) string) {
+        tty_printf("\b \b");
+        string--;
+      }
+    } else {
+      *string++ = c;
+      tty_putc(c);
+    }
+  }
+  *string='\0';
+  tty_putc('\r');
+  tty_putc('\n');
+}
+
 static void FS_CreateDirectoryTest()
 {
     char buf[64];
     FRESULT res;
 
     tty_printf("enter folder name to create : ");
-    tty_getstring(buf);
+    __tty_getstring(buf);
     
     res = f_mkdir(buf);
     if (res)
@@ -163,7 +187,7 @@ static void FS_CreateFileTest()
     for(int k=0; k<sizeof(buf); k++)    buf[k] = (char)gettime();
 
     tty_printf("enter file name to create : ");
-    tty_getstring(buf);
+    __tty_getstring(buf);
     
     start = gettime();
 

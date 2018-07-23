@@ -105,32 +105,23 @@ void tty_init() {
   ringbuffer_init(&tty_rx_ringbuffer, tty_rx_buffer, sizeof(tty_rx_buffer));
 }
 
+uint32_t tty_available() {
+  return ringbuffer_length(&tty_rx_ringbuffer);
+}
 
-bool tty_has_data() {
-  uint32_t n = ringbuffer_length(&tty_rx_ringbuffer);
-  if (n) {
-    return 1;
-  } else {
-    return 0;
-  }
+uint32_t tty_read(uint8_t *buf, size_t len) {
+  if (tty_available()) {
+    ringbuffer_read(&tty_rx_ringbuffer, buf, len);
+  } 
 }
 
 uint8_t tty_getc() {
   uint8_t c = 0;
-  if (tty_data_size()) {
+  if (tty_available()) {
     ringbuffer_read(&tty_rx_ringbuffer, &c, 1);
-  } 
+  }
   return c;
 }
-
-
-uint8_t tty_getch() {
-  while(tty_data_size() == 0);
-  uint8_t c;
-  ringbuffer_read(&tty_rx_ringbuffer, &c, 1);
-  return c;
-}
-
 
 void tty_putc(char ch) {
   /* (ring)buffering the string instead of transmitting it via usb channel */
@@ -156,27 +147,4 @@ void tty_printf(const char *fmt, ...) {
     tty_put_bytes((uint8_t *)string, strlen(string));
   }
   SetPendSV();
-}
-
-uint32_t tty_data_size() {
-  return ringbuffer_length(&tty_rx_ringbuffer);
-}
-
-void tty_getstring(char *string) {
-  char *string2 = string;
-  char c;
-  while ((c = tty_getch()) != '\r') {
-    if(c == '\b' || c == 127) {
-      if ((int) string2 < (int) string) {
-        tty_printf("\b \b");
-        string--;
-      }
-    } else {
-      *string++ = c;
-      tty_putc(c);
-    }
-  }
-  *string='\0';
-  tty_putc('\r');
-  tty_putc('\n');
 }
