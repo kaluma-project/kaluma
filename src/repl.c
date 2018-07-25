@@ -27,6 +27,7 @@
 #include "flash.h"
 #include "repl.h"
 #include "runtime.h"
+#include "system.h"
 #include "jerryscript.h"
 #include "utils.h"
 #include "kameleon_config.h"
@@ -42,6 +43,7 @@ static void cmd_flash(repl_state_t *state, char *arg);
 static void cmd_load(repl_state_t *state);
 static void cmd_mem(repl_state_t *state);
 static void cmd_gc(repl_state_t *state);
+static void cmd_firmup(repl_state_t *state);
 static void cmd_help(repl_state_t *state);
 
 // --------------------------------------------------------------------------
@@ -129,6 +131,8 @@ static void run_command() {
       cmd_mem(&state);
     } else if (strcmp(tokenv[0], ".gc") == 0) {
       cmd_gc(&state);
+    } else if (strcmp(tokenv[0], ".firmup") == 0) {
+      cmd_firmup(&state);
     } else if (strcmp(tokenv[0], ".help") == 0) {
       cmd_help(&state);
     } else { /* unknown command */
@@ -458,13 +462,6 @@ static void cmd_flash(repl_state_t *state, char *arg) {
     repl_printf("Flash has erased\r\n");
     repl_print_end();
 
-  /* get checksum */
-  } else if (strcmp(arg, "-c") == 0) {
-    uint32_t checksum = flash_get_checksum();
-    repl_print_begin(REPL_OUTPUT_LOG);
-    repl_printf("%u\r\n", checksum);
-    repl_print_end();
-
   /* get total size of flash */
   } else if (strcmp(arg, "-t") == 0) {
     uint32_t size = flash_size();
@@ -493,28 +490,28 @@ static void cmd_flash(repl_state_t *state, char *arg) {
     repl_printf("\r\n");
     repl_print_end();
 
-  /* write data to flash by ymodem protocol */
+  /* write a file to flash via Ymodem */
   } else if (strcmp(arg, "-w") == 0) {
-    tty_printf("Transfer a file to via Ymodem protocol... (press 'a' to abort)\r\n");
+    tty_printf("Transfer a file via Ymodem... (press 'a' to abort)\r\n");
     io_tty_read_stop(&tty);
     ymodem_status_t result = ymodem_receive(header_cb, packet_cb, footer_cb);
     io_tty_read_start(&tty, tty_read_cb);
-    delay(1000);
+    delay(500);
     switch (result) {
       case YMODEM_OK:
-        tty_printf("\r\nSucessfully complete.\r\n");
+        tty_printf("\r\nDone.\r\n");
         break;
       case YMODEM_LIMIT:
-        tty_printf("\r\nThe image size is higher than the allowed space memory!\r\n");
+        tty_printf("\r\nThe file size is too large.\r\n");
         break;
       case YMODEM_DATA:
-        tty_printf("\r\nVerification failed!\r\n");
+        tty_printf("\r\nVerification failed.\r\n");
         break;
       case YMODEM_ABORT:
-        tty_printf("\r\nAborted by user.\r\n");
+        tty_printf("\r\nAborted.\r\n");
         break;
       default:
-        tty_printf("\r\nFailed to receive the file!\r\n");
+        tty_printf("\r\nFailed to receive.\r\n");
         break;
     }
 
@@ -522,9 +519,8 @@ static void cmd_flash(repl_state_t *state, char *arg) {
   } else {
     repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf(".flash command options:\r\n");
-    repl_printf("-w\tWrite data in hex format\r\n");
+    repl_printf("-w\tWrite a file to flash via Ymodem\r\n");
     repl_printf("-e\tErase the data in flash\r\n");
-    repl_printf("-c\tGet checksum\r\n");
     repl_printf("-t\tGet total size of flash\r\n");
     repl_printf("-s\tGet data size in flash\r\n");
     repl_printf("-r\tRead data in textual format\r\n");
@@ -570,6 +566,13 @@ static void cmd_gc(repl_state_t *state) {
 }
 
 /**
+ * .firmup command
+ */
+static void cmd_firmup(repl_state_t *state) {
+  request_firmup();
+}
+
+/**
  * .help command
  */
 static void cmd_help(repl_state_t *state) {
@@ -579,6 +582,7 @@ static void cmd_help(repl_state_t *state) {
   repl_printf(".flash\tCommands for the internal flash.\r\n");
   repl_printf(".load\tLoad program from the internal flash.\r\n");
   repl_printf(".mem\tGet heap memory status.\r\n");
+  repl_printf(".firmup\tFirmware update mode.\r\n");
   repl_printf(".gc\tPerform garbage collection.\r\n");
   repl_print_end();
 }
