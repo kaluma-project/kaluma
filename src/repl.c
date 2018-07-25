@@ -418,7 +418,7 @@ static void cmd_flash_handler(repl_state_t *state, uint8_t *buf, size_t len) {
   }
 }
 
-size_t bytes_remained = 0;
+static size_t bytes_remained = 0;
 
 static int header_cb(uint8_t *file_name, size_t file_size) {
   flash_program_begin();
@@ -444,6 +444,7 @@ static int packet_cb(uint8_t *data, size_t len) {
 
 static void footer_cb() {
   flash_program_end();
+  bytes_remained = 0;
 }
 
 /**
@@ -498,16 +499,23 @@ static void cmd_flash(repl_state_t *state, char *arg) {
     io_tty_read_stop(&tty);
     ymodem_status_t result = ymodem_receive(header_cb, packet_cb, footer_cb);
     io_tty_read_start(&tty, tty_read_cb);
-    if (result = YMODEM_OK) {
-      tty_printf("\n\n\r Programming Completed Successfully!\n\r");
-    } else if (YMODEM_LIMIT) {
-      tty_printf("\n\n\rThe image size is higher than the allowed space memory!\n\r");
-    } else if (YMODEM_DATA) {
-      tty_printf("\n\n\rVerification failed!\n\r");
-    } else if (YMODEM_ABORT) {
-      tty_printf("\r\n\nAborted by user.\n\r");
-    } else {
-      tty_printf("\n\rFailed to receive the file!\n\r");
+    delay(1000);
+    switch (result) {
+      case YMODEM_OK:
+        tty_printf("\r\nSucessfully complete.\r\n");
+        break;
+      case YMODEM_LIMIT:
+        tty_printf("\r\nThe image size is higher than the allowed space memory!\r\n");
+        break;
+      case YMODEM_DATA:
+        tty_printf("\r\nVerification failed!\r\n");
+        break;
+      case YMODEM_ABORT:
+        tty_printf("\r\nAborted by user.\r\n");
+        break;
+      default:
+        tty_printf("\r\nFailed to receive the file!\r\n");
+        break;
     }
 
   /* no option is given */
