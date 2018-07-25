@@ -32,7 +32,7 @@
 #include "ringbuffer.h"
 
 #define TTY_TX_RINGBUFFER_SIZE 1024
-#define TTY_RX_RINGBUFFER_SIZE 1024
+#define TTY_RX_RINGBUFFER_SIZE 2048
 
 static unsigned char tty_tx_buffer[TTY_TX_RINGBUFFER_SIZE];
 static unsigned char tty_rx_buffer[TTY_RX_RINGBUFFER_SIZE];
@@ -110,10 +110,30 @@ uint32_t tty_available() {
 }
 
 uint32_t tty_read(uint8_t *buf, size_t len) {
-  if (tty_available()) {
+  if (tty_available() >= len) {
     ringbuffer_read(&tty_rx_ringbuffer, buf, len);
-  } 
+    return len;
+  } else {
+    return 0;
+  }
 }
+
+uint32_t tty_read_sync(uint8_t *buf, size_t len, uint32_t timeout) {
+  uint32_t sz;
+  uint64_t current = gettime();
+  uint64_t due = current + timeout;
+  do {
+    sz = tty_available();
+    current = gettime();
+  } while (current < due && sz < len);
+  if (sz >= len) {
+    ringbuffer_read(&tty_rx_ringbuffer, buf, len);
+    return len;
+  } else {
+    return 0;
+  }
+}
+
 
 uint8_t tty_getc() {
   uint8_t c = 0;
@@ -129,7 +149,7 @@ void tty_putc(char ch) {
   if (space > 1) {
     ringbuffer_write(&tty_tx_ringbuffer, (uint8_t *)&ch, 1);
   }
-  SetPendSV(); 
+  SetPendSV();
 }
 
 

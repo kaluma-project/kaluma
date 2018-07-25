@@ -49,6 +49,16 @@ uint32_t tty_available();
 uint32_t tty_read(uint8_t *buf, size_t len);
 
 /**
+ * Read bytes synchronously from TTY read buffer.
+ * 
+ * @param buf
+ * @param len
+ * @param timeout
+ * @return the number of bytes read
+ */
+uint32_t tty_read_sync(uint8_t *buf, size_t len, uint32_t timeout);
+
+/**
  * Read a char from TTY
  * 
  * @return char

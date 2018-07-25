@@ -30,6 +30,7 @@
 #include "jerryscript.h"
 #include "utils.h"
 #include "kameleon_config.h"
+#include "ymodem.h"
 
 // --------------------------------------------------------------------------
 // FORWARD DECLARATIONS
@@ -417,31 +418,68 @@ static void cmd_flash_handler(repl_state_t *state, uint8_t *buf, size_t len) {
   }
 }
 
+size_t bytes_remained = 0;
+
+static int header_cb(uint8_t *file_name, size_t file_size) {
+  flash_program_begin();
+  bytes_remained = file_size;
+  return 0;
+}
+
+static int packet_cb(uint8_t *data, size_t len) {
+  if (bytes_remained < len) {
+    len = bytes_remained;
+    bytes_remained = 0;
+  } else {
+    bytes_remained = bytes_remained - len;
+  }
+  flash_status_t status = flash_program(data, len);
+  if (status == FLASH_SUCCESS) {
+    return 0;
+  } else {
+    return -1;
+  }
+ return 0;
+}
+
+static void footer_cb() {
+  flash_program_end();
+}
+
 /**
  * .flash command
  */
 static void cmd_flash(repl_state_t *state, char *arg) {
-  if (strcmp(arg, "-e") == 0) { /* erase flash */
+  /* erase flash */
+  if (strcmp(arg, "-e") == 0) {
     flash_clear();
     repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf("Flash has erased\r\n");
     repl_print_end();
-  } else if (strcmp(arg, "-c") == 0) { /* get checksum */
+
+  /* get checksum */
+  } else if (strcmp(arg, "-c") == 0) {
     uint32_t checksum = flash_get_checksum();
     repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf("%u\r\n", checksum);
     repl_print_end();
-  } else if (strcmp(arg, "-t") == 0) { /* get total size of flash */
+
+  /* get total size of flash */
+  } else if (strcmp(arg, "-t") == 0) {
     uint32_t size = flash_size();
     repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf("%u\r\n", size);
     repl_print_end();
-  } else if (strcmp(arg, "-s") == 0) { /* get data size in flash */
+
+  /* get data size in flash */
+  } else if (strcmp(arg, "-s") == 0) {
     uint32_t data_size = flash_get_data_size();
     repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf("%u\r\n", data_size);
     repl_print_end();
-  } else if (strcmp(arg, "-r") == 0) { /* read data from flash */
+  
+  /* read data from flash */
+  } else if (strcmp(arg, "-r") == 0) {
     uint32_t sz = flash_get_data_size();
     uint8_t *ptr = flash_get_data();
     repl_print_begin(REPL_OUTPUT_LOG);
@@ -453,9 +491,26 @@ static void cmd_flash(repl_state_t *state, char *arg) {
     }
     repl_printf("\r\n");
     repl_print_end();
-  } else if (strcmp(arg, "-w") == 0) { /* write mode */
-    flash_program_begin();
-    set_handler(&cmd_flash_handler);
+
+  /* write data to flash by ymodem protocol */
+  } else if (strcmp(arg, "-w") == 0) {
+    tty_printf("Transfer a file to via Ymodem protocol... (press 'a' to abort)\r\n");
+    io_tty_read_stop(&tty);
+    ymodem_status_t result = ymodem_receive(header_cb, packet_cb, footer_cb);
+    io_tty_read_start(&tty, tty_read_cb);
+    if (result = YMODEM_OK) {
+      tty_printf("\n\n\r Programming Completed Successfully!\n\r");
+    } else if (YMODEM_LIMIT) {
+      tty_printf("\n\n\rThe image size is higher than the allowed space memory!\n\r");
+    } else if (YMODEM_DATA) {
+      tty_printf("\n\n\rVerification failed!\n\r");
+    } else if (YMODEM_ABORT) {
+      tty_printf("\r\n\nAborted by user.\n\r");
+    } else {
+      tty_printf("\n\rFailed to receive the file!\n\r");
+    }
+
+  /* no option is given */
   } else {
     repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf(".flash command options:\r\n");

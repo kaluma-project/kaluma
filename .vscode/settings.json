@@ -11,7 +11,8 @@
     "diskio.h": "c",
     "buffer.h": "c",
     "limits": "c",
-    "kameleon_core.h": "c"
+    "kameleon_core.h": "c",
+    "ymodem.h": "c"
   },
   "cpplint.filters" : [
     "-build/include_subdir", "-build/header_guard"

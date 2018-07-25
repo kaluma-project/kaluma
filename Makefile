@@ -121,6 +121,7 @@ src/jerry_port.c \
 src/jerryxx.c \
 src/global.c \
 src/target.c \
+src/ymodem.c \
 $(KAMELEON_GENERATED_C)
 
 KAMELEON_INC = \
