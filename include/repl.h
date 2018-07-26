@@ -46,7 +46,7 @@ struct repl_state_s {
   repl_mode_t mode;
   bool echo;
   repl_handler_t handler;
-  char buffer[MAX_BUFFER_LENGTH];
+  char buffer[MAX_BUFFER_LENGTH + 1];
   unsigned int buffer_length;
   unsigned int position;
   char escape[3];

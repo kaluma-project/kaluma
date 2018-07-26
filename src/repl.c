@@ -209,12 +209,16 @@ static void handle_normal(char ch) {
       break;
     case 0x08: /* backspace */
     case 0x7f: /* also backspace in some terminal */
-      if (state.buffer_length > 0) {
+      if (state.buffer_length > 0 && state.position > 0) {
+        state.position--;
+        for (int i = state.position; i < state.buffer_length - 1; i++) {
+          state.buffer[i] = state.buffer[i + 1];
+        }
         state.buffer_length--;
         state.buffer[state.buffer_length] = '\0';
-        state.position--;
         if (state.echo) {
           repl_printf("\033[D\033[K");
+          repl_printf("\r> %s\033[%dG", state.buffer, state.position + 3);
         }
       }
       break;
@@ -321,6 +325,24 @@ static void handle_escape(char ch) {
         repl_putc(state.escape[i]);
       }
     }
+  } else if (ch == 0x7e) { /* special key */
+    state.mode = REPL_MODE_NORMAL;
+
+    /* delete key */
+    if (state.escape_length == 3 && state.escape[0] == 0x5b && state.escape[1] == 0x33) {
+      if (state.buffer_length > 0 && state.position < state.buffer_length) {
+        for (int i = state.position; i < state.buffer_length; i++) {
+          state.buffer[i] = state.buffer[i + 1];
+        }
+        state.buffer_length--;
+        state.buffer[state.buffer_length] = '\0';
+        if (state.echo) {
+          repl_printf("\033[D\033[K");
+          repl_printf("\r> %s\033[%dG", state.buffer, state.position + 3);
+        }
+      }
+    }
+    state.escape_length = 0;
   }
 }
 
@@ -330,6 +352,9 @@ static void handle_escape(char ch) {
 static void default_handler(repl_state_t *state, uint8_t *buf, size_t len) {
   for (int i = 0; i < len; i++) {
     char ch = buf[i];
+
+    // tty_printf("ch=%d\r\n", ch);
+
     switch (state->mode) {
       case REPL_MODE_NORMAL:
         handle_normal(ch);
@@ -372,54 +397,6 @@ static void cmd_clear(repl_state_t *state) {
   repl_print_begin(REPL_OUTPUT_LOG);
   repl_printf("\r");
   repl_print_end();
-}
-
-/**
- * State for .flash command
- */
-static struct {
-  char buffer[2];
-  unsigned int buffer_length;
-} cmd_flash_state;
-
-/**
- * Handler for .flash command
- */
-static void cmd_flash_handler(repl_state_t *state, uint8_t *buf, size_t len) {
-  for (int i = 0; i < len; i++) {
-    uint8_t ch = buf[i];
-    switch (ch) {
-      case 0x1a: /* Ctrl+Z */
-        flash_program_end();
-        set_handler(NULL);
-        repl_print_begin(REPL_OUTPUT_LOG);
-        repl_printf("\r\n");
-        repl_print_end();
-        break;
-      default:
-        cmd_flash_state.buffer[cmd_flash_state.buffer_length] = ch;
-        cmd_flash_state.buffer_length++;
-        if (state->echo) {
-          repl_putc(ch);
-        }
-        if (cmd_flash_state.buffer_length == 2) {
-          if (state->echo) {
-            repl_putc(' ');
-          }
-          uint8_t dat = hex2bin(cmd_flash_state.buffer);
-          flash_status_t flash_status = flash_program(&dat, 1);
-          if (FLASH_SUCCESS != flash_status) {
-            repl_print_begin(REPL_OUTPUT_ERROR);
-            repl_printf("%s\r\n", "Failed during data writing to file.");
-            repl_print_end();
-            flash_program_end();
-            set_handler(NULL);
-          }
-          cmd_flash_state.buffer_length = 0;
-        }
-        break;
-    }
-  }
 }
 
 static size_t bytes_remained = 0;
