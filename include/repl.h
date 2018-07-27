@@ -49,7 +49,8 @@ struct repl_state_s {
   char buffer[MAX_BUFFER_LENGTH + 1];
   unsigned int buffer_length;
   unsigned int position;
-  char escape[3];
+  unsigned int width;
+  char escape[16];
   unsigned int escape_length;
   char *history[MAX_COMMAND_HISTORY];
   unsigned int history_size;

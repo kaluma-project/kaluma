@@ -193,6 +193,27 @@ static void run_code() {
 }
 
 /**
+ * Move cursor to state.position in consideration with state.width
+ */
+static void set_cursor_to_position() {
+  int horz = (state.position + 2) % state.width;
+  int vert = (state.position + 2) / state.width;
+  if (horz > 0) {
+    if (vert > 0) {
+      repl_printf("\033[u\033[%dC\033[%dB", horz, vert);
+    } else {
+      repl_printf("\033[u\033[%dC", horz);
+    }
+  } else {
+    if (vert > 0) {
+      repl_printf("\033[u\033[%dB", vert);
+    } else {
+      repl_printf("\033[u");
+    }
+  }
+}
+
+/**
  * Handler for normal mode
  */
 static void handle_normal(char ch) {
@@ -217,15 +238,15 @@ static void handle_normal(char ch) {
         state.buffer_length--;
         state.buffer[state.buffer_length] = '\0';
         if (state.echo) {
-          repl_printf("\033[D\033[K");
-          repl_printf("\r> %s\033[%dG", state.buffer, state.position + 3);
+          repl_printf("\033[D\033[K\033[J");
+          repl_printf("\033[u> %s", state.buffer);
+          set_cursor_to_position();
         }
       }
       break;
     case 0x1b: /* escape char */
       state.mode = REPL_MODE_ESCAPE;
       state.escape_length = 0;
-      repl_printf("\033[s"); // save current cursor pos
       break;
     default:
       // check buffer overflow
@@ -246,7 +267,8 @@ static void handle_normal(char ch) {
           state.position++;
           state.buffer[state.buffer_length] = '\0';
           if (state.echo) {
-            repl_printf("\r> %s\033[%dG", state.buffer, state.position + 3);
+            repl_printf("\033[u> %s", state.buffer);
+            set_cursor_to_position();
           }
         }
       } else {
@@ -272,7 +294,6 @@ static void handle_escape(char ch) {
     /* up key */
     if (state.escape_length == 2 && state.escape[0] == 0x5b && state.escape[1] == 0x41) {
       if (state.history_position > 0) {
-        repl_printf("\033[u"); /* restore cursor position */
         state.history_position--;
         char *cmd = state.history[state.history_position];
         repl_printf("\33[2K\r> %s", cmd);
@@ -283,7 +304,6 @@ static void handle_escape(char ch) {
 
     /* down key */
     } else if (state.escape_length == 2 && state.escape[0] == 0x5b && state.escape[1] == 0x42) {
-      repl_printf("\033[u"); // restore cursor position
       if (state.history_position == state.history_size) {
         /* do nothing */
       } else if (state.history_position == (state.history_size - 1)) {
@@ -302,21 +322,30 @@ static void handle_escape(char ch) {
 
     /* left key */
     } else if (state.escape_length == 2 && state.escape[0] == 0x5b && state.escape[1] == 0x44) {
-      if (state.position == 0) {
-        repl_printf("\033[u"); // restore cursor position
-      } else {
+      if (state.position > 0) {
         state.position--;
-        repl_printf("\33[D");
+        set_cursor_to_position();
       }
 
     /* right key */
     } else if (state.escape_length == 2 && state.escape[0] == 0x5b && state.escape[1] == 0x43) {
-      if (state.position >= state.buffer_length) {
-        repl_printf("\033[u"); // restore cursor position
-      } else {
+      if (state.position < state.buffer_length) {
         state.position++;
-        repl_printf("\33[C");
+        set_cursor_to_position();
       }
+
+    /* receive cursor position and update screen width */
+    } else if (state.escape[state.escape_length - 1] == 'R') {
+      int pos = 0;
+      uint8_t width_str[5];
+      for (int i = 0; i < state.escape_length; i++) {
+        if (state.escape[i] == ';') {
+          pos = i + 1;
+          break;
+        }
+      }
+      state.escape[state.escape_length - 1] = '\0';
+      state.width = atoi(state.escape + pos);
 
     // Run original escape sequence
     } else {
@@ -337,8 +366,9 @@ static void handle_escape(char ch) {
         state.buffer_length--;
         state.buffer[state.buffer_length] = '\0';
         if (state.echo) {
-          repl_printf("\033[D\033[K");
-          repl_printf("\r> %s\033[%dG", state.buffer, state.position + 3);
+          repl_printf("\033[K\033[J");
+          repl_printf("\033[u> %s", state.buffer);
+          set_cursor_to_position();
         }
       }
     }
@@ -352,9 +382,6 @@ static void handle_escape(char ch) {
 static void default_handler(repl_state_t *state, uint8_t *buf, size_t len) {
   for (int i = 0; i < len; i++) {
     char ch = buf[i];
-
-    // tty_printf("ch=%d\r\n", ch);
-
     switch (state->mode) {
       case REPL_MODE_NORMAL:
         handle_normal(ch);
@@ -501,7 +528,7 @@ static void cmd_flash(repl_state_t *state, char *arg) {
     repl_printf("-t\tGet total size of flash\r\n");
     repl_printf("-s\tGet data size in flash\r\n");
     repl_printf("-r\tRead data in textual format\r\n");
-    repl_print_end();    
+    repl_print_end();
   }
 }
 
@@ -578,6 +605,7 @@ void repl_init() {
   state.echo = true;
   state.buffer_length = 0;
   state.position = 0;
+  state.width = 80;
   state.escape_length = 0;
   state.history_size = 0;
   state.history_position = 0;
@@ -622,7 +650,9 @@ void repl_print_end() {
   tty_printf("\33[0m"); // back to normal color
   if (state.echo) {
     state.buffer[state.buffer_length] = '\0';
+    tty_printf("\r\033[s"); // save cursor position
     tty_printf("> %s", &state.buffer);
+    tty_printf("\33[H\33[900C\33[6n\033[u\033[2C"); // query terminal screen width and restore cursor position
   }
 }
 
