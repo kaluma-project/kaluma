@@ -3,12 +3,10 @@
 Overview
 ========
 
-__(STILL UNDER DEVELOPMENT)__
-
 Kameleon is a tiny and efficient Javascript runtime for microcontrollers. The main features are:
 
 * Small footprint (Run on 300KB ROM, 64KB RAM)
-* ECMAScript 5.1/2015(subset) standard compliant (built on [Jerryscript](http://jerryscript.net/))
+* ECMAScript 5.1/2015(subset) standard compliant (Powered by [Jerryscript](http://jerryscript.net/))
 * Non-blocking I/O
 * REPL mode support
 * Portability (No RTOS)
@@ -17,13 +15,11 @@ Kameleon is a tiny and efficient Javascript runtime for microcontrollers. The ma
 Documentation
 =============
 
-* Getting Started
+* [Getting Started](http://kameleon.io/#getting-started)
 * [API Reference](docs/api_reference.md)
-* [Contributing](CONTRIBUTING.md)
 
 Supported Targets
 =================
 
-* Kameleon Core (to be released)
-* Contribution required for other boards
-
+* [Kameleon Core](http://kameleon.io/#board)
+* Contributions required for other boards
