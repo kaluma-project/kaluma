@@ -44,6 +44,7 @@ static void cmd_load(repl_state_t *state);
 static void cmd_mem(repl_state_t *state);
 static void cmd_gc(repl_state_t *state);
 static void cmd_firmup(repl_state_t *state);
+static void cmd_version(repl_state_t *state);
 static void cmd_help(repl_state_t *state);
 
 // --------------------------------------------------------------------------
@@ -133,6 +134,8 @@ static void run_command() {
       cmd_gc(&state);
     } else if (strcmp(tokenv[0], ".firmup") == 0) {
       cmd_firmup(&state);
+    } else if (strcmp(tokenv[0], ".v") == 0) {
+      cmd_version(&state);
     } else if (strcmp(tokenv[0], ".help") == 0) {
       cmd_help(&state);
     } else { /* unknown command */
@@ -523,11 +526,11 @@ static void cmd_flash(repl_state_t *state, char *arg) {
   } else {
     repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf(".flash command options:\r\n");
-    repl_printf("-w\tWrite a file to flash via Ymodem\r\n");
-    repl_printf("-e\tErase the data in flash\r\n");
-    repl_printf("-t\tGet total size of flash\r\n");
-    repl_printf("-s\tGet data size in flash\r\n");
-    repl_printf("-r\tRead data in textual format\r\n");
+    repl_printf("-w\tWrite user code (file) to flash via Ymodem.\r\n");
+    repl_printf("-e\tErase the user code in flash.\r\n");
+    repl_printf("-t\tPrint total size of flash for user code.\r\n");
+    repl_printf("-s\tPrint the size of the user code.\r\n");
+    repl_printf("-r\tPrint the user code in textual format.\r\n");
     repl_print_end();
   }
 }
@@ -577,17 +580,28 @@ static void cmd_firmup(repl_state_t *state) {
 }
 
 /**
+ * .version command
+ */
+static void cmd_version(repl_state_t *state) {
+  repl_print_begin(REPL_OUTPUT_LOG);
+  repl_printf("%s\r\n", CONFIG_KAMELEON_VERSION);
+  repl_print_end();
+}
+
+/**
  * .help command
  */
 static void cmd_help(repl_state_t *state) {
   repl_print_begin(REPL_OUTPUT_LOG);
   repl_printf(".echo\tEcho on/off.\r\n");
-  repl_printf(".clear\tClear javascript context.\r\n");
+  repl_printf(".clear\tClear JavaScript runtime context.\r\n");
   repl_printf(".flash\tCommands for the internal flash.\r\n");
-  repl_printf(".load\tLoad program from the internal flash.\r\n");
-  repl_printf(".mem\tGet heap memory status.\r\n");
+  repl_printf(".load\tLoad user code from the internal flash.\r\n");
+  repl_printf(".mem\tHeap memory status.\r\n");
   repl_printf(".firmup\tFirmware update mode.\r\n");
   repl_printf(".gc\tPerform garbage collection.\r\n");
+  repl_printf(".v\tFirmware version.\r\n");
+  repl_printf(".help\tPrint this help message.\r\n");
   repl_print_end();
 }
 
