@@ -32,9 +32,9 @@ bool is_led_pin(uint8_t pin) {
   return false;
 }
 
-bool is_switch_pin(uint8_t pin) {
-  for (int i = 0; i < switch_num; i++) {
-    if (pin == switch_pins[i]) {
+bool is_button_pin(uint8_t pin) {
+  for (int i = 0; i < button_num; i++) {
+    if (pin == button_pins[i]) {
       return true;
     }
   }

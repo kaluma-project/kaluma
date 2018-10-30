@@ -30,14 +30,14 @@ extern const char board_name[];
 
 extern const uint8_t pin_num;
 extern const uint8_t led_num;
-extern const uint8_t switch_num;
+extern const uint8_t button_num;
 extern const uint8_t pwm_num;
 extern const uint8_t adc_num;
 extern const uint8_t i2c_num;
 extern const uint8_t spi_num;
 extern const uint8_t uart_num;
 extern const uint8_t led_pins[];
-extern const uint8_t switch_pins[];
+extern const uint8_t button_pins[];
 extern const uint8_t pwm_pins[];
 extern const uint8_t adc_pins[];
 

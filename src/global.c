@@ -459,11 +459,11 @@ JERRYXX_FUN(board_led_fn) {
   return jerry_create_number(led_pins[index]);
 }
 
-JERRYXX_FUN(board_switch_fn) {
+JERRYXX_FUN(board_button_fn) {
   JERRYXX_CHECK_ARG_NUMBER_OPT(0, "index");
   int index = (int) JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
-  JERRYXX_CHECK_INDEX_RANGE(index, 0, switch_num-1)
-  return jerry_create_number(switch_pins[index]);
+  JERRYXX_CHECK_INDEX_RANGE(index, 0, button_num-1)
+  return jerry_create_number(button_pins[index]);
 }
 
 JERRYXX_FUN(board_pwm_fn) {
@@ -485,14 +485,14 @@ static void register_global_board_object() {
   jerryxx_set_property_string(board, MSTR_NAME, board_name);
   jerryxx_set_property_number(board, MSTR_PIN_NUM, pin_num);
   jerryxx_set_property_number(board, MSTR_LED_NUM, led_num);
-  jerryxx_set_property_number(board, MSTR_SWITCH_NUM, switch_num);
+  jerryxx_set_property_number(board, MSTR_BUTTON_NUM, button_num);
   jerryxx_set_property_number(board, MSTR_PWM_NUM, pwm_num);
   jerryxx_set_property_number(board, MSTR_ADC_NUM, adc_num);
   jerryxx_set_property_number(board, MSTR_I2C_NUM, i2c_num);
   jerryxx_set_property_number(board, MSTR_SPI_NUM, spi_num);
   jerryxx_set_property_number(board, MSTR_UART_NUM, uart_num);
   jerryxx_set_property_function(board, MSTR_LED, board_led_fn);
-  jerryxx_set_property_function(board, MSTR_SWITCH, board_switch_fn);
+  jerryxx_set_property_function(board, MSTR_BUTTON, board_button_fn);
   jerryxx_set_property_function(board, MSTR_PWM, board_pwm_fn);
   jerryxx_set_property_function(board, MSTR_ADC, board_adc_fn);
   jerry_value_t global = jerry_get_global_object();

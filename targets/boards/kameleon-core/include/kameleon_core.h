@@ -41,7 +41,7 @@
 #define SPI_NUM 2
 #define UART_NUM 2
 #define LED_NUM 1
-#define SWITCH_NUM 1
+#define BUTTON_NUM 1
 
 #define APB1    0
 #define APB2    1

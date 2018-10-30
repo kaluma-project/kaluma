@@ -29,13 +29,13 @@ const char board_name[] = "kameleon-core";
 
 const uint8_t pin_num = GPIO_NUM;
 const uint8_t led_num = LED_NUM;
-const uint8_t switch_num = SWITCH_NUM;
+const uint8_t button_num = BUTTON_NUM;
 const uint8_t pwm_num = PWM_NUM;
 const uint8_t adc_num = ADC_NUM;
 const uint8_t i2c_num = I2C_NUM;
 const uint8_t spi_num = SPI_NUM;
 const uint8_t uart_num = UART_NUM;
 const uint8_t led_pins[] = { 20 };
-const uint8_t switch_pins[] = { 21 };
+const uint8_t button_pins[] = { 21 };
 const uint8_t pwm_pins[] = { 8, 9, 13, 14, 15, 16 };
 const uint8_t adc_pins[] = { 2, 3, 4, 5, 10, 11, 12 };
