@@ -29,3 +29,14 @@ Module.prototype.loadBuiltin = function () {
 
 global.require = Module.require;
 global.print = global.console.log;
+
+/**
+ * Board object
+ */
+
+if (process.builtin_modules.indexOf('gpio') > -1) {
+  board.gpio = function (pin, mode) {
+    var GPIO = Module.require('gpio');
+    return new GPIO(pin, mode);
+  }
+}

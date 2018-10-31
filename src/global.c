@@ -508,7 +508,7 @@ static void run_startup_module() {
   jerry_value_t ret_val = jerry_call_function (res, this_val, NULL, 0);
   jerry_release_value (ret_val);
   jerry_release_value (this_val);
-  jerry_release_value (res);  
+  jerry_release_value (res);
 }
 
 void global_init() {

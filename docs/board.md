@@ -3,16 +3,16 @@ Board
 
 * [Object: board]()
   * [name]()
-  * [PIN_COUNT]()
-  * [PWM_COUNT]()
-  * [ADC_COUNT]()
-  * [LED_COUNT]()
-  * [BUTTON_COUNT]()
-  * [I2C_COUNT]()
-  * [SPI_COUNT]()
-  * [UART_COUNT]()
+  * [PIN_NUM]()
+  * [LED_NUM]()
+  * [BUTTON_NUM]()
+  * [PWM_NUM]()
+  * [ADC_NUM]()
+  * [I2C_NUM]()
+  * [SPI_NUM]()
+  * [UART_NUM]()
   * [led(num)]()
-  * [switch(num)]()
+  * [button(num)]()
   * [pwm(num)]()
   * [adc(num)]()
   * [i2c(bus[, options])]()
@@ -23,6 +23,29 @@ Board
 
 board specific object
 
+```js
+board.GPIO_NUM = 22
+board.LED_NUM = 1
+board.BUTTON_NUM = 1
+board.PWM_NUM = 6
+board.ADC_NUM = 5
+board.I2C_NUM = 2
+board.SPI_NUM = 2
+board.UART_NUM = 2
+board.led_pins[]
+board.button_pins[]
+board.pwm_pins[]
+board.adc_pins[]
+borad.gpio() -> GPIO()
+board.led() -> LED()
+board.button() -> Button()
+board.pwm() -> PWM()
+board.adc() -> ADC()
+board.i2c() -> I2C()
+board.spi() -> SPI()
+board.uart() -> UART()
+```
+
 ### name
 
 * `{string}`
@@ -30,35 +53,35 @@ board specific object
 target board name. ex) 'stm32f4discovery', 'kameleon-core', ...
 
 
-### PIN_COUNT
+### PIN_NUM
 
 * `{number}` Total number of pins.
 
-### PWM_COUNT
+### PWM_NUM
 
 * `{number}` Total number of PWM channels.
 
-### ADC_COUNT
+### ADC_NUM
 
 * `{number}` Total number of ADCs.
 
-### LED_COUNT
+### LED_NUM
 
 * `{number}` Total number of LEDs.
 
-### BUTTON_COUNT
+### BUTTON_NUM
 
 * `{number}` Total number of buttons.
 
-### I2C_COUNT
+### I2C_NUM
 
 * `{number}` Total number of I2C buses.
 
-### SPI_COUNT
+### SPI_NUM
 
 * `{number}` Total number of SPI buses.
 
-### UART_COUNT
+### UART_NUM
 
 * `{number}` Total number of UART ports.
 
@@ -68,11 +91,11 @@ target board name. ex) 'stm32f4discovery', 'kameleon-core', ...
 
 Return a LED pin number corresponds to the index number.
 
-### switch(index)
+### button(index)
 
 * __`index`__ `{number}`
 
-Return a switch pin number corresponds to the index number.
+Return a button pin number corresponds to the index number.
 
 ### pwm(index)
 

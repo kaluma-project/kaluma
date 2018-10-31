@@ -15,8 +15,11 @@ API Reference
 ## Builtin Modules
 
 * [Events](events.md)
+* [GPIO](gpio.md)
+* [LED](led.md)
+* [Button](button.md)
 * [PWM](pwm.md)
+* [ADC](adc.md)
 * [I2C](i2c.md)
 * [SPI](spi.md)
 * [UART](uart.md)
-

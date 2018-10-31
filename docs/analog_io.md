@@ -14,7 +14,7 @@ Analog I/O
 Read value from an analog pin. Check the pinmap of the board for analog pins.
 
 ```js
-var pin = board.adc(0); // Get an analog pin number
+var pin = board.adc_pins(0); // Get an analog pin number
 var value = analogRead(pin);
 ```
 
@@ -28,7 +28,7 @@ var value = analogRead(pin);
 Write value to an analog pin.
 
 ```js
-var pin = board.adc(0); // Get an analog pin number
+var pin = board.pwm_pins(0); // Get an analog pin number
 analogWrite(pin, 0.5);
 ```
 

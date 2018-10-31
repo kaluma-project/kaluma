@@ -67,7 +67,7 @@ Whenever press the first button in the board, prints `click` string to terminal.
 ```js
 var button = board.switch(0); // board's first button
 var id = setWatch(function () {
-console.log("click");
+  console.log("click");
 }, button, RISING, 10);
 ```
 
