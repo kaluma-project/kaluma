@@ -40,3 +40,10 @@ if (process.builtin_modules.indexOf('gpio') > -1) {
     return new GPIO(pin, mode);
   }
 }
+
+if (process.builtin_modules.indexOf('led') > -1) {
+  board.led = function (pin) {
+    var LED = Module.require('led');
+    return new LED(pin);
+  }
+}

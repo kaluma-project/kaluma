@@ -76,7 +76,7 @@ endif
 # Kameleon modules
 # -----------------------------------------------------------------------------
 
-KAMELEON_MODULES='events gpio pwm i2c spi uart startup'
+KAMELEON_MODULES='events gpio led pwm i2c spi uart startup'
 
 KAMELEON_MODULE_EVENTS = 1
 KAMELEON_MODULE_PWM = 1
