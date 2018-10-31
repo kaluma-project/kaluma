@@ -10,13 +10,11 @@ var modulesPath = path.join(__dirname, '../src/modules')
 var magicStringHeaders = [ includePath + '/magic_strings.h' ]
 var magicStrings = [];
 
-generateMagicStrings([ 'startup', 'uart', 'i2c', 'spi' ]);
-
 function generateMagicStrings(modules) {
   // Extract magic string from all modules
   var headers = [ includePath + '/magic_strings.h' ]
   modules.forEach(mod => {
-    var header = modulesPath + '/' + mod + '/' + mod + '_magic_strings.h'
+    var header = modulesPath + '/' + mod.name + '/' + mod.name + '_magic_strings.h'
     if (fs.existsSync(header)) {
       headers.push(header);
     }
