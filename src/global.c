@@ -501,9 +501,17 @@ static void register_global_board_object() {
   jerry_release_value(global);
 }
 
-
 static void run_startup_module() {
   jerry_value_t res = jerry_exec_snapshot(module_startup_code, module_startup_size, 0, JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
+  jerry_value_t this_val = jerry_create_undefined ();
+  jerry_value_t ret_val = jerry_call_function (res, this_val, NULL, 0);
+  jerry_release_value (ret_val);
+  jerry_release_value (this_val);
+  jerry_release_value (res);
+}
+
+static void run_target_module() {
+  jerry_value_t res = jerry_exec_snapshot(module_target_code, module_target_size, 0, JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
   jerry_value_t this_val = jerry_create_undefined ();
   jerry_value_t ret_val = jerry_call_function (res, this_val, NULL, 0);
   jerry_release_value (ret_val);
@@ -520,4 +528,5 @@ void global_init() {
   register_global_process_object();
   register_global_board_object();
   run_startup_module();
+  run_target_module();
 }

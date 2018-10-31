@@ -242,7 +242,7 @@ all: $(BUILD_DIR)/$(TARGET_BIN).elf $(BUILD_DIR)/$(TARGET_BIN).hex $(BUILD_DIR)/
 
 $(KAMELEON_GENERATED):
 	$(Q) python $(JERRY_ROOT)/tools/build.py --clean --jerry-cmdline-snapshot=ON --snapshot-save=ON --snapshot-exec=ON
-	$(Q) node tools/js2c.js --modules=$(KAMELEON_MODULES)
+	$(Q) node tools/js2c.js --modules=$(KAMELEON_MODULES) --target=$(TARGET)
 	$(Q) -rm -rf deps/jerryscript/build
 
 # -----------------------------------------------------------------------------

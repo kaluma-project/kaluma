@@ -44,6 +44,10 @@ board.adc() -> ADC()
 board.i2c() -> I2C()
 board.spi() -> SPI()
 board.uart() -> UART()
+
+// Target specific
+board.LED0
+board.BTN0
 ```
 
 ### name

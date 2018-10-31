@@ -8,6 +8,7 @@ const minimist = require('minimist')
 const magicStrings = require('./magic_strings')
 
 var modulesPath = path.join(__dirname, '../src/modules')
+var targetPath = path.join(__dirname, '../targets/boards')
 
 // Parse modules for generate
 var argv = minimist(process.argv.slice(2))
@@ -45,6 +46,20 @@ function identifyModules() {
     };
     modules.push(module);
   })
+
+  if (argv.target) {
+    if (fs.existsSync(path.join(targetPath, argv.target, 'target.js'))) {
+      modules.push({
+        path: path.join(targetPath, argv.target),
+        name: 'target',
+        nameUC: 'TARGET',
+        js: true,
+        native: false,
+        require: false,
+        size: 0
+      })  
+    }
+  }
 }
 
 function generateSnapshots() {
