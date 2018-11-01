@@ -67,6 +67,8 @@ Print data to console. It is equivalent to `console.log()`.
 * `FALLING` = 0
 * `RISING` = 1
 * `CHANGE` = 2
+* `PULL_UP` = 0
+* `PULL_DOWN` = 1
 
 ## Functions
 

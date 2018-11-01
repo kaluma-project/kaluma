@@ -36,9 +36,6 @@ JERRYXX_FUN(i2c_ctor_fn) {
   // check this.bus number
   uint8_t bus = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_BUS, bus);
-  if (!is_i2c_bus(bus)) {
-    return JERRYXX_CREATE_ERROR("Not supported I2C bus.");
-  }
 
   // initialize the bus
   if (JERRYXX_GET_ARG_COUNT > 1) { /* slave mode */

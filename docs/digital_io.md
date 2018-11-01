@@ -65,10 +65,10 @@ digitalToggle(pin)
 Whenever press the first button in the board, prints `click` string to terminal.
 
 ```js
-var button = board.switch(0); // board's first button
+var pin = board.button_pins[0]; // on-board button
 var id = setWatch(function () {
   console.log("click");
-}, button, RISING, 10);
+}, pin, FALLING, 10); // pull up mode
 ```
 
 

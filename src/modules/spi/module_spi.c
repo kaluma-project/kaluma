@@ -55,9 +55,6 @@ JERRYXX_FUN(spi_ctor_fn) {
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BAUDRATE, baudrate);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BITORDER, bitorder);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BITS, bits);
-  if (!is_spi_bus(bus)) {
-    return JERRYXX_CREATE_ERROR("Not supported SPI bus.");
-  }
 
   // initialize the bus
   spi_setup(bus, (spi_mode_t) mode, baudrate, (spi_bitorder_t) bitorder, bits);

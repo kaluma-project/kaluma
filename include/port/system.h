@@ -27,6 +27,9 @@
 #define NVIC_INT_CTRL_REG   (*(volatile uint32_t *)0xe000ed04)
 #define NVIC_PENDSVSET_BIT  (1UL << 28UL)
 
+extern const char system_arch[];
+extern const char system_platform[];
+
 /**
  * Initialize the system
  */

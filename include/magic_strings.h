@@ -30,6 +30,8 @@
 #define MSTR_CHANGE "CHANGE"
 #define MSTR_RISING "RISING"
 #define MSTR_FALLING "FALLING"
+#define MSTR_PULL_UP "PULL_UP"
+#define MSTR_PULL_DOWN "PULL_DOWN"
 #define MSTR_PIN_MODE "pinMode"
 #define MSTR_DIGITAL_READ "digitalRead"
 #define MSTR_DIGITAL_WRITE "digitalWrite"

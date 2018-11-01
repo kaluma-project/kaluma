@@ -27,6 +27,9 @@
 #include "usb_device.h"
 #include "usbd_desc.h"
 
+const char system_arch[] = "cortex-m4";
+const char system_platform[] = "unknown";
+
 static uint64_t tick_count;
 
 /** GPIO Clock Enable

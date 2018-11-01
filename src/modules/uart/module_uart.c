@@ -108,10 +108,6 @@ JERRYXX_FUN(uart_ctor_fn) {
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_DATAEVENT, data_event);
   jerryxx_set_property(JERRYXX_GET_THIS, "callback", callback);
 
-  if (!is_uart_port(port)) {
-    return JERRYXX_CREATE_ERROR("Not supported UART port");
-  }
-
   // initialize the port
   int ret = uart_setup(port, baudrate, bits, parity, stop, flow, buffer_size);
   if (ret < 0) {
@@ -121,7 +117,7 @@ JERRYXX_FUN(uart_ctor_fn) {
   // setup io handle
   io_uart_handle_t *handle = malloc(sizeof(io_uart_handle_t));
   io_uart_init(handle);
-  handle->read_js_cb = callback;
+  handle->read_js_cb = jerry_acquire_value(callback);
   int condition = 0;
   if (jerry_value_is_number(data_event)) {
     condition = (int) jerry_get_number_value(data_event);
@@ -216,6 +212,7 @@ JERRYXX_FUN(uart_close_fn) {
   uint32_t handle_id = jerryxx_get_property_number(JERRYXX_GET_THIS, "handle_id", 0);
   io_uart_handle_t *handle = io_uart_get_by_id(handle_id);
   if (handle != NULL) {
+    jerry_release_value(handle->read_js_cb);
     io_uart_read_stop(handle);
     io_handle_close((io_handle_t *) handle, uart_close_cb);
   }

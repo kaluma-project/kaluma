@@ -19,26 +19,11 @@
  * SOFTWARE.
  */
 
-#ifndef __BOARD_H
-#define __BOARD_H
+#ifndef __BUTTON_MAGIC_STRINGS_H
+#define __BUTTON_MAGIC_STRINGS_H
 
-#include <stdint.h>
+#define MSTR_BUTTON_BUTTON "Button"
+#define MSTR_BUTTON_READ "read"
+#define MSTR_BUTTON_CLOSE "close"
 
-extern const char board_arch[];
-extern const char board_platform[];
-extern const char board_name[];
-
-extern const uint8_t pin_num;
-extern const uint8_t led_num;
-extern const uint8_t button_num;
-extern const uint8_t pwm_num;
-extern const uint8_t adc_num;
-extern const uint8_t i2c_num;
-extern const uint8_t spi_num;
-extern const uint8_t uart_num;
-extern const uint8_t led_pins[];
-extern const uint8_t button_pins[];
-extern const uint8_t pwm_pins[];
-extern const uint8_t adc_pins[];
-
-#endif /* __BOARD_H */
+#endif /* __BUTTON_MAGIC_STRINGS_H */

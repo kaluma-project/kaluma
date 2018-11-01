@@ -1,117 +1,129 @@
 Board
 =====
 
+Common board properties.
+
 * [Object: board]()
   * [name]()
-  * [PIN_NUM]()
-  * [LED_NUM]()
-  * [BUTTON_NUM]()
-  * [PWM_NUM]()
-  * [ADC_NUM]()
-  * [I2C_NUM]()
-  * [SPI_NUM]()
-  * [UART_NUM]()
-  * [led(num)]()
-  * [button(num)]()
-  * [pwm(num)]()
-  * [adc(num)]()
+  * [NUM_GPIO]()
+  * [NUM_LED]()
+  * [NUM_BUTTON]()
+  * [NUM_PWM]()
+  * [NUM_ADC]()
+  * [NUM_I2C]()
+  * [NUM_SPI]()
+  * [NUM_UART]()
+  * [led(pin)]()
+  * [button(pin)]()
+  * [pwm(pin)]()
+  * [adc(pin)]()
   * [i2c(bus[, options])]()
   * [spi(bus[, options])]()
   * [uart(port[, options])]()
 
-##  board
+Board-specific properties.
 
-board specific object
+* [Board: kameleon-core]()
+  * [LED0]()
+  * [BTN0]()
+
+##  Object: board
+
+A board specific object.
 
 ```js
-board.GPIO_NUM = 22
-board.LED_NUM = 1
-board.BUTTON_NUM = 1
-board.PWM_NUM = 6
-board.ADC_NUM = 5
-board.I2C_NUM = 2
-board.SPI_NUM = 2
-board.UART_NUM = 2
+board.NUM_GPIO = 22
+board.NUM_LED = 1
+board.NUM_BUTTON = 1
+board.NUM_PWM = 6
+board.NUM_ADC = 5
+board.NUM_I2C = 2
+board.NUM_SPI = 2
+board.NUM_UART = 2
 board.led_pins[]
 board.button_pins[]
-board.pwm_pins[]
-board.adc_pins[]
-borad.gpio() -> GPIO()
-board.led() -> LED()
-board.button() -> Button()
-board.pwm() -> PWM()
-board.adc() -> ADC()
-board.i2c() -> I2C()
-board.spi() -> SPI()
-board.uart() -> UART()
-
-// Target specific
-board.LED0
-board.BTN0
+board.pwm_pins = []
+board.adc_pins = []
+borad.gpio(pin) -> GPIO()
+board.led(pin) -> LED()
+board.button(pin) -> Button()
+board.pwm(pin) -> PWM()
+board.adc(pin) -> ADC()
+board.i2c(bus) -> I2C()
+board.spi(bus) -> SPI()
+board.uart(port) -> UART()
+// board-specific
+board.LED0 -> LED()
+board.BUTTON0 -> Button()
 ```
 
 ### name
 
 * `{string}`
 
-target board name. ex) 'stm32f4discovery', 'kameleon-core', ...
+Target board name. ex) `kameleon-core`, ...
 
+### NUM_GPIO
 
-### PIN_NUM
+* `{number}` Total number of GPIO.
 
-* `{number}` Total number of pins.
+### NUM_LED
 
-### PWM_NUM
+* `{number}` Total number of on-board LEDs.
+
+### NUM_BUTTON
+
+* `{number}` Total number of on-board buttons.
+
+### NUM_PWM
 
 * `{number}` Total number of PWM channels.
 
-### ADC_NUM
+### NUM_ADC
 
-* `{number}` Total number of ADCs.
+* `{number}` Total number of ADCs (Analog-Digital Converter).
 
-### LED_NUM
-
-* `{number}` Total number of LEDs.
-
-### BUTTON_NUM
-
-* `{number}` Total number of buttons.
-
-### I2C_NUM
+### NUM_I2C
 
 * `{number}` Total number of I2C buses.
 
-### SPI_NUM
+### NUM_SPI
 
 * `{number}` Total number of SPI buses.
 
-### UART_NUM
+### NUM_UART
 
 * `{number}` Total number of UART ports.
 
-### led(index)
+### led(pin)
 
-* __`index`__ `{number}`
+* __`pin`__ `{number}`
+* Returns: `{LED}`
 
-Return a LED pin number corresponds to the index number.
+Return a LED object corresponds to the pin number.
 
-### button(index)
+### button(pin[, pull[, debounce]])
 
-* __`index`__ `{number}`
+* __`pin`__ `{number}`
+* __`pull`__ `{number}` Optional.
+* __`debounce`__ `{number}` Optional.
+* Returns: `{Button}`
 
-Return a button pin number corresponds to the index number.
+Return a button object corresponds to the pin number.
 
-### pwm(index)
+### pwm(pin)
 
-* __`index`__ `{number}`
+* __`pin`__ `{number}`
+* Returns: `{PWM}`
 
-Return a PWM pin number corresponds to the index number.
+Return a PWM object corresponds to the pin number.
 
-### adc(index)
+### adc(pin)
 
-* __`index`__ `{number}`
+* __`pin`__ `{number}`
+* Returns: `{ADC}`
 
-Return a analog (ADC) pin number corresponds to the index number.
+Return an ADC object corresponds to the pin number.
 
 ### i2c(bus[, options])
 
@@ -138,3 +150,19 @@ Return SPI object initialized with the bus number
 * Returns: `{UART}` An initialized UART instance corresponds to the port number. Once initialized, the same object will be returned.
 
 Return UART object initialized with the port number
+
+---
+
+## Board: kameleon-core
+
+### LED0
+
+* `{LED}` Readonly.
+
+Indicates the on-board LED (`LED0`).
+
+### BTN0
+
+* `{Button}` Readonly.
+
+Indicates the on-board button (`BTN0`).

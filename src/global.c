@@ -31,7 +31,7 @@
 #include "gpio.h"
 #include "adc.h"
 #include "pwm.h"
-#include "board.h"
+#include "system.h"
 #include "kameleon_config.h"
 
 static void register_global_objects() {
@@ -103,7 +103,7 @@ JERRYXX_FUN(set_watch_fn) {
   uint32_t debounce = JERRYXX_GET_ARG_NUMBER_OPT(3, 0);
   io_watch_handle_t *watch = malloc(sizeof(io_watch_handle_t));
   io_watch_init(watch);
-  watch->watch_js_cb = callback;
+  watch->watch_js_cb = jerry_acquire_value(callback);
   io_watch_start(watch, set_watch_cb, pin, mode, debounce);
   return jerry_create_number(watch->base.id);
 }
@@ -117,6 +117,7 @@ JERRYXX_FUN(clear_watch_fn) {
   int id = (int) JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
   io_watch_handle_t *watch = io_watch_get_by_id(id);
   if (watch != NULL) {
+    jerry_release_value(watch->watch_js_cb);
     io_watch_stop(watch);
     io_handle_close((io_handle_t *) watch, watch_close_cb);
   }
@@ -132,6 +133,8 @@ static void register_global_digital_io() {
   jerryxx_set_property_number(global, MSTR_CHANGE, (double) IO_WATCH_MODE_CHANGE);
   jerryxx_set_property_number(global, MSTR_RISING, (double) IO_WATCH_MODE_RISING);
   jerryxx_set_property_number(global, MSTR_FALLING, (double) IO_WATCH_MODE_FALLING);
+  jerryxx_set_property_number(global, MSTR_PULL_UP, GPIO_PULL_UP);
+  jerryxx_set_property_number(global, MSTR_PULL_DOWN, GPIO_PULL_DOWN);
   jerryxx_set_property_function(global, MSTR_PIN_MODE, pin_mode_fn);
   jerryxx_set_property_function(global, MSTR_DIGITAL_READ, digital_read_fn);
   jerryxx_set_property_function(global, MSTR_DIGITAL_WRITE, digital_write_fn);
@@ -221,7 +224,7 @@ static void set_timer_cb(io_timer_handle_t *timer) {
     jerry_value_t this_val = jerry_create_undefined ();
     jerry_value_t ret_val = jerry_call_function (timer->timer_js_cb, this_val, NULL, 0);
     if (!jerry_value_is_error(ret_val)) {
-      // handle return value
+      // TODO handle return value
     }
     jerry_release_value (ret_val);
     jerry_release_value (this_val);
@@ -235,7 +238,7 @@ JERRYXX_FUN(set_timeout_fn) {
   uint64_t delay = (uint64_t) JERRYXX_GET_ARG_NUMBER(1);  
   io_timer_handle_t *timer = malloc(sizeof(io_timer_handle_t));
   io_timer_init(timer);
-  timer->timer_js_cb = callback;
+  timer->timer_js_cb = jerry_acquire_value(callback);
   io_timer_start(timer, set_timer_cb, delay, false);
   return jerry_create_number(timer->base.id);
 }
@@ -247,7 +250,7 @@ JERRYXX_FUN(set_interval_fn) {
   uint64_t delay = (uint64_t) JERRYXX_GET_ARG_NUMBER(1);  
   io_timer_handle_t *timer = malloc(sizeof(io_timer_handle_t));
   io_timer_init(timer);
-  timer->timer_js_cb = callback;
+  timer->timer_js_cb = jerry_acquire_value(callback);
   io_timer_start(timer, set_timer_cb, delay, true);
   return jerry_create_number(timer->base.id);
 }
@@ -261,6 +264,7 @@ JERRYXX_FUN(clear_timer_fn) {
   int id = (int) JERRYXX_GET_ARG_NUMBER(0);
   io_timer_handle_t *timer = io_timer_get_by_id(id);
   if (timer != NULL) {
+    jerry_release_value(timer->timer_js_cb);
     io_timer_stop(timer);
     io_handle_close((io_handle_t *) timer, timer_close_cb);
   }
@@ -403,8 +407,8 @@ JERRYXX_FUN(process_get_builtin_module_fn) {
 
 static void register_global_process_object() {
   jerry_value_t process = jerry_create_object();
-  jerryxx_set_property_string(process, MSTR_ARCH, board_arch);
-  jerryxx_set_property_string(process, MSTR_PLATFORM, board_platform);
+  jerryxx_set_property_string(process, MSTR_ARCH, system_arch);
+  jerryxx_set_property_string(process, MSTR_PLATFORM, system_platform);
   jerryxx_set_property_string(process, MSTR_VERSION, CONFIG_KAMELEON_VERSION);
 
   /* Add `process.binding` function and it's properties */
@@ -446,61 +450,6 @@ static void register_global_process_object() {
   jerry_release_value(global);
 }
 
-/****************************************************************************/
-/*                                                                          */
-/*                               BOARD OBJECT                               */
-/*                                                                          */
-/****************************************************************************/
-
-JERRYXX_FUN(board_led_fn) {
-  JERRYXX_CHECK_ARG_NUMBER_OPT(0, "index");
-  int index = (int) JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
-  JERRYXX_CHECK_INDEX_RANGE(index, 0, led_num-1)
-  return jerry_create_number(led_pins[index]);
-}
-
-JERRYXX_FUN(board_button_fn) {
-  JERRYXX_CHECK_ARG_NUMBER_OPT(0, "index");
-  int index = (int) JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
-  JERRYXX_CHECK_INDEX_RANGE(index, 0, button_num-1)
-  return jerry_create_number(button_pins[index]);
-}
-
-JERRYXX_FUN(board_pwm_fn) {
-  JERRYXX_CHECK_ARG_NUMBER_OPT(0, "index");
-  int index = (int) JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
-  JERRYXX_CHECK_INDEX_RANGE(index, 0, pwm_num-1)
-  return jerry_create_number(pwm_pins[index]);
-}
-
-JERRYXX_FUN(board_adc_fn) {
-  JERRYXX_CHECK_ARG_NUMBER_OPT(0, "index");
-  int index = (int) JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
-  JERRYXX_CHECK_INDEX_RANGE(index, 0, adc_num-1)
-  return jerry_create_number(adc_pins[index]);
-}
-
-static void register_global_board_object() {
-  jerry_value_t board = jerry_create_object();
-  jerryxx_set_property_string(board, MSTR_NAME, board_name);
-  jerryxx_set_property_number(board, MSTR_PIN_NUM, pin_num);
-  jerryxx_set_property_number(board, MSTR_LED_NUM, led_num);
-  jerryxx_set_property_number(board, MSTR_BUTTON_NUM, button_num);
-  jerryxx_set_property_number(board, MSTR_PWM_NUM, pwm_num);
-  jerryxx_set_property_number(board, MSTR_ADC_NUM, adc_num);
-  jerryxx_set_property_number(board, MSTR_I2C_NUM, i2c_num);
-  jerryxx_set_property_number(board, MSTR_SPI_NUM, spi_num);
-  jerryxx_set_property_number(board, MSTR_UART_NUM, uart_num);
-  jerryxx_set_property_function(board, MSTR_LED, board_led_fn);
-  jerryxx_set_property_function(board, MSTR_BUTTON, board_button_fn);
-  jerryxx_set_property_function(board, MSTR_PWM, board_pwm_fn);
-  jerryxx_set_property_function(board, MSTR_ADC, board_adc_fn);
-  jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property(global, MSTR_BOARD, board);
-  jerry_release_value(board);
-  jerry_release_value(global);
-}
-
 static void run_startup_module() {
   jerry_value_t res = jerry_exec_snapshot(module_startup_code, module_startup_size, 0, JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
   jerry_value_t this_val = jerry_create_undefined ();
@@ -510,8 +459,8 @@ static void run_startup_module() {
   jerry_release_value (res);
 }
 
-static void run_target_module() {
-  jerry_value_t res = jerry_exec_snapshot(module_target_code, module_target_size, 0, JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
+static void run_board_module() {
+  jerry_value_t res = jerry_exec_snapshot(module_board_code, module_board_size, 0, JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
   jerry_value_t this_val = jerry_create_undefined ();
   jerry_value_t ret_val = jerry_call_function (res, this_val, NULL, 0);
   jerry_release_value (ret_val);
@@ -526,7 +475,6 @@ void global_init() {
   register_global_timers();
   register_global_console_object();
   register_global_process_object();
-  register_global_board_object();
   run_startup_module();
-  run_target_module();
+  run_board_module();
 }

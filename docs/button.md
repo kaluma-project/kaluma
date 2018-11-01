@@ -7,18 +7,22 @@ Use `require('button')` to access this module.
 
 * [open(bus[, address])]()
 * [Class: Button]()
-  * [new Button(pin[, options])]()
+  * [new Button(pin[, pull[, debounce]])]()
   * [read()]()
   * [close()]()
+  * [Event: 'click']()
 
 ## Class: Button
 
 An instances of `Button` represents a button object.
 
-### new Button(pin[, options])
+This class is a subclass of `EventEmitter`.
+
+### new Button(pin[, pull[, debounce]])
 
 * __`pin`__ `{number}` Pin number of the button.
-* __`options`__ `{Object}` Optional.
+* __`pull`__ `{number}` Optional. `PULL_UP` or `PULL_DOWN`. Default is `PULL_DOWN`.
+* __`debounce`__ `{number}` Optional. Default is `50`.
 
 ```js
 var Button = require('button');
@@ -34,7 +38,17 @@ btn0.close();
 
 * Returns: `{number}`
 
-
 ### close()
 
 This method closes the I/O watcher for the button.
+
+### Event: 'click'
+
+The `click` event is emitted when the button is pressed down.
+
+```js
+var btn = board.BTN0;
+btn.on('click', function () {
+  board.LED0.toggle();
+})
+```

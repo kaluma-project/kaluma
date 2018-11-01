@@ -12,7 +12,6 @@ $(TARGET_DIR)/src/startup_stm32f411xe.s
 
 TARGET_SRC += \
 $(TARGET_DIR)/src/adc.c \
-$(TARGET_DIR)/src/board.c \
 $(TARGET_DIR)/src/button.c \
 $(TARGET_DIR)/src/ringbuffer.c \
 $(TARGET_DIR)/src/system.c \
@@ -76,7 +75,7 @@ endif
 # Kameleon modules
 # -----------------------------------------------------------------------------
 
-KAMELEON_MODULES='events gpio led pwm i2c spi uart startup'
+KAMELEON_MODULES='events gpio led button pwm i2c spi uart startup'
 
 KAMELEON_MODULE_EVENTS = 1
 KAMELEON_MODULE_PWM = 1

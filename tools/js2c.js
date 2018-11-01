@@ -8,7 +8,7 @@ const minimist = require('minimist')
 const magicStrings = require('./magic_strings')
 
 var modulesPath = path.join(__dirname, '../src/modules')
-var targetPath = path.join(__dirname, '../targets/boards')
+var boardPath = path.join(__dirname, '../targets/boards')
 
 // Parse modules for generate
 var argv = minimist(process.argv.slice(2))
@@ -48,11 +48,11 @@ function identifyModules() {
   })
 
   if (argv.target) {
-    if (fs.existsSync(path.join(targetPath, argv.target, 'target.js'))) {
+    if (fs.existsSync(path.join(boardPath, argv.target, 'board.js'))) {
       modules.push({
-        path: path.join(targetPath, argv.target),
-        name: 'target',
-        nameUC: 'TARGET',
+        path: path.join(boardPath, argv.target),
+        name: 'board',
+        nameUC: 'BOARD',
         js: true,
         native: false,
         require: false,

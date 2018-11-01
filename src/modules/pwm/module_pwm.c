@@ -24,8 +24,6 @@
 #include "jerryxx.h"
 #include "pwm_magic_strings.h"
 #include "pwm.h"
-#include "board.h"
-#include "target.h"
 
 #define PWM_DEFAULT_FREQUENCY 490
 #define PWM_DEFAULT_DUTY 1.0
@@ -42,9 +40,6 @@ JERRYXX_FUN(pwm_setup_fn) {
   double frequency = JERRYXX_GET_ARG_NUMBER_OPT(1, PWM_DEFAULT_FREQUENCY);
   double duty = JERRYXX_GET_ARG_NUMBER_OPT(2, PWM_DEFAULT_DUTY);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PWM_PIN, pin);
-  if (!is_pwm_pin(pin)) {
-    return JERRYXX_CREATE_ERROR("The pin is not PWM capable.");
-  }
   pwm_setup(pin, frequency, duty);
   return jerry_create_undefined();
 }
