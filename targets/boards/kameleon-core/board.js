@@ -24,12 +24,52 @@ global.board = {
     var Button = global.require('button');
     return new Button(pin, pull, debounce);
   },
-  pwm: function (pin) {
+  pwm: function (pin, frequency, duty) {
     if (this.pwm_pins.indexOf(pin) < 0) {
       throw Error('The pin is not PWM capable.');
     }
     var PWM = global.require('pwm');
-    return new PWM(pin);
+    return new PWM(pin, frequency, duty);
+  },
+  adc: function (pin) {
+    if (this.adc_pins.indexOf(pin) < 0) {
+      throw Error('The pin is not ADC capable.');
+    }
+    var ADC = global.require('adc');
+    return new ADC(pin);
+  },
+  i2c: function (bus, address) {
+    if (bus < 0 || bus >= this.NUM_I2C) {
+      throw Error('Unsupported I2C bus.');
+    }
+    var I2C = global.require('i2c');
+    if (arguments.length > 1) {
+      return new I2C(bus, address);
+    } else {
+      return new I2C(bus);
+    }
+  },
+  spi: function (bus, options) {
+    if (bus < 0 || bus >= this.NUM_SPI) {
+      throw Error('Unsupported SPI bus.');
+    }
+    var SPI = global.require('spi');
+    if (arguments.length > 1) {
+      return new SPI(bus, options);
+    } else {
+      return new SPI(bus);
+    }
+  },
+  uart: function (port, options) {
+    if (port < 0 || port >= this.NUM_UART) {
+      throw Error('Unsupported UART port.');
+    }
+    var UART = global.require('uart');
+    if (arguments.length > 1) {
+      return new UART(port, options);
+    } else {
+      return new UART(port);
+    }
   },
   get LED0() {
     if (!this._led0) {

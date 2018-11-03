@@ -254,7 +254,7 @@ JERRYXX_FUN(spi_close_fn) {
 }
 
 /** 
- * Initialize 'spi' module and return exports
+ * Initialize 'spi' module
  */
 jerry_value_t module_spi_init() {
   /* SPI class */
@@ -266,11 +266,5 @@ jerry_value_t module_spi_init() {
   jerryxx_set_property_function(spi_prototype, MSTR_SPI_RECV, spi_recv_fn);
   jerryxx_set_property_function(spi_prototype, MSTR_SPI_CLOSE, spi_close_fn);
   jerry_release_value (spi_prototype);
-
-  /* spi module exports */
-  jerry_value_t exports = jerry_create_object();
-  jerryxx_set_property(exports, MSTR_SPI_SPI, spi_ctor);
-  jerry_release_value (spi_ctor);
-
-  return exports;
+  return spi_ctor;
 }

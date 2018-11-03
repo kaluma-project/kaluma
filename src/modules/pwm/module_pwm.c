@@ -29,10 +29,6 @@
 #define PWM_DEFAULT_DUTY 1.0
 
 JERRYXX_FUN(pwm_ctor_fn) {
-  return jerry_create_undefined();
-}
-
-JERRYXX_FUN(pwm_setup_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   JERRYXX_CHECK_ARG_NUMBER_OPT(1, "frequency");
   JERRYXX_CHECK_ARG_NUMBER_OPT(2, "duty");
@@ -125,7 +121,6 @@ jerry_value_t module_pwm_init() {
   jerryxx_set_property(ctor, "prototype", prototype);
   jerry_release_value (prototype);
   /* PWM instance properties */
-  jerryxx_set_property_function(prototype, MSTR_PWM_SETUP, pwm_setup_fn);
   jerryxx_set_property_function(prototype, MSTR_PWM_START, pwm_start_fn);
   jerryxx_set_property_function(prototype, MSTR_PWM_STOP, pwm_stop_fn);
   jerryxx_set_property_function(prototype, MSTR_PWM_GET_FREQUENCY, pwm_get_frequency_fn);

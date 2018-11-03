@@ -14,7 +14,6 @@ Use `require('spi')` to access this module.
 - `bits` 디폴트값은 무엇을 줄것인가? 8? or 16? 둘 중 하나만 가능한가?
 ---
 
-* [open(bus[, options])]()
 * [Class: SPI]()
   * [new SPI(bus[, options])]()
   * [transfer(data[, timeout])]()
@@ -28,18 +27,6 @@ Use `require('spi')` to access this module.
   * [Class Property: SPI.MSB]()
   * [Class Property: SPI.LSB]()
 
-## open(bus[, options])
-
-* __`bus`__ `{number}` Bus number.
-* __`options`__ `{Object}` Optional. Same with the `options` parameter of [new SPI(bus[, options])]().
-* Returns: `{SPI}` Return an initalized instance of `SPI`.
-
-```js
-var spi = require('spi');
-var spi0 = spi.open(0);
-// transfer data...
-spi0.close();
-```
 
 ## Class: SPI
 
@@ -55,14 +42,14 @@ An instances of `SPI` represents a SPI bus.
   * `bits` `{number}` Optional. `8` or `16`.
 
 ```js
-var spi = require('spi');
+var SPI = require('spi');
 var options = {
   mode: spi.SPI.MODE_0,
   baudrate: 14000000,
   bitoder: spi.SPI.MSB,
   bits: 8
 };
-var spi0 = new spi.SPI(0, options); // equivalent to spi.open(0, options);
+var spi0 = new SPI(0, options); // equivalent to board.spi(0, options);
 // transfer data...
 spi0.close();
 ```
@@ -76,8 +63,8 @@ spi0.close();
 Send and receive data simultaneously.
 
 ```js
-var spi = require('spi');
-var spi0 = spi.open(0);
+var SPI = require('spi');
+var spi0 = new SPI(0);
 
 // Send two bytes and receive two bytes
 var buf = spi0.transfer([0x88, 0x24]);
@@ -100,8 +87,8 @@ spi0.close();
 Send data
 
 ```js
-var spi = require('spi');
-var spi0 = spi.open(0);
+var SPI = require('spi');
+var spi0 = new SPI(0);
 
 // Send 2 bytes with an array of numbers
 var array = [0x6b, 0x00];
@@ -128,8 +115,8 @@ spi0.close();
 Receive data as the length.
 
 ```js
-var spi = require('spi');
-var spi0 = spi.open(0);
+var SPI = require('spi');
+var spi0 = new SPI(0);
 
 // Receive 10 bytes
 var buf = spi0.recv(10);

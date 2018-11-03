@@ -210,7 +210,7 @@ JERRYXX_FUN(i2c_close_fn) {
 
 
 /** 
- * Initialize 'i2c' module and return exports
+ * Initialize 'i2c' module
  */
 jerry_value_t module_i2c_init() {
   /* I2C class */
@@ -221,11 +221,5 @@ jerry_value_t module_i2c_init() {
   jerryxx_set_property_function(i2c_prototype, MSTR_I2C_READ, i2c_read_fn);
   jerryxx_set_property_function(i2c_prototype, MSTR_I2C_CLOSE, i2c_close_fn);
   jerry_release_value (i2c_prototype);
-
-  /* i2c module exports */
-  jerry_value_t exports = jerry_create_object();
-  jerryxx_set_property(exports, MSTR_I2C_I2C, i2c_ctor);
-  jerry_release_value (i2c_ctor);
-
-  return exports;
+  return i2c_ctor;
 }

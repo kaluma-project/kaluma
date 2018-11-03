@@ -5,7 +5,6 @@ The `uart` module supports communication with computers or deivces using serial 
 
 Use `require('uart')` to access this module.
 
-* [open(port[, options])]()
 * [Class: UART]()
   * [new UART(port[, options])]()
   * [write(data)]()
@@ -18,19 +17,6 @@ Use `require('uart')` to access this module.
   * [Class Property: UART.FLOW_RTS]()
   * [Class Property: UART.FLOW_CTS]()
   * [Class Property: UART.FLOW_RTS_CTS]()
-  
-## open(port[, options])
-
-* __`port`__ `{number}` UART port number.
-* __`options`__ `{Object}` Optional. Same with the `options` parameter of [new UART(port[, options])]().
-* Returns: `{UART}` Return an initalized instance of `UART`.
-
-```js
-var uart = require('uart');
-var serial0 = uart.open(0);
-// ...
-serial0.close();
-```
 
 ## Class: UART
 
@@ -50,7 +36,7 @@ An instances of `UART` represents a UART port.
 
 
 ```js
-var uart = require('uart');
+var UART = require('uart');
 var options = {
   baudrate: 9600,
   bits: 8,
@@ -59,7 +45,7 @@ var options = {
   flow: 0,
   bufferSize: 2048
 };
-var serial0 = new uart.UART(0, options);
+var serial0 = new UART(0, options);
 // read or write data...
 serial0.close();
 ```
@@ -71,8 +57,8 @@ serial0.close();
 Writes data to the UART port. The write operation is non-blocking.
 
 ```js
-var uart = require('uart');
-var serial0 = uart.open(0, { baudrate: 9600 });
+var UART = require('uart');
+var serial0 = new UART(0, { baudrate: 9600 });
 serial0.write('Hello, world\n');
 serial0.close();
 ```
@@ -92,14 +78,14 @@ If the `dataEvent` option is given with a character (e.g. `'\n'`), this event is
 If the `dataEvent` option is given with a number (e.g. `10`), this event is emitted whenever buffer length has reached to the given number. The number should be less then the buffer size.
 
 ```js
-var uart = require('uart');
+var UART = require('uart');
 
 var options = {
   baudrate: 9600,
   dataEvent: '\n'
 };
 
-var serial0 = uart.open(0, options);
+var serial0 = new UART(0, options);
 
 // The `data` event is emitted whenever '\n' is arrived.
 serial0.on('data', function (data) {

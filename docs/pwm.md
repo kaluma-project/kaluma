@@ -2,7 +2,7 @@ PWM (Pulse Width Modulation)
 ============================
 
 * [Class: PWM]()
-  * [setup(pin[, frequency[, duty]])]()
+  * [new PWM(pin[, frequency[, duty]])]()
   * [start()]()
   * [stop()]()
   * [getFrequency()]()
@@ -15,28 +15,20 @@ PWM (Pulse Width Modulation)
 
 PWM Class.
 
-```js
-var PWM = require('pwm');
-var pwm = new PWM(); // Get an instance of PWM
-```
+### new PWM(pin[, frequency[, duty]])
 
-### setup(pin[, frequency[, duty]])
-
-* `pin {number}` Pin number
-* `freq {number}` in Hz
-* `duty {number}` 0 ~ 1
-
+* `pin {number}` Pin number.
+* `freq {number}` Frequency in Hz. Default is 490.
+* `duty {number}` Duty cycle between 0 and 1. Default is 1.
 
 ```js
 var PWM = require('pwm');
-var pwm = new PWM();
-pwm.setup(1, 1000, 0.5);
+var pwm = new PWM(1, 1000, 0.5);
 pwm.start();
 // ...
 pwm.stop();
 pwm.close();
 ```
-
 
 ### start()
 

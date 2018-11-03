@@ -5,7 +5,6 @@ The `i2c` module supports communication with I2C (Inter-Integrated Circuit) / TW
 
 Use `require('i2c')` to access this module.
 
-* [open(bus[, address])]()
 * [Class: I2C]()
   * [new I2C(bus[, address])]()
   * [write(data, address[, timeout])]()
@@ -13,19 +12,6 @@ Use `require('i2c')` to access this module.
   * [read(length[, address[, timeout]])]()
   * [read(length[, timeout])]()
   * [close()]()
-
-## open(bus[, address])
-
-* __`bus`__ `{number}` Bus number.
-* __`address`__ `{number}` Optional. Setup as slave mode with the given address. If not provided, setup as master mode.
-* Returns: `{I2C}` Return an initalized instance of `I2C`.
-
-```js
-var i2c = require('i2c');
-var bus0 = i2c.open(0);
-// read or write ...
-bus0.close();
-```
 
 ## Class: I2C
 
@@ -39,15 +25,15 @@ An instances of `I2C` represents a I2C bus.
 This method setup an I2C bus or throws an exception if failed to setup. If the `address` parameter is given, setup as slave mode. Otherwise, setup as master mode.
 
 ```js
-var i2c = require('i2c');
+var I2C = require('i2c');
 
 // open bus 0 in master mode
-var i2c0 = new i2c.I2C(0); // equals to i2c.open(0)
+var i2c0 = new I2C(0); // equals to board.i2c(0)
 // read or write ...
 i2c0.close();
 
 // open bus 1 in slave mode (address=0x7a)
-var i2c1 = new i2c.I2C(1, 0x7a); // equals to i2c.open(1, 0x7a);
+var i2c1 = new I2C(1, 0x7a); // equals to board.i2c(1, 0x7a);
 //  read or write ...
 i2c1.close();
 ```
@@ -62,8 +48,8 @@ i2c1.close();
 This method writes data to the specified address (slave device) and returns the number of bytes written. This method can be called only in master mode.
 
 ```js
-var i2c = require('i2c');
-var i2c0 = i2c.open(0); // master mode
+var I2C = require('i2c');
+var i2c0 = new I2C(0); // master mode
 
 // Writes 2 bytes with an array of numbers
 var array = [0x6b, 0x00];
@@ -91,7 +77,7 @@ This method writes data to master device and returns the number of bytes written
 
 ```js
 var I2C = require('i2c');
-var i2c0 = i2c.open(0, 0x7a); // slave mode
+var i2c0 = new I2C(0, 0x7a); // slave mode
 
 // Writes 2 bytes with an array of numbers
 var array = [0x6b, 0x00];
@@ -120,7 +106,7 @@ This method read data from the specified address (slave device) and returns an a
 
 ```js
 var I2C = require('i2c');
-var i2c0 = i2c.open(0); 
+var i2c0 = new I2C(0); 
 var buf = i2c0.read(14, 0x68); // Read 14 bytes from the address 0x68.
 i2c0.close();
 if (buf) {
@@ -140,7 +126,7 @@ This method read data from master device and returns an array buffer object. Thi
 
 ```js
 var I2C = require('i2c');
-var i2c0 = i2c.open(0, 0x7a); 
+var i2c0 = new I2C(0, 0x7a); 
 var buf = i2c0.read(10); // Read 10 bytes from the master.
 i2c0.close();
 var data = new Uint8Array(buf);
