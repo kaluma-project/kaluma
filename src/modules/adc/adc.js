@@ -6,4 +6,4 @@ ADC.prototype.read = function () {
   return analogRead(this.pin)
 }
 
-module.exports = ADC;
+exports.ADC = ADC;

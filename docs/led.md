@@ -22,7 +22,7 @@ An instances of `LED` represents a LED.
 * __`pin`__ `{number}` Pin number where LED connected.
 
 ```js
-var LED = require('led');
+var LED = require('led').LED;
 var led = new LED(20); // LED connected to pin 20.
 
 // For on-board LED(s)

@@ -19,4 +19,4 @@ LED.prototype.read = function () {
   return digitalRead(this.pin)
 }
 
-module.exports = LED;
+exports.LED = LED;

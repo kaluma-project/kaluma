@@ -20,4 +20,4 @@ GPIO.prototype.setMode = function (mode) {
   pinMode(this.pin, this.mode);
 }
 
-module.exports = GPIO;
+exports.GPIO = GPIO;

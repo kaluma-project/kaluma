@@ -42,7 +42,7 @@ An instances of `SPI` represents a SPI bus.
   * `bits` `{number}` Optional. `8` or `16`.
 
 ```js
-var SPI = require('spi');
+var SPI = require('spi').SPI;
 var options = {
   mode: spi.SPI.MODE_0,
   baudrate: 14000000,
@@ -63,7 +63,7 @@ spi0.close();
 Send and receive data simultaneously.
 
 ```js
-var SPI = require('spi');
+var SPI = require('spi').SPI;
 var spi0 = new SPI(0);
 
 // Send two bytes and receive two bytes
@@ -87,7 +87,7 @@ spi0.close();
 Send data
 
 ```js
-var SPI = require('spi');
+var SPI = require('spi').SPI;
 var spi0 = new SPI(0);
 
 // Send 2 bytes with an array of numbers
@@ -115,7 +115,7 @@ spi0.close();
 Receive data as the length.
 
 ```js
-var SPI = require('spi');
+var SPI = require('spi').SPI;
 var spi0 = new SPI(0);
 
 // Receive 10 bytes

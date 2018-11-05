@@ -19,7 +19,7 @@ An instances of `ADC` represents a ADC object.
 * __`pin`__ `{number}` Pin number.
 
 ```js
-var ADC = require('adc');
+var ADC = require('adc').ADC;
 var a3 = new ADC(3); // Pin @3.
 var val = a3.read();
 

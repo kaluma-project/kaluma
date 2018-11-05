@@ -24,7 +24,7 @@ An instances of `GPIO` represents a GPIO pin.
 * __`mode`__ `{number}` Optional. Pin mode.
 
 ```js
-var GPIO = require('gpio');
+var GPIO = require('gpio').GPIO;
 var pin = new GPIO(0, OUTPUT);
 
 // or, shortly

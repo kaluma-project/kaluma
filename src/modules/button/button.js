@@ -24,4 +24,4 @@ Button.prototype.close = function () {
   clearWatch(this.watchId);
 }
 
-module.exports = Button;
+exports.Button = Button;

@@ -25,7 +25,7 @@ This class is a subclass of `EventEmitter`.
 * __`debounce`__ `{number}` Optional. Default is `50`.
 
 ```js
-var Button = require('button');
+var Button = require('button').Button;
 var btn0 = new Button(board.button_pins[0]);
 btn0.on('click', function () {
   console.log('button 1 clicked');

@@ -31,4 +31,4 @@ UART.FLOW_RTS = uart_native.FLOW_RTS;
 UART.FLOW_CTS = uart_native.FLOW_CTS;
 UART.FLOW_RTS_CTS = uart_native.FLOW_RTS_CTS;
 
-module.exports = UART;
+exports.UART = UART;

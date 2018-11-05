@@ -25,7 +25,7 @@ An instances of `I2C` represents a I2C bus.
 This method setup an I2C bus or throws an exception if failed to setup. If the `address` parameter is given, setup as slave mode. Otherwise, setup as master mode.
 
 ```js
-var I2C = require('i2c');
+var I2C = require('i2c').I2C;
 
 // open bus 0 in master mode
 var i2c0 = new I2C(0); // equals to board.i2c(0)
@@ -48,7 +48,7 @@ i2c1.close();
 This method writes data to the specified address (slave device) and returns the number of bytes written. This method can be called only in master mode.
 
 ```js
-var I2C = require('i2c');
+var I2C = require('i2c').I2C;
 var i2c0 = new I2C(0); // master mode
 
 // Writes 2 bytes with an array of numbers
@@ -76,7 +76,7 @@ i2c0.close();
 This method writes data to master device and returns the number of bytes written. This method can be called only in slave mode.
 
 ```js
-var I2C = require('i2c');
+var I2C = require('i2c').I2C;
 var i2c0 = new I2C(0, 0x7a); // slave mode
 
 // Writes 2 bytes with an array of numbers
@@ -105,7 +105,7 @@ i2c0.close();
 This method read data from the specified address (slave device) and returns an array buffer object. This method can be called only in master mode.
 
 ```js
-var I2C = require('i2c');
+var I2C = require('i2c').I2C;
 var i2c0 = new I2C(0); 
 var buf = i2c0.read(14, 0x68); // Read 14 bytes from the address 0x68.
 i2c0.close();
@@ -125,7 +125,7 @@ if (buf) {
 This method read data from master device and returns an array buffer object. This method can be called only in slave mode.
 
 ```js
-var I2C = require('i2c');
+var I2C = require('i2c').I2C;
 var i2c0 = new I2C(0, 0x7a); 
 var buf = i2c0.read(10); // Read 10 bytes from the master.
 i2c0.close();

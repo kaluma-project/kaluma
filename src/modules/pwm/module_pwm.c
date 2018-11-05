@@ -115,12 +115,11 @@ JERRYXX_FUN(pwm_close_fn) {
 }
 
 jerry_value_t module_pwm_init() {
-  /* PWM constructor */
-  jerry_value_t ctor = jerry_create_external_function(pwm_ctor_fn);
+  /* PWM class */
+  jerry_value_t pwm_ctor = jerry_create_external_function(pwm_ctor_fn);
   jerry_value_t prototype = jerry_create_object();
-  jerryxx_set_property(ctor, "prototype", prototype);
+  jerryxx_set_property(pwm_ctor, "prototype", prototype);
   jerry_release_value (prototype);
-  /* PWM instance properties */
   jerryxx_set_property_function(prototype, MSTR_PWM_START, pwm_start_fn);
   jerryxx_set_property_function(prototype, MSTR_PWM_STOP, pwm_stop_fn);
   jerryxx_set_property_function(prototype, MSTR_PWM_GET_FREQUENCY, pwm_get_frequency_fn);
@@ -128,5 +127,11 @@ jerry_value_t module_pwm_init() {
   jerryxx_set_property_function(prototype, MSTR_PWM_GET_DUTY, pwm_get_duty_fn);
   jerryxx_set_property_function(prototype, MSTR_PWM_SET_DUTY, pwm_set_duty_fn);
   jerryxx_set_property_function(prototype, MSTR_PWM_CLOSE, pwm_close_fn);
-  return ctor;
+
+  /* pwm module exports */
+  jerry_value_t exports = jerry_create_object();
+  jerryxx_set_property(exports, MSTR_PWM_PWM, pwm_ctor);
+  jerry_release_value (pwm_ctor);
+
+  return exports;
 }

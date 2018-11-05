@@ -36,7 +36,7 @@ An instances of `UART` represents a UART port.
 
 
 ```js
-var UART = require('uart');
+var UART = require('uart').UART;
 var options = {
   baudrate: 9600,
   bits: 8,
@@ -57,7 +57,7 @@ serial0.close();
 Writes data to the UART port. The write operation is non-blocking.
 
 ```js
-var UART = require('uart');
+var UART = require('uart').UART;
 var serial0 = new UART(0, { baudrate: 9600 });
 serial0.write('Hello, world\n');
 serial0.close();
@@ -78,7 +78,7 @@ If the `dataEvent` option is given with a character (e.g. `'\n'`), this event is
 If the `dataEvent` option is given with a number (e.g. `10`), this event is emitted whenever buffer length has reached to the given number. The number should be less then the buffer size.
 
 ```js
-var UART = require('uart');
+var UART = require('uart').UART;
 
 var options = {
   baudrate: 9600,

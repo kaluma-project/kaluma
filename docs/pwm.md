@@ -22,7 +22,7 @@ PWM Class.
 * `duty {number}` Duty cycle between 0 and 1. Default is 1.
 
 ```js
-var PWM = require('pwm');
+var PWM = require('pwm').PWM;
 var pwm = new PWM(1, 1000, 0.5);
 pwm.start();
 // ...

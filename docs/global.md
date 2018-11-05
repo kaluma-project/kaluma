@@ -11,6 +11,8 @@ Global
   * [FALLING]()
   * [RISING]()
   * [CHANGE]()
+  * [PULL_UP]()
+  * [PULL_DOWN]()
   * [Digital I/O functions](digital_io.md)
   * [Analog I/O functions](analog_io.md)
   * [Timer functions](timers.md)
@@ -56,6 +58,14 @@ Print data to console. It is equivalent to `console.log()`.
 ### CHANGE
 
 * `{number}` = 2
+
+### PULL_UP
+
+* `{number}` = 0
+
+### PULL_DOWN
+
+* `{number}` = 1
 
 
 ## Constants
