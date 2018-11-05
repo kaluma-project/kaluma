@@ -236,13 +236,13 @@ jerry_value_t module_uart_init() {
   /* uart module exports */
   jerry_value_t exports = jerry_create_object();
   jerryxx_set_property(exports, MSTR_UART_UART, uart_ctor);
-  jerryxx_set_property(exports, MSTR_UART_PARITY_NONE, UART_PARITY_TYPE_NONE);
-  jerryxx_set_property(exports, MSTR_UART_PARITY_ODD, UART_PARITY_TYPE_ODD);
-  jerryxx_set_property(exports, MSTR_UART_PARITY_EVEN, UART_PARITY_TYPE_EVEN);
-  jerryxx_set_property(exports, MSTR_UART_FLOW_NONE, UART_FLOW_NONE);
-  jerryxx_set_property(exports, MSTR_UART_FLOW_RTS, UART_FLOW_RTS);
-  jerryxx_set_property(exports, MSTR_UART_FLOW_CTS, UART_FLOW_CTS);
-  jerryxx_set_property(exports, MSTR_UART_FLOW_RTS_CTS, UART_FLOW_RTS_CTS);
+  jerryxx_set_property_number(exports, MSTR_UART_PARITY_NONE, UART_PARITY_TYPE_NONE);
+  jerryxx_set_property_number(exports, MSTR_UART_PARITY_ODD, UART_PARITY_TYPE_ODD);
+  jerryxx_set_property_number(exports, MSTR_UART_PARITY_EVEN, UART_PARITY_TYPE_EVEN);
+  jerryxx_set_property_number(exports, MSTR_UART_FLOW_NONE, UART_FLOW_NONE);
+  jerryxx_set_property_number(exports, MSTR_UART_FLOW_RTS, UART_FLOW_RTS);
+  jerryxx_set_property_number(exports, MSTR_UART_FLOW_CTS, UART_FLOW_CTS);
+  jerryxx_set_property_number(exports, MSTR_UART_FLOW_RTS_CTS, UART_FLOW_RTS_CTS);
   jerry_release_value (uart_ctor);
 
   return exports;
