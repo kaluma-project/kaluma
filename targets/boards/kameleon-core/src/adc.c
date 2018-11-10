@@ -60,6 +60,7 @@ static uint8_t get_adc_index(uint8_t pin) {
 
 /* ADC1 init function */
 void adc1_init() {
+ uint32_t n = sizeof(adc_config) / sizeof(struct __adc_config);
   ADC_ChannelConfTypeDef sConfig;
 
   /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
@@ -83,7 +84,8 @@ void adc1_init() {
 
   /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
   */
-  for (int k=0; k<ADC_NUM; k++) {
+ 
+  for (int k=0; k<n; k++) {
     sConfig.Channel = adc_config[k].channel;
     sConfig.Rank = k+1;
     sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
