@@ -3,15 +3,15 @@ global.board = {
   NUM_GPIO: 22,
   NUM_LED: 1,
   NUM_BUTTON: 1,
-  NUM_PWM: 6,
-  NUM_ADC: 7,
+  NUM_PWM: 5,
+  NUM_ADC: 6,
   NUM_I2C: 2,
   NUM_SPI: 2,
   NUM_UART: 2,
   led_pins: [20],
   button_pins: [21],
-  pwm_pins: [8, 9, 13, 14, 15, 16],
-  adc_pins: [2, 3, 4, 5, 10, 11, 12],
+  pwm_pins: [1, 2, 14, 15, 16],
+  adc_pins: [3, 4, 5, 10, 11, 12],
   gpio: function (pin, mode) {
     var GPIO = global.require('gpio').GPIO;
     return new GPIO(pin, mode);

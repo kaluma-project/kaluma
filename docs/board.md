@@ -35,8 +35,8 @@ A board specific object.
 board.NUM_GPIO = 22
 board.NUM_LED = 1
 board.NUM_BUTTON = 1
-board.NUM_PWM = 6
-board.NUM_ADC = 5
+board.NUM_PWM = 5
+board.NUM_ADC = 6
 board.NUM_I2C = 2
 board.NUM_SPI = 2
 board.NUM_UART = 2
