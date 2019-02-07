@@ -22,14 +22,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "jerryscript-ext/handler.h"
 #include "jerryscript-port.h"
 #include "jerryscript.h"
 
 #include "tty.h"
-#include "repl.h"
-
 /**
  * Aborts the program.
  */
@@ -44,7 +43,13 @@ void jerry_port_log(jerry_log_level_t level, /**< log level */
                     const char *format,      /**< format string */
                     ...) {                   /**< parameters */
   /* Drain log messages since IoT.js has not support log levels yet. */
-  // repl_warning(format, format);
+    char buf[256];
+    int length = 0;
+    va_list args;
+    va_start (args, format);
+    length = vsnprintf (buf, 256, format, args);
+    tty_printf ("%s\r", buf);
+    va_end (args);
 } /* jerry_port_log */
 
 /**
