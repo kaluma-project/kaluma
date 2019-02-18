@@ -32,7 +32,7 @@ static const struct __adc_config {
     GPIO_TypeDef * port;
     uint32_t pin;
     uint32_t channel;
-} adc_config[] = {
+} adc_config[] = { //Same as ADC_NUM
    {3, GPIOA, GPIO_PIN_1, ADC_CHANNEL_1},
    {4, GPIOA, GPIO_PIN_2, ADC_CHANNEL_2},
    {5, GPIOA, GPIO_PIN_3, ADC_CHANNEL_3},
@@ -41,20 +41,27 @@ static const struct __adc_config {
    {12, GPIOA, GPIO_PIN_7, ADC_CHANNEL_7},
 };
 
-
 /**
+ * Get ADC index
+ * 
+ * @param pin Pin number.
+ * @return Returns 0 on success or -1 on failure.
+ */
+/**
+ * input : pinNumber
+ * output : pinIndex or 0xFF
+ *          0xFF means the pin is not assigned for ADC
 */
 static uint8_t get_adc_index(uint8_t pin) {
   uint32_t n = sizeof(adc_config) / sizeof(struct __adc_config);
-  uint8_t index;
+  uint8_t index = 0xFF;
 
   for (int k=0; k<n; k++) {
     if (adc_config[k].pin_number == pin) {
       index = k;
       break;
     }
-  }  
-  
+  }
   return index;    
 }
 
@@ -105,12 +112,10 @@ static void adc1_deinit() {
 /**
  * Read value from the ADC channel
  * 
- * @param {uint8_t} pin
+ * @param {uint8_t} adcIndex
  * @return {double}
  */
-double adc_read(uint8_t pin) {
-  uint8_t n = get_adc_index(pin);
-
+double adc_read(uint8_t adcIndex) {
   HAL_ADC_Start(&hadc1);
   
   for (int k=0; k<ADC_NUM; k++) {
@@ -126,11 +131,15 @@ double adc_read(uint8_t pin) {
 
   HAL_ADC_Stop(&hadc1);
     
-  return (double)adc_buf[n] / (1 << ADC_RESOLUTION_BIT);
+  return (double)adc_buf[adcIndex] / (1 << ADC_RESOLUTION_BIT);
 }
 
 int adc_setup(uint8_t pin) {
-  
+
+  uint8_t n = get_adc_index(pin);
+  if (n == 0xFF)
+    return -1;
+
   uint8_t adc_need_init=1;
   for (int k=0; k<ADC_NUM; k++) {
     if (adc_configured[k]) {
@@ -142,7 +151,6 @@ int adc_setup(uint8_t pin) {
     adc1_init();
   }   
   
-  uint8_t n = get_adc_index(pin);
   GPIO_InitTypeDef GPIO_InitStruct;
   GPIO_InitStruct.Pin = adc_config[n].pin;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
@@ -150,11 +158,13 @@ int adc_setup(uint8_t pin) {
   HAL_GPIO_Init(adc_config[n].port, &GPIO_InitStruct);
 
   adc_configured[n] = 1;
-  return 0;
+  return n;
 }
 
 int adc_close(uint8_t pin) {
   uint8_t n = get_adc_index(pin);
+  if (n == 0xFF)
+    return -1;
   HAL_GPIO_DeInit(adc_config[n].port, adc_config[n].pin);
   adc_configured[n] = 0;
   

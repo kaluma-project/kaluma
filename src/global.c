@@ -152,10 +152,15 @@ static void register_global_digital_io() {
 
 JERRYXX_FUN(analog_read_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
-  uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  adc_setup(pin);
+  uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);\
+  int adcIndex = adc_setup(pin);
+  if (adcIndex == -1) {
+    char errmsg[255];
+    sprintf(errmsg, "\"%d\" This pin can't be used for ADC channel", pin);
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+  }
   delay(1); // To prevent issue #55
-  double value = adc_read(pin);
+  double value = adc_read((uint8_t) adcIndex);
   return jerry_create_number(value);
 }
 
