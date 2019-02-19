@@ -69,19 +69,27 @@ static const uint32_t tick_freq_div=4;
 
 
 /**
+ * Get PWM index
+ * 
+ * @param pin Pin number.
+ * @return Returns index number on success or 255 on failure.
+ */
+/**
+ * input : pinNumber
+ * output : pinIndex or 0xFF
+ *          0xFF means the pin is not assigned for PWM
 */
 static uint8_t get_pwm_index(uint8_t pin) {
   uint32_t n = sizeof(pwm_config) / sizeof(struct __pwm_config);
-  uint8_t index;
+  uint8_t index = 0xFF;
 
   for (int k=0; k<n; k++) {
     if (pwm_config[k].pin_number == pin) {
       index = k;
       break;
     }
-  }  
-  
-  return index;    
+  }
+  return index;
 }
 
 /**
@@ -106,7 +114,7 @@ static void tim1_pwm_setup(uint32_t channel, uint32_t arr, uint32_t pulse) {
   TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
 
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = tick_freq_div - 1;;
+  htim1.Init.Prescaler = tick_freq_div - 1;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim1.Init.Period = arr;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -292,17 +300,20 @@ static void tim5_pwm_setup(uint32_t channel, uint32_t arr, uint32_t pulse) {
 }
 
 /**
+ * return Returns 0 on success or -1 on failure.
 */
 int pwm_setup(uint8_t pin, double frequency, double duty) {
   uint32_t tick_freq, ch, arr, pulse;
   uint8_t n = get_pwm_index(pin);
+  if (n == 0xFF) //Not a index of PWM pin
+    return -1;
 
   tick_freq = get_tick_frequency(n);
   ch = pwm_config[n].channel;
   arr = (uint32_t)(tick_freq / frequency + 0.5f) - 1;
   pulse = (uint32_t)(duty * (arr + 1) + 0.5f);
   pwm_config[n].setup(ch, arr, pulse);
-  
+
   return 0;
 }
 
@@ -310,40 +321,48 @@ int pwm_setup(uint8_t pin, double frequency, double duty) {
 */
 void pwm_start(uint8_t pin) {
   uint8_t n = get_pwm_index(pin);
-  pwm_config[n].start(pwm_config[n].handle, pwm_config[n].channel);
+  if (n != 0xFF) //PWM pin index
+    pwm_config[n].start(pwm_config[n].handle, pwm_config[n].channel);
 }
 
 /**
 */
 void pwm_stop(uint8_t pin) {
   uint8_t n = get_pwm_index(pin);
-  pwm_config[n].stop(pwm_config[n].handle, pwm_config[n].channel);
+  if (n != 0xFF) //PWM pin index
+    pwm_config[n].stop(pwm_config[n].handle, pwm_config[n].channel);
 }
 
 /**
 */
 double pwm_get_frequency(uint8_t pin) {
   uint8_t n = get_pwm_index(pin);
-  uint32_t tick_freq = get_tick_frequency(n);
-  return (double)tick_freq/(__HAL_TIM_GET_AUTORELOAD(pwm_config[n].handle)+1);
+  if (n != 0xFF) { //PWM pin index
+    uint32_t tick_freq = get_tick_frequency(n);
+    return (double)tick_freq/(__HAL_TIM_GET_AUTORELOAD(pwm_config[n].handle)+1);
+  }
 }
 
 /**
 */
 double pwm_get_duty(uint8_t pin) {
   uint8_t n = get_pwm_index(pin);
-  uint32_t arr = __HAL_TIM_GET_AUTORELOAD(pwm_config[n].handle);
-  uint32_t pulse = __HAL_TIM_GET_COMPARE(pwm_config[n].handle, pwm_config[n].channel);
-  return (double)(pulse)/(arr+1);
+  if (n != 0xFF) { //PWM pin index
+    uint32_t arr = __HAL_TIM_GET_AUTORELOAD(pwm_config[n].handle);
+    uint32_t pulse = __HAL_TIM_GET_COMPARE(pwm_config[n].handle, pwm_config[n].channel);
+    return (double)(pulse)/(arr+1);
+  }
 }
 
 /**
 */
 void pwm_set_duty(uint8_t pin, double duty) {
   uint8_t n = get_pwm_index(pin);
-  uint32_t arr = __HAL_TIM_GET_AUTORELOAD(pwm_config[n].handle);
-  uint32_t pulse = (uint32_t)(duty * (arr + 1) + 0.5f);  
-  __HAL_TIM_SET_COMPARE(pwm_config[n].handle, pwm_config[n].channel, pulse);
+  if (n != 0xFF) { //PWM pin index
+    uint32_t arr = __HAL_TIM_GET_AUTORELOAD(pwm_config[n].handle);
+    uint32_t pulse = (uint32_t)(duty * (arr + 1) + 0.5f);
+    __HAL_TIM_SET_COMPARE(pwm_config[n].handle, pwm_config[n].channel, pulse);
+  }
 }
 
 /**
@@ -352,20 +371,23 @@ void pwm_set_frequency(uint8_t pin, double frequency) {
   double previous_duty = pwm_get_duty(pin);
 
   uint8_t n = get_pwm_index(pin);
-  uint32_t arr = (uint32_t)(get_tick_frequency(n)/frequency + 0.5f) - 1;
-  uint32_t pulse = (uint32_t)(previous_duty * (arr + 1) + 0.5f);  
-  
-  /* The previous duty ratio must be hold up regardless of changing frequency */
-  __HAL_TIM_SET_COMPARE(pwm_config[n].handle, pwm_config[n].channel, pulse);
-  __HAL_TIM_SET_AUTORELOAD(pwm_config[n].handle, arr);
-  
-  /* The counter value must be reset for not being over the arr value. */
-  __HAL_TIM_SET_COUNTER(pwm_config[n].handle, 0);
-}    
+  if (n != 0xFF) { //PWM pin index
+    uint32_t arr = (uint32_t)(get_tick_frequency(n)/frequency + 0.5f) - 1;
+    uint32_t pulse = (uint32_t)(previous_duty * (arr + 1) + 0.5f);
+
+    /* The previous duty ratio must be hold up regardless of changing frequency */
+    __HAL_TIM_SET_COMPARE(pwm_config[n].handle, pwm_config[n].channel, pulse);
+    __HAL_TIM_SET_AUTORELOAD(pwm_config[n].handle, arr);
+
+    /* The counter value must be reset for not being over the arr value. */
+    __HAL_TIM_SET_COUNTER(pwm_config[n].handle, 0);
+  }
+}
 
 /**
 */
 void pwm_close(uint8_t pin) {
   uint8_t n = get_pwm_index(pin);
-  HAL_TIM_PWM_DeInit(pwm_config[n].handle);  
+  if (n != 0xFF) //PWM pin index
+    HAL_TIM_PWM_DeInit(pwm_config[n].handle);
 }

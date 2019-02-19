@@ -152,7 +152,7 @@ static void register_global_digital_io() {
 
 JERRYXX_FUN(analog_read_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
-  uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);\
+  uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   int adcIndex = adc_setup(pin);
   if (adcIndex == -1) {
     char errmsg[255];
@@ -171,9 +171,14 @@ JERRYXX_FUN(analog_write_fn) {
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   double value = JERRYXX_GET_ARG_NUMBER_OPT(1, 0.5);
   double frequency = JERRYXX_GET_ARG_NUMBER_OPT(2, 490); // Default 490Hz
-  pwm_setup(pin, frequency, value);
-  pwm_start(pin);
-  return jerry_create_undefined();
+  if (pwm_setup(pin, frequency, value) != -1) {
+    pwm_start(pin);
+    return jerry_create_undefined();
+  } else {
+    char errmsg[255];
+    sprintf(errmsg, "\"%d\" This pin can't be used for PWM", pin);
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+  }
 }
 
 static void tone_timeout_cb(io_timer_handle_t *timer) {
@@ -190,16 +195,21 @@ JERRYXX_FUN(tone_fn) {
   double frequency = JERRYXX_GET_ARG_NUMBER_OPT(1, 261.626); // C key frequency
   uint32_t duration = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(2, 0);
   double duty = JERRYXX_GET_ARG_NUMBER_OPT(3, 0.5);
-  pwm_setup(pin, frequency, duty);
-  pwm_start(pin);
-  // setup timer for duration
-  if (duration > 0) {
-    io_timer_handle_t *timer = malloc(sizeof(io_timer_handle_t));
-    io_timer_init(timer);
-    timer->tag = pin;
-    io_timer_start(timer, tone_timeout_cb, duration, false);
+  if (pwm_setup(pin, frequency, duty) != -1) {
+    pwm_start(pin);
+    // setup timer for duration
+    if (duration > 0) {
+      io_timer_handle_t *timer = malloc(sizeof(io_timer_handle_t));
+      io_timer_init(timer);
+      timer->tag = pin;
+      io_timer_start(timer, tone_timeout_cb, duration, false);
+    }
+    return jerry_create_undefined();
+  } else {
+    char errmsg[255];
+    sprintf(errmsg, "\"%d\" This pin can't be used for tone", pin);
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
   }
-  return jerry_create_undefined();
 }
 
 JERRYXX_FUN(no_tone_fn) {

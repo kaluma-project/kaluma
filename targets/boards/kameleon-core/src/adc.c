@@ -45,7 +45,7 @@ static const struct __adc_config {
  * Get ADC index
  * 
  * @param pin Pin number.
- * @return Returns 0 on success or -1 on failure.
+ * @return Returns index on success or -1 on failure.
  */
 /**
  * input : pinNumber
@@ -62,7 +62,7 @@ static uint8_t get_adc_index(uint8_t pin) {
       break;
     }
   }
-  return index;    
+  return index;
 }
 
 /* ADC1 init function */
