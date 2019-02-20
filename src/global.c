@@ -243,14 +243,14 @@ static void set_timer_cb(io_timer_handle_t *timer) {
     }
     jerry_release_value (ret_val);
     jerry_release_value (this_val);
-  } 
+  }
 }
 
 JERRYXX_FUN(set_timeout_fn) {
   JERRYXX_CHECK_ARG_FUNCTION(0, "callback");
   JERRYXX_CHECK_ARG_NUMBER(1, "delay");
   jerry_value_t callback = JERRYXX_GET_ARG(0);
-  uint64_t delay = (uint64_t) JERRYXX_GET_ARG_NUMBER(1);  
+  uint64_t delay = (uint64_t) JERRYXX_GET_ARG_NUMBER(1);
   io_timer_handle_t *timer = malloc(sizeof(io_timer_handle_t));
   io_timer_init(timer);
   timer->timer_js_cb = jerry_acquire_value(callback);
@@ -262,7 +262,7 @@ JERRYXX_FUN(set_interval_fn) {
   JERRYXX_CHECK_ARG_FUNCTION(0, "callback");
   JERRYXX_CHECK_ARG_NUMBER(1, "delay");
   jerry_value_t callback = JERRYXX_GET_ARG(0);
-  uint64_t delay = (uint64_t) JERRYXX_GET_ARG_NUMBER(1);  
+  uint64_t delay = (uint64_t) JERRYXX_GET_ARG_NUMBER(1);
   io_timer_handle_t *timer = malloc(sizeof(io_timer_handle_t));
   io_timer_init(timer);
   timer->timer_js_cb = jerry_acquire_value(callback);
@@ -459,7 +459,7 @@ static void register_global_process_object() {
 
   /* Register 'process' object to global */
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property(global, MSTR_PROCESS, process);  
+  jerryxx_set_property(global, MSTR_PROCESS, process);
 
   jerry_release_value(process);
   jerry_release_value(global);

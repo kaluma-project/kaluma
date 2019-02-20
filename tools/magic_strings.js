@@ -41,7 +41,7 @@ function generateMagicStrings(modules) {
   // Generate magic strings via templates
   magicStringItems = magicStrings.map(item => { return { id: item, len: item.length } })
   magicStringItems[magicStringItems.length - 1].last = true;
-  
+
   const template_h = fs.readFileSync(__dirname + '/kameleon_magic_strings.h.mustache', 'utf8')
   var rendered_h = mustache.render(template_h, { magicStrings: magicStringItems })
   const template_c = fs.readFileSync(__dirname + '/kameleon_magic_strings.c.mustache', 'utf8')
@@ -67,7 +67,7 @@ function extractMagicStrings(filePath) {
         }
       }
     }
-  });    
+  });
 }
 
 exports.generateMagicStrings = generateMagicStrings;

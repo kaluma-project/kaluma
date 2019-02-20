@@ -45,7 +45,7 @@ void runtime_init(bool run_main) {
 }
 
 void runtime_deinit() {
-  jerry_cleanup ();  
+  jerry_cleanup ();
 }
 
 
@@ -90,6 +90,6 @@ void runtime_run_main() {
         print_unhandled_exception (parsed_code);
       }
     }
-    jerry_release_value (parsed_code);  
+    jerry_release_value (parsed_code);
   }
 }

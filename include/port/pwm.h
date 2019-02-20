@@ -26,7 +26,7 @@
 
 /**
  * Setup a PWM channel
- * 
+ *
  * @param {uint8_t} pin
  * @param {double} frequency
  * @param {double} duty
@@ -36,21 +36,21 @@ int pwm_setup(uint8_t pin, double frequency, double duty);
 
 /**
  * Start the PWM channel
- * 
+ *
  * @param {uint8_t} pin
  */
 void pwm_start(uint8_t pin);
 
 /**
  * Stop the PWM channel
- * 
+ *
  * @param {uint8_t} pin
  */
 void pwm_stop(uint8_t pin);
 
 /**
  * Return the current frequency
- * 
+ *
  * @param {uint8_t} pin
  * @return {double}
  */
@@ -58,7 +58,7 @@ double pwm_get_frequency(uint8_t pin);
 
 /**
  * Set the current frequency
- * 
+ *
  * @param {uint8_t} pin
  * @param {double} frequency
  */
@@ -66,7 +66,7 @@ void pwm_set_frequency(uint8_t pin, double frequency);
 
 /**
  * Return the current duty cycle
- * 
+ *
  * @param {uint8_t} pin
  * @return {double}
  */
@@ -74,7 +74,7 @@ double pwm_get_duty(uint8_t pin);
 
 /**
  * Set the current duty cycle
- * 
+ *
  * @param {uint8_t} pin
  * @param {double} duty
  */

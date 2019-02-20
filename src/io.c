@@ -46,7 +46,7 @@ void io_handle_init(io_handle_t *handle, io_type_t type) {
   handle->id = handle_id_count++;
   handle->type = type;
   handle->flags = 0;
-  handle->close_cb = NULL;  
+  handle->close_cb = NULL;
 }
 
 void io_handle_close(io_handle_t *handle, io_close_cb close_cb) {

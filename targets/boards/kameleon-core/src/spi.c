@@ -42,7 +42,7 @@ static uint32_t get_prescaler_factor(uint8_t bus, uint32_t baudrate) {
   uint32_t k;
   uint32_t source_clock;
   const uint32_t pre_scaler_div[] = {2, 4, 8, 16, 32, 64, 128, 256};
-  
+
   if (bus==0) {
     source_clock = 42000000;
   } else {
@@ -53,9 +53,9 @@ static uint32_t get_prescaler_factor(uint8_t bus, uint32_t baudrate) {
     uint32_t rate = source_clock / pre_scaler_div[k];
     if (baudrate >= rate) {
       break;
-    }    
+    }
   }
-  
+
   if (k==sizeof(pre_scaler_div)/sizeof(uint32_t)) {
     k=k-1;
   }
@@ -65,12 +65,12 @@ static uint32_t get_prescaler_factor(uint8_t bus, uint32_t baudrate) {
 /** SPI Setup
 */
 int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bitorder, uint8_t bits) {
-                
+
   assert_param(bus==0 || bus==1);
   assert_param(bits==8 || bits==16);
-  
+
   SPI_HandleTypeDef * pspi = spi_handle[bus];
-    
+
   pspi->Instance = spi_ch[bus];
   pspi->Init.Mode = SPI_MODE_MASTER;
   switch (mode)
@@ -95,7 +95,7 @@ int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bi
   pspi->Init.BaudRatePrescaler = get_prescaler_factor(bus, baudrate);
   pspi->Init.FirstBit = spi_firstbit[bitorder];
   pspi->Init.Direction = SPI_DIRECTION_2LINES;
-  pspi->Init.NSS = SPI_NSS_SOFT;    
+  pspi->Init.NSS = SPI_NSS_SOFT;
   pspi->Init.TIMode = SPI_TIMODE_DISABLE;
   pspi->Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
   pspi->Init.CRCPolynomial = 10;
@@ -111,27 +111,27 @@ int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bi
 int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint32_t timeout) {
   assert_param(bus==0 || bus==1);
 
-  SPI_HandleTypeDef * hspi = spi_handle[bus];  
+  SPI_HandleTypeDef * hspi = spi_handle[bus];
   HAL_StatusTypeDef status = HAL_SPI_TransmitReceive(hspi, tx_buf, rx_buf, (uint16_t)len, timeout);
 
   if (status != HAL_OK) {
     return -1;
   } else {
     return (len-hspi->RxXferCount);
-  }  
+  }
 }
 
 int spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   assert_param(bus==0 || bus==1);
 
-  SPI_HandleTypeDef * hspi = spi_handle[bus];  
+  SPI_HandleTypeDef * hspi = spi_handle[bus];
   HAL_StatusTypeDef status = HAL_SPI_Transmit(hspi, buf, (uint16_t)len, timeout);
-  
+
   if (status != HAL_OK) {
     return -1;
   } else {
     return len;
-  }  
+  }
 }
 
 int spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {

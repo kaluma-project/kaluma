@@ -62,7 +62,7 @@ JERRYXX_FUN(spi_ctor_fn) {
 }
 
 
-/** 
+/**
  * SPI.prototype.transfer() function
  */
 JERRYXX_FUN(spi_transfer_fn) {
@@ -147,7 +147,7 @@ JERRYXX_FUN(spi_transfer_fn) {
 }
 
 
-/** 
+/**
  * SPI.prototype.send() function
  */
 JERRYXX_FUN(spi_send_fn) {
@@ -202,7 +202,7 @@ JERRYXX_FUN(spi_send_fn) {
 }
 
 
-/** 
+/**
  * SPI.prototype.recv() function
  */
 JERRYXX_FUN(spi_recv_fn) {
@@ -230,7 +230,7 @@ JERRYXX_FUN(spi_recv_fn) {
   return jerry_create_null();
 }
 
-/** 
+/**
  * SPI.prototype.close() function
  */
 JERRYXX_FUN(spi_close_fn) {
@@ -253,7 +253,7 @@ JERRYXX_FUN(spi_close_fn) {
   return jerry_create_undefined();
 }
 
-/** 
+/**
  * Initialize 'spi' module
  */
 jerry_value_t module_spi_init() {

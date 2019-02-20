@@ -54,7 +54,7 @@ const struct {
    {GPIOA, GPIO_PIN_4},     // 21 (BUTTON)
 };
 
-/** 
+/**
 */
 void gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode) {
   assert_param(pin < GPIO_NUM);
@@ -65,10 +65,10 @@ void gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode) {
   GPIO_InitStruct.Mode = (mode == GPIO_IO_MODE_INPUT) ?  GPIO_MODE_INPUT:GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(gpio_port_pin[pin].port, &GPIO_InitStruct);   
+  HAL_GPIO_Init(gpio_port_pin[pin].port, &GPIO_InitStruct);
 }
 
-/** 
+/**
 */
 void gpio_write(uint8_t pin, uint8_t value) {
   assert_param(pin < GPIO_NUM);
@@ -78,7 +78,7 @@ void gpio_write(uint8_t pin, uint8_t value) {
   HAL_GPIO_WritePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin, pin_state);
 }
 
-/** 
+/**
 */
 uint8_t gpio_read(uint8_t pin) {
   assert_param(pin < GPIO_NUM);
@@ -86,7 +86,7 @@ uint8_t gpio_read(uint8_t pin) {
   return (pin_state == GPIO_PIN_RESET) ? GPIO_LOW : GPIO_HIGH;
 }
 
-/** 
+/**
 */
 void gpio_toggle(uint8_t pin) {
   assert_param(pin < GPIO_NUM);

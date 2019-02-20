@@ -39,7 +39,7 @@ typedef enum {
 
 /**
  * Setup a UART port. This have to manage an internal read buffer.
- * 
+ *
  * @param port
  * @param baudrate
  * @param bits databits 8 or 9
@@ -55,7 +55,7 @@ int uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
 
 /**
  * Write a given buffer to the port.
- * 
+ *
  * @param port
  * @param buf
  * @param len
@@ -65,7 +65,7 @@ int uart_write(uint8_t port, uint8_t *buf, size_t len);
 
 /**
  * Check the number of bytes available to read.
- * 
+ *
  * @param port
  * @return the number of bytes in read buffer.
  */
@@ -73,7 +73,7 @@ uint32_t uart_available(uint8_t port);
 
 /**
  * Look a character at the offset in read buffer.
- * 
+ *
  * @param port
  * @param offset
  * @return a character at the offset in read buffer.
@@ -82,7 +82,7 @@ uint8_t uart_available_at(uint8_t port, uint32_t offset);
 
 /**
  * Get the size of read buffer.
- * 
+ *
  * @param port
  * @return size of read buffer.
  */
@@ -90,7 +90,7 @@ uint32_t uart_buffer_size(uint8_t port);
 
 /**
  * Read bytes from the port and store them into a given buffer.
- * 
+ *
  * @param port
  * @param buf
  * @param len
@@ -100,7 +100,7 @@ uint32_t uart_read(uint8_t port, uint8_t *buf, size_t len);
 
 /**
  * Close the UART port
- * 
+ *
  * @param port
  */
 int uart_close(uint8_t port);

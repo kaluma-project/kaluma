@@ -55,7 +55,7 @@ JERRYXX_FUN(i2c_ctor_fn) {
 }
 
 
-/** 
+/**
  * I2C.prototype.write() function
  */
 JERRYXX_FUN(i2c_write_fn) {
@@ -140,7 +140,7 @@ JERRYXX_FUN(i2c_write_fn) {
 }
 
 
-/** 
+/**
  * I2C.prototype.read() function
  */
 JERRYXX_FUN(i2c_read_fn) {
@@ -185,7 +185,7 @@ JERRYXX_FUN(i2c_read_fn) {
 }
 
 
-/** 
+/**
  * I2C.prototype.close() function
  */
 JERRYXX_FUN(i2c_close_fn) {
@@ -209,7 +209,7 @@ JERRYXX_FUN(i2c_close_fn) {
 }
 
 
-/** 
+/**
  * Initialize 'i2c' module
  */
 jerry_value_t module_i2c_init() {

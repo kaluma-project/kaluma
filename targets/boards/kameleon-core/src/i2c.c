@@ -29,7 +29,7 @@ static I2C_HandleTypeDef hi2c2;
 static I2C_HandleTypeDef * handle[] = {&hi2c1, &hi2c2};
 static I2C_TypeDef * instance[] = {I2C1, I2C2};
 
-int i2c_setup_master(uint8_t bus) {  
+int i2c_setup_master(uint8_t bus) {
   assert_param(bus==0 || bus==1);
 
   handle[bus]->Instance = instance[bus];
@@ -40,7 +40,7 @@ int i2c_setup_master(uint8_t bus) {
   handle[bus]->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
   handle[bus]->Init.OwnAddress2 = 0;
   handle[bus]->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  handle[bus]->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;  
+  handle[bus]->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
 
   HAL_StatusTypeDef hal_status = HAL_I2C_Init(handle[bus]);
   if (hal_status == HAL_OK) {
@@ -61,7 +61,7 @@ int i2c_setup_slave(uint8_t bus, uint8_t address) {
   handle[bus]->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
   handle[bus]->Init.OwnAddress2 = 0;
   handle[bus]->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  handle[bus]->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;  
+  handle[bus]->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
 
   HAL_StatusTypeDef hal_status = HAL_I2C_Init(handle[bus]);
   if (hal_status == HAL_OK) {
@@ -77,7 +77,7 @@ int i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uin
 
   assert_param(bus==0 || bus==1);
   hal_status = HAL_I2C_Master_Transmit(handle[bus], address << 1, buf, len, timeout);
-  
+
   if (hal_status == HAL_OK) {
     return len;
   } else {
@@ -87,11 +87,11 @@ int i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uin
 
 int i2c_write_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   HAL_StatusTypeDef hal_status;
-  
+
   assert_param(bus==0 || bus==1);
   /* in the case of slave mode, the parameter address is ignored. */
   hal_status = HAL_I2C_Slave_Transmit(handle[bus], buf, len, timeout);
-  
+
   if (hal_status == HAL_OK) {
     return len;
   } else {
@@ -110,7 +110,7 @@ int i2c_read_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uint
     return len;
   } else {
     return -1;
-  }  
+  }
 }
 
 int i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
@@ -124,7 +124,7 @@ int i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
     return len;
   } else {
     return -1;
-  }  
+  }
 }
 
 int i2c_close(uint8_t bus) {

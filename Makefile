@@ -109,7 +109,7 @@ KAMELEON_GENERATED = $(KAMELEON_GENERATED_C) $(KAMELEON_GENERATED_H)
 
 KAMELEON_DEF =
 
-KAMELEON_ASM = 
+KAMELEON_ASM =
 
 KAMELEON_SRC = \
 src/main.c \
@@ -133,7 +133,7 @@ KAMELEON_INC = \
 # Target-specific
 # -----------------------------------------------------------------------------
 
-ifndef TARGET 
+ifndef TARGET
 TARGET = kameleon-core
 endif
 

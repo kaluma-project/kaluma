@@ -33,7 +33,7 @@
 
 uint32_t code_offset;
 
-/** 
+/**
 */
 static void flush_cache() {
   /* Note: If an erase operation in Flash memory also concerns data in the data or instruction cache,
@@ -50,13 +50,13 @@ static void flush_cache() {
   __HAL_FLASH_DATA_CACHE_ENABLE();
 }
 
-/** 
+/**
 */
 static void flash_erase() {
   FLASH_EraseInitTypeDef EraseInitStruct;
   uint32_t SectorError = 0;
 
-  /* Unlock the Flash to enable the flash control register access *************/ 
+  /* Unlock the Flash to enable the flash control register access *************/
   HAL_FLASH_Unlock();
 
   /* Fill EraseInit structure*/
@@ -64,10 +64,10 @@ static void flash_erase() {
   EraseInitStruct.VoltageRange = FLASH_VOLTAGE_RANGE_3;
   EraseInitStruct.Sector = SECTOR_FLASH_USER_AREA;
   EraseInitStruct.NbSectors = 1;
-  if (HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError) != HAL_OK) { 
-    /* 
-      Error occurred while sector erase. 
-      User can add here some code to deal with this error. 
+  if (HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError) != HAL_OK) {
+    /*
+      Error occurred while sector erase.
+      User can add here some code to deal with this error.
       SectorError will contain the faulty sector and then to know the code error on this sector,
       user can call function 'HAL_FLASH_GetError()'
     */
@@ -78,10 +78,10 @@ static void flash_erase() {
   }
 
   /* Lock the Flash to disable the flash control register access (recommended to protect the FLASH memory against possible unwanted operation) *********/
-  HAL_FLASH_Lock();    
+  HAL_FLASH_Lock();
 }
 
-/** 
+/**
 */
 static uint32_t calculate_checksum(uint8_t * pbuf, uint32_t size) {
   uint32_t calcurated_checksum = 0;
@@ -92,45 +92,45 @@ static uint32_t calculate_checksum(uint8_t * pbuf, uint32_t size) {
   return (calcurated_checksum ^ (uint32_t)-1) + 1;
 }
 
-/** 
+/**
 */
 void flash_clear() {
   flash_erase();
 }
 
-/** 
+/**
 */
 uint8_t * flash_get_data() {
   return (uint8_t *)ADDR_FLASH_USER_CODE;
 }
 
-/** 
+/**
 */
 uint32_t flash_size() {
   return SIZE_FLASH_USER_AREA - (ADDR_FLASH_USER_CODE - ADDR_FLASH_USER_AREA);
 }
 
-/** 
+/**
 */
 uint32_t flash_get_data_size() {
   uint32_t size = 0;
   uint32_t * p = (uint32_t *)ADDR_FLASH_USER_AREA;
-  
+
   if (*p != (uint32_t)-1) {
     size = *p;
   }
-  
+
   return size;
 }
 
-/** 
+/**
 */
 void flash_program_begin() {
   code_offset = 0;
   flash_erase();
 }
 
-/** 
+/**
 */
 flash_status_t flash_program(uint8_t * buf, uint32_t size) {
   flash_status_t status = FLASH_SUCCESS;
@@ -142,17 +142,17 @@ flash_status_t flash_program(uint8_t * buf, uint32_t size) {
   end_address = start_address + size;
   address = start_address;
 
-  /* Unlock the Flash to enable the flash control register access */ 
+  /* Unlock the Flash to enable the flash control register access */
   HAL_FLASH_Unlock();
   flush_cache();
-  
+
   /* Program the user Flash area word by byte */
   while (address < end_address) {
     if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, address, p[k]) == HAL_OK) {
       address = address + 1;
       code_offset = code_offset + 1;
       k = k + 1;
-    } else { 
+    } else {
       /* Error occurred while writing data in Flash memory. User can add here some code to deal with this error */
       /* FLASH_ErrorTypeDef errorcode = HAL_FLASH_GetError(); */
       _Error_Handler(__FILE__, __LINE__);
@@ -160,13 +160,13 @@ flash_status_t flash_program(uint8_t * buf, uint32_t size) {
       break;
     }
   }
-  
+
   /* Lock the Flash to disable the flash control register access (recommended to protect the FLASH memory against possible unwanted operation) */
   HAL_FLASH_Lock();
   return status;
 }
 
-/** 
+/**
 */
 flash_status_t flash_program_byte(uint8_t val) {
   flash_status_t status = FLASH_SUCCESS;
@@ -174,37 +174,37 @@ flash_status_t flash_program_byte(uint8_t val) {
 
   address = ADDR_FLASH_USER_CODE + code_offset;
 
-  /* Unlock the Flash to enable the flash control register access */ 
+  /* Unlock the Flash to enable the flash control register access */
   HAL_FLASH_Unlock();
   flush_cache();
-  
+
   /* Program byte on the user Flash area */
   if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, address, val) == HAL_OK) {
     code_offset = code_offset + 1;
-  } else { 
+  } else {
     /* Error occurred while writing data in Flash memory. User can add here some code to deal with this error */
     /* FLASH_ErrorTypeDef errorcode = HAL_FLASH_GetError(); */
     _Error_Handler(__FILE__, __LINE__);
     status = FLASH_FAIL;
   }
-  
+
   /* Lock the Flash to disable the flash control register access (recommended to protect the FLASH memory against possible unwanted operation) */
   HAL_FLASH_Lock();
   return status;
 }
 
-/** 
+/**
 */
 void flash_program_end() {
   uint32_t checksum;
 
-  /* Unlock the Flash to enable the flash control register access */ 
+  /* Unlock the Flash to enable the flash control register access */
   HAL_FLASH_Unlock();
   flush_cache();
-  
+
   /* Program the user code size by word */
   HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, ADDR_FLASH_USER_AREA, code_offset);
-    
+
   /* Program the user code checksum value by word */
   checksum = calculate_checksum((uint8_t *)ADDR_FLASH_USER_CODE, code_offset);
   HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, ADDR_FLASH_USER_CODE_CHECKSUM, checksum);
@@ -213,7 +213,7 @@ void flash_program_end() {
   HAL_FLASH_Lock();
 }
 
-/** 
+/**
 */
 uint32_t flash_get_checksum() {
   return  *(uint32_t *)ADDR_FLASH_USER_CODE_CHECKSUM;

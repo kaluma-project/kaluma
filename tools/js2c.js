@@ -57,7 +57,7 @@ function identifyModules() {
         native: false,
         require: false,
         size: 0
-      })  
+      })
     }
   }
 }
@@ -92,7 +92,7 @@ function removeWrappers() {
     if (mod.wrapped) {
       fs.unlinkSync(mod.wrapped)
     }
-  })  
+  })
 }
 
 function removeSnapshots() {
@@ -120,7 +120,7 @@ function generateSources() {
           bytes[bytes.length - 1].last = true
         }
         mod.segments.push({ bytes: bytes })
-      })  
+      })
     }
   })
   modules[modules.length - 1].lastModule = true

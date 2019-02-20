@@ -25,9 +25,9 @@
 #include <stdint.h>
 
 typedef enum {
-	FLASH_SUCCESS 	= 0x00U,
-	FLASH_FAIL		= 0x01U,
-	FLASH_TIMEOUT 	= 0x02U,
+  FLASH_SUCCESS   = 0x00U,
+  FLASH_FAIL      = 0x01U,
+  FLASH_TIMEOUT   = 0x02U,
 } flash_status_t;
 
 /**

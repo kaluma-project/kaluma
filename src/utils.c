@@ -85,7 +85,7 @@ int main(void) {
   node3->text = "node3";
   text_node_t *node4 = (text_node_t *) malloc(sizeof(text_node_t));
   node4->text = "node4";
-  
+
   list_init(&list);
   list_append(&list, (list_node_t *) node1);
   list_append(&list, (list_node_t *) node2);

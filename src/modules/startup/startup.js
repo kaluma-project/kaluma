@@ -17,7 +17,7 @@ Module.require = function (id) {
     var mod = new Module(id);
     mod.loadBuiltin();
     Module.cache[id] = mod;
-    return mod.exports;        
+    return mod.exports;
   }
   throw new Error('Failed to load module: ' + id);
 }

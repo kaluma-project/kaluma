@@ -32,14 +32,14 @@ static USART_TypeDef * uart_ch[] = {USART1, USART2};
 static const uint32_t uart_parity[] = { UART_PARITY_NONE, UART_PARITY_ODD, UART_PARITY_EVEN };
 static const uint32_t uart_hw_control[] = { UART_HWCONTROL_NONE, UART_HWCONTROL_RTS, UART_HWCONTROL_CTS, UART_HWCONTROL_RTS_CTS };
 static ringbuffer_t uart_rx_ringbuffer[UART_NUM];
-static uint8_t * read_buffer[] = {NULL, NULL}; 
+static uint8_t * read_buffer[] = {NULL, NULL};
 
 
-/** 
+/**
  * This function called by IRQ Handler
  */
 void uart_fill_ringbuffer(uint8_t port, uint8_t ch) {
-  ringbuffer_write(&uart_rx_ringbuffer[port], &ch, sizeof(ch));  
+  ringbuffer_write(&uart_rx_ringbuffer[port], &ch, sizeof(ch));
 }
 
 
@@ -49,7 +49,7 @@ int uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
   assert_param(port==0 || port==1);
   UART_HandleTypeDef * puart = uart_handle[port];
 
-  /* UART Configuration  */  
+  /* UART Configuration  */
   puart->Instance = uart_ch[port];
   puart->Init.BaudRate = baudrate;
   puart->Init.WordLength = (bits == 9 ? UART_WORDLENGTH_9B : UART_WORDLENGTH_8B);
@@ -58,14 +58,14 @@ int uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
   puart->Init.HwFlowCtl = uart_hw_control[flow];
   puart->Init.Mode = UART_MODE_TX_RX;
   puart->Init.OverSampling = UART_OVERSAMPLING_16;
-  
+
   read_buffer[port] = (uint8_t *)malloc(buffer_size);
   if (read_buffer[port] == NULL) {
     return -1;
   } else {
     ringbuffer_init(&uart_rx_ringbuffer[port], read_buffer[port], buffer_size);
   }
-  
+
   HAL_StatusTypeDef hal_status = HAL_UART_Init(puart);
   if (hal_status == HAL_OK) {
     __HAL_UART_ENABLE_IT(puart, UART_IT_RXNE);
@@ -83,7 +83,7 @@ int uart_write(uint8_t port, uint8_t *buf, size_t len) {
     return len;
   } else {
     return -1;
-  } 
+  }
 }
 
 
@@ -111,7 +111,7 @@ uint32_t uart_read(uint8_t port, uint8_t *buf, size_t len) {
   uint32_t n = ringbuffer_length(&uart_rx_ringbuffer[port]);
   if (n > len) {
     n = len;
-  }  
+  }
   ringbuffer_read(&uart_rx_ringbuffer[port], buf, n);
   return n;
 }
@@ -119,12 +119,12 @@ uint32_t uart_read(uint8_t port, uint8_t *buf, size_t len) {
 
 int uart_close(uint8_t port) {
   assert_param(port==0 || port==1);
-  
+
   if (read_buffer[port]) {
     free(read_buffer[port]);
     read_buffer[port] = (uint8_t *)NULL;
   }
-  
+
   HAL_StatusTypeDef hal_status = HAL_UART_DeInit(uart_handle[port]);
   if (hal_status == HAL_OK) {
     UART_HandleTypeDef * puart = uart_handle[port];

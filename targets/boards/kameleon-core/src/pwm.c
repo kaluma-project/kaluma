@@ -70,7 +70,7 @@ static const uint32_t tick_freq_div=4;
 
 /**
  * Get PWM index
- * 
+ *
  * @param pin Pin number.
  * @return Returns index number on success or 255 on failure.
  */
@@ -97,12 +97,12 @@ static uint8_t get_pwm_index(uint8_t pin) {
 static uint32_t get_tick_frequency(uint8_t n) {
   uint32_t tick_freq;
   uint8_t bus = pwm_config[n].bus;
-  
+
   if (bus==APB1) {
     tick_freq = 2 * HAL_RCC_GetPCLK1Freq();
   } else if (bus==APB2) {
     tick_freq = 2 * HAL_RCC_GetPCLK2Freq();
-  }  
+  }
   return (tick_freq / tick_freq_div);
 }
 

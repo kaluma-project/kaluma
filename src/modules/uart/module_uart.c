@@ -188,7 +188,7 @@ JERRYXX_FUN(uart_write_fn) {
 }
 
 
-/** 
+/**
  * UART.prototype.close() function
  */
 JERRYXX_FUN(uart_close_fn) {
@@ -221,7 +221,7 @@ JERRYXX_FUN(uart_close_fn) {
   return jerry_create_undefined();
 }
 
-/** 
+/**
  * Initialize 'uart' module and return exports
  */
 jerry_value_t module_uart_init() {

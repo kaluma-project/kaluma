@@ -34,14 +34,14 @@ void tty_init();
 
 /**
  * Check the number of bytes available to read.
- * 
+ *
  * @return the number of bytes in TTY read buffer.
  */
 uint32_t tty_available();
 
 /**
  * Read bytes from TTY read buffer.
- * 
+ *
  * @param buf
  * @param len
  * @return the number of bytes read
@@ -50,7 +50,7 @@ uint32_t tty_read(uint8_t *buf, size_t len);
 
 /**
  * Read bytes synchronously from TTY read buffer.
- * 
+ *
  * @param buf
  * @param len
  * @param timeout
@@ -60,21 +60,21 @@ uint32_t tty_read_sync(uint8_t *buf, size_t len, uint32_t timeout);
 
 /**
  * Read a char from TTY
- * 
+ *
  * @return char
  */
 uint8_t tty_getc();
 
 /**
  * Write a char to TTY
- * 
+ *
  * @param ch a character to write
  */
 void tty_putc(char ch);
 
 /**
  * Write a formatted string to TTY
- * 
+ *
  * @param fmt a string format
  * @param ... arguments for the format
  */

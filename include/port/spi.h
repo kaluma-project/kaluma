@@ -38,7 +38,7 @@ typedef enum {
 
 /**
  * Setup SPI bus as the master device
- * 
+ *
  * @param bus The bus number.
  * @param mode SPI mode of clock polarity and phase.
  * @param baudrate Baud rate.
@@ -51,7 +51,7 @@ int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bi
 
 /**
  * Send and receive data simultaneously to the SPI bus
- * 
+ *
  * @param bus
  * @param tx_buf
  * @param rx_buf
@@ -63,7 +63,7 @@ int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint
 
 /**
  * Send data to the SPI bus
- * 
+ *
  * @param bus
  * @param buf
  * @param len
@@ -74,7 +74,7 @@ int spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
 
 /**
  * Receive data from the SPI bus and store them into a given buffer.
- * 
+ *
  * @param {uint8_t} bus
  * @param {uint8_t*} buf
  * @param {size_t} len

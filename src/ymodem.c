@@ -14,7 +14,7 @@ static uint16_t calc_crc16(const uint8_t* p_data, uint32_t size);
 
 /**
  * @brief  Update CRC16 for input byte
- * @param  crc_in input value 
+ * @param  crc_in input value
  * @param  input byte
  * @return None
  */
@@ -140,7 +140,7 @@ static ymodem_status_t receive_packet(uint8_t *data, uint32_t *length, uint32_t 
  * @param packet_cb
  * @return ymodem_status_t
  */
-ymodem_status_t ymodem_receive(ymodem_header_cb header_cb, 
+ymodem_status_t ymodem_receive(ymodem_header_cb header_cb,
     ymodem_packet_cb packet_cb, ymodem_footer_cb footer_cb) {
   uint32_t i, packet_length, file_done, errors = 0;
   uint8_t file_name_str[FILE_NAME_LENGTH];

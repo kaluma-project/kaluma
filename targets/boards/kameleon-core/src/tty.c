@@ -41,16 +41,16 @@ static ringbuffer_t tty_rx_ringbuffer;
 
 
 /**
- * this function is called in the pendable interrupt service routine which has 
+ * this function is called in the pendable interrupt service routine which has
  * lowest priority to allow other interrupts service.
  */
-void tty_transmit_data() {   
+void tty_transmit_data() {
   /* if the previous data is under transmitting, just return to avoid blocking */
   if (CDC_Transmit_IsReady()) {
     uint32_t len = ringbuffer_length(&tty_tx_ringbuffer);
     if (len) {
       uint8_t buf[TTY_TX_RINGBUFFER_SIZE];
-      ringbuffer_read(&tty_tx_ringbuffer, buf, len);      
+      ringbuffer_read(&tty_tx_ringbuffer, buf, len);
       CDC_Transmit_FS(buf, len);
     }
   }
@@ -64,12 +64,12 @@ uint32_t tty_get_tx_data_length() {
 
 uint32_t tty_get_bytes(uint8_t * buf, uint32_t nToRead) {
   __set_PRIMASK(1);
-  
+
   uint32_t len = ringbuffer_length(&tty_rx_ringbuffer);
   if (len < nToRead) {
     nToRead = len;
   }
-  
+
   __set_PRIMASK(0);
   ringbuffer_read(&tty_rx_ringbuffer, buf, nToRead);
   return nToRead;
@@ -82,20 +82,20 @@ uint32_t tty_fill_rx_bytes(uint8_t * buf, uint32_t nToWrite) {
     nToWrite = space;
   }
   __set_PRIMASK(0);
-  
+
   ringbuffer_write(&tty_rx_ringbuffer, buf, nToWrite);
   return nToWrite;
 }
 
 
 uint32_t tty_put_bytes(uint8_t * buf, uint32_t nToWrite) {
-  __set_PRIMASK(1);  
+  __set_PRIMASK(1);
   uint32_t space = ringbuffer_freespace(&tty_tx_ringbuffer);
   if (space < nToWrite) {
     nToWrite = space;
   }
   __set_PRIMASK(0);
-  
+
   ringbuffer_write(&tty_tx_ringbuffer, buf, nToWrite);
   return nToWrite;
 }
@@ -156,11 +156,11 @@ void tty_putc(char ch) {
 void tty_printf(const char *fmt, ...) {
   va_list ap;
   char string[256];
-  
+
   va_start(ap,fmt);
-  vsprintf(string, fmt, ap);   
+  vsprintf(string, fmt, ap);
   va_end(ap);
-  
+
   /* (ring)buffering the string instead of transmitting it via usb channel */
   uint32_t space = ringbuffer_freespace(&tty_tx_ringbuffer);
   if (space > strlen(string)) {

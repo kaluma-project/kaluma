@@ -73,24 +73,24 @@
   */ 
 
 /*---------- -----------*/
-#define USBD_MAX_NUM_INTERFACES     1
+#define USBD_MAX_NUM_INTERFACES        1
 /*---------- -----------*/
 #define USBD_MAX_NUM_CONFIGURATION     1
 /*---------- -----------*/
-#define USBD_MAX_STR_DESC_SIZ     512
+#define USBD_MAX_STR_DESC_SIZ          512
 /*---------- -----------*/
-#define USBD_SUPPORT_USER_STRING     0
+#define USBD_SUPPORT_USER_STRING       0
 /*---------- -----------*/
-#define USBD_DEBUG_LEVEL     0
+#define USBD_DEBUG_LEVEL               0
 /*---------- -----------*/
-#define USBD_LPM_ENABLED     0
+#define USBD_LPM_ENABLED               0
 /*---------- -----------*/
-#define USBD_SELF_POWERED     0
+#define USBD_SELF_POWERED              0
 
 /****************************************/
 /* #define for FS and HS identification */
-#define DEVICE_FS 		0
-#define DEVICE_HS 		1
+#define DEVICE_FS     0
+#define DEVICE_HS     1
 
 /** @defgroup USBD_Exported_Macros
   * @{

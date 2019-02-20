@@ -145,7 +145,7 @@ static void run_command() {
     }
   } else {
     repl_print_begin(REPL_OUTPUT_LOG);
-    repl_print_end();    
+    repl_print_end();
   }
 }
 
@@ -482,7 +482,7 @@ static void cmd_flash(repl_state_t *state, char *arg) {
     repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf("%u\r\n", data_size);
     repl_print_end();
-  
+
   /* read data from flash */
   } else if (strcmp(arg, "-r") == 0) {
     uint32_t sz = flash_get_data_size();
@@ -558,7 +558,7 @@ static void cmd_mem(repl_state_t *state) {
   } else {
     repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf("Mem stat feature is not enabled.\r\n");
-    repl_print_end();    
+    repl_print_end();
   }
 }
 
