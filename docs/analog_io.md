@@ -36,7 +36,7 @@ analogWrite(pin, 0.5);
 ## tone(pin, frequency[, duration[, duty]])
 
 * __`pin`__ `{number}` Pin number.
-* __`frequency`__ `{number}` Frequency in Hz. Default is `490`Hz.
+* __`frequency`__ `{number}` Frequency in Hz. Default is `261.6`Hz which is the frequency of C4
 * __`duration`__ `{number}` Duration in milliseconds. Default is 0.
 * __`duty`__ `{number}` Duty cycle between 0 and 1.
 

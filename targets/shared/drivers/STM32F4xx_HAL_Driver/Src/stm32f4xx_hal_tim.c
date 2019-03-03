@@ -230,7 +230,7 @@ HAL_StatusTypeDef HAL_TIM_Base_Init(TIM_HandleTypeDef *htim)
   htim->State= HAL_TIM_STATE_BUSY;
   
   /* Set the Time Base configuration */
-  TIM_Base_SetConfig(htim->Instance, &htim->Init); 
+  TIM_Base_SetConfig(htim->Instance, &htim->Init);
   
   /* Initialize the TIM state*/
   htim->State= HAL_TIM_STATE_READY;
@@ -1110,7 +1110,7 @@ HAL_StatusTypeDef HAL_TIM_PWM_Start(TIM_HandleTypeDef *htim, uint32_t Channel)
   /* Enable the Capture compare channel */
   TIM_CCxChannelCmd(htim->Instance, Channel, TIM_CCx_ENABLE);
   
-  if(IS_TIM_ADVANCED_INSTANCE(htim->Instance) != RESET)  
+  if(IS_TIM_ADVANCED_INSTANCE(htim->Instance) != RESET)
   {
     /* Enable the main output */
     __HAL_TIM_MOE_ENABLE(htim);
@@ -4486,14 +4486,14 @@ void TIM_Base_SetConfig(TIM_TypeDef *TIMx, TIM_Base_InitTypeDef *Structure)
   tmpcr1 = TIMx->CR1;
   
   /* Set TIM Time Base Unit parameters ---------------------------------------*/
-  if(IS_TIM_CC3_INSTANCE(TIMx) != RESET)   
+  if(IS_TIM_CC3_INSTANCE(TIMx) != RESET)
   {
     /* Select the Counter Mode */
     tmpcr1 &= ~(TIM_CR1_DIR | TIM_CR1_CMS);
     tmpcr1 |= Structure->CounterMode;
   }
  
-  if(IS_TIM_CC1_INSTANCE(TIMx) != RESET)  
+  if(IS_TIM_CC1_INSTANCE(TIMx) != RESET)
   {
     /* Set the clock division */
     tmpcr1 &= ~TIM_CR1_CKD;
@@ -4503,12 +4503,12 @@ void TIM_Base_SetConfig(TIM_TypeDef *TIMx, TIM_Base_InitTypeDef *Structure)
   TIMx->CR1 = tmpcr1;
 
   /* Set the Auto-reload value */
-  TIMx->ARR = (uint32_t)Structure->Period ;
+  TIMx->ARR = (uint32_t)Structure->Period;
  
   /* Set the Prescaler value */
   TIMx->PSC = (uint32_t)Structure->Prescaler;
-    
-  if(IS_TIM_ADVANCED_INSTANCE(TIMx) != RESET)  
+
+  if(IS_TIM_ADVANCED_INSTANCE(TIMx) != RESET)
   {
     /* Set the Repetition Counter value */
     TIMx->RCR = Structure->RepetitionCounter;

@@ -36,8 +36,13 @@ JERRYXX_FUN(pwm_ctor_fn) {
   double frequency = JERRYXX_GET_ARG_NUMBER_OPT(1, PWM_DEFAULT_FREQUENCY);
   double duty = JERRYXX_GET_ARG_NUMBER_OPT(2, PWM_DEFAULT_DUTY);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PWM_PIN, pin);
-  pwm_setup(pin, frequency, duty);
-  return jerry_create_undefined();
+  if (pwm_setup(pin, frequency, duty) != -1) {
+    return jerry_create_undefined();
+  } else {
+    char errmsg[255];
+    sprintf(errmsg, "\"%d\" This pin can't be used for PWM", pin);
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+  }
 }
 
 JERRYXX_FUN(pwm_start_fn) {
