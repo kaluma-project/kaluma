@@ -333,7 +333,7 @@ static void tim5_pwm_setup(uint32_t channel, uint32_t prescaler, uint32_t arr, u
 
 int pwm_setup(uint8_t pin, double frequency, double duty) {
   uint32_t tick_freq, ch, prescaler, arr, pulse;
-  uint8_t pduty = duty * 100;
+  uint8_t pduty = (duty + 0.005f) * 100;
   uint8_t n = get_pwm_index(pin);
   if (n == 0xFF) //Not a index of PWM pin
     return -1;
@@ -349,7 +349,7 @@ int pwm_setup(uint8_t pin, double frequency, double duty) {
   tick_freq = get_tick_frequency(n);
   prescaler = get_tick_prescaler(n, frequency);
   ch = pwm_config[n].channel;
-  arr = (uint32_t)(tick_freq / prescaler / frequency - 1);
+  arr = (uint32_t)(tick_freq / prescaler / frequency);
   pulse = (uint32_t)((pduty * arr)/100);
 
   pwm_config[n].setup(ch, prescaler, arr, pulse);
@@ -390,8 +390,9 @@ double pwm_get_duty(uint8_t pin) {
   if (n != 0xFF) { //PWM pin index
     uint32_t arr = __HAL_TIM_GET_AUTORELOAD(pwm_config[n].handle);
     uint32_t pulse = __HAL_TIM_GET_COMPARE(pwm_config[n].handle, pwm_config[n].channel);
-    return (double)(pulse)/(arr+1);
+    return (double)(pulse)/(arr);
   }
+  return -1;
 }
 
 /**
@@ -399,8 +400,9 @@ double pwm_get_duty(uint8_t pin) {
 void pwm_set_duty(uint8_t pin, double duty) {
   uint8_t n = get_pwm_index(pin);
   if (n != 0xFF) { //PWM pin index
+    while (__HAL_TIM_GET_COUNTER(pwm_config[n].handle) != 0);
     uint32_t arr = __HAL_TIM_GET_AUTORELOAD(pwm_config[n].handle);
-    uint32_t pulse = (uint32_t)(duty * (arr + 1) + 0.5f);
+    uint32_t pulse = (uint32_t)(duty * arr);
     __HAL_TIM_SET_COMPARE(pwm_config[n].handle, pwm_config[n].channel, pulse);
   }
 }
@@ -408,12 +410,13 @@ void pwm_set_duty(uint8_t pin, double duty) {
 /**
 */
 void pwm_set_frequency(uint8_t pin, double frequency) {
-  double previous_duty = pwm_get_duty(pin);
   uint8_t n = get_pwm_index(pin);
-  /* The previous duty ratio must be hold up regardless of changing frequency */
-  if (pwm_setup(pin, frequency, previous_duty) != -1) {
-    /* The counter value must be reset for not being over the arr value. */
-    __HAL_TIM_SET_COUNTER(pwm_config[n].handle, 0);
+  if (n != 0xFF) { //PWM pin index
+    double previous_duty = pwm_get_duty(pin);
+    /* The previous duty ratio must be hold up regardless of changing frequency */
+    while (__HAL_TIM_GET_COUNTER(pwm_config[n].handle) != 0);
+    pwm_setup(pin, frequency, previous_duty);
+    pwm_config[n].start(pwm_config[n].handle, pwm_config[n].channel);
   }
 }
 
