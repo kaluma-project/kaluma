@@ -1021,10 +1021,10 @@ HAL_StatusTypeDef HAL_TIM_PWM_Init(TIM_HandleTypeDef *htim)
   }
 
   /* Set the TIM state */
-  htim->State= HAL_TIM_STATE_BUSY;  
+  htim->State= HAL_TIM_STATE_BUSY;
   
   /* Init the base time for the PWM */  
-  TIM_Base_SetConfig(htim->Instance, &htim->Init); 
+  TIM_Base_SetConfig(htim->Instance, &htim->Init);
    
   /* Initialize the TIM state*/
   htim->State= HAL_TIM_STATE_READY;
