@@ -31,22 +31,33 @@
  */
 JERRYXX_FUN(i2c_ctor_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "bus");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(1, "address");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(1, "mode");
+
+  i2c_mode_t mode = (uint8_t) JERRYXX_GET_ARG_NUMBER(1);
+  //Master mode support only
+  if (mode != I2C_MASTER)
+    return JERRYXX_CREATE_ERROR("Invalid I2C mode.");
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_MODE, mode);
 
   // check this.bus number
   uint8_t bus = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_BUS, bus);
 
   // initialize the bus
-  if (JERRYXX_GET_ARG_COUNT > 1) { /* slave mode */
-    uint8_t address = (uint8_t) JERRYXX_GET_ARG_NUMBER(1);
+  if (mode == I2C_SLAVE) { /* slave mode */
+    JERRYXX_CHECK_ARG_NUMBER_OPT(2, "address");
+    uint8_t address = (uint8_t) JERRYXX_GET_ARG_NUMBER(2);
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_ADDRESS, address);
     int ret = i2c_setup_slave(bus, address);
     if (ret < 0) {
       return JERRYXX_CREATE_ERROR("Failed to initialize I2C bus.");
     }
   } else { /* master mode */
-    int ret = i2c_setup_master(bus);
+    JERRYXX_CHECK_ARG_NUMBER_OPT(2, "speed");
+    int32_t speed = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(2, 100000);
+    if (speed >=400000)
+      speed = 400000; //Max is 400KHz
+    int ret = i2c_setup_master(bus, speed);
     if (ret < 0) {
       return JERRYXX_CREATE_ERROR("Failed to initialize I2C bus.");
     }

@@ -24,6 +24,8 @@
 
 #define MSTR_I2C_I2C "I2C"
 #define MSTR_I2C_BUS "bus"
+#define MSTR_I2C_MODE "mode"
+#define MSTR_I2C_SPEED "speed"
 #define MSTR_I2C_ADDRESS "address"
 #define MSTR_I2C_WRITE "write"
 #define MSTR_I2C_READ "read"
