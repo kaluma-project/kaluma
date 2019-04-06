@@ -29,11 +29,11 @@ static I2C_HandleTypeDef hi2c2;
 static I2C_HandleTypeDef * handle[] = {&hi2c1, &hi2c2};
 static I2C_TypeDef * instance[] = {I2C1, I2C2};
 
-int i2c_setup_master(uint8_t bus) {
+int i2c_setup_master(uint8_t bus, uint32_t speed) {
   assert_param(bus==0 || bus==1);
 
   handle[bus]->Instance = instance[bus];
-  handle[bus]->Init.ClockSpeed = 100000;
+  handle[bus]->Init.ClockSpeed = speed;
   handle[bus]->Init.DutyCycle = I2C_DUTYCYCLE_2;
   handle[bus]->Init.OwnAddress1 = 0;
   handle[bus]->Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;

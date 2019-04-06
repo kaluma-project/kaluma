@@ -24,13 +24,19 @@
 
 #include <stdint.h>
 
+typedef enum {
+  I2C_MASTER,
+  I2C_SLAVE,
+} i2c_mode_t;
+
 /**
  * Setup a I2C bus as master.
  *
  * @param bus The bus number.
+ * @param speed i2c speed
  * @return Returns 0 on success or -1 on failure.
  */
-int i2c_setup_master(uint8_t bus);
+int i2c_setup_master(uint8_t bus, uint32_t speed);
 
 /**
  * Setup a I2C bus as slave.
