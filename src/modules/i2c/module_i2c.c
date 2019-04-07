@@ -228,6 +228,10 @@ jerry_value_t module_i2c_init() {
   jerry_value_t i2c_ctor = jerry_create_external_function(i2c_ctor_fn);
   jerry_value_t i2c_prototype = jerry_create_object();
   jerryxx_set_property(i2c_ctor, "prototype", i2c_prototype);
+  jerryxx_set_property_number(i2c_ctor, MSTR_I2C_MASTERMODE, I2C_MASTER);
+  jerryxx_set_property_number(i2c_ctor, MSTR_I2C_SLAVEMODE, I2C_SLAVE);
+  jerryxx_set_property_number(i2c_ctor, MSTR_I2C_STDSPEED, 100000); //100kbps
+  jerryxx_set_property_number(i2c_ctor, MSTR_I2C_FULLSPEED, 400000); //400kbps
   jerryxx_set_property_function(i2c_prototype, MSTR_I2C_WRITE, i2c_write_fn);
   jerryxx_set_property_function(i2c_prototype, MSTR_I2C_READ, i2c_read_fn);
   jerryxx_set_property_function(i2c_prototype, MSTR_I2C_CLOSE, i2c_close_fn);
