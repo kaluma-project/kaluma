@@ -423,9 +423,11 @@ static void cmd_echo(repl_state_t *state, char *arg) {
  */
 static void cmd_clear(repl_state_t *state) {
   runtime_deinit();
+  reset_io();
+  repl_init(false);
   runtime_init(false);
   repl_print_begin(REPL_OUTPUT_LOG);
-  repl_printf("\r");
+  repl_printf("Javascript runtime contexts are cleared\r\n");
   repl_print_end();
 }
 
@@ -539,9 +541,15 @@ static void cmd_flash(repl_state_t *state, char *arg) {
  * .load command
  */
 static void cmd_load(repl_state_t *state) {
+//Clear before load
+  runtime_deinit();
+  reset_io();
+  repl_init(false);
+  runtime_init(false);
+//Run main
   runtime_run_main();
   repl_print_begin(REPL_OUTPUT_LOG);
-  repl_printf("\r");
+  repl_printf("Load and run javascript in the flash\r\n");
   repl_print_end();
 }
 
@@ -612,7 +620,7 @@ static void cmd_help(repl_state_t *state) {
 /**
  * Initialize the REPL
  */
-void repl_init() {
+void repl_init(bool showLogo) {
   io_tty_init(&tty);
   io_tty_read_start(&tty, tty_read_cb);
   state.mode = REPL_MODE_NORMAL;
@@ -624,25 +632,27 @@ void repl_init() {
   state.history_size = 0;
   state.history_position = 0;
   state.handler = &default_handler;
-  repl_print_begin(REPL_OUTPUT_LOG);
-  repl_printf("/---------------------------\\\r\n");
-  repl_printf("|                  ____     |\r\n");
-  repl_printf("|     /----_______/    \\    |\r\n");
-  repl_printf("|    /               O  \\   |\r\n");
-  repl_printf("|   /               _____\\  |\r\n");
-  repl_printf("|  |  /------__ ___ ____/   |\r\n");
-  repl_printf("|  | | /``\\   //   \\\\       |\r\n");
-  repl_printf("|  | \\ @`\\ \\  W     W       |\r\n");
-  repl_printf("|   \\ \\__/ / ***************|\r\n");
-  repl_printf("|    \\____/     ************|\r\n");
-  repl_printf("|                       ****|\r\n");
-  repl_printf("\\---------------------------/\r\n");
-  repl_printf("\r\n");
-  repl_printf("Welcome to Kameleon!\r\n");
-  repl_printf("%s %s\r\n", "Version:", CONFIG_KAMELEON_VERSION);
-  repl_printf("For more info: http://kameleon.io\r\n");
-  repl_printf("\r\n");
-  repl_print_end();
+  if (showLogo) {
+    repl_print_begin(REPL_OUTPUT_LOG);
+    repl_printf("/---------------------------\\\r\n");
+    repl_printf("|                  ____     |\r\n");
+    repl_printf("|     /----_______/    \\    |\r\n");
+    repl_printf("|    /               O  \\   |\r\n");
+    repl_printf("|   /               _____\\  |\r\n");
+    repl_printf("|  |  /------__ ___ ____/   |\r\n");
+    repl_printf("|  | | /``\\   //   \\\\       |\r\n");
+    repl_printf("|  | \\ @`\\ \\  W     W       |\r\n");
+    repl_printf("|   \\ \\__/ / ***************|\r\n");
+    repl_printf("|    \\____/     ************|\r\n");
+    repl_printf("|                       ****|\r\n");
+    repl_printf("\\---------------------------/\r\n");
+    repl_printf("\r\n");
+    repl_printf("Welcome to Kameleon!\r\n");
+    repl_printf("%s %s\r\n", "Version:", CONFIG_KAMELEON_VERSION);
+    repl_printf("For more info: http://kameleon.io\r\n");
+    repl_printf("\r\n");
+    repl_print_end();
+  }
 }
 
 void repl_print_begin(repl_output_t output) {

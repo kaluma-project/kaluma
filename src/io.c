@@ -81,7 +81,6 @@ static void io_handle_closing() {
 }
 
 /* loop functions */
-
 void io_init() {
   loop.stop_flag = false;
   list_init(&loop.tty_handles);
@@ -91,8 +90,13 @@ void io_init() {
   list_init(&loop.closing_handles);
 }
 
+void reset_io() {
+  handle_id_count = 0;
+  io_init();
+}
+
 void io_run() {
-  while (1) {
+  while (loop.stop_flag == false) {
     io_update_time();
     io_timer_run();
     io_tty_run();

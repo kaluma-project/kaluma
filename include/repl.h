@@ -57,7 +57,7 @@ struct repl_state_s {
   unsigned int history_position;
 };
 
-void repl_init();
+void repl_init(bool showLogo);
 void repl_set_handler(repl_handler_t handler);
 void repl_prompt();
 
