@@ -48,6 +48,34 @@ int i2c_setup_master(uint8_t bus, uint32_t speed);
 int i2c_setup_slave(uint8_t bus, uint8_t address);
 
 /**
+ * Memory Write a given buffer to the bus (in master mode).
+ *
+ * @param bus The bus number.
+ * @param address Where the data sent to.
+ * @param memAddress Memory address
+ * @param memAdd16bit set 1 if memAddress is 16 bit address
+ * @param buf Buffer to write.
+ * @param len The size of the buffer.
+ * @param timeout Timeout in milliseconds.
+ * @return The number of bytes written or -1 on timeout or failed to write.
+ */
+int i2c_memWrite_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout);
+
+/**
+ * Memory Read bytes from the bus and store them into a given buffer (in master mode).
+ *
+ * @param bus The bus number.
+ * @param address Where the data read from.
+ * @param memAddress Memory address
+ * @param memAdd16bit set 1 if memAddress is 16 bit address
+ * @param buf Data buffer where the read data to be stored.
+ * @param len The size of the data buffer.
+ * @param timeout Timeout in milliseconds.
+ * @return The number of bytes read or -1 on timeout or failed to read.
+ */
+int i2c_memRead_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout);
+
+/**
  * Write a given buffer to the bus (in master mode).
  *
  * @param bus The bus number.

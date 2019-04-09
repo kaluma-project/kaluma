@@ -71,6 +71,41 @@ int i2c_setup_slave(uint8_t bus, uint8_t address) {
   }
 }
 
+int i2c_memWrite_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout) {
+  uint16_t memAddSize;
+  HAL_StatusTypeDef hal_status;
+
+  assert_param(bus==0 || bus==1);
+  if (memAdd16bit == 0)
+    memAddSize = I2C_MEMADD_SIZE_8BIT;
+  else
+    memAddSize = I2C_MEMADD_SIZE_16BIT;
+  hal_status = HAL_I2C_Mem_Write(handle[bus], address << 1, memAddress, memAddSize, buf, len, timeout);
+
+  if (hal_status == HAL_OK) {
+    return len;
+  } else {
+    return -1;
+  }
+}
+
+int i2c_memRead_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout) {
+  uint16_t memAddSize;
+  HAL_StatusTypeDef hal_status;
+
+  assert_param(bus==0 || bus==1);
+  if (memAdd16bit == 0)
+    memAddSize = I2C_MEMADD_SIZE_8BIT;
+  else
+    memAddSize = I2C_MEMADD_SIZE_16BIT;
+  hal_status = HAL_I2C_Mem_Read(handle[bus], address << 1, memAddress, memAddSize, buf, len, timeout);
+
+  if (hal_status == HAL_OK) {
+    return len;
+  } else {
+    return -1;
+  }
+}
 
 int i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uint32_t timeout) {
   HAL_StatusTypeDef hal_status;
