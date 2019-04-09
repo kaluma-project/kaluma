@@ -138,6 +138,7 @@ struct io_loop_s {
 /* loop functions */
 
 void io_init();
+void reset_io();
 void io_run();
 
 /* general handle functions */
