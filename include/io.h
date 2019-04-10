@@ -138,7 +138,6 @@ struct io_loop_s {
 /* loop functions */
 
 void io_init();
-void reset_io();
 void io_run();
 
 /* general handle functions */
@@ -153,12 +152,14 @@ void io_timer_init(io_timer_handle_t *timer);
 void io_timer_start(io_timer_handle_t *timer, io_timer_cb timer_cb, uint64_t interval, bool repeat);
 void io_timer_stop(io_timer_handle_t *timer);
 io_timer_handle_t *io_timer_get_by_id(uint32_t id);
+void io_timer_cleanup();
 
 /* TTY functions */
 
 void io_tty_init(io_tty_handle_t *tty);
 void io_tty_read_start(io_tty_handle_t *tty, io_tty_read_cb read_cb);
 void io_tty_read_stop(io_tty_handle_t *tty);
+void io_tty_cleanup();
 
 /* GPIO watch functions */
 
@@ -166,6 +167,7 @@ void io_watch_init(io_watch_handle_t *watch);
 void io_watch_start(io_watch_handle_t *watch, io_watch_cb watch_cb, uint8_t pin, io_watch_mode_t mode, uint32_t debounce);
 void io_watch_stop(io_watch_handle_t *watch);
 io_watch_handle_t *io_watch_get_by_id(uint32_t id);
+void io_watch_cleanup();
 
 /* UART function */
 
@@ -173,5 +175,6 @@ void io_uart_init(io_uart_handle_t *uart);
 void io_uart_read_start(io_uart_handle_t *uart, uint8_t port, io_uart_available_cb available_cb, io_uart_read_cb read_cb);
 void io_uart_read_stop(io_uart_handle_t *uart);
 io_uart_handle_t *io_uart_get_by_id(uint32_t id);
+void io_uart_cleanup();
 
 #endif /* __IO_H */

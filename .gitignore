@@ -7,3 +7,6 @@ node_modules
 
 # Generated files
 src/gen
+
+# Temp
+.vscode/ipch

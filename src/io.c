@@ -81,6 +81,7 @@ static void io_handle_closing() {
 }
 
 /* loop functions */
+
 void io_init() {
   loop.stop_flag = false;
   list_init(&loop.tty_handles);
@@ -88,11 +89,6 @@ void io_init() {
   list_init(&loop.watch_handles);
   list_init(&loop.uart_handles);
   list_init(&loop.closing_handles);
-}
-
-void reset_io() {
-  handle_id_count = 0;
-  io_init();
 }
 
 void io_run() {
@@ -133,6 +129,16 @@ io_timer_handle_t *io_timer_get_by_id(uint32_t id) {
   return (io_timer_handle_t *) io_handle_get_by_id(id, &loop.timer_handles);
 }
 
+void io_timer_cleanup() {
+  io_timer_handle_t *handle = (io_timer_handle_t *) loop.timer_handles.head;
+  while (handle != NULL) {
+    io_timer_handle_t *next = (io_timer_handle_t *) ((list_node_t *) handle)->next;
+    free(handle);
+    handle = next;
+  }
+  list_init(&loop.timer_handles);
+}
+
 static void io_timer_run() {
   io_timer_handle_t *handle = (io_timer_handle_t *) loop.timer_handles.head;
   while (handle != NULL) {
@@ -168,6 +174,16 @@ void io_tty_read_start(io_tty_handle_t *tty, io_tty_read_cb read_cb) {
 void io_tty_read_stop(io_tty_handle_t *tty) {
   IO_SET_FLAG_OFF(tty->base.flags, IO_FLAG_ACTIVE);
   list_remove(&loop.tty_handles, (list_node_t *) tty);
+}
+
+void io_tty_cleanup() {
+  io_tty_handle_t *handle = (io_tty_handle_t *) loop.tty_handles.head;
+  while (handle != NULL) {
+    io_tty_handle_t *next = (io_tty_handle_t *) ((list_node_t *) handle)->next;
+    free(handle);
+    handle = next;
+  }
+  list_init(&loop.tty_handles);
 }
 
 static void io_tty_run() {
@@ -215,6 +231,16 @@ void io_watch_stop(io_watch_handle_t *watch) {
 
 io_watch_handle_t *io_watch_get_by_id(uint32_t id) {
   return (io_watch_handle_t *) io_handle_get_by_id(id, &loop.watch_handles);
+}
+
+void io_watch_cleanup() {
+  io_watch_handle_t *handle = (io_watch_handle_t *) loop.watch_handles.head;
+  while (handle != NULL) {
+    io_watch_handle_t *next = (io_watch_handle_t *) ((list_node_t *) handle)->next;
+    free(handle);
+    handle = next;
+  }
+  list_init(&loop.watch_handles);
 }
 
 static void io_watch_run() {
@@ -277,6 +303,16 @@ void io_uart_read_stop(io_uart_handle_t *uart) {
 
 io_uart_handle_t *io_uart_get_by_id(uint32_t id) {
   return (io_uart_handle_t *) io_handle_get_by_id(id, &loop.uart_handles);
+}
+
+void io_uart_cleanup() {
+  io_uart_handle_t *handle = (io_uart_handle_t *) loop.uart_handles.head;
+  while (handle != NULL) {
+    io_uart_handle_t *next = (io_uart_handle_t *) ((list_node_t *) handle)->next;
+    free(handle);
+    handle = next;
+  }
+  list_init(&loop.uart_handles);
 }
 
 static void io_uart_run() {

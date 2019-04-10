@@ -2,7 +2,7 @@ REPL Commands
 =============
 
 * `.echo [on|off]` -- Echo on/off
-* `.clear` -- Clear JavaScript runtime context.
+* `.reset` -- Reset JavaScript runtime context.
 * `.mem` -- Print heap memory usage information (total available, used and peak).
 * `.gc` -- Enforce garbage collection.
 * `.flash` [options] -- Read or write data to the non-versatile flash memory.

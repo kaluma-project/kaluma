@@ -25,6 +25,7 @@
 #include "jerryscript.h"
 #include "jerryscript-port.h"
 #include "jerryscript-ext/handler.h"
+#include "io.h"
 #include "global.h"
 #include "repl.h"
 #include "runtime.h"
@@ -44,10 +45,13 @@ void runtime_init(bool run_main) {
   }
 }
 
-void runtime_deinit() {
-  jerry_cleanup ();
+void runtime_cleanup() {
+  jerry_cleanup();
+  io_timer_cleanup();
+  io_watch_cleanup();
+  io_uart_cleanup();
+  // Do not cleanup tty I/O to keep terminal communication
 }
-
 
 /**
  * Print error value
