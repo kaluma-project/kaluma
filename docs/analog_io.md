@@ -23,7 +23,7 @@ var value = analogRead(pin);
 
 * __`pin`__ `{number}` Pin number.
 * __`value`__ `{number}` Duty cycle between 0 and 1.
-* __`frequency`__ `{number}` Frequency in Hz. Default is `490`Hz.(?)
+* __`frequency`__ `{number}` Frequency in Hz. Default is `490`Hz.
 
 Write value to an analog pin.
 
