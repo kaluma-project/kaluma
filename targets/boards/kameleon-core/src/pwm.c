@@ -424,6 +424,8 @@ void pwm_set_frequency(uint8_t pin, double frequency) {
 */
 void pwm_close(uint8_t pin) {
   uint8_t n = get_pwm_index(pin);
-  if (n != 0xFF) //PWM pin index
+  if (n != 0xFF) {//PWM pin index
     HAL_TIM_PWM_DeInit(pwm_config[n].handle);
+    HAL_GPIO_DeInit(pwm_config[n].port, pwm_config[n].pin);
+  }
 }

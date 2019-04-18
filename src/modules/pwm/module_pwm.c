@@ -115,7 +115,7 @@ JERRYXX_FUN(pwm_close_fn) {
     return JERRYXX_CREATE_ERROR("PWM pin is not setup.");
   }
   uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
-  pwm_stop(pin);
+  pwm_close(pin);
   return jerry_create_undefined();
 }
 
