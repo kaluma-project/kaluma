@@ -26,7 +26,7 @@
 #include "spi.h"
 
 #define SPI_DEFAULT_MODE SPI_MODE_0
-#define SPI_DEFAULT_BAUDRATE 921600
+#define SPI_DEFAULT_BAUDRATE 3000000
 #define SPI_DEFAULT_BITORDER SPI_BITORDER_MSB
 #define SPI_DEFAULT_BITS 8
 
@@ -261,6 +261,23 @@ jerry_value_t module_spi_init() {
   jerry_value_t spi_ctor = jerry_create_external_function(spi_ctor_fn);
   jerry_value_t spi_prototype = jerry_create_object();
   jerryxx_set_property(spi_ctor, "prototype", spi_prototype);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_MODE0, SPI_MODE_0);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_MODE1, SPI_MODE_1);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_MODE2, SPI_MODE_2);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_MODE3, SPI_MODE_3);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_MSB, SPI_BITORDER_MSB);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_LSB, SPI_BITORDER_LSB);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_BIT8, 8);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_BIT16, 16);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_48MBPS, 48000000);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_24MBPS, 24000000);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_12MBPS, 12000000);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_6MBPS, 6000000);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_3MBPS, 3000000);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_1500KBPS, 1500000);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_750KBPS, 750000);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_375KBPS, 375000);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_187_5KBPS, 187500);
   jerryxx_set_property_function(spi_prototype, MSTR_SPI_TRANSFER, spi_transfer_fn);
   jerryxx_set_property_function(spi_prototype, MSTR_SPI_SEND, spi_send_fn);
   jerryxx_set_property_function(spi_prototype, MSTR_SPI_RECV, spi_recv_fn);
