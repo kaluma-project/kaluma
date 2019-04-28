@@ -44,9 +44,9 @@ static uint32_t get_prescaler_factor(uint8_t bus, uint32_t baudrate) {
   const uint32_t pre_scaler_div[] = {2, 4, 8, 16, 32, 64, 128, 256};
 
   if (bus==0) {
-    source_clock = 42000000;
+    source_clock = 96000000;
   } else {
-    source_clock = 21000000;
+    source_clock = 48000000;
   }
 
   for (k=0; k<(sizeof(pre_scaler_div)/sizeof(uint32_t)); k++) {
