@@ -135,11 +135,21 @@ int spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
 }
 
 int spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
+  uint8_t emptyBuf[len];
   assert_param(bus==0 || bus==1);
 
   SPI_HandleTypeDef * hspi = spi_handle[bus];
-  HAL_SPI_Receive(hspi, buf, (uint16_t)len, timeout);
-  return (len - hspi->RxXferCount);
+  //I think SPI_Receive function has a bug (sending garbage data)
+  //HAL_SPI_Receive(hspi, buf, (uint16_t)len, timeout);
+  //Use transmitReceive with empty Tx buffer
+  for (size_t i=0; i<len; i++)
+    emptyBuf[i] = 0;
+  HAL_StatusTypeDef status = HAL_SPI_TransmitReceive(hspi, emptyBuf, buf, (uint16_t)len, timeout);
+  if (status != HAL_OK) {
+    return -1;
+  } else {
+    return (len-hspi->RxXferCount);
+  }
 }
 
 
