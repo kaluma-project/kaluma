@@ -36,6 +36,10 @@ typedef enum {
   SPI_BITORDER_LSB
 } spi_bitorder_t;
 
+typedef enum {
+  SPI_8BIT,
+  SPI_16BIT
+} spi_bits_t;
 /**
  * Setup SPI bus as the master device
  *
@@ -46,7 +50,7 @@ typedef enum {
  * @param bits Number of bits in each transferred word.
  * @return Returns 0 on success or -1 on failure.
  */
-int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bitorder, uint8_t bits);
+int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bitorder, spi_bits_t bits);
 
 
 /**
