@@ -64,10 +64,10 @@ static uint32_t get_prescaler_factor(uint8_t bus, uint32_t baudrate) {
 
 /** SPI Setup
 */
-int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bitorder, uint8_t bits) {
+int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bitorder, spi_bits_t bits) {
 
   assert_param(bus==0 || bus==1);
-  assert_param(bits==8 || bits==16);
+  assert_param(bits==SPI_8BIT || bits==SPI_16BIT);
 
   SPI_HandleTypeDef * pspi = spi_handle[bus];
 
@@ -99,7 +99,7 @@ int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bi
   pspi->Init.TIMode = SPI_TIMODE_DISABLE;
   pspi->Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
   pspi->Init.CRCPolynomial = 10;
-  pspi->Init.DataSize = ((bits==8) ? SPI_DATASIZE_8BIT:SPI_DATASIZE_16BIT);
+  pspi->Init.DataSize = ((bits==SPI_16BIT) ? SPI_DATASIZE_16BIT:SPI_DATASIZE_8BIT);
 
   if (HAL_SPI_Init(pspi) == HAL_OK) {
     return 0;
