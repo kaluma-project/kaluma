@@ -28,7 +28,6 @@
 #define SPI_DEFAULT_MODE SPI_MODE_0
 #define SPI_DEFAULT_BAUDRATE 3000000
 #define SPI_DEFAULT_BITORDER SPI_BITORDER_MSB
-#define SPI_DEFAULT_BITS SPI_8BIT
 
 /**
  * SPI() constructor
@@ -43,21 +42,18 @@ JERRYXX_FUN(spi_ctor_fn) {
   uint8_t mode = SPI_DEFAULT_MODE;
   uint32_t baudrate = SPI_DEFAULT_BAUDRATE;
   uint8_t bitorder = SPI_DEFAULT_BITORDER;
-  uint8_t bits = SPI_DEFAULT_BITS;
   if (jerry_value_is_object(options)) {
     mode = (uint8_t) jerryxx_get_property_number(options,  MSTR_SPI_MODE, SPI_DEFAULT_MODE);
     baudrate = (uint32_t) jerryxx_get_property_number(options,  MSTR_SPI_BAUDRATE, SPI_DEFAULT_BAUDRATE);
     bitorder = (uint8_t) jerryxx_get_property_number(options,  MSTR_SPI_BITORDER, SPI_DEFAULT_BITORDER);
-    bits = (uint8_t) jerryxx_get_property_number(options,  MSTR_SPI_BITS, SPI_DEFAULT_BITS);
   }
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BUS, bus);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_MODE, mode);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BAUDRATE, baudrate);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BITORDER, bitorder);
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BITS, bits);
 
   // initialize the bus
-  spi_setup(bus, (spi_mode_t) mode, baudrate, (spi_bitorder_t) bitorder, (spi_bits_t)bits);
+  spi_setup(bus, (spi_mode_t) mode, baudrate, (spi_bitorder_t) bitorder);
   return jerry_create_undefined();
 }
 
@@ -267,8 +263,6 @@ jerry_value_t module_spi_init() {
   jerryxx_set_property_number(spi_ctor, MSTR_SPI_MODE3, SPI_MODE_3);
   jerryxx_set_property_number(spi_ctor, MSTR_SPI_MSB, SPI_BITORDER_MSB);
   jerryxx_set_property_number(spi_ctor, MSTR_SPI_LSB, SPI_BITORDER_LSB);
-  jerryxx_set_property_number(spi_ctor, MSTR_SPI_BIT8, SPI_8BIT);
-  jerryxx_set_property_number(spi_ctor, MSTR_SPI_BIT16, SPI_16BIT);
   jerryxx_set_property_function(spi_prototype, MSTR_SPI_TRANSFER, spi_transfer_fn);
   jerryxx_set_property_function(spi_prototype, MSTR_SPI_SEND, spi_send_fn);
   jerryxx_set_property_function(spi_prototype, MSTR_SPI_RECV, spi_recv_fn);

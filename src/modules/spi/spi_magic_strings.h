@@ -38,6 +38,4 @@
 #define MSTR_SPI_MODE3 "MODE_3"
 #define MSTR_SPI_MSB "MSB"
 #define MSTR_SPI_LSB "LSB"
-#define MSTR_SPI_BIT8 "BIT8"
-#define MSTR_SPI_BIT16 "BIT16"
 #endif /* __SPI_MAGIC_STRINGS_H */
