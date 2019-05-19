@@ -164,7 +164,7 @@ void io_tty_cleanup();
 /* GPIO watch functions */
 
 void io_watch_init(io_watch_handle_t *watch);
-void io_watch_start(io_watch_handle_t *watch, io_watch_cb watch_cb, uint8_t pin, io_watch_mode_t mode, uint32_t debounce);
+uint8_t io_watch_start(io_watch_handle_t *watch, io_watch_cb watch_cb, uint8_t pin, io_watch_mode_t mode, uint32_t debounce);
 void io_watch_stop(io_watch_handle_t *watch);
 io_watch_handle_t *io_watch_get_by_id(uint32_t id);
 void io_watch_cleanup();

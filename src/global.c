@@ -53,7 +53,11 @@ JERRYXX_FUN(pin_mode_fn) {
   JERRYXX_CHECK_ARG_NUMBER_OPT(1, "mode");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   gpio_io_mode_t mode = (gpio_io_mode_t) JERRYXX_GET_ARG_NUMBER_OPT(1, GPIO_IO_MODE_INPUT);
-  gpio_set_io_mode(pin, mode);
+  if (gpio_set_io_mode(pin, mode) == GPIO_ERROR) {
+    char errmsg[255];
+    sprintf(errmsg, "\"%d\" This pin can't be used for GPIO", pin);
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+  }
   return jerry_create_undefined();
 }
 
@@ -61,6 +65,11 @@ JERRYXX_FUN(digital_read_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   uint8_t value = gpio_read(pin);
+  if (value == GPIO_ERROR) {
+    char errmsg[255];
+    sprintf(errmsg, "\"%d\" This pin can't be used for GPIO", pin);
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+  }
   return jerry_create_number(value);
 }
 
@@ -69,14 +78,22 @@ JERRYXX_FUN(digital_write_fn) {
   JERRYXX_CHECK_ARG_NUMBER_OPT(1, "value");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   uint8_t value = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(1, GPIO_LOW);
-  gpio_write(pin, value);
+  if (gpio_write(pin, value) == GPIO_ERROR) {
+    char errmsg[255];
+    sprintf(errmsg, "\"%d\" This pin can't be used for GPIO", pin);
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+  }
   return jerry_create_undefined();
 }
 
 JERRYXX_FUN(digital_toggle_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  gpio_toggle(pin);
+  if (gpio_toggle(pin) == GPIO_ERROR) {
+    char errmsg[255];
+    sprintf(errmsg, "\"%d\" This pin can't be used for GPIO", pin);
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+  }
   return jerry_create_undefined();
 }
 
@@ -85,7 +102,9 @@ static void set_watch_cb(io_watch_handle_t *watch) {
     jerry_value_t this_val = jerry_create_undefined ();
     jerry_value_t ret_val = jerry_call_function (watch->watch_js_cb, this_val, NULL, 0);
     if (!jerry_value_is_error (ret_val)) {
-      // TODO: handle error and return value
+      char errmsg[255];
+      sprintf(errmsg, "runtime error in callback function");
+      jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
     }
     jerry_release_value (ret_val);
     jerry_release_value (this_val);
@@ -104,7 +123,11 @@ JERRYXX_FUN(set_watch_fn) {
   io_watch_handle_t *watch = malloc(sizeof(io_watch_handle_t));
   io_watch_init(watch);
   watch->watch_js_cb = jerry_acquire_value(callback);
-  io_watch_start(watch, set_watch_cb, pin, mode, debounce);
+  if (io_watch_start(watch, set_watch_cb, pin, mode, debounce) == GPIO_ERROR) {
+    char errmsg[255];
+    sprintf(errmsg, "\"%d\" This pin can't be used for GPIO", pin);
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+  }
   return jerry_create_number(watch->base.id);
 }
 

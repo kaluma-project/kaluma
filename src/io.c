@@ -211,9 +211,10 @@ void io_watch_init(io_watch_handle_t *watch) {
   watch->watch_cb = NULL;
 }
 
-void io_watch_start(io_watch_handle_t *watch, io_watch_cb watch_cb, uint8_t pin, io_watch_mode_t mode, uint32_t debounce) {
+uint8_t io_watch_start(io_watch_handle_t *watch, io_watch_cb watch_cb, uint8_t pin, io_watch_mode_t mode, uint32_t debounce) {
   IO_SET_FLAG_ON(watch->base.flags, IO_FLAG_ACTIVE);
-  gpio_set_io_mode(pin, GPIO_IO_MODE_INPUT);
+  if (gpio_set_io_mode(pin, GPIO_IO_MODE_INPUT) == GPIO_ERROR)
+    return GPIO_ERROR;
   watch->watch_cb = watch_cb;
   watch->pin = pin;
   watch->mode = mode;
