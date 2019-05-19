@@ -56,13 +56,14 @@ const struct {
 
 /**
 */
-void gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode) {
-  assert_param(pin < GPIO_NUM);
-  assert_param(mode==GPIO_IO_MODE_INPUT || mode==GPIO_IO_MODE_OUTPUT);
-
+uint8_t gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode) {
+  if (pin >= GPIO_NUM)
+    return GPIO_ERROR;
+  if (mode != GPIO_IO_MODE_INPUT)
+    mode = GPIO_IO_MODE_OUTPUT;
   GPIO_InitTypeDef GPIO_InitStruct;
   GPIO_InitStruct.Pin = gpio_port_pin[pin].pin;
-  GPIO_InitStruct.Mode = (mode == GPIO_IO_MODE_INPUT) ?  GPIO_MODE_INPUT:GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Mode = (mode == GPIO_IO_MODE_INPUT) ? GPIO_MODE_INPUT : GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(gpio_port_pin[pin].port, &GPIO_InitStruct);
@@ -70,10 +71,11 @@ void gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode) {
 
 /**
 */
-void gpio_write(uint8_t pin, uint8_t value) {
-  assert_param(pin < GPIO_NUM);
-  assert_param(value==GPIO_LOW || value==GPIO_HIGH);
-
+uint8_t gpio_write(uint8_t pin, uint8_t value) {
+  if (pin >= GPIO_NUM)
+    return GPIO_ERROR;
+  if (value != GPIO_LOW)
+    value = GPIO_HIGH;
   GPIO_PinState pin_state = (value == GPIO_LOW) ? GPIO_PIN_RESET : GPIO_PIN_SET;
   HAL_GPIO_WritePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin, pin_state);
 }
@@ -81,15 +83,17 @@ void gpio_write(uint8_t pin, uint8_t value) {
 /**
 */
 uint8_t gpio_read(uint8_t pin) {
-  assert_param(pin < GPIO_NUM);
+  if (pin >= GPIO_NUM)
+    return GPIO_ERROR;
   GPIO_PinState pin_state = HAL_GPIO_ReadPin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
   return (pin_state == GPIO_PIN_RESET) ? GPIO_LOW : GPIO_HIGH;
 }
 
 /**
 */
-void gpio_toggle(uint8_t pin) {
-  assert_param(pin < GPIO_NUM);
+uint8_t gpio_toggle(uint8_t pin) {
+  if (pin >= GPIO_NUM)
+    return GPIO_ERROR;
   HAL_GPIO_TogglePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
 }
 
