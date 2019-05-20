@@ -213,15 +213,15 @@ void io_watch_init(io_watch_handle_t *watch) {
 
 uint8_t io_watch_start(io_watch_handle_t *watch, io_watch_cb watch_cb, uint8_t pin, io_watch_mode_t mode, uint32_t debounce) {
   IO_SET_FLAG_ON(watch->base.flags, IO_FLAG_ACTIVE);
-  if (gpio_set_io_mode(pin, GPIO_IO_MODE_INPUT) == GPIO_ERROR)
-    return GPIO_ERROR;
+  if (gpio_set_io_mode(pin, GPIO_IO_MODE_INPUT) == GPIOPORT_ERROR)
+    return GPIOPORT_ERROR;
   watch->watch_cb = watch_cb;
   watch->pin = pin;
   watch->mode = mode;
   watch->debounce_time = 0;
   watch->debounce_delay = debounce;
-  watch->last_val = gpio_read(watch->pin);
-  watch->val = gpio_read(watch->pin);
+  watch->last_val = (uint8_t)gpio_read(watch->pin);
+  watch->val = (uint8_t)gpio_read(watch->pin);
   list_append(&loop.watch_handles, (list_node_t *) watch);
 }
 
@@ -248,7 +248,7 @@ static void io_watch_run() {
   io_watch_handle_t *handle = (io_watch_handle_t *) loop.watch_handles.head;
   while (handle != NULL) {
     if (IO_HAS_FLAG(handle->base.flags, IO_FLAG_ACTIVE)) {
-      uint8_t reading = gpio_read(handle->pin);
+      uint8_t reading = (uint8_t)gpio_read(handle->pin);
       if (handle->last_val != reading) { /* changed by noise or pressing */
         handle->debounce_time = gettime();
       }

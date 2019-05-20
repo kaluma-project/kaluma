@@ -53,7 +53,7 @@ JERRYXX_FUN(pin_mode_fn) {
   JERRYXX_CHECK_ARG_NUMBER_OPT(1, "mode");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   gpio_io_mode_t mode = (gpio_io_mode_t) JERRYXX_GET_ARG_NUMBER_OPT(1, GPIO_IO_MODE_INPUT);
-  if (gpio_set_io_mode(pin, mode) == GPIO_ERROR) {
+  if (gpio_set_io_mode(pin, mode) == GPIOPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "\"%d\" This pin can't be used for GPIO", pin);
     return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
@@ -64,8 +64,8 @@ JERRYXX_FUN(pin_mode_fn) {
 JERRYXX_FUN(digital_read_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  uint8_t value = gpio_read(pin);
-  if (value == GPIO_ERROR) {
+  int value = gpio_read(pin);
+  if (value == GPIOPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "\"%d\" This pin can't be used for GPIO", pin);
     return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
@@ -78,7 +78,7 @@ JERRYXX_FUN(digital_write_fn) {
   JERRYXX_CHECK_ARG_NUMBER_OPT(1, "value");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   uint8_t value = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(1, GPIO_LOW);
-  if (gpio_write(pin, value) == GPIO_ERROR) {
+  if (gpio_write(pin, value) == GPIOPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "\"%d\" This pin can't be used for GPIO", pin);
     return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
@@ -89,7 +89,7 @@ JERRYXX_FUN(digital_write_fn) {
 JERRYXX_FUN(digital_toggle_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  if (gpio_toggle(pin) == GPIO_ERROR) {
+  if (gpio_toggle(pin) == GPIOPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "\"%d\" This pin can't be used for GPIO", pin);
     return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
@@ -123,7 +123,7 @@ JERRYXX_FUN(set_watch_fn) {
   io_watch_handle_t *watch = malloc(sizeof(io_watch_handle_t));
   io_watch_init(watch);
   watch->watch_js_cb = jerry_acquire_value(callback);
-  if (io_watch_start(watch, set_watch_cb, pin, mode, debounce) == GPIO_ERROR) {
+  if (io_watch_start(watch, set_watch_cb, pin, mode, debounce) == GPIOPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "\"%d\" This pin can't be used for GPIO", pin);
     return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
@@ -193,14 +193,18 @@ JERRYXX_FUN(analog_write_fn) {
   JERRYXX_CHECK_ARG_NUMBER_OPT(2, "frequency");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   double value = JERRYXX_GET_ARG_NUMBER_OPT(1, 0.5);
+  if (value < PWM_DUTY_MIN)
+    value = PWM_DUTY_MIN;
+  else if (value > PWM_DUTY_MAX)
+    value = PWM_DUTY_MAX;
   double frequency = JERRYXX_GET_ARG_NUMBER_OPT(2, 490); // Default 490Hz
-  if (pwm_setup(pin, frequency, value) != -1) {
+  if (pwm_setup(pin, frequency, value) == PWMPORT_ERROR) {
+    char errmsg[255];
+    sprintf(errmsg, "\"%d\" This pin can't be used for analog out (PWM)", pin);
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+  } else {
     pwm_start(pin);
     return jerry_create_undefined();
-  } else {
-    char errmsg[255];
-    sprintf(errmsg, "\"%d\" This pin can't be used for PWM", pin);
-    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
   }
 }
 
@@ -218,7 +222,15 @@ JERRYXX_FUN(tone_fn) {
   double frequency = JERRYXX_GET_ARG_NUMBER_OPT(1, 261.626); // C key frequency
   uint32_t duration = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(2, 0);
   double duty = JERRYXX_GET_ARG_NUMBER_OPT(3, 0.5);
-  if (pwm_setup(pin, frequency, duty) != -1) {
+  if (duty < PWM_DUTY_MIN)
+    duty = PWM_DUTY_MIN;
+  else if (duty > PWM_DUTY_MAX)
+    duty = PWM_DUTY_MAX;
+  if (pwm_setup(pin, frequency, duty) == PWMPORT_ERROR) {
+    char errmsg[255];
+    sprintf(errmsg, "\"%d\" This pin can't be used for tone", pin);
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+  } else {
     pwm_start(pin);
     // setup timer for duration
     if (duration > 0) {
@@ -228,17 +240,17 @@ JERRYXX_FUN(tone_fn) {
       io_timer_start(timer, tone_timeout_cb, duration, false);
     }
     return jerry_create_undefined();
-  } else {
-    char errmsg[255];
-    sprintf(errmsg, "\"%d\" This pin can't be used for tone", pin);
-    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
   }
 }
 
 JERRYXX_FUN(no_tone_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  pwm_stop(pin);
+  if (pwm_stop(pin) == PWMPORT_ERROR) {
+    char errmsg[255];
+    sprintf(errmsg, "\"%d\" This pin can't be used for PWM", pin);
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+  }
   return jerry_create_undefined();
 }
 

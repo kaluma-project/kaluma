@@ -42,11 +42,11 @@ typedef enum {
 #define GPIO_PULL_UP 0
 #define GPIO_PULL_DOWN 1
 
-#define GPIO_ERROR 0xFF
+#define GPIOPORT_ERROR -1
 
-uint8_t gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode);
-uint8_t gpio_write(uint8_t pin, uint8_t value);
-uint8_t gpio_toggle(uint8_t pin);
-uint8_t gpio_read(uint8_t pin);
+int gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode);
+int gpio_write(uint8_t pin, uint8_t value);
+int gpio_toggle(uint8_t pin);
+int gpio_read(uint8_t pin);
 
 #endif /* __GPIO_H */
