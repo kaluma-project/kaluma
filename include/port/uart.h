@@ -23,6 +23,7 @@
 #define __UART_H
 
 #include <stdint.h>
+#define UARTPORT_ERROR -1
 
 typedef enum {
   UART_PARITY_TYPE_NONE = 0,
