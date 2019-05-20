@@ -23,7 +23,7 @@
 #define __ADC_H
 
 #include <stdint.h>
-
+#define ADCPORT_ERRROR  -1
 /**
  * Setup a ADC channel
  *
