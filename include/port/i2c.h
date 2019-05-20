@@ -29,6 +29,7 @@ typedef enum {
   I2C_SLAVE,
 } i2c_mode_t;
 
+#define I2CPORT_ERROR -1
 /**
  * Setup a I2C bus as master.
  *

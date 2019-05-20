@@ -46,7 +46,8 @@ void uart_fill_ringbuffer(uint8_t port, uint8_t ch) {
 int uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
     uart_parity_type_t parity, uint8_t stop, uart_flow_control_t flow,
     size_t buffer_size) {
-  assert_param(port==0 || port==1);
+  if ((port != 0) && (port != 1))
+    return UARTPORT_ERROR;
   UART_HandleTypeDef * puart = uart_handle[port];
 
   /* UART Configuration  */
@@ -61,7 +62,7 @@ int uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
 
   read_buffer[port] = (uint8_t *)malloc(buffer_size);
   if (read_buffer[port] == NULL) {
-    return -1;
+    return UARTPORT_ERROR;
   } else {
     ringbuffer_init(&uart_rx_ringbuffer[port], read_buffer[port], buffer_size);
   }
@@ -70,44 +71,47 @@ int uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
   if (hal_status == HAL_OK) {
     __HAL_UART_ENABLE_IT(puart, UART_IT_RXNE);
     return port;
-  } else {
-    return -1;
   }
+  return UARTPORT_ERROR;
 }
 
 
 int uart_write(uint8_t port, uint8_t *buf, size_t len) {
-  assert_param(port==0 || port==1);
+  if ((port != 0) && (port != 1))
+    return UARTPORT_ERROR;
   HAL_StatusTypeDef hal_status = HAL_UART_Transmit(uart_handle[port], buf, len, (uint32_t)-1);
   if (hal_status == HAL_OK) {
     return len;
-  } else {
-    return -1;
   }
+  return UARTPORT_ERROR;
 }
 
 
 uint32_t uart_available(uint8_t port) {
-  assert_param(port==0 || port==1);
+  if ((port != 0) && (port != 1))
+    return 0;
   return ringbuffer_length(&uart_rx_ringbuffer[port]);
 }
 
 
 uint8_t uart_available_at(uint8_t port, uint32_t offset) {
-  assert_param(port==0 || port==1);
+  if ((port != 0) && (port != 1))
+    return 0;
   return ringbuffer_look_at(&uart_rx_ringbuffer[port], offset);
 }
 
 
 uint32_t uart_buffer_size(uint8_t port) {
-  assert_param(port==0 || port==1);
+  if ((port != 0) && (port != 1))
+    return 0;
   uint32_t size = ringbuffer_size(&uart_rx_ringbuffer[port]);
   return size;
 }
 
 
 uint32_t uart_read(uint8_t port, uint8_t *buf, size_t len) {
-  assert_param(port==0 || port==1);
+  if ((port != 0) && (port != 1))
+    return 0;
   uint32_t n = ringbuffer_length(&uart_rx_ringbuffer[port]);
   if (n > len) {
     n = len;
@@ -118,7 +122,8 @@ uint32_t uart_read(uint8_t port, uint8_t *buf, size_t len) {
 
 
 int uart_close(uint8_t port) {
-  assert_param(port==0 || port==1);
+  if ((port != 0) && (port != 1))
+    return UARTPORT_ERROR;
 
   if (read_buffer[port]) {
     free(read_buffer[port]);
@@ -131,6 +136,6 @@ int uart_close(uint8_t port) {
     __HAL_UART_DISABLE_IT(puart, UART_IT_RXNE);
     return port;
   } else {
-    return -1;
+    return UARTPORT_ERROR;
   }
 }

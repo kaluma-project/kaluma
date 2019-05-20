@@ -65,8 +65,8 @@ static uint32_t get_prescaler_factor(uint8_t bus, uint32_t baudrate) {
 /** SPI Setup
 */
 int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bitorder) {
-
-  assert_param(bus==0 || bus==1);
+  if ((bus != 0) && (bus != 1))
+    return SPIPORT_ERROR;
 
   SPI_HandleTypeDef * pspi = spi_handle[bus];
 
@@ -102,40 +102,40 @@ int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bi
 
   if (HAL_SPI_Init(pspi) == HAL_OK) {
     return 0;
-  } else {
-    return -1;
   }
+  return SPIPORT_ERROR;
 }
 
 int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint32_t timeout) {
-  assert_param(bus==0 || bus==1);
+  if ((bus != 0) && (bus != 1))
+    return SPIPORT_ERROR;
 
   SPI_HandleTypeDef * hspi = spi_handle[bus];
   HAL_StatusTypeDef status = HAL_SPI_TransmitReceive(hspi, tx_buf, rx_buf, (uint16_t)len, timeout);
 
-  if (status != HAL_OK) {
-    return -1;
-  } else {
+  if (status == HAL_OK) {
     return (len-hspi->RxXferCount);
   }
+  return SPIPORT_ERROR;
 }
 
 int spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
-  assert_param(bus==0 || bus==1);
+  if ((bus != 0) && (bus != 1))
+    return SPIPORT_ERROR;
 
   SPI_HandleTypeDef * hspi = spi_handle[bus];
   HAL_StatusTypeDef status = HAL_SPI_Transmit(hspi, buf, (uint16_t)len, timeout);
 
-  if (status != HAL_OK) {
-    return -1;
-  } else {
+  if (status == HAL_OK) {
     return len;
   }
+  return SPIPORT_ERROR;
 }
 
 int spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   uint8_t emptyBuf[len];
-  assert_param(bus==0 || bus==1);
+  if ((bus != 0) && (bus != 1))
+    return SPIPORT_ERROR;
 
   SPI_HandleTypeDef * hspi = spi_handle[bus];
   //I think SPI_Receive function has a bug (sending garbage data)
@@ -144,21 +144,20 @@ int spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   for (size_t i=0; i<len; i++)
     emptyBuf[i] = 0;
   HAL_StatusTypeDef status = HAL_SPI_TransmitReceive(hspi, emptyBuf, buf, (uint16_t)len, timeout);
-  if (status != HAL_OK) {
-    return -1;
-  } else {
+  if (status == HAL_OK) {
     return (len-hspi->RxXferCount);
   }
+  return SPIPORT_ERROR;
 }
 
 
 int spi_close(uint8_t bus) {
-  assert_param(bus==0 || bus==1);
+  if ((bus != 0) && (bus != 1))
+    return SPIPORT_ERROR;
 
   HAL_StatusTypeDef hal_status = HAL_SPI_DeInit(spi_handle[bus]);
   if (hal_status == HAL_OK) {
     return bus;
-  } else {
-    return -1;
   }
+  return SPIPORT_ERROR;
 }

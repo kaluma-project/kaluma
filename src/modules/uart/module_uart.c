@@ -98,6 +98,13 @@ JERRYXX_FUN(uart_ctor_fn) {
   uint32_t flow = (uint32_t) jerryxx_get_property_number(options,  MSTR_UART_FLOW, UART_DEFAULT_FLOW);
   uint32_t buffer_size = (uint32_t) jerryxx_get_property_number(options,  MSTR_UART_BUFFERSIZE, UART_DEFAULT_BUFFERSIZE);
   jerry_value_t data_event = jerryxx_get_property(options, MSTR_UART_DATAEVENT);
+
+  // initialize the port
+  int ret = uart_setup(port, baudrate, bits, parity, stop, flow, buffer_size);
+  if (ret == UARTPORT_ERROR) {
+    return JERRYXX_CREATE_ERROR("UART port setup error.");
+  }
+
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PORT, port);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_BAUDRATE, baudrate);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_BITS, bits);
@@ -107,12 +114,6 @@ JERRYXX_FUN(uart_ctor_fn) {
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_BUFFERSIZE, buffer_size);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_DATAEVENT, data_event);
   jerryxx_set_property(JERRYXX_GET_THIS, "callback", callback);
-
-  // initialize the port
-  int ret = uart_setup(port, baudrate, bits, parity, stop, flow, buffer_size);
-  if (ret < 0) {
-    // TODO: Handle error
-  }
 
   // setup io handle
   io_uart_handle_t *handle = malloc(sizeof(io_uart_handle_t));
@@ -149,7 +150,7 @@ JERRYXX_FUN(uart_write_fn) {
   uint8_t port = (uint8_t) jerry_get_number_value(port_value);
 
   // write data to the port
-  int ret = -1;
+  int ret = UARTPORT_ERROR;
   if (jerry_value_is_array(data)) { /* for Array<number> */
     size_t len = jerry_get_array_length(data);
     uint8_t buf[len];
@@ -184,7 +185,10 @@ JERRYXX_FUN(uart_write_fn) {
   } else {
     return JERRYXX_CREATE_ERROR("The data argument must be one of string, Array<number>, ArrayBuffer or TypedArray.");
   }
-  return jerry_create_undefined();
+  if (ret == UARTPORT_ERROR)
+    return jerry_create_null();
+  else
+    return jerry_create_number(ret);
 }
 
 
@@ -201,7 +205,7 @@ JERRYXX_FUN(uart_close_fn) {
 
   // close the port
   int ret = uart_close(port);
-  if (ret < 0) {
+  if (ret == UARTPORT_ERROR) {
     return JERRYXX_CREATE_ERROR("Failed to close UART port.");
   }
 
