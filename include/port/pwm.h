@@ -23,7 +23,11 @@
 #define __PWM_H
 
 #include <stdint.h>
-
+#define PWMPORT_ERROR  -1
+#define PWM_DEFAULT_FREQUENCY 490
+#define PWM_DEFAULT_DUTY 1.0
+#define PWM_DUTY_MIN  0
+#define PWM_DUTY_MAX  1.0
 /**
  * Setup a PWM channel
  *
@@ -39,14 +43,14 @@ int pwm_setup(uint8_t pin, double frequency, double duty);
  *
  * @param {uint8_t} pin
  */
-void pwm_start(uint8_t pin);
+int pwm_start(uint8_t pin);
 
 /**
  * Stop the PWM channel
  *
  * @param {uint8_t} pin
  */
-void pwm_stop(uint8_t pin);
+int pwm_stop(uint8_t pin);
 
 /**
  * Return the current frequency
@@ -62,7 +66,7 @@ double pwm_get_frequency(uint8_t pin);
  * @param {uint8_t} pin
  * @param {double} frequency
  */
-void pwm_set_frequency(uint8_t pin, double frequency);
+int pwm_set_frequency(uint8_t pin, double frequency);
 
 /**
  * Return the current duty cycle
@@ -78,12 +82,12 @@ double pwm_get_duty(uint8_t pin);
  * @param {uint8_t} pin
  * @param {double} duty
  */
-void pwm_set_duty(uint8_t pin, double duty);
+int pwm_set_duty(uint8_t pin, double duty);
 
 /**
  * Close the PWM channel
  */
-void pwm_close(uint8_t pin);
+int pwm_close(uint8_t pin);
 
 #endif /* __PWM_H */
 

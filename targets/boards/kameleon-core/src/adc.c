@@ -20,6 +20,7 @@
  */
 
 #include <stdint.h>
+#include "adc.h"
 #include "kameleon_core.h"
 
 DMA_HandleTypeDef hdma_adc1;
@@ -49,12 +50,12 @@ static const struct __adc_config {
  */
 /**
  * input : pinNumber
- * output : pinIndex or 0xFF
+ * output : pinIndex or ADC_PORTERRROR (-1)
  *          0xFF means the pin is not assigned for ADC
 */
-static uint8_t get_adc_index(uint8_t pin) {
+static int get_adc_index(uint8_t pin) {
   uint32_t n = sizeof(adc_config) / sizeof(struct __adc_config);
-  uint8_t index = 0xFF;
+  int index = ADCPORT_ERRROR;
 
   for (int k=0; k<n; k++) {
     if (adc_config[k].pin_number == pin) {
@@ -136,9 +137,9 @@ double adc_read(uint8_t adcIndex) {
 
 int adc_setup(uint8_t pin) {
 
-  uint8_t n = get_adc_index(pin);
-  if (n == 0xFF)
-    return -1;
+  int n = get_adc_index(pin);
+  if (n == ADCPORT_ERRROR)
+    return ADCPORT_ERRROR;
 
   uint8_t adc_need_init=1;
   for (int k=0; k<ADC_NUM; k++) {
@@ -162,9 +163,9 @@ int adc_setup(uint8_t pin) {
 }
 
 int adc_close(uint8_t pin) {
-  uint8_t n = get_adc_index(pin);
-  if (n == 0xFF)
-    return -1;
+  int n = get_adc_index(pin);
+  if (n == ADCPORT_ERRROR)
+    return ADCPORT_ERRROR;
   HAL_GPIO_DeInit(adc_config[n].port, adc_config[n].pin);
   adc_configured[n] = 0;
 
@@ -178,4 +179,5 @@ int adc_close(uint8_t pin) {
   if (adc_need_deinit) {
     adc1_deinit();
   }
+  return n;
 }
