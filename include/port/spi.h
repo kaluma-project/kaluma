@@ -23,6 +23,7 @@
 #define __SPI_H
 
 #include <stdint.h>
+#define SPIPORT_ERROR -1
 
 typedef enum {
   SPI_MODE_0, // (CPOL=0/CPHA=0)

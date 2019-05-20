@@ -47,14 +47,20 @@ JERRYXX_FUN(spi_ctor_fn) {
     baudrate = (uint32_t) jerryxx_get_property_number(options,  MSTR_SPI_BAUDRATE, SPI_DEFAULT_BAUDRATE);
     bitorder = (uint8_t) jerryxx_get_property_number(options,  MSTR_SPI_BITORDER, SPI_DEFAULT_BITORDER);
   }
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BUS, bus);
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_MODE, mode);
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BAUDRATE, baudrate);
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BITORDER, bitorder);
-
+  if (bitorder != SPI_BITORDER_LSB)
+    bitorder = SPI_BITORDER_MSB;
+  if (mode < 0 || mode > 3)
+    return JERRYXX_CREATE_ERROR("SPI mode error.");
   // initialize the bus
-  spi_setup(bus, (spi_mode_t) mode, baudrate, (spi_bitorder_t) bitorder);
-  return jerry_create_undefined();
+  if (spi_setup(bus, (spi_mode_t) mode, baudrate, (spi_bitorder_t) bitorder) == SPIPORT_ERROR) {
+    return JERRYXX_CREATE_ERROR("SPI port setup fail.");
+  } else {
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BUS, bus);
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_MODE, mode);
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BAUDRATE, baudrate);
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BITORDER, bitorder);
+    return jerry_create_undefined();
+  }
 }
 
 
@@ -87,12 +93,12 @@ JERRYXX_FUN(spi_transfer_fn) {
       }
     }
     int ret = spi_sendrecv(bus, tx_buf, rx_buf, len, timeout);
-    if (ret > -1) {
+    if (ret == SPIPORT_ERROR) {
+      return jerry_create_null();
+    } else {
       jerry_value_t array_buffer = jerry_create_arraybuffer(len);
       jerry_arraybuffer_write(array_buffer, 0, rx_buf, len);
       return array_buffer;
-    } else {
-      return jerry_create_null();
     }
   } else if (jerry_value_is_arraybuffer(data)) { /* for ArrayBuffer */
     size_t len = jerry_get_arraybuffer_byte_length(data);
@@ -100,12 +106,12 @@ JERRYXX_FUN(spi_transfer_fn) {
     uint8_t rx_buf[len];
     jerry_arraybuffer_read(data, 0, tx_buf, len);
     int ret = spi_sendrecv(bus, tx_buf, rx_buf, len, timeout);
-    if (ret > -1) {
+    if (ret == SPIPORT_ERROR) {
+      return jerry_create_null();
+    } else {
       jerry_value_t array_buffer = jerry_create_arraybuffer(len);
       jerry_arraybuffer_write(array_buffer, 0, rx_buf, len);
       return array_buffer;
-    } else {
-      return jerry_create_null();
     }
   } else if (jerry_value_is_typedarray(data)) { /* for TypedArrays (Uint8Array, Int16Array, ...) */
     jerry_length_t byteLength = 0;
@@ -116,12 +122,12 @@ JERRYXX_FUN(spi_transfer_fn) {
     uint8_t rx_buf[len];
     jerry_arraybuffer_read(array_buffer, 0, tx_buf, len);
     int ret = spi_sendrecv(bus, tx_buf, rx_buf, len, timeout);
-    if (ret > -1) {
+    if (ret == SPIPORT_ERROR) {
+      return jerry_create_null();
+    } else {
       jerry_value_t array_buffer = jerry_create_arraybuffer(len);
       jerry_arraybuffer_write(array_buffer, 0, rx_buf, len);
       return array_buffer;
-    } else {
-      return jerry_create_null();
     }
     jerry_release_value(array_buffer);
   } else if (jerry_value_is_string(data)) { /* for string */
@@ -130,12 +136,12 @@ JERRYXX_FUN(spi_transfer_fn) {
     uint8_t rx_buf[len];
     jerry_string_to_char_buffer(data, tx_buf, len);
     int ret = spi_sendrecv(bus, tx_buf, rx_buf, len, timeout);
-    if (ret > -1) {
+    if (ret == SPIPORT_ERROR) {
+      return jerry_create_null();
+    } else {
       jerry_value_t array_buffer = jerry_create_arraybuffer(len);
       jerry_arraybuffer_write(array_buffer, 0, rx_buf, len);
       return array_buffer;
-    } else {
-      return jerry_create_null();
     }
   } else {
     return JERRYXX_CREATE_ERROR("The data argument must be one of string, Array<number>, ArrayBuffer or TypedArray.");
@@ -159,7 +165,7 @@ JERRYXX_FUN(spi_send_fn) {
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
 
   // write data to the bus
-  int ret = -1;
+  int ret = SPIPORT_ERROR;
   if (jerry_value_is_array(data)) { /* for Array<number> */
     size_t len = jerry_get_array_length(data);
     uint8_t tx_buf[len];
@@ -194,7 +200,10 @@ JERRYXX_FUN(spi_send_fn) {
   } else {
     return JERRYXX_CREATE_ERROR("The data argument must be one of string, Array<number>, ArrayBuffer or TypedArray.");
   }
-  return jerry_create_number(ret);
+  if (ret == SPIPORT_ERROR)
+    return jerry_create_null();
+  else
+    return jerry_create_number(ret);
 }
 
 
@@ -218,12 +227,13 @@ JERRYXX_FUN(spi_recv_fn) {
   int ret = spi_recv(bus, buf, length, timeout);
 
   // return an array buffer
-  if (ret > -1) {
+  if (ret == SPIPORT_ERROR) {
+    return jerry_create_null();
+  } else {
     jerry_value_t array_buffer = jerry_create_arraybuffer(length);
     jerry_arraybuffer_write(array_buffer, 0, buf, length);
     return array_buffer;
   }
-  return jerry_create_null();
 }
 
 /**
@@ -239,7 +249,7 @@ JERRYXX_FUN(spi_close_fn) {
 
   // close the bus
   int ret = spi_close(bus);
-  if (ret < 0) {
+  if (ret == SPIPORT_ERROR) {
     return JERRYXX_CREATE_ERROR("Failed to close SPI bus.");
   }
 
