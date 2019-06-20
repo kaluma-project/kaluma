@@ -68,15 +68,15 @@ print_unhandled_exception (jerry_value_t error_value) /**< error value */
 
   jerry_release_value (error_value);
   err_str_size = jerry_string_to_char_buffer (err_str_val, err_str_buf, err_str_size);
-  if (err_str_size >= 242) //256-14
+  if (err_str_size >= 230) //256 - 26
   {
-    err_str_buf[241] = 0;
+    err_str_buf[229] = 0;
   }
   else
   {
     err_str_buf[err_str_size] = 0;
   }
-  jerry_port_log (JERRY_LOG_LEVEL_ERROR, "Script Error: %s\n", err_str_buf);
+  jerry_port_log (JERRY_LOG_LEVEL_ERROR, "Script Error - %s\n", err_str_buf);
   jerry_release_value (err_str_val);
 } /* print_unhandled_exception */
 
@@ -88,12 +88,13 @@ void runtime_run_main() {
     if (!jerry_value_is_error (parsed_code))
     {
       jerry_value_t ret_value = jerry_run (parsed_code);
+      if (jerry_value_is_error (ret_value))
+      {
+        print_unhandled_exception (ret_value);
+      }
       jerry_release_value (ret_value);
     } else {
-      if (jerry_value_is_error (parsed_code))
-      {
         print_unhandled_exception (parsed_code);
-      }
     }
     jerry_release_value (parsed_code);
   }
