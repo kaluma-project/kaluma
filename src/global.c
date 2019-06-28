@@ -56,7 +56,7 @@ JERRYXX_FUN(pin_mode_fn) {
   if (gpio_set_io_mode(pin, mode) == GPIOPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
-    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
   }
   return jerry_create_undefined();
 }
@@ -68,7 +68,7 @@ JERRYXX_FUN(digital_read_fn) {
   if (value == GPIOPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
-    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
   }
   return jerry_create_number(value);
 }
@@ -81,7 +81,7 @@ JERRYXX_FUN(digital_write_fn) {
   if (gpio_write(pin, value) == GPIOPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
-    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
   }
   return jerry_create_undefined();
 }
@@ -92,7 +92,7 @@ JERRYXX_FUN(digital_toggle_fn) {
   if (gpio_toggle(pin) == GPIOPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
-    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
   }
   return jerry_create_undefined();
 }
@@ -104,7 +104,7 @@ static void set_watch_cb(io_watch_handle_t *watch) {
     if (!jerry_value_is_error (ret_val)) {
       char errmsg[255];
       sprintf(errmsg, "runtime error in callback function");
-      jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+      jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
     }
     jerry_release_value (ret_val);
     jerry_release_value (this_val);
@@ -126,7 +126,7 @@ JERRYXX_FUN(set_watch_fn) {
   if (io_watch_start(watch, set_watch_cb, pin, mode, debounce) == GPIOPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
-    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
   }
   return jerry_create_number(watch->base.id);
 }
@@ -180,7 +180,7 @@ JERRYXX_FUN(analog_read_fn) {
   if (adcIndex == ADCPORT_ERRROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for ADC channel", pin);
-    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
   }
   delay(1); // To prevent issue #55
   double value = adc_read((uint8_t) adcIndex);
@@ -201,7 +201,7 @@ JERRYXX_FUN(analog_write_fn) {
   if (pwm_setup(pin, frequency, value) == PWMPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for analog out (PWM)", pin);
-    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
   } else {
     pwm_start(pin);
     return jerry_create_undefined();
@@ -229,7 +229,7 @@ JERRYXX_FUN(tone_fn) {
   if (pwm_setup(pin, frequency, duty) == PWMPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for tone", pin);
-    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
   } else {
     pwm_start(pin);
     // setup timer for duration
@@ -249,7 +249,7 @@ JERRYXX_FUN(no_tone_fn) {
   if (pwm_stop(pin) == PWMPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
-    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
   }
   return jerry_create_undefined();
 }
