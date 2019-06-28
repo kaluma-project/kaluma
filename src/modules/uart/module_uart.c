@@ -102,7 +102,7 @@ JERRYXX_FUN(uart_ctor_fn) {
   // initialize the port
   int ret = uart_setup(port, baudrate, bits, parity, stop, flow, buffer_size);
   if (ret == UARTPORT_ERROR) {
-    return JERRYXX_CREATE_ERROR("UART port setup error.");
+    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "UART port setup error.");
   }
 
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PORT, port);
@@ -145,7 +145,7 @@ JERRYXX_FUN(uart_write_fn) {
   // check this.port
   uint8_t port_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
   if (!jerry_value_is_number(port_value)) {
-    return JERRYXX_CREATE_ERROR("UART port is not initialized.");
+    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "UART port is not initialized.");
   }
   uint8_t port = (uint8_t) jerry_get_number_value(port_value);
 
@@ -183,10 +183,10 @@ JERRYXX_FUN(uart_write_fn) {
     jerry_string_to_char_buffer(data, buf, len);
     ret = uart_write(port, buf, len);
   } else {
-    return JERRYXX_CREATE_ERROR("The data argument must be one of string, Array<number>, ArrayBuffer or TypedArray.");
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "The data argument must be one of string, Array<number>, ArrayBuffer or TypedArray.");
   }
   if (ret == UARTPORT_ERROR)
-    return jerry_create_null();
+    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to write data to UART port.");
   else
     return jerry_create_number(ret);
 }
@@ -199,14 +199,14 @@ JERRYXX_FUN(uart_close_fn) {
   // check this.port
   uint8_t port_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
   if (!jerry_value_is_number(port_value)) {
-    return JERRYXX_CREATE_ERROR("UART port is not initialized.");
+    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "UART port is not initialized.");
   }
   uint8_t port = (uint8_t) jerry_get_number_value(port_value);
 
   // close the port
   int ret = uart_close(port);
   if (ret == UARTPORT_ERROR) {
-    return JERRYXX_CREATE_ERROR("Failed to close UART port.");
+    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to close UART port.");
   }
 
   // delete this.port

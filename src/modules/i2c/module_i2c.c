@@ -35,7 +35,7 @@ JERRYXX_FUN(i2c_ctor_fn) {
   i2c_mode_t mode = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(1, I2C_MASTER);
   //Master mode support only
   if (mode != I2C_MASTER)
-    return JERRYXX_CREATE_ERROR("Invalid I2C mode.");
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) "Invalid I2C mode.");
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_MODE, mode);
 
   // check this.bus number
@@ -49,14 +49,14 @@ JERRYXX_FUN(i2c_ctor_fn) {
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_ADDRESS, address);
     int ret = i2c_setup_slave(bus, address);
     if (ret < 0) {
-      return JERRYXX_CREATE_ERROR("Failed to initialize I2C bus.");
+      return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to initialize I2C bus.");
     }
   } else { /* master mode */
     JERRYXX_CHECK_ARG_NUMBER_OPT(2, "speed");
     int32_t speed = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(2, 100000);
     int ret = i2c_setup_master(bus, speed);
     if (ret == I2CPORT_ERROR) {
-      return JERRYXX_CREATE_ERROR("Failed to initialize I2C bus.");
+      jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to initialize I2C bus.");
     }
   }
   return jerry_create_undefined();
@@ -73,7 +73,7 @@ JERRYXX_FUN(i2c_write_fn) {
   // check this.bus number
   uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
   if (!jerry_value_is_number(bus_value)) {
-    return JERRYXX_CREATE_ERROR("I2C bus is not initialized.");
+    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "I2C bus is not initialized.");
   }
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
 
@@ -144,7 +144,7 @@ JERRYXX_FUN(i2c_write_fn) {
     }
   }
   if (ret == I2CPORT_ERROR)
-    return jerry_create_null();
+    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to write data via I2C bus.");
   else
     return jerry_create_number(ret);
 }
@@ -160,7 +160,7 @@ JERRYXX_FUN(i2c_read_fn) {
   // check this.bus number
   uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
   if (!jerry_value_is_number(bus_value)) {
-    return JERRYXX_CREATE_ERROR("I2C bus is not initialized.");
+    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "I2C bus is not initialized.");
   }
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
 
@@ -186,7 +186,7 @@ JERRYXX_FUN(i2c_read_fn) {
 
   // return an array buffer
   if (ret == I2CPORT_ERROR) {
-    return jerry_create_null();
+    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to read data via I2C bus.");
   } else {
     jerry_value_t array_buffer = jerry_create_arraybuffer(length);
     jerry_arraybuffer_write(array_buffer, 0, buf, length);
@@ -207,14 +207,14 @@ JERRYXX_FUN(i2c_memwrite_fn) {
   // check this.bus number
   uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
   if (!jerry_value_is_number(bus_value)) {
-    return JERRYXX_CREATE_ERROR("I2C bus is not initialized.");
+    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "I2C bus is not initialized.");
   }
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
 
   // check the mode (determine slave mode or master mode)
   i2c_mode_t i2cmode = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_MODE);
   if (i2cmode == I2C_SLAVE)
-    return JERRYXX_CREATE_ERROR("This function runs in master mode only.");
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) "This function runs in master mode only.");
 
   JERRYXX_CHECK_ARG_NUMBER(2, "slaveaddr");
   JERRYXX_CHECK_ARG_NUMBER_OPT(3, "memAddr16bit");
@@ -258,7 +258,7 @@ JERRYXX_FUN(i2c_memwrite_fn) {
     ret = i2c_memWrite_master(bus, address, memAddress, memAddr16, buf, len, timeout);
   }
   if (ret == I2CPORT_ERROR)
-    return jerry_create_null();
+    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to write data via I2C bus.");
   else
     return jerry_create_number(ret);
 }
@@ -277,14 +277,14 @@ JERRYXX_FUN(i2c_memread_fn) {
   // check this.bus number
   uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
   if (!jerry_value_is_number(bus_value)) {
-    return JERRYXX_CREATE_ERROR("I2C bus is not initialized.");
+    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "I2C bus is not initialized.");
   }
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
 
   // check the mode (determine slave mode or master mode)
   i2c_mode_t i2cmode = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_MODE);
   if (i2cmode == I2C_SLAVE)
-    return JERRYXX_CREATE_ERROR("This function runs in master mode only.");
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) "This function runs in master mode only.");
 
   JERRYXX_CHECK_ARG_NUMBER(2, "slaveaddr");
   JERRYXX_CHECK_ARG_NUMBER_OPT(3, "memAddr16bit");
@@ -297,7 +297,7 @@ JERRYXX_FUN(i2c_memread_fn) {
 
   // return an array buffer
   if (ret == I2CPORT_ERROR) {
-    return jerry_create_null();
+    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to read data via I2C bus.");
   } else {
     jerry_value_t array_buffer = jerry_create_arraybuffer(length);
     jerry_arraybuffer_write(array_buffer, 0, buf, length);
@@ -312,14 +312,14 @@ JERRYXX_FUN(i2c_close_fn) {
   // check this.bus number
   uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
   if (!jerry_value_is_number(bus_value)) {
-    return JERRYXX_CREATE_ERROR("I2C bus is not initialized.");
+    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "I2C bus is not initialized.");
   }
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
 
   // close the bus
   int ret = i2c_close(bus);
   if (ret == I2CPORT_ERROR) {
-    return JERRYXX_CREATE_ERROR("Failed to close I2C bus.");
+    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to close I2C bus.");
   }
 
   // delete this.bus property
