@@ -1,6 +1,6 @@
 function GPIO (pin, mode) {
   this.pin = pin;
-  if (mode === OUTPUT)
+  if (mode !== OUTPUT)
     mode = INPUT;
   this.setMode(mode)
 }
