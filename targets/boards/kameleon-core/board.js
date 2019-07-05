@@ -29,6 +29,8 @@ global.board = {
       throw Error('The pin is not PWM capable.');
     }
     var PWM = global.require('pwm').PWM;
+    frequency = (typeof frequency === 'number' ? frequency : 490);
+    duty = (typeof duty === 'number' ? duty : 1);
     return new PWM(pin, frequency, duty);
   },
   adc: function (pin) {
