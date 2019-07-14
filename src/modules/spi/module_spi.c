@@ -43,9 +43,9 @@ JERRYXX_FUN(spi_ctor_fn) {
   uint32_t baudrate = SPI_DEFAULT_BAUDRATE;
   uint8_t bitorder = SPI_DEFAULT_BITORDER;
   if (jerry_value_is_object(options)) {
-    mode = (uint8_t) jerryxx_get_property_number(options,  MSTR_SPI_MODE, SPI_DEFAULT_MODE);
-    baudrate = (uint32_t) jerryxx_get_property_number(options,  MSTR_SPI_BAUDRATE, SPI_DEFAULT_BAUDRATE);
-    bitorder = (uint8_t) jerryxx_get_property_number(options,  MSTR_SPI_BITORDER, SPI_DEFAULT_BITORDER);
+    mode = (uint8_t) jerryxx_get_property_number(options, MSTR_SPI_MODE, SPI_DEFAULT_MODE);
+    baudrate = (uint32_t) jerryxx_get_property_number(options, MSTR_SPI_BAUDRATE, SPI_DEFAULT_BAUDRATE);
+    bitorder = (uint8_t) jerryxx_get_property_number(options, MSTR_SPI_BITORDER, SPI_DEFAULT_BITORDER);
   }
   if (bitorder != SPI_BITORDER_LSB)
     bitorder = SPI_BITORDER_MSB;

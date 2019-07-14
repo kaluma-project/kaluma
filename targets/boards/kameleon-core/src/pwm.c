@@ -348,7 +348,10 @@ int pwm_setup(uint8_t pin, double frequency, double duty) {
   prescaler = get_tick_prescaler(n, frequency);
   ch = pwm_config[n].channel;
   arr = (uint32_t)(tick_freq / prescaler / frequency);
-  pulse = (uint32_t)((pduty * arr)/100);
+  if (duty == 0)
+    pulse = 0;
+  else
+    pulse = (uint32_t)((pduty * arr)/100 + 1);
 
   pwm_config[n].setup(ch, prescaler, arr, pulse);
 
@@ -400,11 +403,15 @@ double pwm_get_duty(uint8_t pin) {
 */
 int pwm_set_duty(uint8_t pin, double duty) {
   int n = get_pwm_index(pin);
+  uint32_t pulse;
   if (n == PWMPORT_ERROR) //PWM pin index
     return PWMPORT_ERROR;
   while (__HAL_TIM_GET_COUNTER(pwm_config[n].handle) != 0);
   uint32_t arr = __HAL_TIM_GET_AUTORELOAD(pwm_config[n].handle);
-  uint32_t pulse = (uint32_t)(duty * arr);
+  if (duty == 0)
+    pulse = 0;
+  else
+    pulse = (uint32_t)(duty * arr + 1);
   __HAL_TIM_SET_COMPARE(pwm_config[n].handle, pwm_config[n].channel, pulse);
   return 0;
 }

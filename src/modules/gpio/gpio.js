@@ -1,5 +1,7 @@
 function GPIO (pin, mode) {
   this.pin = pin;
+  if (mode !== OUTPUT)
+    mode = INPUT;
   this.setMode(mode)
 }
 
@@ -16,7 +18,7 @@ GPIO.prototype.toggle = function () {
 }
 
 GPIO.prototype.setMode = function (mode) {
-  this.mode = typeof mode === 'number' ? mode : OUTPUT
+  this.mode = typeof mode === 'number' ? mode : INPUT
   pinMode(this.pin, this.mode);
 }
 

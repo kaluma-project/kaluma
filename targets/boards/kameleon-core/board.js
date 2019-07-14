@@ -29,6 +29,8 @@ global.board = {
       throw Error('The pin is not PWM capable.');
     }
     var PWM = global.require('pwm').PWM;
+    frequency = (typeof frequency === 'number' ? frequency : 490);
+    duty = (typeof duty === 'number' ? duty : 1);
     return new PWM(pin, frequency, duty);
   },
   adc: function (pin) {
@@ -38,16 +40,14 @@ global.board = {
     var ADC = global.require('adc').ADC;
     return new ADC(pin);
   },
-  i2c: function (bus, address) {
+  i2c: function (bus, mode, mode_option) {
     if (bus < 0 || bus >= this.NUM_I2C) {
       throw Error('Unsupported I2C bus.');
     }
     var I2C = global.require('i2c').I2C;
-    if (arguments.length > 1) {
-      return new I2C(bus, address);
-    } else {
-      return new I2C(bus);
-    }
+    mode = (typeof mode === 'number' ? mode : 0);
+    mode_option = (typeof mode_option === 'number' ? mode_option : 100000);
+    return new I2C(bus, mode, mode_option);
   },
   spi: function (bus, options) {
     if (bus < 0 || bus >= this.NUM_SPI) {

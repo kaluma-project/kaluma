@@ -104,7 +104,7 @@ static void set_watch_cb(io_watch_handle_t *watch) {
     if (!jerry_value_is_error (ret_val)) {
       char errmsg[255];
       sprintf(errmsg, "runtime error in callback function");
-      jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
+      jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) errmsg);
     }
     jerry_release_value (ret_val);
     jerry_release_value (this_val);

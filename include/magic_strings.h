@@ -42,8 +42,6 @@
 #define MSTR_ANALOG_WRITE "analogWrite"
 #define MSTR_TONE "tone"
 #define MSTR_NO_TONE "noTone"
-#define MSTR_DIGITAL_READ "digitalRead"
-#define MSTR_DIGITAL_WRITE "digitalWrite"
 #define MSTR_SET_TIMEOUT "setTimeout"
 #define MSTR_SET_INTERVAL "setInterval"
 #define MSTR_CLEAR_TIMEOUT "clearTimeout"
