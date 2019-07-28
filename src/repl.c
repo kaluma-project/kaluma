@@ -45,6 +45,7 @@ static void cmd_mem(repl_state_t *state);
 static void cmd_gc(repl_state_t *state);
 static void cmd_firmup(repl_state_t *state);
 static void cmd_version(repl_state_t *state);
+static void cmd_hi(repl_state_t *state);
 static void cmd_help(repl_state_t *state);
 
 // --------------------------------------------------------------------------
@@ -136,6 +137,8 @@ static void run_command() {
       cmd_firmup(&state);
     } else if (strcmp(tokenv[0], ".v") == 0) {
       cmd_version(&state);
+    } else if (strcmp(tokenv[0], ".hi") == 0) {
+      cmd_hi(&state);
     } else if (strcmp(tokenv[0], ".help") == 0) {
       cmd_help(&state);
     } else { /* unknown command */
@@ -590,6 +593,31 @@ static void cmd_version(repl_state_t *state) {
 }
 
 /**
+ * .hi command
+ */
+static void cmd_hi(repl_state_t *state) {
+  repl_print_begin(REPL_OUTPUT_LOG);
+  repl_printf("/---------------------------\\\r\n");
+  repl_printf("|                  ____     |\r\n");
+  repl_printf("|     /----_______/    \\    |\r\n");
+  repl_printf("|    /               O  \\   |\r\n");
+  repl_printf("|   /               _____\\  |\r\n");
+  repl_printf("|  |  /------__ ___ ____/   |\r\n");
+  repl_printf("|  | | /``\\   //   \\\\       |\r\n");
+  repl_printf("|  | \\ @`\\ \\  W     W       |\r\n");
+  repl_printf("|   \\ \\__/ / ***************|\r\n");
+  repl_printf("|    \\____/     ************|\r\n");
+  repl_printf("|                       ****|\r\n");
+  repl_printf("\\---------------------------/\r\n");
+  repl_printf("\r\n");
+  repl_printf("Welcome to Kameleon!\r\n");
+  repl_printf("%s %s\r\n", "Version:", CONFIG_KAMELEON_VERSION);
+  repl_printf("For more info: https://kameleon.io\r\n");
+  repl_printf("\r\n");
+  repl_print_end();
+}
+
+/**
  * .help command
  */
 static void cmd_help(repl_state_t *state) {
@@ -602,6 +630,7 @@ static void cmd_help(repl_state_t *state) {
   repl_printf(".firmup\tFirmware update mode.\r\n");
   repl_printf(".gc\tPerform garbage collection.\r\n");
   repl_printf(".v\tFirmware version.\r\n");
+  repl_printf(".hi\tPrint welcome message.\r\n");
   repl_printf(".help\tPrint this help message.\r\n");
   repl_print_end();
 }
@@ -625,25 +654,7 @@ void repl_init() {
   state.history_size = 0;
   state.history_position = 0;
   state.handler = &default_handler;
-  repl_print_begin(REPL_OUTPUT_LOG);
-  repl_printf("/---------------------------\\\r\n");
-  repl_printf("|                  ____     |\r\n");
-  repl_printf("|     /----_______/    \\    |\r\n");
-  repl_printf("|    /               O  \\   |\r\n");
-  repl_printf("|   /               _____\\  |\r\n");
-  repl_printf("|  |  /------__ ___ ____/   |\r\n");
-  repl_printf("|  | | /``\\   //   \\\\       |\r\n");
-  repl_printf("|  | \\ @`\\ \\  W     W       |\r\n");
-  repl_printf("|   \\ \\__/ / ***************|\r\n");
-  repl_printf("|    \\____/     ************|\r\n");
-  repl_printf("|                       ****|\r\n");
-  repl_printf("\\---------------------------/\r\n");
-  repl_printf("\r\n");
-  repl_printf("Welcome to Kameleon!\r\n");
-  repl_printf("%s %s\r\n", "Version:", CONFIG_KAMELEON_VERSION);
-  repl_printf("For more info: http://kameleon.io\r\n");
-  repl_printf("\r\n");
-  repl_print_end();
+  cmd_hi(NULL);
 }
 
 void repl_print_begin(repl_output_t output) {
