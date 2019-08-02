@@ -44,6 +44,16 @@ typedef enum {
 
 #define GPIOPORT_ERROR -1
 
+/**
+ * Initialize all GPIO when system started
+ */
+void gpio_init();
+
+/**
+ * Cleanup all GPIO when system cleanup
+ */
+void gpio_cleanup();
+
 int gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode);
 int gpio_write(uint8_t pin, uint8_t value);
 int gpio_toggle(uint8_t pin);

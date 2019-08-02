@@ -111,6 +111,18 @@ static void adc1_deinit() {
 }
 
 /**
+ * Initialize all ADC channels when system started
+ */
+void adc_init() {
+}
+
+/**
+ * Cleanup all ADC channels when system cleanup
+ */
+void adc_cleanup() {
+}
+
+/**
  * Read value from the ADC channel
  *
  * @param {uint8_t} adcIndex

@@ -30,6 +30,18 @@ static I2C_HandleTypeDef hi2c2;
 static I2C_HandleTypeDef * handle[] = {&hi2c1, &hi2c2};
 static I2C_TypeDef * instance[] = {I2C1, I2C2};
 
+/**
+ * Initialize all I2C when system started
+ */
+void i2c_init() {
+}
+
+/**
+ * Cleanup all I2C when system cleanup
+ */
+void i2c_cleanup() {
+}
+
 int i2c_setup_master(uint8_t bus, uint32_t speed) {
   if ((bus != 0) && (bus != 1))
     return I2CPORT_ERROR;

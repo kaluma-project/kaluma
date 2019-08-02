@@ -26,6 +26,12 @@
 #include "usbd_cdc_if.h"
 #include "usb_device.h"
 #include "usbd_desc.h"
+#include "gpio.h"
+#include "adc.h"
+#include "pwm.h"
+#include "i2c.h"
+#include "spi.h"
+#include "uart.h"
 
 const char system_arch[] = "cortex-m4";
 const char system_platform[] = "unknown";
@@ -208,18 +214,24 @@ void request_firmup() {
 void system_init() {
   HAL_Init();
   SystemClock_Config();
-  GpioClock_Config();
-  Gpio_Init();
-  Led_Config();
-  Button_Config();
+  GpioClock_Config(); // TODO: Move to gpio_init() ???
+  Gpio_Init(); // TODO: Move to gpio_init() ???
+  Led_Config(); // TODO: Move to gpio_init() ???
+  Button_Config(); // TODO: Move to gpio_init() ???
   UsbDevice_Config();
+  gpio_init();
+  adc_init();
+  pwm_init();
+  i2c_init();
+  spi_init();
+  uart_init();
 }
 
 void system_cleanup() {
-  // cleanup gpio
-  // cleanup pwm
-  // cleanup adc
-  // cleanup i2c
-  // cleanup spi
-  // cleanup uart
+  gpio_cleanup();
+  adc_cleanup();
+  pwm_cleanup();
+  i2c_cleanup();
+  spi_cleanup();
+  uart_cleanup();
 }

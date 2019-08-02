@@ -24,6 +24,17 @@
 
 #include <stdint.h>
 #define ADCPORT_ERRROR  -1
+
+/**
+ * Initialize all ADC channels when system started
+ */
+void adc_init();
+
+/**
+ * Cleanup all ADC channels when system cleanup
+ */
+void adc_cleanup();
+
 /**
  * Setup a ADC channel
  *

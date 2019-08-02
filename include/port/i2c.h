@@ -30,6 +30,17 @@ typedef enum {
 } i2c_mode_t;
 
 #define I2CPORT_ERROR -1
+
+/**
+ * Initialize all I2C when system started
+ */
+void i2c_init();
+
+/**
+ * Cleanup all I2C when system cleanup
+ */
+void i2c_cleanup();
+
 /**
  * Setup a I2C bus as master.
  *

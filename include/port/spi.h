@@ -37,6 +37,17 @@ typedef enum {
   SPI_BITORDER_LSB
 } spi_bitorder_t;
 
+
+/**
+ * Initialize all SPI when system started
+ */
+void spi_init();
+
+/**
+ * Cleanup all SPI when system cleanup
+ */
+void spi_cleanup();
+
 /**
  * Setup SPI bus as the master device
  *

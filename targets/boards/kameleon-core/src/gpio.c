@@ -54,6 +54,19 @@ const struct {
    {GPIOA, GPIO_PIN_4},     // 21 (BUTTON)
 };
 
+
+/**
+ * Initialize all GPIO when system started
+ */
+void gpio_init() {
+}
+
+/**
+ * Cleanup all GPIO when system cleanup
+ */
+void gpio_cleanup() {
+}
+
 /**
 */
 int gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode) {

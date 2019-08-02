@@ -42,6 +42,17 @@ void uart_fill_ringbuffer(uint8_t port, uint8_t ch) {
   ringbuffer_write(&uart_rx_ringbuffer[port], &ch, sizeof(ch));
 }
 
+/**
+ * Initialize all UART when system started
+ */
+void uart_init() {
+}
+
+/**
+ * Cleanup all UART when system cleanup
+ */
+void uart_cleanup() {
+}
 
 int uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
     uart_parity_type_t parity, uint8_t stop, uart_flow_control_t flow,

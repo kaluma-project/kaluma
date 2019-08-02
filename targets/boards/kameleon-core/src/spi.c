@@ -62,6 +62,18 @@ static uint32_t get_prescaler_factor(uint8_t bus, uint32_t baudrate) {
   return spi_prescaler[k];
 }
 
+/**
+ * Initialize all SPI when system started
+ */
+void spi_init() {
+}
+
+/**
+ * Cleanup all SPI when system cleanup
+ */
+void spi_cleanup() {
+}
+
 /** SPI Setup
 */
 int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bitorder) {

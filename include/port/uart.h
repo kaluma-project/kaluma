@@ -39,6 +39,16 @@ typedef enum {
 } uart_flow_control_t;
 
 /**
+ * Initialize all UART when system started
+ */
+void uart_init();
+
+/**
+ * Cleanup all UART when system cleanup
+ */
+void uart_cleanup();
+
+/**
  * Setup a UART port. This have to manage an internal read buffer.
  *
  * @param port

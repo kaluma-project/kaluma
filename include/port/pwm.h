@@ -28,6 +28,17 @@
 #define PWM_DEFAULT_DUTY 1.0
 #define PWM_DUTY_MIN  0
 #define PWM_DUTY_MAX  1.0
+
+/**
+ * Initialize all PWM when system started
+ */
+void pwm_init();
+
+/**
+ * Cleanup all PWM when system cleanup
+ */
+void pwm_cleanup();
+
 /**
  * Setup a PWM channel
  *

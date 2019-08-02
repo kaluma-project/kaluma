@@ -329,9 +329,20 @@ static void tim5_pwm_setup(uint32_t channel, uint32_t prescaler, uint32_t arr, u
 }
 
 /**
+ * Initialize all PWM when system started
+ */
+void pwm_init() {
+}
+
+/**
+ * Cleanup all PWM when system cleanup
+ */
+void pwm_cleanup() {
+}
+
+/**
  * return Returns 0 on success or -1 on failure.
 */
-
 int pwm_setup(uint8_t pin, double frequency, double duty) {
   uint32_t tick_freq, ch, prescaler, arr, pulse;
   uint8_t pduty = (duty + 0.005f) * 100;
