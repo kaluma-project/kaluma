@@ -36,6 +36,11 @@ extern const char system_platform[];
 void system_init();
 
 /**
+ * Cleanup all resources in the system
+ */
+void system_cleanup();
+
+/**
  * Increment tick count
  */
 void inc_tick();

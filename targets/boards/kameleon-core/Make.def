@@ -17,7 +17,6 @@ $(TARGET_DIR)/src/ringbuffer.c \
 $(TARGET_DIR)/src/system.c \
 $(TARGET_DIR)/src/gpio.c \
 $(TARGET_DIR)/src/pwm.c \
-$(TARGET_DIR)/src/led.c \
 $(TARGET_DIR)/src/tty.c \
 $(TARGET_DIR)/src/usb_device.c \
 $(TARGET_DIR)/src/usbd_conf.c \

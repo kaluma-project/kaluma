@@ -21,7 +21,6 @@
 
 #include "system.h"
 #include "gpio.h"
-#include "led.h"
 #include "tty.h"
 #include "io.h"
 #include "repl.h"

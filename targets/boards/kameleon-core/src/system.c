@@ -215,3 +215,11 @@ void system_init() {
   UsbDevice_Config();
 }
 
+void system_cleanup() {
+  // cleanup gpio
+  // cleanup pwm
+  // cleanup adc
+  // cleanup i2c
+  // cleanup spi
+  // cleanup uart
+}

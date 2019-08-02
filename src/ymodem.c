@@ -2,7 +2,6 @@
 #include "kameleon_core.h"
 #include "main.h"
 #include "tty.h"
-#include "led.h"
 #include "ymodem.h"
 
 uint8_t packet_data[PACKET_1K_SIZE + PACKET_DATA_INDEX + PACKET_TRAILER_SIZE];

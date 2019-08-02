@@ -28,6 +28,7 @@
 #include "io.h"
 #include "global.h"
 #include "repl.h"
+#include "system.h"
 #include "runtime.h"
 #include "kameleon_magic_strings.h"
 
@@ -46,8 +47,9 @@ void runtime_init(bool run_main) {
 }
 
 void runtime_cleanup() {
-  Gpio_Init();
+  Gpio_Init(); // TODO: Move to system_cleanup()
   jerry_cleanup();
+  system_cleanup();
   io_timer_cleanup();
   io_watch_cleanup();
   io_uart_cleanup();
