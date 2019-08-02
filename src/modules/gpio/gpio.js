@@ -17,6 +17,14 @@ GPIO.prototype.toggle = function () {
   digitalToggle(this.pin)
 }
 
+GPIO.prototype.low = function () {
+  digitalWrite(this.pin, 0)
+}
+
+GPIO.prototype.high = function () {
+  digitalWrite(this.pin, 1)
+}
+
 GPIO.prototype.setMode = function (mode) {
   this.mode = typeof mode === 'number' ? mode : INPUT
   pinMode(this.pin, this.mode);
