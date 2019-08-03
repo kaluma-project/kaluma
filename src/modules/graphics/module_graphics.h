@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2019 Kameleon
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,20 +19,6 @@
  * SOFTWARE.
  */
 
-#include <stdint.h>
 #include "jerryscript.h"
-#include "kameleon_magic_strings.h"
 
-const uint32_t num_magic_string_items = {{magicStrings.length}};
-
-const jerry_char_t *magic_string_items[] = {
-  {{#magicStrings}}
-  (const jerry_char_t *) "{{id}}"{{^last}},{{/last}}
-  {{/magicStrings}}
-};
-
-const jerry_length_t magic_string_lengths[] = {
-  {{#magicStrings}}
-  {{len}}{{^last}},{{/last}}
-  {{/magicStrings}}
-};
+jerry_value_t module_graphics_init();

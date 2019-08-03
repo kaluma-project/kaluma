@@ -52,18 +52,9 @@ void jerry_port_log(jerry_log_level_t level, /**< log level */
     va_end (args);
 } /* jerry_port_log */
 
-/**
- * Dummy function to get the time zone.
- *
- * @return true
- */
-bool jerry_port_get_time_zone(jerry_time_zone_t *tz_p) {
-  /* We live in UTC. */
-  tz_p->offset = 0;
-  tz_p->daylight_saving_time = 0;
-
-  return true;
-} /* jerry_port_get_time_zone */
+double jerry_port_get_local_time_zone_adjustment (double unix_ms, bool is_utc) {
+  return 0;
+}
 
 /**
  * Dummy function to get the current time.
@@ -73,6 +64,45 @@ bool jerry_port_get_time_zone(jerry_time_zone_t *tz_p) {
 double jerry_port_get_current_time(void) {
   return 0;
 } /* jerry_port_get_current_time */
+
+
+/**
+ * Opens file with the given path and reads its source.
+ * @return the source of the file
+ */
+uint8_t *
+jerry_port_read_source (const char *file_name_p, /**< file name */
+                        size_t *out_size_p) /**< [out] read bytes */
+{
+  return NULL;
+} /* jerry_port_read_source */
+
+/**
+ * Normalize a file path
+ *
+ * @return length of the path written to the output buffer
+ */
+size_t
+jerry_port_normalize_path (const char *in_path_p, /**< input file path */
+                           char *out_buf_p,       /**< output buffer */
+                           size_t out_buf_size,   /**< size of output buffer */
+                           char *base_file_p)     /**< base file path */
+{
+  // normalize in_path_p by expanding relative paths etc.
+  // if base_file_p is not NULL, in_path_p is relative to that file
+  // write to out_buf_p the normalized path
+  // return length of written path
+  return 0;
+} /* jerry_port_normalize_path */
+
+/**
+ * Release the previously opened file's content.
+ */
+void
+jerry_port_release_source (uint8_t *buffer_p) /**< buffer to free */
+{
+  free (buffer_p);
+} /* jerry_port_release_source */
 
 /**
  * Provide the implementation of jerryx_port_handler_print_char.

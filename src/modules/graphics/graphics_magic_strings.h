@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2019 Kameleon
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,20 +19,14 @@
  * SOFTWARE.
  */
 
-#include <stdint.h>
-#include "jerryscript.h"
-#include "kameleon_magic_strings.h"
+#ifndef __GRAPHICS_MAGIC_STRINGS_H
+#define __GRAPHICS_MAGIC_STRINGS_H
 
-const uint32_t num_magic_string_items = {{magicStrings.length}};
-
-const jerry_char_t *magic_string_items[] = {
-  {{#magicStrings}}
-  (const jerry_char_t *) "{{id}}"{{^last}},{{/last}}
-  {{/magicStrings}}
-};
-
-const jerry_length_t magic_string_lengths[] = {
-  {{#magicStrings}}
-  {{len}}{{^last}},{{/last}}
-  {{/magicStrings}}
-};
+#define MSTR_GRAPHICS_MONO_GRAPHIC_CONTEXT "MonoGraphicContext"
+#define MSTR_GRAPHICS_DRIVER "driver"
+#define MSTR_GRAPHICS_WIDTH "width"
+#define MSTR_GRAPHICS_HEIGHT "height"
+#define MSTR_GRAPHICS_BUFFER "buffer"
+#define MSTR_GRAPHICS_SETPIXEL "setPixel"
+#define MSTR_GRAPHICS_FLUSH "flush"
+#endif /* __GRAPHICS_MAGIC_STRINGS_H */

@@ -176,6 +176,11 @@ KAMELEON_SRC += src/modules/uart/module_uart.c
 KAMELEON_INC += -Isrc/modules/uart
 endif
 
+ifdef KAMELEON_MODULE_GRAPHICS
+KAMELEON_SRC += src/modules/graphics/module_graphics.c
+KAMELEON_INC += -Isrc/modules/graphics
+endif
+
 # -----------------------------------------------------------------------------
 # CFLAGS
 # -----------------------------------------------------------------------------

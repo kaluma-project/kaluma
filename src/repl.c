@@ -570,7 +570,7 @@ static void cmd_mem(repl_state_t *state) {
  * .gc command
  */
 static void cmd_gc(repl_state_t *state) {
-  jerry_gc(JERRY_GC_SEVERITY_HIGH);
+  jerry_gc(JERRY_GC_PRESSURE_HIGH);
   repl_print_begin(REPL_OUTPUT_LOG);
   repl_printf("\r");
   repl_print_end();

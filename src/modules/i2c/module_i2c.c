@@ -71,7 +71,7 @@ JERRYXX_FUN(i2c_write_fn) {
   jerry_value_t data = JERRYXX_GET_ARG(0);
 
   // check this.bus number
-  uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
+  jerry_value_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
   if (!jerry_value_is_number(bus_value)) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "I2C bus is not initialized.");
   }
@@ -158,7 +158,7 @@ JERRYXX_FUN(i2c_read_fn) {
   uint8_t length = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
 
   // check this.bus number
-  uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
+  jerry_value_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
   if (!jerry_value_is_number(bus_value)) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "I2C bus is not initialized.");
   }
@@ -205,7 +205,7 @@ JERRYXX_FUN(i2c_memwrite_fn) {
   jerry_value_t data = JERRYXX_GET_ARG(1);
 
   // check this.bus number
-  uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
+  jerry_value_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
   if (!jerry_value_is_number(bus_value)) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "I2C bus is not initialized.");
   }
@@ -275,7 +275,7 @@ JERRYXX_FUN(i2c_memread_fn) {
   uint8_t buf[length];
 
   // check this.bus number
-  uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
+  jerry_value_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
   if (!jerry_value_is_number(bus_value)) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "I2C bus is not initialized.");
   }
@@ -310,7 +310,7 @@ JERRYXX_FUN(i2c_memread_fn) {
  */
 JERRYXX_FUN(i2c_close_fn) {
   // check this.bus number
-  uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
+  jerry_value_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
   if (!jerry_value_is_number(bus_value)) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "I2C bus is not initialized.");
   }

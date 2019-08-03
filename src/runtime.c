@@ -40,7 +40,7 @@ void runtime_init(bool run_main) {
   jerry_init (JERRY_INIT_EMPTY);
   jerry_register_magic_strings (magic_string_items, num_magic_string_items, magic_string_lengths);
   global_init();
-  jerry_gc(JERRY_GC_SEVERITY_HIGH);
+  jerry_gc(JERRY_GC_PRESSURE_HIGH);
   if (run_main) {
     runtime_run_main();
   }

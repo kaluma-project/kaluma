@@ -73,7 +73,7 @@ JERRYXX_FUN(spi_transfer_fn) {
   uint32_t timeout = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 5000);
 
   // check this.bus number
-  uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
+  jerry_value_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
   if (!jerry_value_is_number(bus_value)) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "SPI bus is not initialized.");
   }
@@ -158,7 +158,7 @@ JERRYXX_FUN(spi_send_fn) {
   uint32_t timeout = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 5000);
 
   // check this.bus number
-  uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
+  jerry_value_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
   if (!jerry_value_is_number(bus_value)) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "SPI bus is not initialized.");
   }
@@ -216,7 +216,7 @@ JERRYXX_FUN(spi_recv_fn) {
   uint32_t timeout = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 5000);
 
   // check this.bus number
-  uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
+  jerry_value_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
   if (!jerry_value_is_number(bus_value)) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "I2C bus is not initialized.");
   }
@@ -241,7 +241,7 @@ JERRYXX_FUN(spi_recv_fn) {
  */
 JERRYXX_FUN(spi_close_fn) {
   // check this.bus number
-  uint8_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
+  jerry_value_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
   if (!jerry_value_is_number(bus_value)) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "SPI bus is not initialized.");
   }
