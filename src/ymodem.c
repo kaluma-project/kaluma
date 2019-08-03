@@ -191,7 +191,7 @@ ymodem_status_t ymodem_receive(ymodem_header_cb header_cb,
                       file_size_str[i++] = *file_ptr++;
                     }
                     file_size_str[i++] = '\0';
-                    file_size = atoi(file_size_str);
+                    file_size = atoi((const char*)file_size_str);
 
                     // Process the received file header
                     if (header_cb) {

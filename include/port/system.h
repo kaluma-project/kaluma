@@ -69,4 +69,8 @@ void settime(uint64_t time);
  */
 void SetPendSV();
 
+/**
+ * Firmware update request
+ */
+void request_firmup();
 #endif /* __SYSTEM_H */

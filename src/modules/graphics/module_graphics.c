@@ -54,7 +54,7 @@ JERRYXX_FUN(mono_graphic_context_set_pixel_fn) {
   uint16_t y = (uint16_t) JERRYXX_GET_ARG_NUMBER(1);
   uint16_t color = (uint16_t) JERRYXX_GET_ARG_NUMBER(2);
   uint16_t width = (uint16_t) jerryxx_get_property_number(JERRYXX_GET_THIS, MSTR_GRAPHICS_WIDTH, 0);
-  uint16_t height = (uint16_t) jerryxx_get_property_number(JERRYXX_GET_THIS, MSTR_GRAPHICS_HEIGHT, 0);
+  //uint16_t height = (uint16_t) jerryxx_get_property_number(JERRYXX_GET_THIS, MSTR_GRAPHICS_HEIGHT, 0); //Never used.
   jerry_value_t buffer = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_GRAPHICS_BUFFER);
 
   uint8_t *buf = jerry_get_arraybuffer_pointer (buffer);

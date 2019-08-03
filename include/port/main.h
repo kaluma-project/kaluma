@@ -24,6 +24,6 @@
 
 #include <stdint.h>
 
-void _Error_Handler(uint8_t * file, uint32_t line);
+void _Error_Handler(char * file, uint32_t line);
 
 #endif /* __GPIO_H */

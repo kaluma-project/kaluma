@@ -81,3 +81,16 @@ void tty_putc(char ch);
 void tty_printf(const char *fmt, ...);
 
 #endif /* __TTY_H */
+
+/**
+ * this function is called in the pendable interrupt service routine which has
+ * lowest priority to allow other interrupts service.
+ */
+void tty_transmit_data();
+
+/**
+ * return tx data length
+ */
+uint32_t tty_get_tx_data_length();
+
+uint32_t tty_fill_rx_bytes(uint8_t * buf, uint32_t nToWrite);

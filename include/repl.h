@@ -58,12 +58,6 @@ struct repl_state_s {
 };
 
 void repl_init();
-void repl_set_handler(repl_handler_t handler);
-void repl_prompt();
-
-void repl_log(const char *format, const char *str);
-void repl_info(const char *format, const char *str);
-void repl_error(const char *format, const char *str);
 
 void repl_print_begin(repl_output_t output);
 #define repl_printf(format,args...) tty_printf(format, ## args)

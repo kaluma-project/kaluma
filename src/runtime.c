@@ -26,6 +26,7 @@
 #include "jerryscript-port.h"
 #include "jerryscript-ext/handler.h"
 #include "io.h"
+#include "gpio.h"
 #include "global.h"
 #include "repl.h"
 #include "system.h"
@@ -47,7 +48,7 @@ void runtime_init(bool run_main) {
 }
 
 void runtime_cleanup() {
-  Gpio_Init(); // TODO: Move to system_cleanup()
+  gpio_init(); // TODO: Move to system_cleanup()
   jerry_cleanup();
   system_cleanup();
   io_timer_cleanup();

@@ -343,7 +343,6 @@ static void handle_escape(char ch) {
     /* receive cursor position and update screen width */
     } else if (state.escape[state.escape_length - 1] == 'R') {
       int pos = 0;
-      uint8_t width_str[5];
       for (int i = 0; i < state.escape_length; i++) {
         if (state.escape[i] == ';') {
           pos = i + 1;
@@ -398,7 +397,7 @@ static void default_handler(repl_state_t *state, uint8_t *buf, size_t len) {
     }
   }
 }
-
+#if 0 //Never used.
 /**
  * Change handler
  */
@@ -409,7 +408,7 @@ static void set_handler(repl_handler_t handler) {
     state.handler = &default_handler;
   }
 }
-
+#endif
 /**
  * .echo command
  */

@@ -73,12 +73,12 @@
   */
 #define USBD_VID                        0x1209
 #define USBD_LANGID_STRING              1033
-#define USBD_MANUFACTURER_STRING        "Kameleon"
+#define USBD_MANUFACTURER_STRING        (uint8_t *) "Kameleon"
 #define USBD_PID_FS                     0x7600
-#define USBD_PRODUCT_STRING_FS          "Kameleon Core"
-#define USBD_SERIALNUMBER_STRING_FS     "kameleon-core-0001"
-#define USBD_CONFIGURATION_STRING_FS    "CDC Config"
-#define USBD_INTERFACE_STRING_FS        "CDC Interface"
+#define USBD_PRODUCT_STRING_FS          (uint8_t *) "Kameleon Core"
+#define USBD_SERIALNUMBER_STRING_FS     (uint8_t *) "kameleon-core-0001"
+#define USBD_CONFIGURATION_STRING_FS    (uint8_t *) "CDC Config"
+#define USBD_INTERFACE_STRING_FS        (uint8_t *) "CDC Interface"
 #define USB_SIZ_BOS_DESC                0x0C
 
 

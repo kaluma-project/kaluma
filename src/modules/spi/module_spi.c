@@ -38,7 +38,7 @@ JERRYXX_FUN(spi_ctor_fn) {
 
   // read parameters
   uint8_t bus = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  jerry_value_t options = JERRYXX_GET_ARG_OPT(1, NULL);
+  jerry_value_t options = JERRYXX_GET_ARG_OPT(1, 0);
   uint8_t mode = SPI_DEFAULT_MODE;
   uint32_t baudrate = SPI_DEFAULT_BAUDRATE;
   uint8_t bitorder = SPI_DEFAULT_BITORDER;

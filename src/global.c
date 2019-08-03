@@ -19,6 +19,8 @@
  * SOFTWARE.
  */
 
+#include <stdlib.h>
+#include <string.h>
 #include "jerryscript.h"
 #include "jerryscript-ext/handler.h"
 #include "runtime.h"
@@ -26,6 +28,7 @@
 #include "jerryxx.h"
 #include "kameleon_modules.h"
 #include "magic_strings.h"
+#include "tty.h"
 #include "repl.h"
 #include "io.h"
 #include "gpio.h"
@@ -415,14 +418,14 @@ JERRYXX_FUN(process_binding_fn) {
 }
 
 JERRYXX_FUN(native_module_wrapper_fn) {
-  jerry_value_t exports = JERRYXX_GET_ARG(0);
-  jerry_value_t require = JERRYXX_GET_ARG(1);
+  //jerry_value_t exports = JERRYXX_GET_ARG(0); //comment out because it's not used
+  //jerry_value_t require = JERRYXX_GET_ARG(1); //comment out because it's not used
   jerry_value_t module = JERRYXX_GET_ARG(2);
   /* Get module name by module.id */
   jerry_value_t id = jerryxx_get_property(module, MSTR_ID);
   jerry_size_t module_name_sz = jerry_get_string_size(id);
   char module_name[module_name_sz + 1];
-  jerry_string_to_char_buffer(id, module_name, module_name_sz);
+  jerry_string_to_char_buffer(id, (jerry_char_t *)module_name, module_name_sz);
   module_name[module_name_sz] = '\0';
   jerry_release_value(id);
   /* Find corresponding native module */
@@ -457,8 +460,8 @@ JERRYXX_FUN(process_get_builtin_module_fn) {
 
 static void register_global_process_object() {
   jerry_value_t process = jerry_create_object();
-  jerryxx_set_property_string(process, MSTR_ARCH, system_arch);
-  jerryxx_set_property_string(process, MSTR_PLATFORM, system_platform);
+  jerryxx_set_property_string(process, MSTR_ARCH, (char *)system_arch);
+  jerryxx_set_property_string(process, MSTR_PLATFORM, (char *)system_platform);
   jerryxx_set_property_string(process, MSTR_VERSION, CONFIG_KAMELEON_VERSION);
 
   /* Add `process.binding` function and it's properties */
@@ -501,7 +504,7 @@ static void register_global_process_object() {
 }
 
 static void run_startup_module() {
-  jerry_value_t res = jerry_exec_snapshot(module_startup_code, module_startup_size, 0, JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
+  jerry_value_t res = jerry_exec_snapshot((const uint32_t *)module_startup_code, module_startup_size, 0, JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
   jerry_value_t this_val = jerry_create_undefined ();
   jerry_value_t ret_val = jerry_call_function (res, this_val, NULL, 0);
   jerry_release_value (ret_val);
@@ -510,7 +513,7 @@ static void run_startup_module() {
 }
 
 static void run_board_module() {
-  jerry_value_t res = jerry_exec_snapshot(module_board_code, module_board_size, 0, JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
+  jerry_value_t res = jerry_exec_snapshot((const uint32_t *)module_board_code, module_board_size, 0, JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
   jerry_value_t this_val = jerry_create_undefined ();
   jerry_value_t ret_val = jerry_call_function (res, this_val, NULL, 0);
   jerry_release_value (ret_val);

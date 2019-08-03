@@ -104,7 +104,7 @@
 #define JERRYXX_GET_ARG_STRING_AS_CHAR(index, name) \
   jerry_size_t name##_sz = jerry_get_string_size(args_p[index]); \
   char name[name##_sz + 1]; \
-  jerry_string_to_char_buffer(args_p[index], name, name##_sz); \
+  jerry_string_to_char_buffer(args_p[index], (jerry_char_t *)name, name##_sz); \
   name[name##_sz] = '\0';
 
 #define JERRYXX_CREATE_ERROR(errmsg) jerry_create_error(JERRY_ERROR_COMMON, (const jerry_char_t *) errmsg)

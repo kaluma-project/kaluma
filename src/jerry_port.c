@@ -44,10 +44,9 @@ void jerry_port_log(jerry_log_level_t level, /**< log level */
                     ...) {                   /**< parameters */
   /* Drain log messages since IoT.js has not support log levels yet. */
     char buf[256];
-    int length = 0;
     va_list args;
     va_start (args, format);
-    length = vsnprintf (buf, 256, format, args);
+    vsnprintf (buf, 256, format, args);
     tty_printf ("%s\r", buf);
     va_end (args);
 } /* jerry_port_log */
