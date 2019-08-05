@@ -24,7 +24,7 @@
 #include "kameleon_core.h"
 
 extern void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-
+static uint8_t pwm_configured[PWM_NUM];
 static void tim1_pwm_setup(uint32_t, uint32_t, uint32_t, uint32_t);
 static void tim2_pwm_setup(uint32_t, uint32_t, uint32_t, uint32_t);
 static void tim3_pwm_setup(uint32_t, uint32_t, uint32_t, uint32_t);
@@ -338,6 +338,11 @@ void pwm_init() {
  * Cleanup all PWM when system cleanup
  */
 void pwm_cleanup() {
+  uint32_t n = sizeof(pwm_config) / sizeof(struct __pwm_config);
+  for (int k=0; k<n; k++) {
+    if (pwm_configured[k])
+      pwm_close(pwm_config[k].pin_number);
+  }
 }
 
 /**
@@ -365,7 +370,7 @@ int pwm_setup(uint8_t pin, double frequency, double duty) {
     pulse = (uint32_t)((pduty * arr)/100 + 1);
 
   pwm_config[n].setup(ch, prescaler, arr, pulse);
-
+  pwm_configured[n] = 1;
   return 0;
 }
 
@@ -449,5 +454,6 @@ int pwm_close(uint8_t pin) {
     return PWMPORT_ERROR;
   HAL_TIM_PWM_DeInit(pwm_config[n].handle);
   HAL_GPIO_DeInit(pwm_config[n].port, pwm_config[n].pin);
+  pwm_configured[n] = 0;
   return 0;
 }

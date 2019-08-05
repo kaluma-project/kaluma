@@ -23,6 +23,7 @@
 #include "stm32f4xx.h"
 #include "kameleon_core.h"
 #include "gpio.h"
+#include "system.h"
 
 const struct {
     GPIO_TypeDef * port;
@@ -59,12 +60,14 @@ const struct {
  * Initialize all GPIO when system started
  */
 void gpio_init() {
+  Gpio_Init();
 }
 
 /**
  * Cleanup all GPIO when system cleanup
  */
 void gpio_cleanup() {
+  Gpio_Init();
 }
 
 /**

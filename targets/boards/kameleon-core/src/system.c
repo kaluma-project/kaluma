@@ -214,12 +214,11 @@ void request_firmup() {
 void system_init() {
   HAL_Init();
   SystemClock_Config();
-  GpioClock_Config(); // TODO: Move to gpio_init() ???
-  Gpio_Init(); // TODO: Move to gpio_init() ???
-  Led_Config(); // TODO: Move to gpio_init() ???
-  Button_Config(); // TODO: Move to gpio_init() ???
+  GpioClock_Config();
+  gpio_init(); //Should be called before LED and Button configuration
+  Led_Config();
+  Button_Config();
   UsbDevice_Config();
-  gpio_init();
   adc_init();
   pwm_init();
   i2c_init();
@@ -228,10 +227,10 @@ void system_init() {
 }
 
 void system_cleanup() {
-  gpio_cleanup();
   adc_cleanup();
   pwm_cleanup();
   i2c_cleanup();
   spi_cleanup();
   uart_cleanup();
+  gpio_cleanup();
 }

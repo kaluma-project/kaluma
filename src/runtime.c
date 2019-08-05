@@ -48,7 +48,6 @@ void runtime_init(bool run_main) {
 }
 
 void runtime_cleanup() {
-  gpio_init(); // TODO: Move to system_cleanup()
   jerry_cleanup();
   system_cleanup();
   io_timer_cleanup();

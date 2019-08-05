@@ -120,6 +120,11 @@ void adc_init() {
  * Cleanup all ADC channels when system cleanup
  */
 void adc_cleanup() {
+  uint32_t n = sizeof(adc_config) / sizeof(struct __adc_config);
+  for (int k=0; k<n; k++) {
+    if (adc_configured[k])
+      adc_close(adc_config[k].pin_number);
+  }
 }
 
 /**

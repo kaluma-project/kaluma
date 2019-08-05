@@ -72,6 +72,10 @@ void spi_init() {
  * Cleanup all SPI when system cleanup
  */
 void spi_cleanup() {
+  for (int k = 0; k < SPI_NUM; k++) {
+    if (spi_handle[k]->Instance == spi_ch[k])
+      spi_close(k);
+  }
 }
 
 /** SPI Setup
