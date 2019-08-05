@@ -40,6 +40,10 @@ void i2c_init() {
  * Cleanup all I2C when system cleanup
  */
 void i2c_cleanup() {
+  for (int k = 0; k < I2C_NUM; k++) {
+    if (handle[k]->Instance == instance[k])
+      i2c_close(k);
+  }
 }
 
 int i2c_setup_master(uint8_t bus, uint32_t speed) {

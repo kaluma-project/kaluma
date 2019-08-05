@@ -52,6 +52,10 @@ void uart_init() {
  * Cleanup all UART when system cleanup
  */
 void uart_cleanup() {
+  for (int k = 0; k < UART_NUM; k++) {
+    if (uart_handle[k]->Instance == uart_ch[k])
+      uart_close(k);
+  }
 }
 
 int uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,

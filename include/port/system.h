@@ -73,4 +73,9 @@ void SetPendSV();
  * Firmware update request
  */
 void request_firmup();
+
+/**
+ * GPIO init (set all GPIOs to GPIO input as a default)
+ */
+void Gpio_Init();
 #endif /* __SYSTEM_H */
