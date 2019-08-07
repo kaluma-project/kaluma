@@ -27,7 +27,9 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include "jerryscript.h"
+#include "font.h"
 #include "gc.h"
 
 #ifndef SWAP_INT16
@@ -549,12 +551,111 @@ void gc_fill_ellipse (gc_handle_t *handle, int16_t x0, int16_t y0, int16_t x1,
     int16_t y1) {
 }
 
-/*
-setFont (font) {}
-getFont () {}
-drawPolygon (pts) {}
-fillPolygon (pts) {}
-drawText(x, y, text) {}
-getTextBound(text) {} : returns {w, h}
-drawBitmap(x, y, bitmap, w, h) {}
-*/
+
+/**
+ * @brief
+ */
+void gc_set_font(gc_handle_t *handle, gc_font_t *font) {
+  handle->font = font;
+}
+
+/**
+ * @brief
+ */
+gc_font_t* gc_get_font(gc_handle_t *handle) {
+  return handle->font;
+}
+
+/**
+ * @brief
+ */
+void gc_set_font_color(gc_handle_t *handle, uint16_t color) {
+  handle->font_color = color;
+}
+
+/**
+ * @brief
+ */
+uint16_t gc_get_font_color(gc_handle_t *handle) {
+  return handle->font_color;
+}
+
+/**
+ * @brief
+ */
+void gc_draw_char(gc_handle_t *handle, int16_t x, int16_t y, const char ch) {
+  uint8_t scale_x = 1;
+  uint8_t scale_y = 1;
+
+  if (handle->font == NULL) { /* default font */
+    if ((x >= handle->width) || (y >= handle->height) ||
+        ((x + 6 * scale_x - 1) < 0) || ((y + 8 * scale_y - 1) < 0))
+      return;
+    for (int8_t i = 0; i < 5; i++ ) {
+      uint8_t line = font_default_bitmap[ch * 5 + i];
+      for(int8_t j = 0; j < 8; j++, line >>= 1) {
+        if (line & 1) {
+          if(scale_x == 1 && scale_y == 1)
+            gc_prim_set_pixel(handle, x + i, y + j, handle->font_color);
+          else
+            gc_prim_fill_rect(handle, x + i * scale_x, y + j * scale_y, scale_x,
+                scale_y, handle->font_color);
+        }
+      }
+    }
+  } else {  /* custom font */
+    uint8_t w = handle->font->width;
+    uint8_t h = handle->font->height;
+    uint8_t sz = (((h + 7) / 8) * w);
+    uint8_t idx = ((uint8_t) ch) - handle->font->first;
+    uint16_t offset = idx * sz;
+    if (handle->font->glyph != NULL) {
+      gc_font_glyph_t glyph = handle->font->glyph[idx];
+      w = glyph.width;
+      h = glyph.height;
+      offset = glyph.bitmap_offset;
+    }
+    if ((x >= handle->width) || (y >= handle->height) ||
+        ((x + w * scale_x - 1) < 0) || ((y + h * scale_y - 1) < 0))
+      return;
+    uint8_t bits = 0, bit = 0;
+    for(uint8_t yy = 0; yy < h; yy++) {
+      for(uint8_t xx = 0; xx < w; xx++) {
+        if (!(bit++ & 7)) {
+          bits = handle->font->bitmap[offset++];
+        }
+        if (bits & 0x80) {
+          if (scale_x == 1 && scale_y == 1) {
+            gc_prim_set_pixel(handle, x + xx, y + yy, handle->font_color);
+          } else {
+            gc_prim_fill_rect(handle, x + xx * scale_x, y + yy * scale_y,
+              scale_x, scale_y, handle->font_color);
+          }
+        }
+        bits <<= 1;
+      }
+    }
+  }
+}
+
+/**
+ * @brief
+ */
+void gc_draw_text(gc_handle_t *handle, int16_t x, int16_t y, const char *text) {
+  int16_t cursor_x = x;
+  int16_t cursor_y = y;
+  for (uint16_t i = 0; i < strlen(text); i++) {
+    char ch = text[i];
+    if (handle->font == NULL) {
+      if (ch == '\n') {
+        cursor_x = x;
+        cursor_y += 8;
+      } else if (ch != '\r') {
+        gc_draw_char(handle, cursor_x, cursor_y, ch);
+        cursor_x += 6;
+      }
+    } else {
+      // ...
+    }
+  }
+}

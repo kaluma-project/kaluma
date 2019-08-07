@@ -25,6 +25,7 @@
 #include "graphics_magic_strings.h"
 #include "module_graphics.h"
 #include "gc.h"
+#include "font.h"
 
 static void gc_handle_freecb (void *handle) {
   free (handle);
@@ -70,6 +71,8 @@ JERRYXX_FUN(gc_ctor_fn) {
   native_handle->buffer_size = size;
   native_handle->color = 1;
   native_handle->fill_color = 1;
+  native_handle->font = NULL;
+  native_handle->font_color = 1;
   jerry_set_object_native_pointer(this_val, native_handle, &gc_handle_info);
   
   return jerry_create_undefined();
@@ -303,6 +306,21 @@ JERRYXX_FUN(gc_fill_roundrect_fn) {
 }
 
 /**
+ * GraphicContext.prototype.drawText(x, y, text)
+ */
+JERRYXX_FUN(gc_draw_text_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "x")
+  JERRYXX_CHECK_ARG_NUMBER(1, "y")
+  JERRYXX_CHECK_ARG_STRING(2, "text")
+  int16_t x = (int16_t) JERRYXX_GET_ARG_NUMBER(0);
+  int16_t y = (int16_t) JERRYXX_GET_ARG_NUMBER(1);
+  JERRYXX_GET_ARG_STRING_AS_CHAR(2, text)
+  JERRYXX_GET_NATIVE_HANDLE(native_handle, gc_handle_t, gc_handle_info);
+  gc_draw_text(native_handle, x, y, text);
+  return jerry_create_undefined();
+}
+
+/**
  * GraphicContext.prototype.flush() function
  */
 JERRYXX_FUN(gc_flush_fn) {
@@ -348,6 +366,7 @@ jerry_value_t module_graphics_init() {
   jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_FILL_CIRCLE, gc_fill_circle_fn);
   jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_DRAW_ROUNDRECT, gc_draw_roundrect_fn);
   jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_FILL_ROUNDRECT, gc_fill_roundrect_fn);
+  jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_DRAW_TEXT, gc_draw_text_fn);
   jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_FLUSH, gc_flush_fn);
   jerry_release_value (gc_prototype);
 

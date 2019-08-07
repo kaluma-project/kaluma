@@ -45,5 +45,6 @@
 #define MSTR_GRAPHICS_FILL_CIRCLE "fillCircle"
 #define MSTR_GRAPHICS_DRAW_ROUNDRECT "drawRoundRect"
 #define MSTR_GRAPHICS_FILL_ROUNDRECT "fillRoundRect"
+#define MSTR_GRAPHICS_DRAW_TEXT "drawText"
 #define MSTR_GRAPHICS_FLUSH "flush"
 #endif /* __GRAPHICS_MAGIC_STRINGS_H */
