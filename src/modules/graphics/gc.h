@@ -40,6 +40,8 @@ typedef struct {
   uint16_t fill_color;
   gc_font_t *font;
   uint16_t font_color;
+  uint8_t font_scale_x;
+  uint8_t font_scale_y;
 } gc_handle_t;
 
 // primitive device-dependant functions
@@ -52,6 +54,8 @@ void gc_prim_fill_rect(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, int
 void gc_prim_fill_screen (gc_handle_t *handle, uint16_t color);
 
 // graphic device-neutral functions
+int16_t gc_get_width (gc_handle_t *handle);
+int16_t gc_get_height (gc_handle_t *handle);
 void gc_clear_screen (gc_handle_t *handle);
 void gc_fill_screen (gc_handle_t *handle, uint16_t color);
 void gc_set_rotation (gc_handle_t *handle, uint8_t rotation);
@@ -70,17 +74,15 @@ void gc_fill_rect (gc_handle_t *handle, int16_t x, int16_t y, int16_t w, int16_t
 void gc_fill_roundrect (gc_handle_t *handle, int16_t x, int16_t y, int16_t w, int16_t h, int16_t r);
 void gc_fill_circle (gc_handle_t *handle, int16_t x, int16_t y, int16_t r);
 
-// void gc_draw_bitmap(gc_handle_t *handle, uint8_t bitmap[], int16_t w, int16_t h);
-
 void gc_set_font_color(gc_handle_t *handle, uint16_t color);
 uint16_t gc_get_font_color(gc_handle_t *handle);
 void gc_set_font(gc_handle_t *handle, gc_font_t *font);
 gc_font_t* gc_get_font(gc_handle_t *handle);
+void gc_set_font_scale(gc_handle_t *handle, uint8_t scale_x, uint8_t scale_y);
 void gc_draw_char(gc_handle_t *handle, int16_t x, int16_t y, const char ch);
 void gc_draw_text(gc_handle_t *handle, int16_t x, int16_t y, const char *text);
 
-// void gc_get_text_bound(gc_handle_t *handle, const uint8_t *text, uint16_t *w, uint16_t *h);
-// 
-// 
+void gc_get_text_bound(gc_handle_t *handle, const uint8_t *text, uint16_t *w, uint16_t *h);
+void gc_draw_bitmap(gc_handle_t *handle, int16_t x, int16_t y, uint8_t *bitmap, int16_t w, int16_t h);
 
 #endif /* __GC_H */

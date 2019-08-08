@@ -206,6 +206,14 @@ void gc_prim_fill_screen (gc_handle_t *handle, uint16_t color) {
 /*                      GRAPHIC DEVICE_NEUTRAL FUNCTIONS                      */
 /* ************************************************************************** */
 
+int16_t gc_get_width (gc_handle_t *handle) {
+  return handle->width;
+}
+
+int16_t gc_get_height (gc_handle_t *handle) {
+  return handle->height;
+}
+
 /**
  * @brief Clear screen
  * @param handle Graphic context handle
@@ -551,7 +559,6 @@ void gc_fill_ellipse (gc_handle_t *handle, int16_t x0, int16_t y0, int16_t x1,
     int16_t y1) {
 }
 
-
 /**
  * @brief
  */
@@ -583,31 +590,37 @@ uint16_t gc_get_font_color(gc_handle_t *handle) {
 /**
  * @brief
  */
-void gc_draw_char(gc_handle_t *handle, int16_t x, int16_t y, const char ch) {
-  uint8_t scale_x = 1;
-  uint8_t scale_y = 1;
+void gc_set_font_scale(gc_handle_t *handle, uint8_t scale_x, uint8_t scale_y) {
 
+}
+
+/**
+ * @brief
+ */
+void gc_draw_char(gc_handle_t *handle, int16_t x, int16_t y, const char ch) {
+  uint8_t sx = handle->font_scale_x;
+  uint8_t sy = handle->font_scale_y;
   if (handle->font == NULL) { /* default font */
     if ((x >= handle->width) || (y >= handle->height) ||
-        ((x + 6 * scale_x - 1) < 0) || ((y + 8 * scale_y - 1) < 0))
+        ((x + 6 * sx - 1) < 0) || ((y + 8 * sy - 1) < 0))
       return;
     for (int8_t i = 0; i < 5; i++ ) {
       uint8_t line = font_default_bitmap[ch * 5 + i];
       for(int8_t j = 0; j < 8; j++, line >>= 1) {
         if (line & 1) {
-          if(scale_x == 1 && scale_y == 1)
+          if(sx == 1 && sy == 1)
             gc_prim_set_pixel(handle, x + i, y + j, handle->font_color);
           else
-            gc_prim_fill_rect(handle, x + i * scale_x, y + j * scale_y, scale_x,
-                scale_y, handle->font_color);
+            gc_prim_fill_rect(handle, x + i * sx, y + j * sy, sx,
+                sy, handle->font_color);
         }
       }
     }
   } else {  /* custom font */
     uint8_t w = handle->font->width;
     uint8_t h = handle->font->height;
-    uint8_t sz = (((h + 7) / 8) * w);
-    uint8_t idx = ((uint8_t) ch) - handle->font->first;
+    uint16_t sz = (((w + 7) / 8) * h);
+    uint16_t idx = ((uint8_t) ch) - handle->font->first;
     uint16_t offset = idx * sz;
     if (handle->font->glyph != NULL) {
       gc_font_glyph_t glyph = handle->font->glyph[idx];
@@ -616,24 +629,31 @@ void gc_draw_char(gc_handle_t *handle, int16_t x, int16_t y, const char ch) {
       offset = glyph.bitmap_offset;
     }
     if ((x >= handle->width) || (y >= handle->height) ||
-        ((x + w * scale_x - 1) < 0) || ((y + h * scale_y - 1) < 0))
+        ((x + w * sx - 1) < 0) || ((y + h * sy - 1) < 0))
       return;
-    uint8_t bits = 0, bit = 0;
+    uint8_t bit = 0;
+    uint8_t bits = handle->font->bitmap[offset];
     for(uint8_t yy = 0; yy < h; yy++) {
       for(uint8_t xx = 0; xx < w; xx++) {
-        if (!(bit++ & 7)) {
-          bits = handle->font->bitmap[offset++];
+        if (bit > 7) {
+          bit = 0;
+          offset++;
+          bits = handle->font->bitmap[offset];
         }
         if (bits & 0x80) {
-          if (scale_x == 1 && scale_y == 1) {
+          if (sx == 1 && sy == 1) {
             gc_prim_set_pixel(handle, x + xx, y + yy, handle->font_color);
           } else {
-            gc_prim_fill_rect(handle, x + xx * scale_x, y + yy * scale_y,
-              scale_x, scale_y, handle->font_color);
+            gc_prim_fill_rect(handle, x + xx * sx, y + yy * sy,
+              sx, sy, handle->font_color);
           }
         }
         bits <<= 1;
+        bit++;
       }
+      offset++;
+      bit = 0;
+      bits = handle->font->bitmap[offset];
     }
   }
 }
@@ -646,16 +666,23 @@ void gc_draw_text(gc_handle_t *handle, int16_t x, int16_t y, const char *text) {
   int16_t cursor_y = y;
   for (uint16_t i = 0; i < strlen(text); i++) {
     char ch = text[i];
-    if (handle->font == NULL) {
+    if (handle->font == NULL) {  /* default font */
       if (ch == '\n') {
         cursor_x = x;
-        cursor_y += 8;
+        cursor_y += 8 * handle->font_scale_y;
       } else if (ch != '\r') {
         gc_draw_char(handle, cursor_x, cursor_y, ch);
-        cursor_x += 6;
+        cursor_x += 6 * handle->font_scale_x;
       }
-    } else {
-      // ...
+    } else {  /* custom font */
+      if (ch == '\n') {
+        cursor_x = x;
+        cursor_y += handle->font->advance_y * handle->font_scale_y;
+      } else if (ch != '\r') {
+        gc_draw_char(handle, cursor_x, cursor_y, ch);
+        cursor_x += handle->font->advance_x * handle->font_scale_x;
+        // TODO: Handle variable-width fonts
+      }
     }
   }
 }
