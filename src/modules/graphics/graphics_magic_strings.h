@@ -57,5 +57,7 @@
 #define MSTR_GRAPHICS_FILL_ROUNDRECT "fillRoundRect"
 #define MSTR_GRAPHICS_SET_FONT "setFont"
 #define MSTR_GRAPHICS_DRAW_TEXT "drawText"
+#define MSTR_GRAPHICS_MEASURE_TEXT "measureText"
+#define MSTR_GRAPHICS_DRAW_BITMAP "drawBitmap"
 #define MSTR_GRAPHICS_FLUSH "flush"
 #endif /* __GRAPHICS_MAGIC_STRINGS_H */

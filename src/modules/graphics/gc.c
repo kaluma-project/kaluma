@@ -591,7 +591,8 @@ uint16_t gc_get_font_color(gc_handle_t *handle) {
  * @brief
  */
 void gc_set_font_scale(gc_handle_t *handle, uint8_t scale_x, uint8_t scale_y) {
-
+  handle->font_scale_x = scale_x;
+  handle->font_scale_y = scale_y;
 }
 
 /**
@@ -684,5 +685,37 @@ void gc_draw_text(gc_handle_t *handle, int16_t x, int16_t y, const char *text) {
         // TODO: Handle variable-width fonts
       }
     }
+  }
+}
+
+void gc_measure_text(gc_handle_t *handle, const uint8_t *text, uint16_t *w,
+    uint16_t *h) {
+  // TODO: Implement when handling variable-width fonts
+}
+
+void gc_draw_bitmap(gc_handle_t *handle, int16_t x, int16_t y, uint8_t *bitmap,
+    int16_t w, int16_t h, uint16_t color) {
+  uint16_t offset = 0;
+  if ((x >= handle->width) || (y >= handle->height) ||
+      ((x + w - 1) < 0) || ((y + h - 1) < 0))
+    return;
+  uint8_t bit = 0;
+  uint8_t bits = bitmap[offset];
+  for(uint8_t yy = 0; yy < h; yy++) {
+    for(uint8_t xx = 0; xx < w; xx++) {
+      if (bit > 7) {
+        bit = 0;
+        offset++;
+        bits = bitmap[offset];
+      }
+      if (bits & 0x80) {
+        gc_prim_set_pixel(handle, x + xx, y + yy, color);
+      }
+      bits <<= 1;
+      bit++;
+    }
+    offset++;
+    bit = 0;
+    bits = bitmap[offset];
   }
 }

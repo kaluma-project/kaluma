@@ -235,8 +235,7 @@ JERRYXX_FUN(gc_set_font_scale_fn) {
   int8_t scale_x = (int8_t) JERRYXX_GET_ARG_NUMBER(0);
   int8_t scale_y = (int8_t) JERRYXX_GET_ARG_NUMBER(1);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
-  gc_handle->font_scale_x = scale_x;
-  gc_handle->font_scale_y = scale_y;
+  gc_set_font_scale(gc_handle, scale_x, scale_y);
   return jerry_create_undefined();
 }
 
@@ -403,6 +402,39 @@ JERRYXX_FUN(gc_draw_text_fn) {
 }
 
 /**
+ * GraphicContext.prototype.measureText(text)
+ */
+JERRYXX_FUN(gc_measure_text_fn) {
+  JERRYXX_CHECK_ARG_STRING(0, "text")
+  // JERRYXX_GET_ARG_STRING_AS_CHAR(0, text)
+  // JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
+  // TODO: implement
+  return jerry_create_undefined();
+}
+
+/**
+ * GraphicContext.prototype.drawBitmap(x, y, bitmap, w, h, color)
+ */
+JERRYXX_FUN(gc_draw_bitmap_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "x")
+  JERRYXX_CHECK_ARG_NUMBER(1, "y")
+  JERRYXX_CHECK_ARG_ARRAYBUFFER(2, "bitmap")
+  JERRYXX_CHECK_ARG_NUMBER(3, "w")
+  JERRYXX_CHECK_ARG_NUMBER(4, "h")
+  JERRYXX_CHECK_ARG_NUMBER(5, "color")
+  int16_t x = (int16_t) JERRYXX_GET_ARG_NUMBER(0);
+  int16_t y = (int16_t) JERRYXX_GET_ARG_NUMBER(1);
+  jerry_value_t bitmap = JERRYXX_GET_ARG(2);
+  int16_t w = (int16_t) JERRYXX_GET_ARG_NUMBER(3);
+  int16_t h = (int16_t) JERRYXX_GET_ARG_NUMBER(4);
+  uint16_t color = (int16_t) JERRYXX_GET_ARG_NUMBER(5);
+  JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
+  uint8_t *buffer = jerry_get_arraybuffer_pointer(bitmap);
+  gc_draw_bitmap(gc_handle, x, y, buffer, w, h, color);
+  return jerry_create_undefined();
+}
+
+/**
  * GraphicContext.prototype.flush() function
  */
 JERRYXX_FUN(gc_flush_fn) {
@@ -455,6 +487,8 @@ jerry_value_t module_graphics_init() {
   jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_DRAW_ROUNDRECT, gc_draw_roundrect_fn);
   jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_FILL_ROUNDRECT, gc_fill_roundrect_fn);
   jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_DRAW_TEXT, gc_draw_text_fn);
+  jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_DRAW_TEXT, gc_measure_text_fn);
+  jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_DRAW_BITMAP, gc_draw_bitmap_fn);
   jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_FLUSH, gc_flush_fn);
   jerry_release_value (gc_prototype);
 
