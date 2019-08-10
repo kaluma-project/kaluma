@@ -59,44 +59,49 @@ void runtime_cleanup() {
 /**
  * Print error value
  */
-static void
-print_unhandled_exception (jerry_value_t error_value) /**< error value */
-{
+static void print_unhandled_exception (jerry_value_t error_value) {
+  jerry_value_t err_val = jerry_get_value_from_error (error_value, false);
+  jerry_value_t err_str = jerry_value_to_string (err_val);
+  repl_print_begin(REPL_OUTPUT_ERROR);
+  repl_print_value("%s\r\n", err_str);
+  repl_print_end();
+  jerry_release_value (err_val);
+  jerry_release_value (err_str);
 
-  error_value = jerry_get_value_from_error (error_value, false);
-  jerry_value_t err_str_val = jerry_value_to_string (error_value);
-  jerry_size_t err_str_size = jerry_get_string_size (err_str_val);
-  jerry_char_t err_str_buf[256];
-
-  jerry_release_value (error_value);
-  err_str_size = jerry_string_to_char_buffer (err_str_val, err_str_buf, err_str_size);
-  if (err_str_size >= 230) //256 - 26
-  {
-    err_str_buf[229] = 0;
+  // backtrace test
+  /*
+  jerry_value_t backtrace_array = jerry_get_backtrace (5);
+  uint32_t array_length = jerry_get_array_length (backtrace_array);
+  for (uint32_t idx = 0; idx < array_length; idx++) {
+    jerry_value_t property = jerry_get_property_by_index (backtrace_array, idx);
+    jerry_char_t string_buffer[64];
+    jerry_size_t copied_bytes = jerry_substring_to_char_buffer (property,
+                                                                0,
+                                                                63,
+                                                                string_buffer,
+                                                                63);
+    string_buffer[copied_bytes] = '\0';
+    printf(" %d: %s\n", idx, string_buffer);
+    jerry_release_value (property);
   }
-  else
-  {
-    err_str_buf[err_str_size] = 0;
-  }
-  jerry_port_log (JERRY_LOG_LEVEL_ERROR, "Script Error - %s\n", err_str_buf);
-  jerry_release_value (err_str_val);
-} /* print_unhandled_exception */
+  jerry_release_value (backtrace_array);
+  */
+  // end of backtrace test
+}
 
 void runtime_run_main() {
   uint32_t size = flash_get_data_size();
   if (size > 0) {
     uint8_t *script = flash_get_data();
     jerry_value_t parsed_code = jerry_parse (NULL, 0, script, size, JERRY_PARSE_STRICT_MODE);
-    if (!jerry_value_is_error (parsed_code))
-    {
+    if (!jerry_value_is_error (parsed_code)) {
       jerry_value_t ret_value = jerry_run (parsed_code);
-      if (jerry_value_is_error (ret_value))
-      {
+      if (jerry_value_is_error (ret_value)) {
         print_unhandled_exception (ret_value);
       }
       jerry_release_value (ret_value);
     } else {
-        print_unhandled_exception (parsed_code);
+      print_unhandled_exception (parsed_code);
     }
     jerry_release_value (parsed_code);
   }
