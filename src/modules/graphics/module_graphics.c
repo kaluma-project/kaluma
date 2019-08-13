@@ -411,14 +411,19 @@ JERRYXX_FUN(gc_draw_text_fn) {
 }
 
 /**
- * GraphicContext.prototype.measureText(text)
+ * GraphicContext.prototype.measureText(text) -> {width, height}
  */
 JERRYXX_FUN(gc_measure_text_fn) {
   JERRYXX_CHECK_ARG_STRING(0, "text")
-  // JERRYXX_GET_ARG_STRING_AS_CHAR(0, text)
-  // JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
-  // TODO: implement
-  return jerry_create_undefined();
+  JERRYXX_GET_ARG_STRING_AS_CHAR(0, text)
+  JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
+  uint16_t w = 0;
+  uint16_t h = 0;
+  gc_measure_text(gc_handle, text, &w, &h);
+  jerry_value_t metric = jerry_create_object ();
+  jerryxx_set_property_number(metric, "width", w);
+  jerryxx_set_property_number(metric, "height", h);
+  return metric;
 }
 
 /**

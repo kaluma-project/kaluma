@@ -80,7 +80,7 @@ gc_font_t* gc_get_font(gc_handle_t *handle);
 void gc_set_font_scale(gc_handle_t *handle, uint8_t scale_x, uint8_t scale_y);
 void gc_draw_char(gc_handle_t *handle, int16_t x, int16_t y, const char ch);
 void gc_draw_text(gc_handle_t *handle, int16_t x, int16_t y, const char *text);
-void gc_measure_text(gc_handle_t *handle, const uint8_t *text, uint16_t *w, uint16_t *h);
+void gc_measure_text(gc_handle_t *handle, const char *text, uint16_t *w, uint16_t *h);
 void gc_draw_bitmap(gc_handle_t *handle, int16_t x, int16_t y, uint8_t *bitmap, int16_t w, int16_t h, uint16_t color);
 
 #endif /* __GC_H */

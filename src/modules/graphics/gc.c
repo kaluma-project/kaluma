@@ -36,6 +36,10 @@
 #define SWAP_INT16(a, b) { int16_t t = a; a = b; b = t; }
 #endif
 
+#ifndef MAX
+#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
+#endif
+
 /* ************************************************************************** */
 /*                        PRIMITIVE GRAPHIC FUNCTIONS                         */
 /* ************************************************************************** */
@@ -687,9 +691,44 @@ void gc_draw_text(gc_handle_t *handle, int16_t x, int16_t y, const char *text) {
   }
 }
 
-void gc_measure_text(gc_handle_t *handle, const uint8_t *text, uint16_t *w,
+void gc_measure_text(gc_handle_t *handle, const char *text, uint16_t *w,
     uint16_t *h) {
-  // TODO: Implement when handling variable-width fonts
+  uint16_t _w = 0;
+  uint16_t _h = 0;
+  uint16_t cursor_x = 0;
+  uint16_t cursor_y = 0;
+  for (uint16_t i = 0; i < strlen(text); i++) {
+    char ch = text[i];
+    if (handle->font == NULL) { /* default font */
+      if (ch == '\n') {
+        cursor_x = 0;
+        cursor_y += 8;
+      } else {
+        _w = MAX(_w, cursor_x + 6);
+        _h = MAX(_h, cursor_y + 8);
+        cursor_x += 6;
+      }
+    } else { /* custom font */
+      if (ch == '\n') {
+        cursor_x = 0;
+        cursor_y += handle->font->advance_y;
+      } else {
+        if (handle->font->glyphs != NULL) {
+          uint16_t idx = ((uint8_t) ch) - handle->font->first;
+          gc_font_glyph_t glyph = handle->font->glyphs[idx];
+          _w = MAX(_w, cursor_x + glyph.width);
+          _h = MAX(_h, cursor_y + glyph.height);
+          cursor_x += glyph.advance_x;
+        } else {
+          _w = MAX(_w, cursor_x + handle->font->width);
+          _h = MAX(_h, cursor_y + handle->font->height);
+          cursor_x += handle->font->advance_x;
+        }
+      }
+    }
+  }
+  *w = _w * handle->font_scale_x;
+  *h = _h * handle->font_scale_y;
 }
 
 void gc_draw_bitmap(gc_handle_t *handle, int16_t x, int16_t y, uint8_t *bitmap,
