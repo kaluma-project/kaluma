@@ -29,12 +29,9 @@
  * Font glyph
  */
 typedef struct {
-	uint16_t bitmap_offset;
 	uint8_t  width;
   uint8_t  height;
 	uint8_t  advance_x;
-	int8_t   offset_x;
-  int8_t   offset_y;
 } gc_font_glyph_t;
 
 /**
@@ -42,7 +39,7 @@ typedef struct {
  */
 typedef struct {
   uint8_t *bitmap;         // Glyph bitmap data
-  gc_font_glyph_t *glyph;  // NULL if fixed-size font
+  gc_font_glyph_t *glyphs; // NULL if fixed-size font
   uint8_t first;           // First char (ASCII) in bitmap
   uint8_t last;            // Last char (ASCII) in bitmap
   uint8_t width;           // Glyph width in pixels if no glyph data

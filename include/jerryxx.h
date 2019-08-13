@@ -89,6 +89,15 @@
     } \
   }
 
+#define JERRYXX_CHECK_ARG_OBJECT_NULL_OPT(index, argname) \
+  if (args_cnt > index) { \
+    if (!(jerry_value_is_object(args_p[index]) || jerry_value_is_null(args_p[index]))) { \
+      char errmsg[255]; \
+      sprintf(errmsg, "\"%s\" argument must be an object or null", argname); \
+      return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg); \
+    } \
+  }
+
 #define JERRYXX_CHECK_ARG_ARRAYBUFFER(index, argname) \
   if ((args_cnt <= index) || (!jerry_value_is_arraybuffer(args_p[index]))) { \
     char errmsg[255]; \

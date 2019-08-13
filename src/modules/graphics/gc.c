@@ -623,12 +623,6 @@ void gc_draw_char(gc_handle_t *handle, int16_t x, int16_t y, const char ch) {
     uint16_t sz = (((w + 7) / 8) * h);
     uint16_t idx = ((uint8_t) ch) - handle->font->first;
     uint16_t offset = idx * sz;
-    if (handle->font->glyph != NULL) {
-      gc_font_glyph_t glyph = handle->font->glyph[idx];
-      w = glyph.width;
-      h = glyph.height;
-      offset = glyph.bitmap_offset;
-    }
     if ((x >= handle->width) || (y >= handle->height) ||
         ((x + w * sx - 1) < 0) || ((y + h * sy - 1) < 0))
       return;
@@ -681,8 +675,13 @@ void gc_draw_text(gc_handle_t *handle, int16_t x, int16_t y, const char *text) {
         cursor_y += handle->font->advance_y * handle->font_scale_y;
       } else if (ch != '\r') {
         gc_draw_char(handle, cursor_x, cursor_y, ch);
-        cursor_x += handle->font->advance_x * handle->font_scale_x;
-        // TODO: Handle variable-width fonts
+        if (handle->font->glyphs != NULL) {
+          uint16_t idx = ((uint8_t) ch) - handle->font->first;
+          gc_font_glyph_t glyph = handle->font->glyphs[idx];
+          cursor_x += glyph.advance_x * handle->font_scale_x;
+        } else {
+          cursor_x += handle->font->advance_x * handle->font_scale_x;
+        }
       }
     }
   }

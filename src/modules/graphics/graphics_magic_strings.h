@@ -31,6 +31,7 @@
 #define MSTR_GRAPHICS_ADVANCE_X "advanceX"
 #define MSTR_GRAPHICS_ADVANCE_Y "advanceY"
 #define MSTR_GRAPHICS_BITMAP "bitmap"
+#define MSTR_GRAPHICS_GLYPHS "glyphs"
 #define MSTR_GRAPHICS_BUFFER "buffer"
 #define MSTR_GRAPHICS_ROTATION "rotation"
 #define MSTR_GRAPHICS_CLEAR_SCREEN "clearScreen"
