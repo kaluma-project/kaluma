@@ -60,33 +60,35 @@ void runtime_cleanup() {
  * Print error value
  */
 static void print_unhandled_exception (jerry_value_t error_value) {
-  jerry_value_t err_val = jerry_get_value_from_error (error_value, false);
-  jerry_value_t err_str = jerry_value_to_string (err_val);
+  // print error message  
+  jerry_value_t err_str = jerry_value_to_string (error_value);
   repl_print_begin(REPL_OUTPUT_ERROR);
   repl_print_value("%s\r\n", err_str);
   repl_print_end();
-  jerry_release_value (err_val);
   jerry_release_value (err_str);
 
-  // backtrace test
-  /*
-  jerry_value_t backtrace_array = jerry_get_backtrace (5);
-  uint32_t array_length = jerry_get_array_length (backtrace_array);
-  for (uint32_t idx = 0; idx < array_length; idx++) {
-    jerry_value_t property = jerry_get_property_by_index (backtrace_array, idx);
-    jerry_char_t string_buffer[64];
-    jerry_size_t copied_bytes = jerry_substring_to_char_buffer (property,
-                                                                0,
-                                                                63,
-                                                                string_buffer,
-                                                                63);
-    string_buffer[copied_bytes] = '\0';
-    printf(" %d: %s\n", idx, string_buffer);
-    jerry_release_value (property);
+  // print stack trace
+  if (jerry_value_is_object (error_value)) {
+    jerry_value_t stack_str = jerry_create_string ((const jerry_char_t *) "stack");
+    jerry_value_t backtrace_val = jerry_get_property (error_value, stack_str);
+    jerry_release_value (stack_str);
+    if (!jerry_value_is_error (backtrace_val)
+        && jerry_value_is_array (backtrace_val)) {
+      uint32_t length = jerry_get_array_length (backtrace_val);
+      if (length > 32) { length = 32; } /* max length: 32 */
+      for (uint32_t i = 0; i < length; i++) {
+        jerry_value_t item_val = jerry_get_property_by_index (backtrace_val, i);
+        if (!jerry_value_is_error (item_val)
+            && jerry_value_is_string (item_val)) {
+          repl_print_begin(REPL_OUTPUT_ERROR);
+          repl_print_value("  at %s\r\n", item_val);
+          repl_print_end();          
+        }
+        jerry_release_value (item_val);        
+      }
+    }
+    jerry_release_value (backtrace_val);
   }
-  jerry_release_value (backtrace_array);
-  */
-  // end of backtrace test
 }
 
 void runtime_run_main() {
@@ -97,11 +99,15 @@ void runtime_run_main() {
     if (!jerry_value_is_error (parsed_code)) {
       jerry_value_t ret_value = jerry_run (parsed_code);
       if (jerry_value_is_error (ret_value)) {
-        print_unhandled_exception (ret_value);
+        jerry_value_t error_value = jerry_get_value_from_error (ret_value, true);
+        print_unhandled_exception (error_value);
+        jerry_release_value (error_value);
       }
       jerry_release_value (ret_value);
     } else {
-      print_unhandled_exception (parsed_code);
+      jerry_value_t error_value = jerry_get_value_from_error (parsed_code, true);
+      print_unhandled_exception (error_value);
+      jerry_release_value (error_value);
     }
     jerry_release_value (parsed_code);
   }
