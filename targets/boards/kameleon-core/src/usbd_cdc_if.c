@@ -49,6 +49,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc_if.h"
 #include "tty.h"
+#include "runtime.h"
+
 /* USER CODE BEGIN INCLUDE */
 
 /* USER CODE END INCLUDE */
@@ -287,6 +289,17 @@ static int8_t CDC_Receive_FS (uint8_t* Buf, uint32_t *Len)
   /* USER CODE BEGIN 6 */
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+
+  /*
+   * Check special control from USB
+   * Ctrl+C to break VM execution
+   */
+  for (uint32_t i = 0; i < *Len; i++) {
+    uint8_t ch = Buf[i];
+    if (ch == 3) { /* Ctrl+C */
+      runtime_set_vm_stop(1);
+    }
+  }
 
   tty_fill_rx_bytes(Buf, *Len);
   return (USBD_OK);

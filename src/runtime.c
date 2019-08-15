@@ -33,12 +33,32 @@
 #include "runtime.h"
 #include "kameleon_magic_strings.h"
 
+/**
+ * Runtime VM stop
+ * - 0: normal
+ * - 1: break VM execution 
+ */
+static uint8_t runtime_vm_stop = 0;
+
+// --------------------------------------------------------------------------
+// PRIVATE FUNCTIONS
+// --------------------------------------------------------------------------
+
+static jerry_value_t vm_exec_stop_callback (void *user_p) {
+  if (runtime_vm_stop > 0) {
+    runtime_vm_stop = 0;
+    return jerry_create_string ((const jerry_char_t *) "Abort script"); 
+  }
+  return jerry_create_undefined ();
+}
+
 // --------------------------------------------------------------------------
 // PUBLIC FUNCTIONS
 // --------------------------------------------------------------------------
 
 void runtime_init(bool run_main) {
   jerry_init (JERRY_INIT_EMPTY);
+  jerry_set_vm_exec_stop_callback (vm_exec_stop_callback, &runtime_vm_stop, 16);
   jerry_register_magic_strings (magic_string_items, num_magic_string_items, magic_string_lengths);
   global_init();
   jerry_gc(JERRY_GC_PRESSURE_HIGH);
@@ -111,4 +131,8 @@ void runtime_run_main() {
     }
     jerry_release_value (parsed_code);
   }
+}
+
+void runtime_set_vm_stop(uint8_t stop) {
+  runtime_vm_stop = stop;
 }

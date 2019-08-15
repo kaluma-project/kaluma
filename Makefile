@@ -91,6 +91,7 @@ JERRY_ARGS = \
 --mem-stats=ON \
 --snapshot-exec=ON \
 --line-info=ON \
+--vm-exec-stop=ON \
 --profile=es2015-subset \
 --jerry-cmdline=OFF
 

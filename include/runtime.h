@@ -27,5 +27,6 @@
 void runtime_init(bool run_main);
 void runtime_cleanup();
 void runtime_run_main();
+void runtime_set_vm_stop(uint8_t stop);
 
 #endif /* __RUNTIME_H */
