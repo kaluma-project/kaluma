@@ -134,5 +134,6 @@ double jerryxx_get_property_number(jerry_value_t object, const char *name, doubl
 bool jerryxx_delete_property(jerry_value_t object, const char *name);
 
 void jerryxx_print_value(const char *format, jerry_value_t value);
+void jerryxx_print_error(jerry_value_t value, bool print_stacktrace);
 
 #endif /* __JERRYXX_H */

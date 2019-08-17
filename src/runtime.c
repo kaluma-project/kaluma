@@ -32,6 +32,7 @@
 #include "system.h"
 #include "runtime.h"
 #include "kameleon_magic_strings.h"
+#include "jerryxx.h"
 
 /**
  * Runtime VM stop
@@ -79,6 +80,7 @@ void runtime_cleanup() {
 /**
  * Print error value
  */
+/*
 static void print_unhandled_exception (jerry_value_t error_value) {
   // print error message  
   jerry_value_t err_str = jerry_value_to_string (error_value);
@@ -95,7 +97,7 @@ static void print_unhandled_exception (jerry_value_t error_value) {
     if (!jerry_value_is_error (backtrace_val)
         && jerry_value_is_array (backtrace_val)) {
       uint32_t length = jerry_get_array_length (backtrace_val);
-      if (length > 32) { length = 32; } /* max length: 32 */
+      if (length > 32) { length = 32; } // max length: 32
       for (uint32_t i = 0; i < length; i++) {
         jerry_value_t item_val = jerry_get_property_by_index (backtrace_val, i);
         if (!jerry_value_is_error (item_val)
@@ -110,6 +112,7 @@ static void print_unhandled_exception (jerry_value_t error_value) {
     jerry_release_value (backtrace_val);
   }
 }
+*/
 
 void runtime_run_main() {
   uint32_t size = flash_get_data_size();
@@ -119,15 +122,17 @@ void runtime_run_main() {
     if (!jerry_value_is_error (parsed_code)) {
       jerry_value_t ret_value = jerry_run (parsed_code);
       if (jerry_value_is_error (ret_value)) {
-        jerry_value_t error_value = jerry_get_value_from_error (ret_value, true);
-        print_unhandled_exception (error_value);
-        jerry_release_value (error_value);
+        jerryxx_print_error(ret_value, true);
+        // jerry_value_t error_value = jerry_get_value_from_error (ret_value, true);
+        // print_unhandled_exception (error_value);
+        // jerry_release_value (error_value);
       }
       jerry_release_value (ret_value);
     } else {
-      jerry_value_t error_value = jerry_get_value_from_error (parsed_code, true);
-      print_unhandled_exception (error_value);
-      jerry_release_value (error_value);
+      jerryxx_print_error(parsed_code, true);
+      // jerry_value_t error_value = jerry_get_value_from_error (parsed_code, true);
+      // print_unhandled_exception (error_value);
+      // jerry_release_value (error_value);
     }
     jerry_release_value (parsed_code);
   }

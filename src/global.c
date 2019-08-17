@@ -110,6 +110,8 @@ static void set_watch_cb(io_watch_handle_t *watch) {
     jerry_value_t ret_val = jerry_call_function (watch->watch_js_cb, this_val, NULL, 0);
     if (jerry_value_is_error (ret_val)) {
       // print error
+      jerryxx_print_error(ret_val, true);
+      /*
       jerry_value_t err_val = jerry_get_value_from_error (ret_val, false);
       jerry_value_t err_str = jerry_value_to_string (err_val);
       repl_print_begin(REPL_OUTPUT_ERROR);
@@ -117,6 +119,7 @@ static void set_watch_cb(io_watch_handle_t *watch) {
       repl_print_end();
       jerry_release_value (err_val);
       jerry_release_value (err_str);
+      */
       // clear handle
       jerry_release_value(watch->watch_js_cb);
       io_watch_stop(watch);
@@ -290,7 +293,9 @@ static void set_timer_cb(io_timer_handle_t *timer) {
     jerry_value_t this_val = jerry_create_undefined ();
     jerry_value_t ret_val = jerry_call_function (timer->timer_js_cb, this_val, NULL, 0);
     if (jerry_value_is_error(ret_val)) {
+      jerryxx_print_error(ret_val, true);
       // print error
+      /*
       jerry_value_t err_val = jerry_get_value_from_error (ret_val, false);
       jerry_value_t err_str = jerry_value_to_string (err_val);
       repl_print_begin(REPL_OUTPUT_ERROR);
@@ -298,6 +303,7 @@ static void set_timer_cb(io_timer_handle_t *timer) {
       repl_print_end();
       jerry_release_value (err_val);
       jerry_release_value (err_str);
+      */
       // clear handle
       jerry_release_value(timer->timer_js_cb);
       io_timer_stop(timer);
