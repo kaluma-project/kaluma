@@ -31,6 +31,6 @@ int main(void) {
   tty_init();
   io_init();
   repl_init();
-  runtime_init(true);
+  runtime_init(running_script_check());
   io_run();
 }
