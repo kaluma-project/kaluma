@@ -123,16 +123,10 @@ void runtime_run_main() {
       jerry_value_t ret_value = jerry_run (parsed_code);
       if (jerry_value_is_error (ret_value)) {
         jerryxx_print_error(ret_value, true);
-        // jerry_value_t error_value = jerry_get_value_from_error (ret_value, true);
-        // print_unhandled_exception (error_value);
-        // jerry_release_value (error_value);
       }
       jerry_release_value (ret_value);
     } else {
       jerryxx_print_error(parsed_code, true);
-      // jerry_value_t error_value = jerry_get_value_from_error (parsed_code, true);
-      // print_unhandled_exception (error_value);
-      // jerry_release_value (error_value);
     }
     jerry_release_value (parsed_code);
   }

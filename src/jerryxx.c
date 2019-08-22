@@ -100,7 +100,7 @@ void jerryxx_print_value(const char *format, jerry_value_t value) {
  * Print error with stacktrace
  */
 void jerryxx_print_error (jerry_value_t value, bool print_stacktrace) {
-  jerry_value_t error_value = jerry_get_value_from_error (value, true);
+  jerry_value_t error_value = jerry_get_value_from_error (value, false);
   // print error message  
   jerry_value_t err_str = jerry_value_to_string (error_value);
   repl_print_begin(REPL_OUTPUT_ERROR);
