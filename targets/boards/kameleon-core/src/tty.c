@@ -33,6 +33,7 @@
 
 #define TTY_TX_RINGBUFFER_SIZE 1024
 #define TTY_RX_RINGBUFFER_SIZE 2048
+#define TTY_MAX_STRING_BUFFER_SIZE 1024
 
 static unsigned char tty_tx_buffer[TTY_TX_RINGBUFFER_SIZE];
 static unsigned char tty_rx_buffer[TTY_RX_RINGBUFFER_SIZE];
@@ -152,10 +153,12 @@ void tty_putc(char ch) {
   SetPendSV();
 }
 
-
+/**
+ * Print formatted string to TTY
+ */
 void tty_printf(const char *fmt, ...) {
   va_list ap;
-  char string[256];
+  char string[TTY_MAX_STRING_BUFFER_SIZE];
 
   va_start(ap,fmt);
   vsprintf(string, fmt, ap);

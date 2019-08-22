@@ -77,43 +77,6 @@ void runtime_cleanup() {
   // Do not cleanup tty I/O to keep terminal communication
 }
 
-/**
- * Print error value
- */
-/*
-static void print_unhandled_exception (jerry_value_t error_value) {
-  // print error message  
-  jerry_value_t err_str = jerry_value_to_string (error_value);
-  repl_print_begin(REPL_OUTPUT_ERROR);
-  repl_print_value("%s\r\n", err_str);
-  repl_print_end();
-  jerry_release_value (err_str);
-
-  // print stack trace
-  if (jerry_value_is_object (error_value)) {
-    jerry_value_t stack_str = jerry_create_string ((const jerry_char_t *) "stack");
-    jerry_value_t backtrace_val = jerry_get_property (error_value, stack_str);
-    jerry_release_value (stack_str);
-    if (!jerry_value_is_error (backtrace_val)
-        && jerry_value_is_array (backtrace_val)) {
-      uint32_t length = jerry_get_array_length (backtrace_val);
-      if (length > 32) { length = 32; } // max length: 32
-      for (uint32_t i = 0; i < length; i++) {
-        jerry_value_t item_val = jerry_get_property_by_index (backtrace_val, i);
-        if (!jerry_value_is_error (item_val)
-            && jerry_value_is_string (item_val)) {
-          repl_print_begin(REPL_OUTPUT_ERROR);
-          repl_print_value("  at %s\r\n", item_val);
-          repl_print_end();          
-        }
-        jerry_release_value (item_val);        
-      }
-    }
-    jerry_release_value (backtrace_val);
-  }
-}
-*/
-
 void runtime_run_main() {
   uint32_t size = flash_get_data_size();
   if (size > 0) {
