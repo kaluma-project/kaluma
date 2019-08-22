@@ -25,36 +25,46 @@
 #include "i2c_magic_strings.h"
 #include "i2c.h"
 
+#define I2C_DEFAULT_MODE I2C_MASTER
+#define I2C_DEFAULT_BAUDRATE 100000 // 100kbps
 
 /**
  * I2C() constructor
  */
 JERRYXX_FUN(i2c_ctor_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "bus");
+  JERRYXX_CHECK_ARG_OBJECT_OPT(1, "options");
 
-  i2c_mode_t mode = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(1, I2C_MASTER);
-  //Master mode support only
+  uint8_t bus = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
+  jerry_value_t options = JERRYXX_GET_ARG_OPT(1, 0);
+  i2c_mode_t mode = I2C_MASTER;
+  uint32_t baudrate = I2C_DEFAULT_BAUDRATE;
+  uint8_t address = 0;
+  if (jerry_value_is_object(options)) {
+    mode = jerryxx_get_property_number(options, MSTR_I2C_MODE, I2C_DEFAULT_MODE);
+    baudrate = (uint32_t) jerryxx_get_property_number(options, MSTR_I2C_BAUDRATE, I2C_DEFAULT_BAUDRATE);
+    address = (uint32_t) jerryxx_get_property_number(options, MSTR_I2C_ADDRESS, 0);
+  }
+
+  // master mode support only
   if (mode != I2C_MASTER)
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) "Invalid I2C mode.");
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) "Unsupported I2C mode.");
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_MODE, mode);
 
   // check this.bus number
-  uint8_t bus = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_BUS, bus);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_MODE, mode);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_BAUDRATE, baudrate);
 
   // initialize the bus
   if (mode == I2C_SLAVE) { /* slave mode */
-    JERRYXX_CHECK_ARG_NUMBER_OPT(2, "address");
-    uint8_t address = (uint8_t) JERRYXX_GET_ARG_NUMBER(2);
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_ADDRESS, address);
     int ret = i2c_setup_slave(bus, address);
     if (ret < 0) {
       return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to initialize I2C bus.");
     }
   } else { /* master mode */
-    JERRYXX_CHECK_ARG_NUMBER_OPT(2, "speed");
-    int32_t speed = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(2, 100000);
-    int ret = i2c_setup_master(bus, speed);
+    int ret = i2c_setup_master(bus, baudrate);
     if (ret == I2CPORT_ERROR) {
       jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to initialize I2C bus.");
     }
@@ -339,8 +349,6 @@ jerry_value_t module_i2c_init() {
   jerryxx_set_property(i2c_ctor, "prototype", i2c_prototype);
   jerryxx_set_property_number(i2c_ctor, MSTR_I2C_MASTERMODE, I2C_MASTER);
   jerryxx_set_property_number(i2c_ctor, MSTR_I2C_SLAVEMODE, I2C_SLAVE);
-  jerryxx_set_property_number(i2c_ctor, MSTR_I2C_STDSPEED, 100000); //100kbps
-  jerryxx_set_property_number(i2c_ctor, MSTR_I2C_FULLSPEED, 400000); //400kbps
   jerryxx_set_property_function(i2c_prototype, MSTR_I2C_WRITE, i2c_write_fn);
   jerryxx_set_property_function(i2c_prototype, MSTR_I2C_READ, i2c_read_fn);
   jerryxx_set_property_function(i2c_prototype, MSTR_I2C_MEM_WRITE, i2c_memwrite_fn);
