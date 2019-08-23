@@ -86,6 +86,9 @@ void runtime_run_main() {
       jerry_value_t ret_value = jerry_run (parsed_code);
       if (jerry_value_is_error (ret_value)) {
         jerryxx_print_error(ret_value, true);
+        runtime_cleanup();
+        runtime_init(false);
+        return;
       }
       jerry_release_value (ret_value);
     } else {
