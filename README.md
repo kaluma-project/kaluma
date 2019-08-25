@@ -15,11 +15,11 @@ Kameleon is a tiny and efficient JavaScript runtime for microcontrollers. The ma
 Resources
 =========
 
-* [Documentation](https://github.com/kameleon-project/kameleon/wiki)
+* [Documentation](https://docs.kameleon.io/)
 * [CLI (Command Line Interface)](https://github.com/kameleon-project/kameleon-cli)
 
 Supported Targets
 =================
 
-* [Kameleon Core](http://kameleon.io/#board)
+* [Kameleon Core](https://docs.kameleon.io/boards/kameleon-core)
 * Contributions required for other boards
