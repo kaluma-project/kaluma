@@ -55,9 +55,11 @@ struct repl_state_s {
   char *history[MAX_COMMAND_HISTORY];
   unsigned int history_size;
   unsigned int history_position;
+  uint8_t ymodem_state; // 0=stopped, 1=transfering
 };
 
 void repl_init();
+repl_state_t *get_repl_state();
 
 void repl_print_begin(repl_output_t output);
 #define repl_printf(format,args...) tty_printf(format, ## args)

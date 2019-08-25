@@ -501,6 +501,7 @@ static void cmd_flash(repl_state_t *state, char *arg) {
 
   /* write a file to flash via Ymodem */
   } else if (strcmp(arg, "-w") == 0) {
+    state->ymodem_state = 1; // transfering
     tty_printf("Transfer a file via Ymodem... (press 'a' to abort)\r\n");
     io_tty_read_stop(&tty);
     ymodem_status_t result = ymodem_receive(header_cb, packet_cb, footer_cb);
@@ -523,7 +524,7 @@ static void cmd_flash(repl_state_t *state, char *arg) {
         tty_printf("\r\nFailed to receive.\r\n");
         break;
     }
-
+    state->ymodem_state = 0; // stopped
   /* no option is given */
   } else {
     repl_print_begin(REPL_OUTPUT_LOG);
@@ -653,7 +654,12 @@ void repl_init() {
   state.history_size = 0;
   state.history_position = 0;
   state.handler = &default_handler;
+  state.ymodem_state = 0;
   cmd_hi(NULL);
+}
+
+repl_state_t *get_repl_state() {
+  return &state;
 }
 
 void repl_print_begin(repl_output_t output) {

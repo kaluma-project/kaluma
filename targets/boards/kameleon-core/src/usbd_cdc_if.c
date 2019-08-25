@@ -49,6 +49,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc_if.h"
 #include "tty.h"
+#include "repl.h"
 #include "runtime.h"
 
 /* USER CODE BEGIN INCLUDE */
@@ -290,18 +291,27 @@ static int8_t CDC_Receive_FS (uint8_t* Buf, uint32_t *Len)
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
 
+  // To avoid sending Ctrl+C to tty terminal
+  bool skip_copy = false;
+
   /*
    * Check special control from USB
-   * Ctrl+C to break VM execution
+   * Ctrl+C to break VM execution only if ymodem is stopped
    */
   for (uint32_t i = 0; i < *Len; i++) {
     uint8_t ch = Buf[i];
     if (ch == 3) { /* Ctrl+C */
-      runtime_set_vm_stop(1);
+      repl_state_t *state = get_repl_state();
+      if (state->ymodem_state == 0) {
+        skip_copy = true;
+        runtime_set_vm_stop(1);
+      }
     }
   }
 
-  tty_fill_rx_bytes(Buf, *Len);
+  if (!skip_copy) {
+    tty_fill_rx_bytes(Buf, *Len);
+  }
   return (USBD_OK);
   /* USER CODE END 6 */
 }
