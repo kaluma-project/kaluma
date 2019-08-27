@@ -449,21 +449,21 @@ JERRYXX_FUN(gc_draw_bitmap_fn) {
 }
 
 /**
- * GraphicContext.prototype.flush() function
+ * GraphicContext.prototype.display() function
  */
-JERRYXX_FUN(gc_flush_fn) {
+JERRYXX_FUN(gc_display_fn) {
   jerry_value_t driver = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_GRAPHICS_DRIVER);
   jerry_value_t buffer = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_GRAPHICS_BUFFER);
-  jerry_value_t driver_flush = jerryxx_get_property(driver, MSTR_GRAPHICS_FLUSH);
-  if (jerry_value_is_function (driver_flush)) {
+  jerry_value_t driver_display = jerryxx_get_property(driver, MSTR_GRAPHICS_DISPLAY);
+  if (jerry_value_is_function (driver_display)) {
     jerry_value_t args[] = { buffer };
-    jerry_value_t ret_val = jerry_call_function (driver_flush, driver, args, 1);
+    jerry_value_t ret_val = jerry_call_function (driver_display, driver, args, 1);
     if (!jerry_value_is_error (ret_val)) {
       // TODO handle error
     }
     jerry_release_value(ret_val);
   }
-  jerry_release_value(driver_flush);
+  jerry_release_value(driver_display);
   jerry_release_value(buffer);
   jerry_release_value(driver);
   return jerry_create_undefined();
@@ -503,7 +503,7 @@ jerry_value_t module_graphics_init() {
   jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_DRAW_TEXT, gc_draw_text_fn);
   jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_MEASURE_TEXT, gc_measure_text_fn);
   jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_DRAW_BITMAP, gc_draw_bitmap_fn);
-  jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_FLUSH, gc_flush_fn);
+  jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_DISPLAY, gc_display_fn);
   jerry_release_value (gc_prototype);
 
   /* graphics module exports */

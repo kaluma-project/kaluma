@@ -60,5 +60,5 @@
 #define MSTR_GRAPHICS_DRAW_TEXT "drawText"
 #define MSTR_GRAPHICS_MEASURE_TEXT "measureText"
 #define MSTR_GRAPHICS_DRAW_BITMAP "drawBitmap"
-#define MSTR_GRAPHICS_FLUSH "flush"
+#define MSTR_GRAPHICS_DISPLAY "display"
 #endif /* __GRAPHICS_MAGIC_STRINGS_H */
