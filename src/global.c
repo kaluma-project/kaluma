@@ -36,6 +36,7 @@
 #include "pwm.h"
 #include "system.h"
 #include "kameleon_config.h"
+#include "base64.h"
 
 static void register_global_objects() {
   jerry_value_t global_object = jerry_get_global_object ();
@@ -529,6 +530,87 @@ static void register_global_process_object() {
   jerry_release_value(global);
 }
 
+/****************************************************************************/
+/*                                                                          */
+/*                      BASE64 ENCODE/DECODE FUNCTIONS                      */
+/*                                                                          */
+/****************************************************************************/
+
+static void base64_buffer_free_cb(void *native_p) {
+  free(native_p);
+}
+
+JERRYXX_FUN(encode_fn) {
+  JERRYXX_CHECK_ARG(0, "binaryData")
+  jerry_value_t binary_data = JERRYXX_GET_ARG(0);
+  size_t encoded_data_sz;
+  unsigned char *encoded_data = NULL;
+  if (jerry_value_is_array(binary_data)) { /* for Array<number> */
+    size_t len = jerry_get_array_length(binary_data);
+    uint8_t buf[len];
+    for (int i = 0; i < len; i++) {
+      jerry_value_t item = jerry_get_property_by_index(binary_data, i);
+      if (jerry_value_is_number(item)) {
+        buf[i] = (uint8_t) jerry_get_number_value(item);
+      } else {
+        buf[i] = 0; // write 0 for non-number item.
+      }
+    }
+    encoded_data = base64_encode(buf, len, &encoded_data_sz);
+  } else if (jerry_value_is_arraybuffer(binary_data)) { /* for ArrayBuffer */
+    size_t len = jerry_get_arraybuffer_byte_length(binary_data);
+    uint8_t buf[len];
+    jerry_arraybuffer_read(binary_data, 0, buf, len);
+    encoded_data = base64_encode(buf, len, &encoded_data_sz);
+  } else if (jerry_value_is_typedarray(binary_data)) { /* for TypedArrays (Uint8Array, Int16Array, ...) */
+    jerry_length_t byteLength = 0;
+    jerry_length_t byteOffset = 0;
+    jerry_value_t array_buffer = jerry_get_typedarray_buffer(binary_data, &byteOffset, &byteLength);
+    size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
+    uint8_t buf[len];
+    jerry_arraybuffer_read(array_buffer, 0, buf, len);
+    encoded_data = base64_encode(buf, len, &encoded_data_sz);
+    jerry_release_value(array_buffer);
+  } else if (jerry_value_is_string(binary_data)) { /* for string */
+    jerry_size_t len = jerry_get_string_size(binary_data);
+    uint8_t buf[len];
+    jerry_string_to_char_buffer(binary_data, buf, len);
+    encoded_data = base64_encode(buf, len, &encoded_data_sz);
+  } else {
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "Unsupported binary data.");
+  }
+  if (encoded_data != NULL && encoded_data_sz > 0) {
+    jerry_value_t result = jerry_create_string_sz(encoded_data, encoded_data_sz - 1);
+    free(encoded_data);
+    return result;
+  } else {
+    return jerry_create_undefined();
+  }
+}
+
+JERRYXX_FUN(decode_fn) {
+  JERRYXX_CHECK_ARG_STRING(0, "encodedData")
+  JERRYXX_GET_ARG_STRING_AS_CHAR(0, encoded_data)
+  size_t decoded_data_sz;
+  unsigned char *decoded_data = base64_decode((unsigned char *) encoded_data,
+      encoded_data_sz, &decoded_data_sz);
+  if (decoded_data != NULL) {
+    jerry_value_t buffer = jerry_create_arraybuffer_external(decoded_data_sz, decoded_data, base64_buffer_free_cb);
+    return buffer;
+  } else {
+    return jerry_create_undefined();
+  }
+}
+
+static void register_global_base64() {
+  jerry_value_t global = jerry_get_global_object();
+  jerryxx_set_property_function(global, MSTR_ENCODE, encode_fn);
+  jerryxx_set_property_function(global, MSTR_DECODE, decode_fn);
+  jerry_release_value(global);
+}
+
+/******************************************************************************/
+
 static void run_startup_module() {
   jerry_value_t res = jerry_exec_snapshot((const uint32_t *)module_startup_code, module_startup_size, 0, JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
   jerry_value_t this_val = jerry_create_undefined ();
@@ -554,6 +636,7 @@ void global_init() {
   register_global_timers();
   register_global_console_object();
   register_global_process_object();
+  register_global_base64();
   run_startup_module();
   run_board_module();
 }

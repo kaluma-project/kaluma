@@ -52,6 +52,8 @@
 #define MSTR_LOG "log"
 #define MSTR_ERROR "error"
 #define MSTR_PROCESS "process"
+#define MSTR_ENCODE "encode"
+#define MSTR_DECODE "decode"
 #define MSTR_ARCH "arch"
 #define MSTR_PLATFORM "platform"
 #define MSTR_VERSION "version"
