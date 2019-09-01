@@ -83,4 +83,9 @@ void Gpio_Init();
  * check script running mode - skipping or running user script
  */
 uint8_t running_script_check();
+
+/**
+ * Error handler for the system driver error.
+ */
+void _Error_Handler(char * file, uint32_t line);
 #endif /* __SYSTEM_H */
