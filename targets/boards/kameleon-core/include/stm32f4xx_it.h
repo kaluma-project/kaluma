@@ -43,8 +43,11 @@
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
-/* Exported functions ------------------------------------------------------- */
+#define NVIC_INT_CTRL_REG   (*(volatile uint32_t *)0xe000ed04)
+#define NVIC_PENDSVSET_BIT  (1UL << 28UL)
 
+/* Exported functions ------------------------------------------------------- */
+void SetPendSV();
 void NMI_Handler(void);
 void HardFault_Handler(void);
 void MemManage_Handler(void);

@@ -24,9 +24,6 @@
 
 #include <stdint.h>
 
-#define NVIC_INT_CTRL_REG   (*(volatile uint32_t *)0xe000ed04)
-#define NVIC_PENDSVSET_BIT  (1UL << 28UL)
-
 extern const char system_arch[];
 extern const char system_platform[];
 
@@ -65,11 +62,6 @@ uint64_t gettime();
 void settime(uint64_t time);
 
 /**
- * Pend SV Interrupt
- */
-void SetPendSV();
-
-/**
  * Firmware update request
  */
 void request_firmup();
@@ -84,8 +76,4 @@ void Gpio_Init();
  */
 uint8_t running_script_check();
 
-/**
- * Error handler for the system driver error.
- */
-void _Error_Handler(char * file, uint32_t line);
 #endif /* __SYSTEM_H */

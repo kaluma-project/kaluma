@@ -27,6 +27,7 @@
 #include <ctype.h>
 
 #include "tty.h"
+#include "stm32f4xx_it.h"
 #include "system.h"
 #include "usbd_cdc_if.h"
 #include "ringbuffer.h"

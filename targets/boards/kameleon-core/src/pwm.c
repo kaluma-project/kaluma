@@ -22,7 +22,6 @@
 #include <stdint.h>
 #include "pwm.h"
 #include "kameleon_core.h"
-#include "system.h"
 
 extern void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 static uint8_t pwm_configured[PWM_NUM];

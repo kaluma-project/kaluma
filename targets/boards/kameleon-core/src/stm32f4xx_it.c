@@ -49,6 +49,12 @@ extern DMA_HandleTypeDef hdma_adc1;
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 
+/** Pend SV Interrupt
+*/
+void SetPendSV() {
+   NVIC_INT_CTRL_REG = NVIC_PENDSVSET_BIT;
+}
+
 /******************************************************************************/
 /*            Cortex-M4 Processor Interruption and Exception Handlers         */
 /******************************************************************************/
