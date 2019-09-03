@@ -22,7 +22,6 @@
 #include <stdint.h>
 #include "adc.h"
 #include "kameleon_core.h"
-#include "system.h"
 
 DMA_HandleTypeDef hdma_adc1;
 static uint16_t adc_buf[ADC_NUM];

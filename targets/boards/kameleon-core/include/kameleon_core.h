@@ -47,5 +47,8 @@
 #define APB2    1
 
 #define ADC_RESOLUTION_BIT 12
-
+/**
+ * Error handler for the system driver error.
+ */
+void _Error_Handler(char * file, uint32_t line);
 #endif /* __KAMELEON_CORE_H */

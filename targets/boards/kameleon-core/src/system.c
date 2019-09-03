@@ -141,12 +141,6 @@ void Button_Config() {
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 }
 
-/** Pend SV Interrupt
-*/
-void SetPendSV() {
-   NVIC_INT_CTRL_REG = NVIC_PENDSVSET_BIT;
-}
-
 /**
  * @brief  This function is executed in case of error occurrence.
  * @param  None

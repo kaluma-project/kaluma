@@ -23,7 +23,6 @@
 #include "kameleon_core.h"
 #include "flash.h"
 #include "tty.h"
-#include "system.h"
 
 #define SIZE_FLASH_USER_AREA            (128 * 1024)
 #define ADDR_FLASH_USER_AREA            (FLASH_BASE_ADDR + FLASH_SIZE - SIZE_FLASH_USER_AREA)
