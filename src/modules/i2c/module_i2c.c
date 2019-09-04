@@ -28,6 +28,10 @@
 #define I2C_DEFAULT_MODE I2C_MASTER
 #define I2C_DEFAULT_BAUDRATE 100000 // 100kbps
 
+static void buffer_free_cb(void *native_p) {
+  free(native_p);
+}
+
 /**
  * I2C() constructor
  */
@@ -123,8 +127,7 @@ JERRYXX_FUN(i2c_write_fn) {
     }
   } else if (jerry_value_is_arraybuffer(data)) { /* for ArrayBuffer */
     size_t len = jerry_get_arraybuffer_byte_length(data);
-    uint8_t buf[len];
-    jerry_arraybuffer_read(data, 0, buf, len);
+    uint8_t *buf = jerry_get_arraybuffer_pointer(data);
     if (i2cmode == I2C_SLAVE) {
       ret = i2c_write_slave(bus, buf, len, timeout);
     } else {
@@ -135,8 +138,7 @@ JERRYXX_FUN(i2c_write_fn) {
     jerry_length_t byteOffset = 0;
     jerry_value_t array_buffer = jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
     size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
-    uint8_t buf[len];
-    jerry_arraybuffer_read(array_buffer, 0, buf, len);
+    uint8_t *buf = jerry_get_arraybuffer_pointer(array_buffer);
     if (i2cmode == I2C_SLAVE) {
       ret = i2c_write_slave(bus, buf, len, timeout);
     } else {
@@ -165,7 +167,7 @@ JERRYXX_FUN(i2c_write_fn) {
  */
 JERRYXX_FUN(i2c_read_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "length");
-  uint8_t length = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
+  jerry_length_t length = (jerry_length_t) JERRYXX_GET_ARG_NUMBER(0);
 
   // check this.bus number
   jerry_value_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
@@ -180,7 +182,7 @@ JERRYXX_FUN(i2c_read_fn) {
   // read data with optional parameters (address, timeout)
   uint8_t address = 0;
   uint32_t timeout = 5000;
-  uint8_t buf[length];
+  uint8_t *buf = malloc(length);
   int ret = I2CPORT_ERROR;
   if (i2cmode == I2C_SLAVE) {
     JERRYXX_CHECK_ARG_NUMBER_OPT(1, "timeout");
@@ -196,10 +198,11 @@ JERRYXX_FUN(i2c_read_fn) {
 
   // return an array buffer
   if (ret == I2CPORT_ERROR) {
+    free(buf);
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to read data via I2C bus.");
   } else {
-    jerry_value_t array_buffer = jerry_create_arraybuffer(length);
-    jerry_arraybuffer_write(array_buffer, 0, buf, length);
+    jerry_value_t array_buffer = jerry_create_arraybuffer_external(length, buf,
+        buffer_free_cb);
     return array_buffer;
   }
 }
@@ -249,16 +252,14 @@ JERRYXX_FUN(i2c_memwrite_fn) {
     ret = i2c_memWrite_master(bus, address, memAddress, memAddr16, buf, len, timeout);
   } else if (jerry_value_is_arraybuffer(data)) { /* for ArrayBuffer */
     size_t len = jerry_get_arraybuffer_byte_length(data);
-    uint8_t buf[len];
-    jerry_arraybuffer_read(data, 0, buf, len);
+    uint8_t *buf = jerry_get_arraybuffer_pointer(data);
     ret = i2c_memWrite_master(bus, address, memAddress, memAddr16, buf, len, timeout);
   } else if (jerry_value_is_typedarray(data)) { /* for TypedArrays (Uint8Array, Int16Array, ...) */
     jerry_length_t byteLength = 0;
     jerry_length_t byteOffset = 0;
     jerry_value_t array_buffer = jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
     size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
-    uint8_t buf[len];
-    jerry_arraybuffer_read(array_buffer, 0, buf, len);
+    uint8_t *buf = jerry_get_arraybuffer_pointer(array_buffer);
     ret = i2c_memWrite_master(bus, address, memAddress, memAddr16, buf, len, timeout);
     jerry_release_value(array_buffer);
   } else if (jerry_value_is_string(data)) { /* for string */
@@ -281,8 +282,8 @@ JERRYXX_FUN(i2c_memread_fn) {
   JERRYXX_CHECK_ARG(0, "memAddr");
   uint16_t memAddress = (uint16_t) JERRYXX_GET_ARG_NUMBER(0);
   JERRYXX_CHECK_ARG_NUMBER(1, "length");
-  uint8_t length = (uint8_t) JERRYXX_GET_ARG_NUMBER(1);
-  uint8_t buf[length];
+  jerry_length_t length = (jerry_length_t) JERRYXX_GET_ARG_NUMBER(1);
+  uint8_t *buf = malloc(length);
 
   // check this.bus number
   jerry_value_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_I2C_BUS);
@@ -307,10 +308,11 @@ JERRYXX_FUN(i2c_memread_fn) {
 
   // return an array buffer
   if (ret == I2CPORT_ERROR) {
+    free(buf);
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to read data via I2C bus.");
   } else {
-    jerry_value_t array_buffer = jerry_create_arraybuffer(length);
-    jerry_arraybuffer_write(array_buffer, 0, buf, length);
+    jerry_value_t array_buffer = jerry_create_arraybuffer_external(length, buf,
+        buffer_free_cb);
     return array_buffer;
   }
 }

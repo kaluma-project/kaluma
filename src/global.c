@@ -559,16 +559,14 @@ JERRYXX_FUN(encode_fn) {
     encoded_data = base64_encode(buf, len, &encoded_data_sz);
   } else if (jerry_value_is_arraybuffer(binary_data)) { /* for ArrayBuffer */
     size_t len = jerry_get_arraybuffer_byte_length(binary_data);
-    uint8_t buf[len];
-    jerry_arraybuffer_read(binary_data, 0, buf, len);
+    uint8_t *buf = jerry_get_arraybuffer_pointer(binary_data);
     encoded_data = base64_encode(buf, len, &encoded_data_sz);
   } else if (jerry_value_is_typedarray(binary_data)) { /* for TypedArrays (Uint8Array, Int16Array, ...) */
     jerry_length_t byteLength = 0;
     jerry_length_t byteOffset = 0;
     jerry_value_t array_buffer = jerry_get_typedarray_buffer(binary_data, &byteOffset, &byteLength);
     size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
-    uint8_t buf[len];
-    jerry_arraybuffer_read(array_buffer, 0, buf, len);
+    uint8_t *buf = jerry_get_arraybuffer_pointer(array_buffer);
     encoded_data = base64_encode(buf, len, &encoded_data_sz);
     jerry_release_value(array_buffer);
   } else if (jerry_value_is_string(binary_data)) { /* for string */

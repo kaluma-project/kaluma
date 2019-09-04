@@ -165,16 +165,14 @@ JERRYXX_FUN(uart_write_fn) {
     ret = uart_write(port, buf, len);
   } else if (jerry_value_is_arraybuffer(data)) { /* for ArrayBuffer */
     size_t len = jerry_get_arraybuffer_byte_length(data);
-    uint8_t buf[len];
-    jerry_arraybuffer_read(data, 0, buf, len);
+    uint8_t *buf = jerry_get_arraybuffer_pointer(data);
     ret = uart_write(port, buf, len);
   } else if (jerry_value_is_typedarray(data)) { /* for TypedArrays (Uint8Array, Int16Array, ...) */
     jerry_length_t byteLength = 0;
     jerry_length_t byteOffset = 0;
     jerry_value_t array_buffer = jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
     size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
-    uint8_t buf[len];
-    jerry_arraybuffer_read(array_buffer, 0, buf, len);
+    uint8_t *buf = jerry_get_arraybuffer_pointer(array_buffer);
     ret = uart_write(port, buf, len);
     jerry_release_value(array_buffer);
   } else if (jerry_value_is_string(data)) { /* for string */
