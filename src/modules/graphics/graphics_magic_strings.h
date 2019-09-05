@@ -22,8 +22,8 @@
 #ifndef __GRAPHICS_MAGIC_STRINGS_H
 #define __GRAPHICS_MAGIC_STRINGS_H
 
-#define MSTR_GRAPHICS_GRAPHIC_CONTEXT "GraphicContext"
-#define MSTR_GRAPHICS_DRIVER "driver"
+#define MSTR_GRAPHICS_GRAPHICS_CONTEXT "GraphicsContext"
+#define MSTR_GRAPHICS_BUFFERED_GRAPHICS_CONTEXT "BufferedGraphicsContext"
 #define MSTR_GRAPHICS_WIDTH "width"
 #define MSTR_GRAPHICS_HEIGHT "height"
 #define MSTR_GRAPHICS_FIRST "first"
@@ -34,6 +34,8 @@
 #define MSTR_GRAPHICS_GLYPHS "glyphs"
 #define MSTR_GRAPHICS_BUFFER "buffer"
 #define MSTR_GRAPHICS_ROTATION "rotation"
+#define MSTR_GRAPHICS_COLORBITS "colorbits"
+#define MSTR_GRAPHICS_COLOR16 "color16"
 #define MSTR_GRAPHICS_CLEAR_SCREEN "clearScreen"
 #define MSTR_GRAPHICS_FILL_SCREEN "fillScreen"
 #define MSTR_GRAPHICS_SET_ROTATION "setRotation"

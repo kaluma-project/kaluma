@@ -32,180 +32,6 @@
 #include "font.h"
 #include "gc.h"
 
-#ifndef SWAP_INT16
-#define SWAP_INT16(a, b) { int16_t t = a; a = b; b = t; }
-#endif
-
-#ifndef MAX
-#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
-#endif
-
-/* ************************************************************************** */
-/*                        PRIMITIVE GRAPHIC FUNCTIONS                         */
-/* ************************************************************************** */
-
-/**
- * @brief  Primitive set pixel
- * @param  handle  Graphic context handle
- * @param  x
- * @param  y
- * @param  color
- */
-void gc_prim_set_pixel(gc_handle_t *handle, int16_t x, int16_t y,
-    uint16_t color) {
-  if((x >= 0) && (x < handle->width) && (y >= 0) && (y < handle->height)) {
-    switch (handle->rotation) {
-     case 1:
-      SWAP_INT16(x, y)
-      x = handle->device_width - x - 1;
-      break;
-     case 2:
-      x = handle->device_width  - x - 1;
-      y = handle->device_height - y - 1;
-      break;
-     case 3:
-      SWAP_INT16(x, y)
-      y = handle->device_height - y - 1;
-      break;
-    }
-    uint16_t idx = x + (y / 8) * handle->device_width;
-    uint8_t mask = (1 << (y & 7));
-    if (color) {
-      handle->buffer[idx] |= mask;
-    } else {
-      handle->buffer[idx] &= ~mask;
-    }
-  }
-}
-
-/**
- * @brief  Get olor of the pixel in the buffer
- * @param  x
- * @param  y
- * @return  color if pixel has color, 0 if pixel is outbound
- */
-uint16_t gc_prim_get_pixel(gc_handle_t *handle, int16_t x, int16_t y) {
-  if((x >= 0) && (x < handle->width) && (y >= 0) && (y < handle->height)) {
-    switch (handle->rotation) {
-     case 1:
-      SWAP_INT16(x, y)
-      x = handle->device_width - x - 1;
-      break;
-     case 2:
-      x = handle->device_width  - x - 1;
-      y = handle->device_height - y - 1;
-      break;
-     case 3:
-      SWAP_INT16(x, y)
-      y = handle->device_height - y - 1;
-      break;
-    }
-    return (handle->buffer[x + (y / 8) * handle->device_width] & (1 << (y & 7))) > 0;
-  }
-  return 0;
-}
-
-/**
- * @brief Primitive draw fast vertical line
- * @param handle Graphic context handle
- * @param x
- * @param y
- * @param h
- * @param color
- */
-void gc_prim_draw_fast_vline(gc_handle_t *handle, int16_t x, int16_t y,
-    int16_t h, uint16_t color) {
-  gc_prim_draw_line(handle, x, y, x, y + h - 1, color);
-}
-
-/**
- * @brief Primitive draw fast horizontal line
- * @param handle Graphic context handle
- * @param x
- * @param y
- * @param w
- * @param color
- */
-void gc_prim_draw_fast_hline(gc_handle_t *handle, int16_t x, int16_t y,
-    int16_t w, uint16_t color) {
-  gc_prim_draw_line(handle, x, y, x + w - 1, y, color);
-}
-
-/**
- * @brief Primitive draw line (Bresenham's algorithm)
- * @param handle Graphic context handle
- * @param x0
- * @param y0
- * @param x1
- * @param y1
- * @param color
- */
-void gc_prim_draw_line(gc_handle_t *handle, int16_t x0, int16_t y0, int16_t x1,
-    int16_t y1, uint16_t color) {
-  int16_t steep = abs(y1 - y0) > abs(x1 - x0);
-  if (steep) {
-    SWAP_INT16(x0, y0);
-    SWAP_INT16(x1, y1);
-  }
-  if (x0 > x1) {
-    SWAP_INT16(x0, x1);
-    SWAP_INT16(y0, y1);
-  }
-  int16_t dx, dy;
-  dx = x1 - x0;
-  dy = abs(y1 - y0);
-  int16_t err = dx / 2;
-  int16_t ystep;
-  if (y0 < y1) {
-    ystep = 1;
-  } else {
-    ystep = -1;
-  }
-  for (; x0<=x1; x0++) {
-    if (steep) {
-      gc_prim_set_pixel(handle, y0, x0, color);
-    } else {
-      gc_prim_set_pixel(handle, x0, y0, color);
-    }
-    err -= dy;
-    if (err < 0) {
-      y0 += ystep;
-      err += dx;
-    }
-  }
-}
-
-/**
- * @brief Primitive filled rectangle
- * @param handle Graphic context handle
- * @param x
- * @param y
- * @param w
- * @param h
- * @param color
- */
-void gc_prim_fill_rect(gc_handle_t *handle, int16_t x, int16_t y, int16_t w,
-    int16_t h, uint16_t color) {
-  for (int16_t i = x; i < x + w; i++) {
-    gc_prim_draw_fast_vline(handle, i, y, h, color);
-  }
-}
-
-/**
- * @brief Primitive fill screen
- * @param handle Graphic context handle
- * @param color
- */
-void gc_prim_fill_screen (gc_handle_t *handle, uint16_t color) {
-  for (int i = 0; i < handle->buffer_size; i++) {
-    if (color) {
-      handle->buffer[i] = 255;
-    } else {
-      handle->buffer[i] = 0;
-    }
-  }
-}
-
 /* ************************************************************************** */
 /*                      GRAPHIC DEVICE_NEUTRAL FUNCTIONS                      */
 /* ************************************************************************** */
@@ -219,11 +45,18 @@ int16_t gc_get_height (gc_handle_t *handle) {
 }
 
 /**
+ * @brief  Make 16-color value from 5-6-5 bits RGB values
+ */
+uint16_t gc_color16 (gc_handle_t *handle, uint8_t r, uint8_t g, uint8_t b) {
+  return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
+}
+
+/**
  * @brief Clear screen
  * @param handle Graphic context handle
  */
 void gc_clear_screen (gc_handle_t *handle) {
-  gc_prim_fill_screen(handle, 0);
+  handle->fill_screen_cb(handle, 0);
 }
 
 /**
@@ -232,7 +65,7 @@ void gc_clear_screen (gc_handle_t *handle) {
  * @param color
  */
 void gc_fill_screen (gc_handle_t *handle, uint16_t color) {
-  gc_prim_fill_screen(handle, color);
+  handle->fill_screen_cb(handle, color);
 }
 
 /**
@@ -309,7 +142,7 @@ uint16_t gc_get_fill_color (gc_handle_t *handle) {
  * @param color
  */
 void gc_set_pixel (gc_handle_t *handle, int16_t x, int16_t y, uint16_t color) {
-  gc_prim_set_pixel(handle, x, y, color);
+  handle->set_pixel_cb(handle, x, y, color);
 }
 
 /**
@@ -320,11 +153,13 @@ void gc_set_pixel (gc_handle_t *handle, int16_t x, int16_t y, uint16_t color) {
  * @return Color at (x, y) coordinate
  */
 uint16_t gc_get_pixel (gc_handle_t *handle, int16_t x, int16_t y) {
-  return gc_prim_get_pixel(handle, x, y);
+  uint16_t color;
+  handle->get_pixel_cb(handle, x, y, &color);
+  return color;
 }
 
 /**
- * @brief Draw line
+ * @brief Draw line (Bresenham's algorithm)
  * @param handle Graphic context handle
  * @param x0
  * @param y0
@@ -333,7 +168,37 @@ uint16_t gc_get_pixel (gc_handle_t *handle, int16_t x, int16_t y) {
  */
 void gc_draw_line (gc_handle_t *handle, int16_t x0, int16_t y0, int16_t x1,
     int16_t y1) {
-  gc_prim_draw_line(handle, x0, y0, x1, y1, handle->color);
+  int16_t steep = abs(y1 - y0) > abs(x1 - x0);
+  if (steep) {
+    SWAP_INT16(x0, y0);
+    SWAP_INT16(x1, y1);
+  }
+  if (x0 > x1) {
+    SWAP_INT16(x0, x1);
+    SWAP_INT16(y0, y1);
+  }
+  int16_t dx, dy;
+  dx = x1 - x0;
+  dy = abs(y1 - y0);
+  int16_t err = dx / 2;
+  int16_t ystep;
+  if (y0 < y1) {
+    ystep = 1;
+  } else {
+    ystep = -1;
+  }
+  for (; x0<=x1; x0++) {
+    if (steep) {
+      handle->set_pixel_cb(handle, y0, x0, handle->color);
+    } else {
+      handle->set_pixel_cb(handle, x0, y0, handle->color);
+    }
+    err -= dy;
+    if (err < 0) {
+      y0 += ystep;
+      err += dx;
+    }
+  }
 }
 
 /**
@@ -346,10 +211,10 @@ void gc_draw_line (gc_handle_t *handle, int16_t x0, int16_t y0, int16_t x1,
  */
 void gc_draw_rect (gc_handle_t *handle, int16_t x, int16_t y, int16_t w,
     int16_t h) {
-  gc_prim_draw_fast_hline(handle, x, y, w, handle->color);
-  gc_prim_draw_fast_hline(handle, x, y + h - 1, w, handle->color);
-  gc_prim_draw_fast_vline(handle, x, y, h, handle->color);
-  gc_prim_draw_fast_vline(handle, x + w - 1, y, h, handle->color);
+  handle->draw_hline_cb(handle, x, y, w, handle->color);
+  handle->draw_hline_cb(handle, x, y + h - 1, w, handle->color);
+  handle->draw_vline_cb(handle, x, y, h, handle->color);
+  handle->draw_vline_cb(handle, x + w - 1, y, h, handle->color);
 }
 
 /**
@@ -378,20 +243,20 @@ void gc_draw_circle_helper(gc_handle_t *handle, int16_t x, int16_t y, int16_t r,
     ddF_x += 2;
     f += ddF_x;
     if (cornername & 0x4) {
-      gc_prim_set_pixel(handle, x + _x, y + _y, color);
-      gc_prim_set_pixel(handle, x + _y, y + _x, color);
+      handle->set_pixel_cb(handle, x + _x, y + _y, color);
+      handle->set_pixel_cb(handle, x + _y, y + _x, color);
     }
     if (cornername & 0x2) {
-      gc_prim_set_pixel(handle, x + _x, y - _y, color);
-      gc_prim_set_pixel(handle, x + _y, y - _x, color);
+      handle->set_pixel_cb(handle, x + _x, y - _y, color);
+      handle->set_pixel_cb(handle, x + _y, y - _x, color);
     }
     if (cornername & 0x8) {
-      gc_prim_set_pixel(handle, x - _y, y + _x, color);
-      gc_prim_set_pixel(handle, x - _x, y + _y, color);
+      handle->set_pixel_cb(handle, x - _y, y + _x, color);
+      handle->set_pixel_cb(handle, x - _x, y + _y, color);
     }
     if (cornername & 0x1) {
-      gc_prim_set_pixel(handle, x - _y, y - _x, color);
-      gc_prim_set_pixel(handle, x - _x, y - _y, color);
+      handle->set_pixel_cb(handle, x - _y, y - _x, color);
+      handle->set_pixel_cb(handle, x - _x, y - _y, color);
     }
   }
 }
@@ -410,10 +275,10 @@ void gc_draw_roundrect (gc_handle_t *handle, int16_t x, int16_t y, int16_t w,
   int16_t max_radius = ((w < h) ? w : h) / 2; // 1/2 minor axis
   if(r > max_radius) r = max_radius;
   // smarter version
-  gc_prim_draw_fast_hline(handle, x + r, y, w - 2 * r, handle->color);
-  gc_prim_draw_fast_hline(handle, x + r, y + h - 1, w - 2 * r, handle->color);
-  gc_prim_draw_fast_vline(handle, x, y+r, h - 2 * r, handle->color);
-  gc_prim_draw_fast_vline(handle, x + w - 1, y + r, h - 2 * r, handle->color);
+  handle->draw_hline_cb(handle, x + r, y, w - 2 * r, handle->color);
+  handle->draw_hline_cb(handle, x + r, y + h - 1, w - 2 * r, handle->color);
+  handle->draw_vline_cb(handle, x, y+r, h - 2 * r, handle->color);
+  handle->draw_vline_cb(handle, x + w - 1, y + r, h - 2 * r, handle->color);
   // draw four corners
   gc_draw_circle_helper(handle, x + r, y + r, r, 1, handle->color);
   gc_draw_circle_helper(handle, x + w - r - 1, y + r, r, 2, handle->color);
@@ -435,10 +300,10 @@ void gc_draw_circle (gc_handle_t *handle, int16_t x, int16_t y, int16_t r) {
   int16_t _x = 0;
   int16_t _y = r;
 
-  gc_prim_set_pixel(handle, x, y + r, handle->color);
-  gc_prim_set_pixel(handle, x, y - r, handle->color);
-  gc_prim_set_pixel(handle, x + r, y, handle->color);
-  gc_prim_set_pixel(handle, x - r, y, handle->color);
+  handle->set_pixel_cb(handle, x, y + r, handle->color);
+  handle->set_pixel_cb(handle, x, y - r, handle->color);
+  handle->set_pixel_cb(handle, x + r, y, handle->color);
+  handle->set_pixel_cb(handle, x - r, y, handle->color);
 
   while (_x < _y) {
     if (f >= 0) {
@@ -449,14 +314,14 @@ void gc_draw_circle (gc_handle_t *handle, int16_t x, int16_t y, int16_t r) {
     _x++;
     ddF_x += 2;
     f += ddF_x;
-    gc_prim_set_pixel(handle, x + _x, y + _y, handle->color);
-    gc_prim_set_pixel(handle, x - _x, y + _y, handle->color);
-    gc_prim_set_pixel(handle, x + _x, y - _y, handle->color);
-    gc_prim_set_pixel(handle, x - _x, y - _y, handle->color);
-    gc_prim_set_pixel(handle, x + _y, y + _x, handle->color);
-    gc_prim_set_pixel(handle, x - _y, y + _x, handle->color);
-    gc_prim_set_pixel(handle, x + _y, y - _x, handle->color);
-    gc_prim_set_pixel(handle, x - _y, y - _x, handle->color);
+    handle->set_pixel_cb(handle, x + _x, y + _y, handle->color);
+    handle->set_pixel_cb(handle, x - _x, y + _y, handle->color);
+    handle->set_pixel_cb(handle, x + _x, y - _y, handle->color);
+    handle->set_pixel_cb(handle, x - _x, y - _y, handle->color);
+    handle->set_pixel_cb(handle, x + _y, y + _x, handle->color);
+    handle->set_pixel_cb(handle, x - _y, y + _x, handle->color);
+    handle->set_pixel_cb(handle, x + _y, y - _x, handle->color);
+    handle->set_pixel_cb(handle, x - _y, y - _x, handle->color);
   }
 }
 
@@ -477,7 +342,7 @@ void gc_draw_ellipse (gc_handle_t *handle, int16_t x0, int16_t y0, int16_t x1,
  */
 void gc_fill_rect (gc_handle_t *handle, int16_t x, int16_t y, int16_t w,
     int16_t h) {
-  gc_prim_fill_rect(handle, x, y, w, h, handle->fill_color);
+  handle->fill_rect_cb(handle, x, y, w, h, handle->fill_color);
 }
 
 /**
@@ -510,15 +375,15 @@ void gc_fill_circle_helper(gc_handle_t *handle, int16_t x, int16_t y, int16_t r,
     f += ddF_x;
     if(_x < (_y + 1)) {
       if (corners & 1)
-        gc_prim_draw_fast_vline(handle, x + _x, y - _y, 2 * _y + delta, color);
+        handle->draw_vline_cb(handle, x + _x, y - _y, 2 * _y + delta, color);
       if (corners & 2)
-        gc_prim_draw_fast_vline(handle, x - _x, y - _y, 2 * _y + delta, color);
+        handle->draw_vline_cb(handle, x - _x, y - _y, 2 * _y + delta, color);
     }
     if(_y != py) {
       if (corners & 1)
-        gc_prim_draw_fast_vline(handle, x + py, y - px, 2 * px + delta, color);
+        handle->draw_vline_cb(handle, x + py, y - px, 2 * px + delta, color);
       if (corners & 2)
-        gc_prim_draw_fast_vline(handle, x - py, y - px, 2 * px + delta, color);
+        handle->draw_vline_cb(handle, x - py, y - px, 2 * px + delta, color);
       py = _y;
     }
     px = _x;
@@ -538,7 +403,7 @@ void gc_fill_roundrect (gc_handle_t *handle, int16_t x, int16_t y, int16_t w,
     int16_t h, int16_t r) {
   int16_t max_radius = ((w < h) ? w : h) / 2; // 1/2 minor axis
   if(r > max_radius) r = max_radius;
-  gc_prim_fill_rect(handle, x + r, y, w - 2 * r, h, handle->fill_color);
+  handle->fill_rect_cb(handle, x + r, y, w - 2 * r, h, handle->fill_color);
   // draw four corners
   gc_fill_circle_helper(handle, x + w - r - 1, y + r, r, 1, h - 2 * r - 1, handle->fill_color);
   gc_fill_circle_helper(handle, x + r, y + r, r, 2, h - 2 * r - 1, handle->fill_color);
@@ -552,7 +417,7 @@ void gc_fill_roundrect (gc_handle_t *handle, int16_t x, int16_t y, int16_t w,
  * @param  r
  */
 void gc_fill_circle (gc_handle_t *handle, int16_t x, int16_t y, int16_t r) {
-  gc_prim_draw_fast_vline(handle, x, y - r, 2 * r + 1, handle->fill_color);
+  handle->draw_vline_cb(handle, x, y - r, 2 * r + 1, handle->fill_color);
   gc_fill_circle_helper(handle, x, y, r, 3, 0, handle->fill_color);
 }
 
@@ -614,10 +479,10 @@ void gc_draw_char(gc_handle_t *handle, int16_t x, int16_t y, const char ch) {
       for(int8_t j = 0; j < 8; j++, line >>= 1) {
         if (line & 1) {
           if(sx == 1 && sy == 1)
-            gc_prim_set_pixel(handle, x + i, y + j, handle->font_color);
+            handle->set_pixel_cb(handle, x + i, y + j, handle->font_color);
           else
-            gc_prim_fill_rect(handle, x + i * sx, y + j * sy, sx,
-                sy, handle->font_color);
+            handle->fill_rect_cb(handle, x + i * sx, y + j * sy, sx, sy,
+                handle->font_color);
         }
       }
     }
@@ -641,10 +506,10 @@ void gc_draw_char(gc_handle_t *handle, int16_t x, int16_t y, const char ch) {
         }
         if (bits & 0x80) {
           if (sx == 1 && sy == 1) {
-            gc_prim_set_pixel(handle, x + xx, y + yy, handle->font_color);
+            handle->set_pixel_cb(handle, x + xx, y + yy, handle->font_color);
           } else {
-            gc_prim_fill_rect(handle, x + xx * sx, y + yy * sy,
-              sx, sy, handle->font_color);
+            handle->fill_rect_cb(handle, x + xx * sx, y + yy * sy, sx, sy,
+                handle->font_color);
           }
         }
         bits <<= 1;
@@ -747,7 +612,7 @@ void gc_draw_bitmap(gc_handle_t *handle, int16_t x, int16_t y, uint8_t *bitmap,
         bits = bitmap[offset];
       }
       if (bits & 0x80) {
-        gc_prim_set_pixel(handle, x + xx, y + yy, color);
+        handle->set_pixel_cb(handle, x + xx, y + yy, color);
       }
       bits <<= 1;
       bit++;

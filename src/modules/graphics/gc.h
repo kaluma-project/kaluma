@@ -25,15 +25,33 @@
 #include <stdlib.h>
 #include "font.h"
 
+#ifndef SWAP_INT16
+#define SWAP_INT16(a, b) { int16_t t = a; a = b; b = t; }
+#endif
+
+#ifndef MAX
+#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
+#endif
+
+typedef struct gc_handle_s gc_handle_t;
+
+typedef void (* gc_set_pixel_cb)(gc_handle_t *, int16_t, int16_t, uint16_t);
+typedef void (* gc_get_pixel_cb)(gc_handle_t *, int16_t, int16_t, uint16_t *);
+typedef void (* gc_draw_hline_cb)(gc_handle_t *, int16_t, int16_t, int16_t, uint16_t);
+typedef void (* gc_draw_vline_cb)(gc_handle_t *, int16_t, int16_t, int16_t, uint16_t);
+typedef void (* gc_fill_rect_cb)(gc_handle_t *, int16_t, int16_t, int16_t, int16_t, uint16_t);
+typedef void (* gc_fill_screen_cb)(gc_handle_t *, uint16_t);
+
 /**
  * Graphic context native handle
  */
-typedef struct {
+struct gc_handle_s {
   int16_t device_width;
   int16_t device_height;
   int16_t width;
   int16_t height;
   uint8_t rotation;
+  uint8_t colorbits;
   uint8_t *buffer;
   uint16_t buffer_size;
   uint16_t color;
@@ -42,20 +60,35 @@ typedef struct {
   uint16_t font_color;
   uint8_t font_scale_x;
   uint8_t font_scale_y;
-} gc_handle_t;
+  gc_set_pixel_cb set_pixel_cb;
+  gc_get_pixel_cb get_pixel_cb;
+  gc_draw_hline_cb draw_hline_cb;
+  gc_draw_vline_cb draw_vline_cb;
+  gc_fill_rect_cb fill_rect_cb;
+  gc_fill_screen_cb fill_screen_cb;
+  jerry_value_t display_cb;
+};
 
-// primitive device-dependant functions
+// primitive functions
 void gc_prim_set_pixel(gc_handle_t *handle, int16_t x, int16_t y, uint16_t color);
-uint16_t gc_prim_get_pixel(gc_handle_t *handle, int16_t x, int16_t y);
-void gc_prim_draw_fast_vline(gc_handle_t *handle, int16_t x, int16_t y, int16_t h, uint16_t color);
-void gc_prim_draw_fast_hline(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, uint16_t color);
-void gc_prim_draw_line(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
+void gc_prim_get_pixel(gc_handle_t *handle, int16_t x, int16_t y, uint16_t *color);
+void gc_prim_draw_vline(gc_handle_t *handle, int16_t x, int16_t y, int16_t h, uint16_t color);
+void gc_prim_draw_hline(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, uint16_t color);
 void gc_prim_fill_rect(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
 void gc_prim_fill_screen (gc_handle_t *handle, uint16_t color);
+
+// primitive functions for 16bits color
+void gc_prim_16bits_set_pixel(gc_handle_t *handle, int16_t x, int16_t y, uint16_t color);
+void gc_prim_16bits_get_pixel(gc_handle_t *handle, int16_t x, int16_t y, uint16_t *color);
+void gc_prim_16bits_draw_fast_vline(gc_handle_t *handle, int16_t x, int16_t y, int16_t h, uint16_t color);
+void gc_prim_16bits_draw_fast_hline(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, uint16_t color);
+void gc_prim_16bits_fill_rect(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
+void gc_prim_16bits_fill_screen (gc_handle_t *handle, uint16_t color);
 
 // graphic device-neutral functions
 int16_t gc_get_width (gc_handle_t *handle);
 int16_t gc_get_height (gc_handle_t *handle);
+uint16_t gc_color16 (gc_handle_t *handle, uint8_t r, uint8_t g, uint8_t b);
 void gc_clear_screen (gc_handle_t *handle);
 void gc_fill_screen (gc_handle_t *handle, uint16_t color);
 void gc_set_rotation (gc_handle_t *handle, uint8_t rotation);

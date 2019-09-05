@@ -181,9 +181,12 @@ endif
 
 ifdef KAMELEON_MODULE_GRAPHICS
 KAMELEON_SRC += \
-  src/modules/graphics/module_graphics.c \
+	src/modules/graphics/gc_cb_prims.c \
+	src/modules/graphics/gc_1bit_prims.c \
+	src/modules/graphics/gc_16bits_prims.c \
   src/modules/graphics/gc.c \
-	src/modules/graphics/font_default.c
+	src/modules/graphics/font_default.c \
+  src/modules/graphics/module_graphics.c
 KAMELEON_INC += -Isrc/modules/graphics
 endif
 
