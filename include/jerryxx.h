@@ -113,7 +113,7 @@
 #define JERRYXX_GET_THIS this_val
 #define JERRYXX_GET_ARG_COUNT args_cnt
 #define JERRYXX_GET_ARG(index) args_p[index]
-#define JERRYXX_GET_ARG_OPT(index, default) (args_cnt > index ? args_p[index] : default)
+#define JERRYXX_GET_ARG_OPT(index) (args_cnt > index ? args_p[index] : jerry_create_undefined())
 #define JERRYXX_GET_ARG_NUMBER(index) jerry_get_number_value(args_p[index])
 #define JERRYXX_GET_ARG_NUMBER_OPT(index, default) (args_cnt > index ? jerry_get_number_value(args_p[index]) : default)
 #define JERRYXX_GET_ARG_BOOLEAN_OPT(index, default) (args_cnt > index ? jerry_get_boolean_value(args_p[index]) : default)

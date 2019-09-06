@@ -35,6 +35,8 @@
 #define MSTR_GRAPHICS_BUFFER "buffer"
 #define MSTR_GRAPHICS_ROTATION "rotation"
 #define MSTR_GRAPHICS_COLORBITS "colorbits"
+#define MSTR_GRAPHICS_COLOR "color"
+#define MSTR_GRAPHICS_TRANSPARENT "transparent"
 #define MSTR_GRAPHICS_COLOR16 "color16"
 #define MSTR_GRAPHICS_CLEAR_SCREEN "clearScreen"
 #define MSTR_GRAPHICS_FILL_SCREEN "fillScreen"

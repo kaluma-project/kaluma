@@ -77,7 +77,7 @@ JERRYXX_FUN(gc_ctor_fn) {
   // read parameters
   gc_handle->device_width = (int16_t) JERRYXX_GET_ARG_NUMBER(0);
   gc_handle->device_height = (int16_t) JERRYXX_GET_ARG_NUMBER(1);
-  jerry_value_t options = JERRYXX_GET_ARG_OPT(2, 0);
+  jerry_value_t options = JERRYXX_GET_ARG_OPT(2);
   if (jerry_value_is_object(options)) {
     // rotation
     uint8_t rotation = (uint8_t) jerryxx_get_property_number(options,
@@ -111,6 +111,7 @@ JERRYXX_FUN(gc_ctor_fn) {
     }
     jerry_release_value(fill_rect_js_cb);
   }
+  jerry_release_value(options);
 
   // setup primitive functions
   gc_handle->set_pixel_cb = gc_prim_cb_set_pixel;
@@ -261,7 +262,7 @@ JERRYXX_FUN(gc_get_font_color_fn) {
  */
 JERRYXX_FUN(gc_set_font_fn) {
   JERRYXX_CHECK_ARG_OBJECT_NULL_OPT(0, "font")
-  jerry_value_t font = JERRYXX_GET_ARG_OPT(0, 0);
+  jerry_value_t font = JERRYXX_GET_ARG_OPT(0);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   if (jerry_value_is_object(font)) {
     custom_font.first = (uint8_t) jerryxx_get_property_number(font, MSTR_GRAPHICS_FIRST, 0);
@@ -288,6 +289,7 @@ JERRYXX_FUN(gc_set_font_fn) {
   } else {
     gc_handle->font = NULL;
   }
+  jerry_release_value(font);
   return jerry_create_undefined();
 }
 
@@ -483,7 +485,7 @@ JERRYXX_FUN(gc_measure_text_fn) {
 }
 
 /**
- * GraphicsContext.prototype.drawBitmap(x, y, bitmap, w, h, color)
+ * GraphicsContext.prototype.drawBitmap(x, y, bitmap, w, h, colorbits, {color,transparent})
  */
 JERRYXX_FUN(gc_draw_bitmap_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "x")
@@ -491,16 +493,32 @@ JERRYXX_FUN(gc_draw_bitmap_fn) {
   JERRYXX_CHECK_ARG_ARRAYBUFFER(2, "bitmap")
   JERRYXX_CHECK_ARG_NUMBER(3, "w")
   JERRYXX_CHECK_ARG_NUMBER(4, "h")
-  JERRYXX_CHECK_ARG_NUMBER(5, "color")
+  JERRYXX_CHECK_ARG_NUMBER_OPT(5, "colorbits")
+
   int16_t x = (int16_t) JERRYXX_GET_ARG_NUMBER(0);
   int16_t y = (int16_t) JERRYXX_GET_ARG_NUMBER(1);
   jerry_value_t bitmap = JERRYXX_GET_ARG(2);
   int16_t w = (int16_t) JERRYXX_GET_ARG_NUMBER(3);
   int16_t h = (int16_t) JERRYXX_GET_ARG_NUMBER(4);
-  uint16_t color = (int16_t) JERRYXX_GET_ARG_NUMBER(5);
+  uint8_t colorbits = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(5, 1);
+  uint16_t color = colorbits == 1 ? 1 : 0xffff;
+  bool transparent = false;
+  uint16_t transparent_color = 0;
+  jerry_value_t options = JERRYXX_GET_ARG_OPT(6);
+  if (jerry_value_is_object(options)) {
+    color = jerryxx_get_property_number(options, MSTR_GRAPHICS_COLOR, color);
+    jerry_value_t tp = jerryxx_get_property(options, MSTR_GRAPHICS_TRANSPARENT);
+    if (jerry_value_is_number(tp)) {
+      transparent = true;
+      transparent_color = (uint16_t) jerry_get_number_value(tp);
+    }
+    jerry_release_value(tp);
+  }
+  jerry_release_value(options);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   uint8_t *buffer = jerry_get_arraybuffer_pointer(bitmap);
-  gc_draw_bitmap(gc_handle, x, y, buffer, w, h, color);
+  gc_draw_bitmap(gc_handle, x, y, buffer, w, h, colorbits, color, transparent,
+      transparent_color);
   return jerry_create_undefined();
 }
 
@@ -546,7 +564,7 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
   // read parameters
   gc_handle->device_width = (int16_t) JERRYXX_GET_ARG_NUMBER(0);
   gc_handle->device_height = (int16_t) JERRYXX_GET_ARG_NUMBER(1);
-  jerry_value_t options = JERRYXX_GET_ARG_OPT(2, 0);
+  jerry_value_t options = JERRYXX_GET_ARG_OPT(2);
   if (jerry_value_is_object(options)) {
     // rotation
     uint8_t rotation = (uint8_t) jerryxx_get_property_number(options,
@@ -572,6 +590,7 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
     }
     jerry_release_value(display_js_cb);    
   }
+  jerry_release_value(options);
 
   // setup primitive functions
   if (gc_handle->colorbits == 1) {

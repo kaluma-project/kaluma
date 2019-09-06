@@ -597,28 +597,44 @@ void gc_measure_text(gc_handle_t *handle, const char *text, uint16_t *w,
 }
 
 void gc_draw_bitmap(gc_handle_t *handle, int16_t x, int16_t y, uint8_t *bitmap,
-    int16_t w, int16_t h, uint16_t color) {
-  uint16_t offset = 0;
-  if ((x >= handle->width) || (y >= handle->height) ||
-      ((x + w - 1) < 0) || ((y + h - 1) < 0))
+    int16_t w, int16_t h, uint8_t colorbits, uint16_t color, bool transparent,
+    uint16_t transparent_color) {
+  if ((x >= handle->width) || (y >= handle->height) || ((x + w - 1) < 0) ||
+      ((y + h - 1) < 0))
     return;
-  uint8_t bit = 0;
-  uint8_t bits = bitmap[offset];
-  for(uint8_t yy = 0; yy < h; yy++) {
-    for(uint8_t xx = 0; xx < w; xx++) {
-      if (bit > 7) {
-        bit = 0;
-        offset++;
-        bits = bitmap[offset];
+  if (colorbits == 1) {
+    uint16_t offset = 0;
+    uint8_t bit = 0;
+    uint8_t bits = bitmap[offset];
+    for(int16_t yy = 0; yy < h; yy++) {
+      for(int16_t xx = 0; xx < w; xx++) {
+        if (bit > 7) {
+          bit = 0;
+          offset++;
+          bits = bitmap[offset];
+        }
+        if (bits & 0x80) {
+          handle->set_pixel_cb(handle, x + xx, y + yy, color);
+        }
+        bits <<= 1;
+        bit++;
       }
-      if (bits & 0x80) {
-        handle->set_pixel_cb(handle, x + xx, y + yy, color);
-      }
-      bits <<= 1;
-      bit++;
+      offset++;
+      bit = 0;
+      bits = bitmap[offset];
     }
-    offset++;
-    bit = 0;
-    bits = bitmap[offset];
+  } else if (colorbits == 16) {
+    for(int16_t yy = 0; yy < h; yy++) {
+      for(int16_t xx = 0; xx < w; xx++) {
+        uint32_t idx = ((yy * w) + xx) * 2;
+        color = bitmap[idx] << 8 | bitmap[idx + 1];
+        if (transparent) {
+          if (color != transparent_color)
+            handle->set_pixel_cb(handle, x + xx, y + yy, color);
+        } else {
+          handle->set_pixel_cb(handle, x + xx, y + yy, color);
+        }
+      }
+    }
   }
 }
