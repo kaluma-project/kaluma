@@ -27,13 +27,16 @@
 #include "gc.h"
 #include "gc_cb_prims.h"
 #include "gc_1bit_prims.h"
-#include "gc_16bits_prims.h"
+#include "gc_16bit_prims.h"
 #include "font.h"
 
 gc_font_t custom_font;
 
 static void gc_handle_freecb (void *handle) {
-  jerry_release_value(((gc_handle_t *) handle)->display_cb);
+  jerry_release_value(((gc_handle_t *) handle)->display_js_cb);
+  jerry_release_value(((gc_handle_t *) handle)->set_pixel_js_cb);
+  jerry_release_value(((gc_handle_t *) handle)->get_pixel_js_cb);
+  jerry_release_value(((gc_handle_t *) handle)->fill_rect_js_cb);
   free (handle);
 }
 
@@ -76,24 +79,47 @@ JERRYXX_FUN(gc_ctor_fn) {
   gc_handle->device_height = (int16_t) JERRYXX_GET_ARG_NUMBER(1);
   jerry_value_t options = JERRYXX_GET_ARG_OPT(2, 0);
   if (jerry_value_is_object(options)) {
-    uint8_t rotation = (uint8_t) jerryxx_get_property_number(options, MSTR_GRAPHICS_ROTATION, 0);
+    // rotation
+    uint8_t rotation = (uint8_t) jerryxx_get_property_number(options,
+        MSTR_GRAPHICS_ROTATION, 0);
     gc_set_rotation(gc_handle, rotation);
-    jerry_value_t display_cb = jerryxx_get_property(options, MSTR_GRAPHICS_DISPLAY);
-    if (jerry_value_is_function(display_cb)) {
-      gc_handle->display_cb = jerry_acquire_value(display_cb);
+
+    // setPixel callback
+    jerry_value_t set_pixel_js_cb = jerryxx_get_property(options, MSTR_GRAPHICS_SET_PIXEL);
+    if (jerry_value_is_function(set_pixel_js_cb)) {
+      gc_handle->set_pixel_js_cb = jerry_acquire_value(set_pixel_js_cb);
     } else {
-      gc_handle->display_cb = jerry_create_null();
+      gc_handle->set_pixel_js_cb = jerry_create_null();
     }
-    jerry_release_value(display_cb);    
+    jerry_release_value(set_pixel_js_cb);
+
+    // getPixel callback
+    jerry_value_t get_pixel_js_cb = jerryxx_get_property(options, MSTR_GRAPHICS_GET_PIXEL);
+    if (jerry_value_is_function(get_pixel_js_cb)) {
+      gc_handle->get_pixel_js_cb = jerry_acquire_value(get_pixel_js_cb);
+    } else {
+      gc_handle->get_pixel_js_cb = jerry_create_null();
+    }
+    jerry_release_value(get_pixel_js_cb);
+
+    // fillRect callback
+    jerry_value_t fill_rect_js_cb = jerryxx_get_property(options, MSTR_GRAPHICS_FILL_RECT);
+    if (jerry_value_is_function(fill_rect_js_cb)) {
+      gc_handle->fill_rect_js_cb = jerry_acquire_value(fill_rect_js_cb);
+    } else {
+      gc_handle->fill_rect_js_cb = jerry_create_null();
+    }
+    jerry_release_value(fill_rect_js_cb);
   }
-  
-  // allocate buffer
-  uint16_t size = gc_handle->device_width * ((gc_handle->device_height + 7) / 8);
-  jerry_value_t buffer = jerry_create_arraybuffer(size);
-  jerryxx_set_property(JERRYXX_GET_THIS, MSTR_GRAPHICS_BUFFER, buffer);
-  gc_handle->buffer = jerry_get_arraybuffer_pointer(buffer);
-  gc_handle->buffer_size = size;
-  
+
+  // setup primitive functions
+  gc_handle->set_pixel_cb = gc_prim_cb_set_pixel;
+  gc_handle->get_pixel_cb = gc_prim_cb_get_pixel;
+  gc_handle->draw_hline_cb = gc_prim_cb_draw_hline;
+  gc_handle->draw_vline_cb = gc_prim_cb_draw_vline;
+  gc_handle->fill_rect_cb = gc_prim_cb_fill_rect;
+  gc_handle->fill_screen_cb = gc_prim_cb_fill_screen;
+
   return jerry_create_undefined();
 }
 
@@ -483,11 +509,11 @@ JERRYXX_FUN(gc_draw_bitmap_fn) {
  */
 JERRYXX_FUN(gc_display_fn) {
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
-  if (jerry_value_is_function (gc_handle->display_cb)) {
+  if (jerry_value_is_function (gc_handle->display_js_cb)) {
     jerry_value_t buffer = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_GRAPHICS_BUFFER);
     jerry_value_t this_val = jerry_create_undefined();
     jerry_value_t args[] = { buffer };
-    jerry_value_t ret_val = jerry_call_function(gc_handle->display_cb, this_val, args, 1);
+    jerry_value_t ret_val = jerry_call_function(gc_handle->display_js_cb, this_val, args, 1);
     jerry_release_value(buffer);
     jerry_release_value(this_val);
     return ret_val;
@@ -522,9 +548,12 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
   gc_handle->device_height = (int16_t) JERRYXX_GET_ARG_NUMBER(1);
   jerry_value_t options = JERRYXX_GET_ARG_OPT(2, 0);
   if (jerry_value_is_object(options)) {
+    // rotation
     uint8_t rotation = (uint8_t) jerryxx_get_property_number(options,
         MSTR_GRAPHICS_ROTATION, 0);
     gc_set_rotation(gc_handle, rotation);
+
+    // colorbits
     uint8_t colorbits = (uint8_t) jerryxx_get_property_number(options,
         MSTR_GRAPHICS_COLORBITS, 1); // should be 1 or 16
     if (colorbits > 1) {
@@ -532,14 +561,16 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
     } else {
       gc_handle->colorbits = 1;
     }
-    jerry_value_t display_cb = jerryxx_get_property(options,
+
+    // display callback
+    jerry_value_t display_js_cb = jerryxx_get_property(options,
         MSTR_GRAPHICS_DISPLAY);
-    if (jerry_value_is_function(display_cb)) {
-      gc_handle->display_cb = jerry_acquire_value(display_cb);
+    if (jerry_value_is_function(display_js_cb)) {
+      gc_handle->display_js_cb = jerry_acquire_value(display_js_cb);
     } else {
-      gc_handle->display_cb = jerry_create_null();
+      gc_handle->display_js_cb = jerry_create_null();
     }
-    jerry_release_value(display_cb);    
+    jerry_release_value(display_js_cb);    
   }
 
   // setup primitive functions
@@ -551,12 +582,12 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
     gc_handle->fill_rect_cb = gc_prim_1bit_fill_rect;
     gc_handle->fill_screen_cb = gc_prim_1bit_fill_screen;
   } else {
-    gc_handle->set_pixel_cb = gc_prim_16bits_set_pixel;
-    gc_handle->get_pixel_cb = gc_prim_16bits_get_pixel;
-    gc_handle->draw_hline_cb = gc_prim_16bits_draw_hline;
-    gc_handle->draw_vline_cb = gc_prim_16bits_draw_vline;
-    gc_handle->fill_rect_cb = gc_prim_16bits_fill_rect;
-    gc_handle->fill_screen_cb = gc_prim_16bits_fill_screen;
+    gc_handle->set_pixel_cb = gc_prim_16bit_set_pixel;
+    gc_handle->get_pixel_cb = gc_prim_16bit_get_pixel;
+    gc_handle->draw_hline_cb = gc_prim_16bit_draw_hline;
+    gc_handle->draw_vline_cb = gc_prim_16bit_draw_vline;
+    gc_handle->fill_rect_cb = gc_prim_16bit_fill_rect;
+    gc_handle->fill_screen_cb = gc_prim_16bit_fill_screen;
   }
   
   // allocate buffer

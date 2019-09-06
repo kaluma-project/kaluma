@@ -140,7 +140,10 @@ JERRYXX_FUN(uart_ctor_fn) {
 
 JERRYXX_FUN(uart_write_fn) {
   JERRYXX_CHECK_ARG(0, "data");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(1, "count");
+
   jerry_value_t data = JERRYXX_GET_ARG(0);
+  uint32_t count = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 1);
 
   // check this.port
   jerry_value_t port_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
@@ -162,24 +165,36 @@ JERRYXX_FUN(uart_write_fn) {
         buf[i] = 0; // write 0 for non-number item.
       }
     }
-    ret = uart_write(port, buf, len);
+    for (int c = 0; c < count; c++) {
+      ret = uart_write(port, buf, len);
+      if (ret < 0) break;
+    }
   } else if (jerry_value_is_arraybuffer(data)) { /* for ArrayBuffer */
     size_t len = jerry_get_arraybuffer_byte_length(data);
     uint8_t *buf = jerry_get_arraybuffer_pointer(data);
-    ret = uart_write(port, buf, len);
+    for (int c = 0; c < count; c++) {
+      ret = uart_write(port, buf, len);
+      if (ret < 0) break;
+    }
   } else if (jerry_value_is_typedarray(data)) { /* for TypedArrays (Uint8Array, Int16Array, ...) */
     jerry_length_t byteLength = 0;
     jerry_length_t byteOffset = 0;
     jerry_value_t array_buffer = jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
     size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
     uint8_t *buf = jerry_get_arraybuffer_pointer(array_buffer);
-    ret = uart_write(port, buf, len);
+    for (int c = 0; c < count; c++) {
+      ret = uart_write(port, buf, len);
+      if (ret < 0) break;
+    }
     jerry_release_value(array_buffer);
   } else if (jerry_value_is_string(data)) { /* for string */
     jerry_size_t len = jerry_get_string_size(data);
     uint8_t buf[len];
     jerry_string_to_char_buffer(data, buf, len);
-    ret = uart_write(port, buf, len);
+    for (int c = 0; c < count; c++) {
+      ret = uart_write(port, buf, len);
+      if (ret < 0) break;
+    }
   } else {
     return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "The data argument must be one of string, Array<number>, ArrayBuffer or TypedArray.");
   }

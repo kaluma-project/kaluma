@@ -26,13 +26,13 @@
 #include "jerryscript.h"
 #include "font.h"
 #include "gc.h"
-#include "gc_16bits_prims.h"
+#include "gc_16bit_prims.h"
 
 /**
  * Graphic primitive functions for 16-bits color graphic buffer
  */
 
-void gc_prim_16bits_set_pixel(gc_handle_t *handle, int16_t x, int16_t y,
+void gc_prim_16bit_set_pixel(gc_handle_t *handle, int16_t x, int16_t y,
     uint16_t color) {
   if((x >= 0) && (x < handle->width) && (y >= 0) && (y < handle->height)) {
     switch (handle->rotation) {
@@ -55,29 +55,29 @@ void gc_prim_16bits_set_pixel(gc_handle_t *handle, int16_t x, int16_t y,
   }
 }
 
-void gc_prim_16bits_get_pixel(gc_handle_t *handle, int16_t x, int16_t y, uint16_t *color) {
+void gc_prim_16bit_get_pixel(gc_handle_t *handle, int16_t x, int16_t y, uint16_t *color) {
 
 }
 
-void gc_prim_16bits_draw_vline(gc_handle_t *handle, int16_t x, int16_t y, int16_t h, uint16_t color) {
+void gc_prim_16bit_draw_vline(gc_handle_t *handle, int16_t x, int16_t y, int16_t h, uint16_t color) {
   for (int16_t i = y; i < y + h; i++) {
-    gc_prim_16bits_set_pixel(handle, x, i, color);
+    gc_prim_16bit_set_pixel(handle, x, i, color);
   }
 }
 
-void gc_prim_16bits_draw_hline(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, uint16_t color) {
+void gc_prim_16bit_draw_hline(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, uint16_t color) {
   for (int16_t i = x; i < x + w; i++) {
-    gc_prim_16bits_set_pixel(handle, i, y, color);
+    gc_prim_16bit_set_pixel(handle, i, y, color);
   }
 }
 
-void gc_prim_16bits_fill_rect(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
+void gc_prim_16bit_fill_rect(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
   for (int16_t i = x; i < x + w; i++) {
-    gc_prim_16bits_draw_vline(handle, i, y, h, color);
+    gc_prim_16bit_draw_vline(handle, i, y, h, color);
   }
 }
 
-void gc_prim_16bits_fill_screen (gc_handle_t *handle, uint16_t color) {
+void gc_prim_16bit_fill_screen (gc_handle_t *handle, uint16_t color) {
   for (int16_t y = 0; y < handle->device_height; y++) {
     for (int16_t x = 0; x < handle->device_width; x++) {
       uint16_t idx = ((y * handle->device_width) + x) * 2;

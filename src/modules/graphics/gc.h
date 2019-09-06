@@ -66,7 +66,10 @@ struct gc_handle_s {
   gc_draw_vline_cb draw_vline_cb;
   gc_fill_rect_cb fill_rect_cb;
   gc_fill_screen_cb fill_screen_cb;
-  jerry_value_t display_cb;
+  jerry_value_t display_js_cb;
+  jerry_value_t set_pixel_js_cb;
+  jerry_value_t get_pixel_js_cb;
+  jerry_value_t fill_rect_js_cb;
 };
 
 // primitive functions
@@ -78,12 +81,12 @@ void gc_prim_fill_rect(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, int
 void gc_prim_fill_screen (gc_handle_t *handle, uint16_t color);
 
 // primitive functions for 16bits color
-void gc_prim_16bits_set_pixel(gc_handle_t *handle, int16_t x, int16_t y, uint16_t color);
-void gc_prim_16bits_get_pixel(gc_handle_t *handle, int16_t x, int16_t y, uint16_t *color);
-void gc_prim_16bits_draw_fast_vline(gc_handle_t *handle, int16_t x, int16_t y, int16_t h, uint16_t color);
-void gc_prim_16bits_draw_fast_hline(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, uint16_t color);
-void gc_prim_16bits_fill_rect(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-void gc_prim_16bits_fill_screen (gc_handle_t *handle, uint16_t color);
+void gc_prim_16bit_set_pixel(gc_handle_t *handle, int16_t x, int16_t y, uint16_t color);
+void gc_prim_16bit_get_pixel(gc_handle_t *handle, int16_t x, int16_t y, uint16_t *color);
+void gc_prim_16bit_draw_fast_vline(gc_handle_t *handle, int16_t x, int16_t y, int16_t h, uint16_t color);
+void gc_prim_16bit_draw_fast_hline(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, uint16_t color);
+void gc_prim_16bit_fill_rect(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
+void gc_prim_16bit_fill_screen (gc_handle_t *handle, uint16_t color);
 
 // graphic device-neutral functions
 int16_t gc_get_width (gc_handle_t *handle);

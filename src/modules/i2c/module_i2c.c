@@ -97,14 +97,17 @@ JERRYXX_FUN(i2c_write_fn) {
   // read optional parameters (address, timeout)
   uint8_t address = 0;
   uint32_t timeout = 5000;
+  uint32_t count = 1;
   if (i2cmode == I2C_SLAVE) {
     JERRYXX_CHECK_ARG_NUMBER_OPT(1, "timeout");
     timeout = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 5000);
   } else {
     JERRYXX_CHECK_ARG_NUMBER(1, "address");
     JERRYXX_CHECK_ARG_NUMBER_OPT(2, "timeout");
+    JERRYXX_CHECK_ARG_NUMBER_OPT(3, "count");
     address = (uint8_t) JERRYXX_GET_ARG_NUMBER(1);
     timeout = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(2, 5000);
+    count = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(3, 1);
   }
 
   // write data to the bus
@@ -129,9 +132,15 @@ JERRYXX_FUN(i2c_write_fn) {
     size_t len = jerry_get_arraybuffer_byte_length(data);
     uint8_t *buf = jerry_get_arraybuffer_pointer(data);
     if (i2cmode == I2C_SLAVE) {
-      ret = i2c_write_slave(bus, buf, len, timeout);
+      for (int c = 0; c < count; c++) {
+        ret = i2c_write_slave(bus, buf, len, timeout);
+        if (ret < 0) break;
+      }
     } else {
-      ret = i2c_write_master(bus, address, buf, len, timeout);
+      for (int c = 0; c < count; c++) {
+        ret = i2c_write_master(bus, address, buf, len, timeout);
+        if (ret < 0) break;
+      }
     }
   } else if (jerry_value_is_typedarray(data)) { /* for TypedArrays (Uint8Array, Int16Array, ...) */
     jerry_length_t byteLength = 0;
@@ -140,9 +149,15 @@ JERRYXX_FUN(i2c_write_fn) {
     size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
     uint8_t *buf = jerry_get_arraybuffer_pointer(array_buffer);
     if (i2cmode == I2C_SLAVE) {
-      ret = i2c_write_slave(bus, buf, len, timeout);
+      for (int c = 0; c < count; c++) {
+        ret = i2c_write_slave(bus, buf, len, timeout);
+        if (ret < 0) break;
+      }
     } else {
-      ret = i2c_write_master(bus, address, buf, len, timeout);
+      for (int c = 0; c < count; c++) {
+        ret = i2c_write_master(bus, address, buf, len, timeout);
+        if (ret < 0) break;
+      }
     }
     jerry_release_value(array_buffer);
   } else if (jerry_value_is_string(data)) { /* for string */
@@ -150,9 +165,15 @@ JERRYXX_FUN(i2c_write_fn) {
     uint8_t buf[len];
     jerry_string_to_char_buffer(data, buf, len);
     if (i2cmode == I2C_SLAVE) {
-      ret = i2c_write_slave(bus, buf, len, timeout);
+      for (int c = 0; c < count; c++) {
+        ret = i2c_write_slave(bus, buf, len, timeout);
+        if (ret < 0) break;
+      }
     } else {
-      ret = i2c_write_master(bus, address, buf, len, timeout);
+      for (int c = 0; c < count; c++) {
+        ret = i2c_write_master(bus, address, buf, len, timeout);
+        if (ret < 0) break;
+      }
     }
   }
   if (ret == I2CPORT_ERROR)
@@ -232,9 +253,11 @@ JERRYXX_FUN(i2c_memwrite_fn) {
   JERRYXX_CHECK_ARG_NUMBER(2, "slaveaddr");
   JERRYXX_CHECK_ARG_NUMBER_OPT(3, "memAddr16bit");
   JERRYXX_CHECK_ARG_NUMBER_OPT(4, "timeout");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(5, "count");
   uint8_t address = (uint8_t) JERRYXX_GET_ARG_NUMBER(2);
   uint16_t memAddr16 = (uint16_t) JERRYXX_GET_ARG_NUMBER_OPT(3, 0);
   uint32_t timeout = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(4, 5000);
+  uint32_t count = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(5, 1);
 
   // write data to the bus
   int ret = I2CPORT_ERROR;
@@ -249,24 +272,36 @@ JERRYXX_FUN(i2c_memwrite_fn) {
         buf[i] = 0; // write 0 for non-number item.
       }
     }
-    ret = i2c_memWrite_master(bus, address, memAddress, memAddr16, buf, len, timeout);
+    for (int c = 0; c < count; c++) {
+      ret = i2c_memWrite_master(bus, address, memAddress, memAddr16, buf, len, timeout);
+      if (ret < 0) break;
+    }
   } else if (jerry_value_is_arraybuffer(data)) { /* for ArrayBuffer */
     size_t len = jerry_get_arraybuffer_byte_length(data);
     uint8_t *buf = jerry_get_arraybuffer_pointer(data);
-    ret = i2c_memWrite_master(bus, address, memAddress, memAddr16, buf, len, timeout);
+    for (int c = 0; c < count; c++) {
+      ret = i2c_memWrite_master(bus, address, memAddress, memAddr16, buf, len, timeout);
+      if (ret < 0) break;
+    }
   } else if (jerry_value_is_typedarray(data)) { /* for TypedArrays (Uint8Array, Int16Array, ...) */
     jerry_length_t byteLength = 0;
     jerry_length_t byteOffset = 0;
     jerry_value_t array_buffer = jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
     size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
     uint8_t *buf = jerry_get_arraybuffer_pointer(array_buffer);
-    ret = i2c_memWrite_master(bus, address, memAddress, memAddr16, buf, len, timeout);
+    for (int c = 0; c < count; c++) {
+      ret = i2c_memWrite_master(bus, address, memAddress, memAddr16, buf, len, timeout);
+      if (ret < 0) break;
+    }
     jerry_release_value(array_buffer);
   } else if (jerry_value_is_string(data)) { /* for string */
     jerry_size_t len = jerry_get_string_size(data);
     uint8_t buf[len];
     jerry_string_to_char_buffer(data, buf, len);
-    ret = i2c_memWrite_master(bus, address, memAddress, memAddr16, buf, len, timeout);
+    for (int c = 0; c < count; c++) {
+      ret = i2c_memWrite_master(bus, address, memAddress, memAddr16, buf, len, timeout);
+      if (ret < 0) break;
+    }
   }
   if (ret == I2CPORT_ERROR)
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to write data via I2C bus.");
