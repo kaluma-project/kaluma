@@ -22,6 +22,6 @@
 #ifndef __KAMELEON_CONFIG_H
 #define __KAMELEON_CONFIG_H
 
-#define CONFIG_KAMELEON_VERSION "0.9.0-beta.1"
+#define CONFIG_KAMELEON_VERSION "1.0.0-beta.1"
 
 #endif /* __KAMELEON_CONFIG_H */
