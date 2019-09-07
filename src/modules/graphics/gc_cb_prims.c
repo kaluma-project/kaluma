@@ -65,7 +65,36 @@ void gc_prim_cb_set_pixel(gc_handle_t *handle, int16_t x, int16_t y, uint16_t co
 }
 
 void gc_prim_cb_get_pixel(gc_handle_t *handle, int16_t x, int16_t y, uint16_t *color) {
-
+  if((x >= 0) && (x < handle->width) && (y >= 0) && (y < handle->height)) {
+    switch (handle->rotation) {
+      case 1:
+      SWAP_INT16(x, y)
+      x = handle->device_width - x - 1;
+      break;
+      case 2:
+      x = handle->device_width  - x - 1;
+      y = handle->device_height - y - 1;
+      break;
+      case 3:
+      SWAP_INT16(x, y)
+      y = handle->device_height - y - 1;
+      break;
+    }
+    if (jerry_value_is_function(handle->get_pixel_js_cb)) {
+      jerry_value_t this_val = jerry_create_undefined ();
+      jerry_value_t arg_x = jerry_create_number(x);
+      jerry_value_t arg_y = jerry_create_number(y);
+      jerry_value_t args[] = { arg_x, arg_y };
+      jerry_value_t ret_val = jerry_call_function (handle->get_pixel_js_cb, this_val, args, 2);
+      if (jerry_value_is_number(ret_val)) {
+        *color = (uint16_t) jerry_get_number_value(ret_val);
+      }
+      jerry_release_value (ret_val);
+      jerry_release_value (arg_x);
+      jerry_release_value (arg_y);
+      jerry_release_value (this_val);
+    }
+  }
 }
 
 void gc_prim_cb_draw_vline(gc_handle_t *handle, int16_t x, int16_t y, int16_t h, uint16_t color) {

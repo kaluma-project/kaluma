@@ -153,7 +153,7 @@ void gc_set_pixel (gc_handle_t *handle, int16_t x, int16_t y, uint16_t color) {
  * @return Color at (x, y) coordinate
  */
 uint16_t gc_get_pixel (gc_handle_t *handle, int16_t x, int16_t y) {
-  uint16_t color;
+  uint16_t color = 0;
   handle->get_pixel_cb(handle, x, y, &color);
   return color;
 }
