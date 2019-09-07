@@ -148,7 +148,7 @@ TARGET_SRC =
 TARGET_INC =
 TARGET_DEF =
 
-TARGET_BIN = kameleon
+TARGET_BIN = $(TARGET)
 
 -include $(TARGET_DIR)/Make.def
 
