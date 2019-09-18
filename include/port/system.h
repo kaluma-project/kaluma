@@ -67,11 +67,6 @@ void settime(uint64_t time);
 void request_firmup();
 
 /**
- * GPIO init (set all GPIOs to GPIO input as a default)
- */
-void Gpio_Init();
-
-/**
  * check script running mode - skipping or running user script
  */
 uint8_t running_script_check();
