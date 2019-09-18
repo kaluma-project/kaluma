@@ -76,12 +76,12 @@ void gpio_cleanup() {
 int gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode) {
   if (pin >= GPIO_NUM)
     return GPIOPORT_ERROR;
-  if (mode != GPIO_IO_MODE_INPUT)
+  if ((mode != GPIO_IO_MODE_INPUT) && (mode != GPIO_IO_MODE_INPUT_PULLUP))
     mode = GPIO_IO_MODE_OUTPUT;
   GPIO_InitTypeDef GPIO_InitStruct;
   GPIO_InitStruct.Pin = gpio_port_pin[pin].pin;
-  GPIO_InitStruct.Mode = (mode == GPIO_IO_MODE_INPUT) ? GPIO_MODE_INPUT : GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Mode = (mode == GPIO_IO_MODE_OUTPUT) ? GPIO_MODE_OUTPUT_PP : GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = (mode == GPIO_IO_MODE_INPUT_PULLUP) ? GPIO_PULLUP : GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(gpio_port_pin[pin].port, &GPIO_InitStruct);
   return 0;

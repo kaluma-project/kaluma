@@ -169,6 +169,7 @@ static void register_global_digital_io() {
   jerryxx_set_property_number(global, MSTR_LOW, GPIO_LOW);
   jerryxx_set_property_number(global, MSTR_INPUT, (double) GPIO_IO_MODE_INPUT);
   jerryxx_set_property_number(global, MSTR_OUTPUT, (double) GPIO_IO_MODE_OUTPUT);
+  jerryxx_set_property_number(global, MSTR_INPUT_PULLUP, (double) GPIO_IO_MODE_INPUT_PULLUP);
   jerryxx_set_property_number(global, MSTR_CHANGE, (double) IO_WATCH_MODE_CHANGE);
   jerryxx_set_property_number(global, MSTR_RISING, (double) IO_WATCH_MODE_RISING);
   jerryxx_set_property_number(global, MSTR_FALLING, (double) IO_WATCH_MODE_FALLING);

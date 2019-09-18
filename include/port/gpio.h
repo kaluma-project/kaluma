@@ -27,6 +27,7 @@
 typedef enum {
   GPIO_IO_MODE_INPUT,
   GPIO_IO_MODE_OUTPUT,
+  GPIO_IO_MODE_INPUT_PULLUP,
 } gpio_io_mode_t;
 
 typedef enum {
