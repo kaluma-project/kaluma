@@ -1,10 +1,10 @@
 var EventEmitter = require('events').EventEmitter;
 
-function Button (pin, pull, debounce) {
+function Button (pin, event, debounce) {
   EventEmitter.call(this);
   this.pin = pin;
   pinMode(this.pin, INPUT);
-  this.mode = (pull === PULL_UP ? FALLING : RISING);
+  this.mode = event;
   this.debounce = (typeof debounce === 'number' ? debounce : 50);
   var self = this;
   this.watchId = setWatch(function () {
