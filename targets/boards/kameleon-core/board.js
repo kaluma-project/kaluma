@@ -81,7 +81,7 @@ global.board = {
   get BTN0() {
     if (!this._btn0) {
       var Button = global.require('button').Button;
-      this._btn0 = new Button(this.button_pins[0], PULL_UP);
+      this._btn0 = new Button(this.button_pins[0], FALLING);
     }
     return this._btn0;
   }
