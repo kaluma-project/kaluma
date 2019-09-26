@@ -27,10 +27,12 @@
 #include "runtime.h"
 
 int main(void) {
+  bool run_main = false;
   system_init();
+  run_main = running_script_check();
   tty_init();
   io_init();
   repl_init();
-  runtime_init(running_script_check());
+  runtime_init(run_main);
   io_run();
 }
