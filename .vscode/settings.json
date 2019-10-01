@@ -12,7 +12,8 @@
     "buffer.h": "c",
     "limits": "c",
     "kameleon_core.h": "c",
-    "ymodem.h": "c"
+    "ymodem.h": "c",
+    "jerryxx.h": "c"
   },
   "cpplint.filters" : [
     "-build/include_subdir", "-build/header_guard"

@@ -50,6 +50,7 @@
 #define MSTR_CONSOLE "console"
 #define MSTR_LOG "log"
 #define MSTR_ERROR "error"
+#define MSTR_PRINT "print"
 #define MSTR_PROCESS "process"
 #define MSTR_ENCODE "encode"
 #define MSTR_DECODE "decode"

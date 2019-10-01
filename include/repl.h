@@ -34,7 +34,7 @@ typedef enum {
 } repl_mode_t;
 
 typedef enum {
-  REPL_OUTPUT_LOG,
+  REPL_OUTPUT_NORMAL,
   REPL_OUTPUT_INFO,
   REPL_OUTPUT_ERROR
 } repl_output_t;
@@ -61,11 +61,11 @@ struct repl_state_s {
 void repl_init();
 repl_state_t *get_repl_state();
 
-void repl_print_begin(repl_output_t output);
+void repl_set_output(repl_output_t output);
+void repl_print_prompt();
 #define repl_printf(format,args...) tty_printf(format, ## args)
-#define repl_print_value(format,value) jerryxx_print_value(format,value)
-#define repl_print_value_form(value) jerryxx_print_value_form(value, 1)
+#define repl_print_value(value) jerryxx_print_value(value)
 #define repl_putc(ch) tty_putc(ch)
-void repl_print_end();
+void repl_println();
 
 #endif /* __REPL_H */

@@ -87,14 +87,14 @@ bool jerryxx_delete_property(jerry_value_t object, const char *name) {
   return ret;
 }
 
-void jerryxx_print_value(const char *format, jerry_value_t value) {
+void jerryxx_print_value(jerry_value_t value) {
   jerry_value_t str = jerry_value_to_string(value);
   jerry_size_t str_sz = jerry_get_string_size (str);
   if (str_sz < 1024) {
     jerry_char_t str_buf[str_sz + 1];
     jerry_string_to_char_buffer (str, str_buf, str_sz);
     str_buf[str_sz] = '\0';
-    tty_printf(format, (char *) str_buf);
+    tty_printf("%s", (char *) str_buf); // If possible, use tty_write() instead of print format
   } else {
     tty_printf("Buffer overflow\r\n");
   }
@@ -107,9 +107,10 @@ void jerryxx_print_error (jerry_value_t value, bool print_stacktrace) {
   jerry_value_t error_value = jerry_get_value_from_error (value, false);
   // print error message  
   jerry_value_t err_str = jerry_value_to_string (error_value);
-  repl_print_begin(REPL_OUTPUT_ERROR);
-  repl_print_value("%s\r\n", err_str);
-  repl_print_end();
+  repl_set_output(REPL_OUTPUT_ERROR);
+  repl_print_value(err_str);
+  repl_println();
+  repl_set_output(REPL_OUTPUT_NORMAL);
   jerry_release_value (err_str);
   // print stack trace
   if (jerry_value_is_object (error_value)) {
@@ -124,9 +125,11 @@ void jerryxx_print_error (jerry_value_t value, bool print_stacktrace) {
         jerry_value_t item_val = jerry_get_property_by_index (backtrace_val, i);
         if (!jerry_value_is_error (item_val)
             && jerry_value_is_string (item_val)) {
-          repl_print_begin(REPL_OUTPUT_ERROR);
-          repl_print_value("  at %s\r\n", item_val);
-          repl_print_end();          
+          repl_set_output(REPL_OUTPUT_ERROR);
+          repl_printf("  at ");
+          repl_print_value(item_val);
+          repl_println();
+          repl_set_output(REPL_OUTPUT_NORMAL);
         }
         jerry_release_value (item_val);        
       }

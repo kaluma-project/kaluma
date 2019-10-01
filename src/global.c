@@ -112,15 +112,6 @@ static void set_watch_cb(io_watch_handle_t *watch) {
     if (jerry_value_is_error (ret_val)) {
       // print error
       jerryxx_print_error(ret_val, true);
-      /*
-      jerry_value_t err_val = jerry_get_value_from_error (ret_val, false);
-      jerry_value_t err_str = jerry_value_to_string (err_val);
-      repl_print_begin(REPL_OUTPUT_ERROR);
-      repl_print_value("%s\r\n", err_str);
-      repl_print_end();
-      jerry_release_value (err_val);
-      jerry_release_value (err_str);
-      */
       // clear handle
       jerry_release_value(watch->watch_js_cb);
       io_watch_stop(watch);
@@ -293,17 +284,8 @@ static void set_timer_cb(io_timer_handle_t *timer) {
     jerry_value_t this_val = jerry_create_undefined ();
     jerry_value_t ret_val = jerry_call_function (timer->timer_js_cb, this_val, NULL, 0);
     if (jerry_value_is_error(ret_val)) {
-      jerryxx_print_error(ret_val, true);
       // print error
-      /*
-      jerry_value_t err_val = jerry_get_value_from_error (ret_val, false);
-      jerry_value_t err_str = jerry_value_to_string (err_val);
-      repl_print_begin(REPL_OUTPUT_ERROR);
-      repl_print_value("%s\r\n", err_str);
-      repl_print_end();
-      jerry_release_value (err_val);
-      jerry_release_value (err_str);
-      */
+      jerryxx_print_error(ret_val, true);
       // clear handle
       jerry_release_value(timer->timer_js_cb);
       io_timer_stop(timer);
@@ -381,35 +363,32 @@ static void register_global_timers() {
 
 JERRYXX_FUN(console_log_fn) {
   if (JERRYXX_GET_ARG_COUNT > 0) {
-    repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf("\33[2K\r"); // set column to 0
     repl_printf("\33[0m"); // set to normal color
     for (int i = 0; i < JERRYXX_GET_ARG_COUNT; i++) {
       if (i > 0) {
         repl_printf(" ");
       }
-      repl_print_value("%s", JERRYXX_GET_ARG(i));
+      repl_print_value(JERRYXX_GET_ARG(i));
     }
-    repl_printf("\r\n");
-    repl_print_end();
+    repl_println();
   }
   return jerry_create_undefined();
 }
 
 JERRYXX_FUN(console_error_fn) {
   if (JERRYXX_GET_ARG_COUNT > 0) {
-    repl_print_begin(REPL_OUTPUT_ERROR);
+    repl_set_output(REPL_OUTPUT_ERROR);
     repl_printf("\33[2K\r"); // set column to 0
     repl_printf("\33[31m"); // red
     for (int i = 0; i < JERRYXX_GET_ARG_COUNT; i++) {
       if (i > 0) {
         repl_printf(" ");
       }
-      repl_print_value("%s", JERRYXX_GET_ARG(i));
+      repl_print_value(JERRYXX_GET_ARG(i));
     }
-    repl_printf("\r\n");
-    repl_printf("\33[0m"); // back to normal color
-    repl_print_end();
+    repl_println();
+    repl_set_output(REPL_OUTPUT_NORMAL);
   }
   return jerry_create_undefined();
 }
@@ -606,6 +585,30 @@ static void register_global_base64() {
   jerry_release_value(global);
 }
 
+/****************************************************************************/
+/*                                                                          */
+/*                                ETC FUNCTIONS                             */
+/*                                                                          */
+/****************************************************************************/
+
+JERRYXX_FUN(print_fn) {
+  if (JERRYXX_GET_ARG_COUNT > 0) {
+    for (int i = 0; i < JERRYXX_GET_ARG_COUNT; i++) {
+      if (i > 0) {
+        repl_printf(" ");
+      }
+      repl_print_value(JERRYXX_GET_ARG(i));
+    }
+  }
+  return jerry_create_undefined();
+}
+
+static void register_global_etc() {
+  jerry_value_t global = jerry_get_global_object();
+  jerryxx_set_property_function(global, MSTR_PRINT, print_fn);
+  jerry_release_value(global);
+}
+
 /******************************************************************************/
 
 static void run_startup_module() {
@@ -634,6 +637,7 @@ void global_init() {
   register_global_console_object();
   register_global_process_object();
   register_global_base64();
+  register_global_etc();
   run_startup_module();
   run_board_module();
 }

@@ -44,7 +44,6 @@ static void cmd_load(repl_state_t *state);
 static void cmd_mem(repl_state_t *state);
 static void cmd_gc(repl_state_t *state);
 static void cmd_firmup(repl_state_t *state);
-static void cmd_version(repl_state_t *state);
 static void cmd_hi(repl_state_t *state);
 static void cmd_help(repl_state_t *state);
 
@@ -135,20 +134,17 @@ static void run_command() {
       cmd_gc(&state);
     } else if (strcmp(tokenv[0], ".firmup") == 0) {
       cmd_firmup(&state);
-    } else if (strcmp(tokenv[0], ".v") == 0) {
-      cmd_version(&state);
     } else if (strcmp(tokenv[0], ".hi") == 0) {
       cmd_hi(&state);
     } else if (strcmp(tokenv[0], ".help") == 0) {
       cmd_help(&state);
     } else { /* unknown command */
-      repl_print_begin(REPL_OUTPUT_ERROR);
+      repl_set_output(REPL_OUTPUT_ERROR);
       repl_printf("Unknown command: %s\r\n", tokenv[0]);
-      repl_print_end();
+      repl_set_output(REPL_OUTPUT_NORMAL);
     }
   } else {
-    repl_print_begin(REPL_OUTPUT_LOG);
-    repl_print_end();
+    repl_set_output(REPL_OUTPUT_NORMAL);
   }
 }
 
@@ -171,30 +167,30 @@ static void run_code() {
     /* evaluate code */
     jerry_value_t parsed_code = jerry_parse(NULL, 0, (const jerry_char_t *) data, strlen(data), JERRY_PARSE_STRICT_MODE);
     if (jerry_value_is_error(parsed_code)) {
-      repl_print_begin(REPL_OUTPUT_ERROR);
+      repl_set_output(REPL_OUTPUT_ERROR);
       jerry_value_t parse_err = jerry_get_value_from_error(parsed_code, false);
-      repl_print_value("%s\r\n", parse_err);
+      repl_print_value(parse_err);
+      repl_println();
       jerry_release_value(parse_err);
-      repl_print_end();
+      repl_set_output(REPL_OUTPUT_NORMAL);
     } else {
       jerry_value_t ret_value = jerry_run(parsed_code);
       if (jerry_value_is_error(ret_value)) {
-        repl_print_begin(REPL_OUTPUT_ERROR);
+        repl_set_output(REPL_OUTPUT_ERROR);
         jerry_value_t err = jerry_get_value_from_error(ret_value, false);
-        repl_print_value("%s\r\n", err);
+        repl_print_value(err);
+        repl_println();
         jerry_release_value(err);
-        repl_print_end();
+        repl_set_output(REPL_OUTPUT_NORMAL);
       } else {
-        repl_print_begin(REPL_OUTPUT_INFO);
-        repl_print_value("%s\r\n", ret_value);
-        repl_print_end();
+        repl_set_output(REPL_OUTPUT_INFO);
+        repl_print_value(ret_value);
+        repl_println();
+        repl_set_output(REPL_OUTPUT_ERROR);
       }
       jerry_release_value(ret_value);
     }
     jerry_release_value(parsed_code);
-  } else {
-    repl_print_begin(REPL_OUTPUT_LOG);
-    repl_print_end();
   }
 }
 
@@ -233,6 +229,7 @@ static void handle_normal(char ch) {
       } else {
         run_code();
       }
+      repl_print_prompt();      
       break;
     case 0x08: /* backspace */
     case 0x7f: /* also backspace in some terminal */
@@ -278,9 +275,9 @@ static void handle_normal(char ch) {
           }
         }
       } else {
-        repl_print_begin(REPL_OUTPUT_ERROR);
+        repl_set_output(REPL_OUTPUT_ERROR);
         repl_printf("%s\r\n", "REPL buffer overflow");
-        repl_print_end();
+        repl_set_output(REPL_OUTPUT_NORMAL);
       }
       break;
   }
@@ -426,9 +423,6 @@ static void cmd_echo(repl_state_t *state, char *arg) {
 static void cmd_reset(repl_state_t *state) {
   runtime_cleanup();
   runtime_init(false);
-  repl_print_begin(REPL_OUTPUT_LOG);
-  repl_printf("\r");
-  repl_print_end();
 }
 
 static size_t bytes_remained = 0;
@@ -452,7 +446,7 @@ static int packet_cb(uint8_t *data, size_t len) {
   } else {
     return -1;
   }
- return 0;
+  return 0;
 }
 
 static void footer_cb() {
@@ -467,37 +461,29 @@ static void cmd_flash(repl_state_t *state, char *arg) {
   /* erase flash */
   if (strcmp(arg, "-e") == 0) {
     flash_clear();
-    repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf("Flash has erased\r\n");
-    repl_print_end();
 
   /* get total size of flash */
   } else if (strcmp(arg, "-t") == 0) {
     uint32_t size = flash_size();
-    repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf("%u\r\n", size);
-    repl_print_end();
 
   /* get data size in flash */
   } else if (strcmp(arg, "-s") == 0) {
     uint32_t data_size = flash_get_data_size();
-    repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf("%u\r\n", data_size);
-    repl_print_end();
 
   /* read data from flash */
   } else if (strcmp(arg, "-r") == 0) {
     uint32_t sz = flash_get_data_size();
     uint8_t *ptr = flash_get_data();
-    repl_print_begin(REPL_OUTPUT_LOG);
     for (int i = 0; i < sz; i++) {
       if (ptr[i] == '\n') { /* convert "\n" to "\r\n" */
         repl_putc('\r');
       }
       repl_putc(ptr[i]);
     }
-    repl_printf("\r\n");
-    repl_print_end();
+    repl_println();
 
   /* write a file to flash via Ymodem */
   } else if (strcmp(arg, "-w") == 0) {
@@ -527,14 +513,12 @@ static void cmd_flash(repl_state_t *state, char *arg) {
     state->ymodem_state = 0; // stopped
   /* no option is given */
   } else {
-    repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf(".flash command options:\r\n");
     repl_printf("-w\tWrite user code (file) to flash via Ymodem.\r\n");
     repl_printf("-e\tErase the user code in flash.\r\n");
     repl_printf("-t\tPrint total size of flash for user code.\r\n");
     repl_printf("-s\tPrint the size of the user code.\r\n");
     repl_printf("-r\tPrint the user code in textual format.\r\n");
-    repl_print_end();
   }
 }
 
@@ -544,9 +528,6 @@ static void cmd_flash(repl_state_t *state, char *arg) {
 static void cmd_load(repl_state_t *state) {
   runtime_cleanup();
   runtime_init(true);
-  repl_print_begin(REPL_OUTPUT_LOG);
-  repl_printf("\r");
-  repl_print_end();
 }
 
 /**
@@ -556,13 +537,9 @@ static void cmd_mem(repl_state_t *state) {
   jerry_heap_stats_t stats = {0};
   bool stats_ret = jerry_get_memory_stats (&stats);
   if (stats_ret) {
-    repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf("total: %u, occupied: %u, peak: %u\r\n", stats.size, stats.allocated_bytes, stats.peak_allocated_bytes);
-    repl_print_end();
   } else {
-    repl_print_begin(REPL_OUTPUT_LOG);
     repl_printf("Mem stat feature is not enabled.\r\n");
-    repl_print_end();
   }
 }
 
@@ -571,9 +548,6 @@ static void cmd_mem(repl_state_t *state) {
  */
 static void cmd_gc(repl_state_t *state) {
   jerry_gc(JERRY_GC_PRESSURE_HIGH);
-  repl_print_begin(REPL_OUTPUT_LOG);
-  repl_printf("\r");
-  repl_print_end();
 }
 
 /**
@@ -584,19 +558,9 @@ static void cmd_firmup(repl_state_t *state) {
 }
 
 /**
- * .version command
- */
-static void cmd_version(repl_state_t *state) {
-  repl_print_begin(REPL_OUTPUT_LOG);
-  repl_printf("%s\r\n", CONFIG_KAMELEON_VERSION);
-  repl_print_end();
-}
-
-/**
  * .hi command
  */
 static void cmd_hi(repl_state_t *state) {
-  repl_print_begin(REPL_OUTPUT_LOG);
   repl_printf("/---------------------------\\\r\n");
   repl_printf("|                  ____     |\r\n");
   repl_printf("|     /----_______/    \\    |\r\n");
@@ -613,15 +577,13 @@ static void cmd_hi(repl_state_t *state) {
   repl_printf("Welcome to Kameleon!\r\n");
   repl_printf("%s %s\r\n", "Version:", CONFIG_KAMELEON_VERSION);
   repl_printf("For more info: https://kameleon.io\r\n");
-  repl_printf("\r\n");
-  repl_print_end();
+  repl_println();
 }
 
 /**
  * .help command
  */
 static void cmd_help(repl_state_t *state) {
-  repl_print_begin(REPL_OUTPUT_LOG);
   repl_printf(".echo\tEcho on/off.\r\n");
   repl_printf(".reset\tReset JavaScript runtime context.\r\n");
   repl_printf(".flash\tCommands for the internal flash.\r\n");
@@ -629,10 +591,8 @@ static void cmd_help(repl_state_t *state) {
   repl_printf(".mem\tHeap memory status.\r\n");
   repl_printf(".firmup\tFirmware update mode.\r\n");
   repl_printf(".gc\tPerform garbage collection.\r\n");
-  repl_printf(".v\tFirmware version.\r\n");
   repl_printf(".hi\tPrint welcome message.\r\n");
   repl_printf(".help\tPrint this help message.\r\n");
-  repl_print_end();
 }
 
 // --------------------------------------------------------------------------
@@ -662,10 +622,9 @@ repl_state_t *get_repl_state() {
   return &state;
 }
 
-void repl_print_begin(repl_output_t output) {
-  tty_printf("\33[2K\r"); /* set column to 0 */
+void repl_set_output(repl_output_t output) {
   switch (output) {
-    case REPL_OUTPUT_LOG:
+    case REPL_OUTPUT_NORMAL:
       tty_printf("\33[0m"); /* set to normal color */
       break;
     case REPL_OUTPUT_INFO:
@@ -677,7 +636,11 @@ void repl_print_begin(repl_output_t output) {
   }
 }
 
-void repl_print_end() {
+void repl_println() {
+  tty_printf("\r\n");
+}
+
+void repl_print_prompt() {
   tty_printf("\33[0m"); // back to normal color
   if (state.echo) {
     state.buffer[state.buffer_length] = '\0';
@@ -686,4 +649,3 @@ void repl_print_end() {
     tty_printf("\33[H\33[900C\33[6n\033[u\033[2C"); // query terminal screen width and restore cursor position
   }
 }
-

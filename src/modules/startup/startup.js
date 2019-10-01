@@ -28,7 +28,6 @@ Module.prototype.loadBuiltin = function () {
 }
 
 global.require = Module.require;
-global.print = global.console.log;
 
 /**
  * Board object
