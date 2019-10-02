@@ -24,6 +24,10 @@
 
 #define MSTR_GRAPHICS_GRAPHICS_CONTEXT "GraphicsContext"
 #define MSTR_GRAPHICS_BUFFERED_GRAPHICS_CONTEXT "BufferedGraphicsContext"
+#define MSTR_GRAPHICS_DISPLAY_CB "__display_cb"
+#define MSTR_GRAPHICS_SETPIXEL_CB "__setPixel_cb"
+#define MSTR_GRAPHICS_GETPIXEL_CB "__getPixel_cb"
+#define MSTR_GRAPHICS_FILLRECT_CB "__fillRect_cb"
 #define MSTR_GRAPHICS_WIDTH "width"
 #define MSTR_GRAPHICS_HEIGHT "height"
 #define MSTR_GRAPHICS_FIRST "first"

@@ -40,17 +40,19 @@ JERRYXX_FUN(i2c_ctor_fn) {
   JERRYXX_CHECK_ARG_OBJECT_OPT(1, "options");
 
   uint8_t bus = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  jerry_value_t options = JERRYXX_GET_ARG_OPT(1);
   i2c_mode_t mode = I2C_MASTER;
   uint32_t baudrate = I2C_DEFAULT_BAUDRATE;
   uint8_t address = 0;
-  if (jerry_value_is_object(options)) {
-    mode = jerryxx_get_property_number(options, MSTR_I2C_MODE, I2C_DEFAULT_MODE);
-    baudrate = (uint32_t) jerryxx_get_property_number(options, MSTR_I2C_BAUDRATE, I2C_DEFAULT_BAUDRATE);
-    address = (uint32_t) jerryxx_get_property_number(options, MSTR_I2C_ADDRESS, 0);
-  }
-  jerry_release_value(options);
 
+  if (JERRYXX_HAS_ARG(1)) {
+    jerry_value_t options = JERRYXX_GET_ARG(1);
+    if (jerry_value_is_object(options)) {
+      mode = jerryxx_get_property_number(options, MSTR_I2C_MODE, I2C_DEFAULT_MODE);
+      baudrate = (uint32_t) jerryxx_get_property_number(options, MSTR_I2C_BAUDRATE, I2C_DEFAULT_BAUDRATE);
+      address = (uint32_t) jerryxx_get_property_number(options, MSTR_I2C_ADDRESS, 0);
+    }
+  }
+  
   // master mode support only
   if (mode != I2C_MASTER)
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) "Unsupported I2C mode.");

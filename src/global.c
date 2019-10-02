@@ -290,6 +290,12 @@ static void set_timer_cb(io_timer_handle_t *timer) {
       jerry_release_value(timer->timer_js_cb);
       io_timer_stop(timer);
       io_handle_close((io_handle_t *) timer, timer_close_cb);
+    } else {
+      if (timer->repeat == false) {
+        jerry_release_value(timer->timer_js_cb);
+        io_timer_stop(timer);
+        io_handle_close((io_handle_t *) timer, timer_close_cb);
+      }
     }
     jerry_release_value (ret_val);
     jerry_release_value (this_val);

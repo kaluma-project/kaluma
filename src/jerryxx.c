@@ -72,7 +72,7 @@ double jerryxx_get_property_number(jerry_value_t object, const char *name, doubl
   jerry_value_t prop = jerry_create_string((const jerry_char_t *) name);
   jerry_value_t ret = jerry_get_property (object, prop);
   double value = default_value;
-  if (!jerry_value_is_undefined(ret)) {
+  if (jerry_value_is_number(ret)) {
     value = jerry_get_number_value(ret);
   }
   jerry_release_value(ret);

@@ -33,10 +33,7 @@
 gc_font_t custom_font;
 
 static void gc_handle_freecb (void *handle) {
-  jerry_release_value(((gc_handle_t *) handle)->display_js_cb);
-  jerry_release_value(((gc_handle_t *) handle)->set_pixel_js_cb);
-  jerry_release_value(((gc_handle_t *) handle)->get_pixel_js_cb);
-  jerry_release_value(((gc_handle_t *) handle)->fill_rect_js_cb);
+  gc_handle_t *gc_handle = (gc_handle_t *) handle;
   free (handle);
 }
 
@@ -77,41 +74,37 @@ JERRYXX_FUN(gc_ctor_fn) {
   // read parameters
   gc_handle->device_width = (int16_t) JERRYXX_GET_ARG_NUMBER(0);
   gc_handle->device_height = (int16_t) JERRYXX_GET_ARG_NUMBER(1);
-  jerry_value_t options = JERRYXX_GET_ARG_OPT(2);
-  if (jerry_value_is_object(options)) {
-    // rotation
-    uint8_t rotation = (uint8_t) jerryxx_get_property_number(options,
-        MSTR_GRAPHICS_ROTATION, 0);
-    gc_set_rotation(gc_handle, rotation);
 
-    // setPixel callback
-    jerry_value_t set_pixel_js_cb = jerryxx_get_property(options, MSTR_GRAPHICS_SET_PIXEL);
-    if (jerry_value_is_function(set_pixel_js_cb)) {
-      gc_handle->set_pixel_js_cb = jerry_acquire_value(set_pixel_js_cb);
-    } else {
-      gc_handle->set_pixel_js_cb = jerry_create_null();
-    }
-    jerry_release_value(set_pixel_js_cb);
+  if (JERRYXX_HAS_ARG(2)) {
+    jerry_value_t options = JERRYXX_GET_ARG(2);
+    if (jerry_value_is_object(options)) {
+      // rotation
+      uint8_t rotation = (uint8_t) jerryxx_get_property_number(options,
+          MSTR_GRAPHICS_ROTATION, 0);
+      gc_set_rotation(gc_handle, rotation);
 
-    // getPixel callback
-    jerry_value_t get_pixel_js_cb = jerryxx_get_property(options, MSTR_GRAPHICS_GET_PIXEL);
-    if (jerry_value_is_function(get_pixel_js_cb)) {
-      gc_handle->get_pixel_js_cb = jerry_acquire_value(get_pixel_js_cb);
-    } else {
-      gc_handle->get_pixel_js_cb = jerry_create_null();
-    }
-    jerry_release_value(get_pixel_js_cb);
+      // setPixel callback
+      jerry_value_t set_pixel_js_cb = jerryxx_get_property(options,
+          MSTR_GRAPHICS_SET_PIXEL);
+      jerryxx_set_property(JERRYXX_GET_THIS, MSTR_GRAPHICS_SETPIXEL_CB, set_pixel_js_cb);
+      gc_handle->set_pixel_js_cb = set_pixel_js_cb; // reference without acquire
+      jerry_release_value(set_pixel_js_cb);
 
-    // fillRect callback
-    jerry_value_t fill_rect_js_cb = jerryxx_get_property(options, MSTR_GRAPHICS_FILL_RECT);
-    if (jerry_value_is_function(fill_rect_js_cb)) {
-      gc_handle->fill_rect_js_cb = jerry_acquire_value(fill_rect_js_cb);
-    } else {
-      gc_handle->fill_rect_js_cb = jerry_create_null();
+      // getPixel callback
+      jerry_value_t get_pixel_js_cb = jerryxx_get_property(options,
+          MSTR_GRAPHICS_GET_PIXEL);
+      jerryxx_set_property(JERRYXX_GET_THIS, MSTR_GRAPHICS_GETPIXEL_CB, get_pixel_js_cb);
+      gc_handle->get_pixel_js_cb = get_pixel_js_cb; // reference without acquire
+      jerry_release_value(get_pixel_js_cb);
+
+      // fillRect callback
+      jerry_value_t fill_rect_js_cb = jerryxx_get_property(options,
+          MSTR_GRAPHICS_FILL_RECT);
+      jerryxx_set_property(JERRYXX_GET_THIS, MSTR_GRAPHICS_FILLRECT_CB, fill_rect_js_cb);
+      gc_handle->fill_rect_js_cb = fill_rect_js_cb; // reference without acquire
+      jerry_release_value(fill_rect_js_cb);
     }
-    jerry_release_value(fill_rect_js_cb);
   }
-  jerry_release_value(options);
 
   // setup primitive functions
   gc_handle->set_pixel_cb = gc_prim_cb_set_pixel;
@@ -262,34 +255,35 @@ JERRYXX_FUN(gc_get_font_color_fn) {
  */
 JERRYXX_FUN(gc_set_font_fn) {
   JERRYXX_CHECK_ARG_OBJECT_NULL_OPT(0, "font")
-  jerry_value_t font = JERRYXX_GET_ARG_OPT(0);
-  JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
-  if (jerry_value_is_object(font)) {
-    custom_font.first = (uint8_t) jerryxx_get_property_number(font, MSTR_GRAPHICS_FIRST, 0);
-    custom_font.last = (uint8_t) jerryxx_get_property_number(font, MSTR_GRAPHICS_LAST, 0);
-    custom_font.width = (uint8_t) jerryxx_get_property_number(font, MSTR_GRAPHICS_WIDTH, 0);
-    custom_font.height = (uint8_t) jerryxx_get_property_number(font, MSTR_GRAPHICS_HEIGHT, 0);
-    custom_font.advance_x = (uint8_t) jerryxx_get_property_number(font, MSTR_GRAPHICS_ADVANCE_X, 0);
-    custom_font.advance_y = (uint8_t) jerryxx_get_property_number(font, MSTR_GRAPHICS_ADVANCE_Y, 0);
-    // get bitmap buffer
-    jerry_value_t bitmap = jerryxx_get_property(font, MSTR_GRAPHICS_BITMAP);
-    if (jerry_value_is_arraybuffer(bitmap)) {
-      custom_font.bitmap = jerry_get_arraybuffer_pointer(bitmap);
+  if (JERRYXX_HAS_ARG(0)) {
+    jerry_value_t font = JERRYXX_GET_ARG(0);
+    JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
+    if (jerry_value_is_object(font)) {
+      custom_font.first = (uint8_t) jerryxx_get_property_number(font, MSTR_GRAPHICS_FIRST, 0);
+      custom_font.last = (uint8_t) jerryxx_get_property_number(font, MSTR_GRAPHICS_LAST, 0);
+      custom_font.width = (uint8_t) jerryxx_get_property_number(font, MSTR_GRAPHICS_WIDTH, 0);
+      custom_font.height = (uint8_t) jerryxx_get_property_number(font, MSTR_GRAPHICS_HEIGHT, 0);
+      custom_font.advance_x = (uint8_t) jerryxx_get_property_number(font, MSTR_GRAPHICS_ADVANCE_X, 0);
+      custom_font.advance_y = (uint8_t) jerryxx_get_property_number(font, MSTR_GRAPHICS_ADVANCE_Y, 0);
+      // get bitmap buffer
+      jerry_value_t bitmap = jerryxx_get_property(font, MSTR_GRAPHICS_BITMAP);
+      if (jerry_value_is_arraybuffer(bitmap)) {
+        custom_font.bitmap = jerry_get_arraybuffer_pointer(bitmap);
+      }
       jerry_release_value(bitmap);
-    }
-    // get glyphs buffer
-    jerry_value_t glyphs = jerryxx_get_property(font, MSTR_GRAPHICS_GLYPHS);
-    if (jerry_value_is_arraybuffer(glyphs)) {
-      custom_font.glyphs = (gc_font_glyph_t *) jerry_get_arraybuffer_pointer(glyphs);
+      // get glyphs buffer
+      jerry_value_t glyphs = jerryxx_get_property(font, MSTR_GRAPHICS_GLYPHS);
+      if (jerry_value_is_arraybuffer(glyphs)) {
+        custom_font.glyphs = (gc_font_glyph_t *) jerry_get_arraybuffer_pointer(glyphs);
+      } else {
+        custom_font.glyphs = NULL;
+      }
       jerry_release_value(glyphs);
+      gc_handle->font = &custom_font;
     } else {
-      custom_font.glyphs = NULL;
+      gc_handle->font = NULL;
     }
-    gc_handle->font = &custom_font;
-  } else {
-    gc_handle->font = NULL;
   }
-  jerry_release_value(font);
   return jerry_create_undefined();
 }
 
@@ -504,17 +498,20 @@ JERRYXX_FUN(gc_draw_bitmap_fn) {
   uint16_t color = colorbits == 1 ? 1 : 0xffff;
   bool transparent = false;
   uint16_t transparent_color = 0;
-  jerry_value_t options = JERRYXX_GET_ARG_OPT(6);
-  if (jerry_value_is_object(options)) {
-    color = jerryxx_get_property_number(options, MSTR_GRAPHICS_COLOR, color);
-    jerry_value_t tp = jerryxx_get_property(options, MSTR_GRAPHICS_TRANSPARENT);
-    if (jerry_value_is_number(tp)) {
-      transparent = true;
-      transparent_color = (uint16_t) jerry_get_number_value(tp);
+
+  if (JERRYXX_HAS_ARG(6)) {
+    jerry_value_t options = JERRYXX_GET_ARG(6);
+    if (jerry_value_is_object(options)) {
+      color = jerryxx_get_property_number(options, MSTR_GRAPHICS_COLOR, color);
+      jerry_value_t tp = jerryxx_get_property(options, MSTR_GRAPHICS_TRANSPARENT);
+      if (jerry_value_is_number(tp)) {
+        transparent = true;
+        transparent_color = (uint16_t) jerry_get_number_value(tp);
+      }
+      jerry_release_value(tp);
     }
-    jerry_release_value(tp);
   }
-  jerry_release_value(options);
+
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   uint8_t *buffer = jerry_get_arraybuffer_pointer(bitmap);
   gc_draw_bitmap(gc_handle, x, y, buffer, w, h, colorbits, color, transparent,
@@ -529,14 +526,15 @@ JERRYXX_FUN(gc_display_fn) {
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   if (jerry_value_is_function (gc_handle->display_js_cb)) {
     jerry_value_t buffer = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_GRAPHICS_BUFFER);
-    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t this_ = jerry_create_undefined();
     jerry_value_t args[] = { buffer };
-    jerry_value_t ret_val = jerry_call_function(gc_handle->display_js_cb, this_val, args, 1);
+    jerry_value_t ret_val = jerry_call_function(gc_handle->display_js_cb, this_, args, 1);
     jerry_release_value(buffer);
-    jerry_release_value(this_val);
+    jerry_release_value(this_);
     return ret_val;
+  } else {
+    return jerry_create_undefined();
   }
-  return jerry_create_undefined();
 }
 
 /* ************************************************************************** */
@@ -564,33 +562,31 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
   // read parameters
   gc_handle->device_width = (int16_t) JERRYXX_GET_ARG_NUMBER(0);
   gc_handle->device_height = (int16_t) JERRYXX_GET_ARG_NUMBER(1);
-  jerry_value_t options = JERRYXX_GET_ARG_OPT(2);
-  if (jerry_value_is_object(options)) {
-    // rotation
-    uint8_t rotation = (uint8_t) jerryxx_get_property_number(options,
-        MSTR_GRAPHICS_ROTATION, 0);
-    gc_set_rotation(gc_handle, rotation);
+  if (JERRYXX_HAS_ARG(2)) {
+    jerry_value_t options = JERRYXX_GET_ARG(2);
+    if (jerry_value_is_object(options)) {
+      // rotation
+      uint8_t rotation = (uint8_t) jerryxx_get_property_number(options,
+          MSTR_GRAPHICS_ROTATION, 0);
+      gc_set_rotation(gc_handle, rotation);
 
-    // colorbits
-    uint8_t colorbits = (uint8_t) jerryxx_get_property_number(options,
-        MSTR_GRAPHICS_COLORBITS, 1); // should be 1 or 16
-    if (colorbits > 1) {
-      gc_handle->colorbits = 16;
-    } else {
-      gc_handle->colorbits = 1;
-    }
+      // colorbits
+      uint8_t colorbits = (uint8_t) jerryxx_get_property_number(options,
+          MSTR_GRAPHICS_COLORBITS, 1); // should be 1 or 16
+      if (colorbits > 1) {
+        gc_handle->colorbits = 16;
+      } else {
+        gc_handle->colorbits = 1;
+      }
 
-    // display callback
-    jerry_value_t display_js_cb = jerryxx_get_property(options,
-        MSTR_GRAPHICS_DISPLAY);
-    if (jerry_value_is_function(display_js_cb)) {
-      gc_handle->display_js_cb = jerry_acquire_value(display_js_cb);
-    } else {
-      gc_handle->display_js_cb = jerry_create_null();
+      // display callback
+      jerry_value_t display_js_cb = jerryxx_get_property(options,
+          MSTR_GRAPHICS_DISPLAY);
+      jerryxx_set_property(JERRYXX_GET_THIS, MSTR_GRAPHICS_DISPLAY_CB, display_js_cb);
+      gc_handle->display_js_cb = display_js_cb; // reference without acquire
+      jerry_release_value(display_js_cb);
     }
-    jerry_release_value(display_js_cb);    
   }
-  jerry_release_value(options);
 
   // setup primitive functions
   if (gc_handle->colorbits == 1) {

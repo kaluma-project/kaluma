@@ -42,16 +42,19 @@ JERRYXX_FUN(spi_ctor_fn) {
 
   // read parameters
   uint8_t bus = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  jerry_value_t options = JERRYXX_GET_ARG_OPT(1);
   uint8_t mode = SPI_DEFAULT_MODE;
   uint32_t baudrate = SPI_DEFAULT_BAUDRATE;
   uint8_t bitorder = SPI_DEFAULT_BITORDER;
-  if (jerry_value_is_object(options)) {
-    mode = (uint8_t) jerryxx_get_property_number(options, MSTR_SPI_MODE, SPI_DEFAULT_MODE);
-    baudrate = (uint32_t) jerryxx_get_property_number(options, MSTR_SPI_BAUDRATE, SPI_DEFAULT_BAUDRATE);
-    bitorder = (uint8_t) jerryxx_get_property_number(options, MSTR_SPI_BITORDER, SPI_DEFAULT_BITORDER);
+
+  if (JERRYXX_HAS_ARG(1)) {
+    jerry_value_t options = JERRYXX_GET_ARG(1);
+    if (jerry_value_is_object(options)) {
+      mode = (uint8_t) jerryxx_get_property_number(options, MSTR_SPI_MODE, SPI_DEFAULT_MODE);
+      baudrate = (uint32_t) jerryxx_get_property_number(options, MSTR_SPI_BAUDRATE, SPI_DEFAULT_BAUDRATE);
+      bitorder = (uint8_t) jerryxx_get_property_number(options, MSTR_SPI_BITORDER, SPI_DEFAULT_BITORDER);
+    }
   }
-  jerry_release_value(options);
+
   if (bitorder != SPI_BITORDER_LSB)
     bitorder = SPI_BITORDER_MSB;
   if (mode < 0 || mode > 3)
@@ -84,6 +87,7 @@ JERRYXX_FUN(spi_transfer_fn) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "SPI bus is not initialized.");
   }
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
+  jerry_release_value(bus_value);
 
   // write data to the bus
   if (jerry_value_is_array(data)) { /* for Array<number> */
@@ -173,6 +177,7 @@ JERRYXX_FUN(spi_send_fn) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "SPI bus is not initialized.");
   }
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
+  jerry_release_value(bus_value);
 
   // write data to the bus
   int ret = SPIPORT_ERROR;
@@ -241,6 +246,7 @@ JERRYXX_FUN(spi_recv_fn) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "I2C bus is not initialized.");
   }
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
+  jerry_release_value(bus_value);
 
   // recv data
   uint8_t *buf = malloc(length);
@@ -267,6 +273,7 @@ JERRYXX_FUN(spi_close_fn) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "SPI bus is not initialized.");
   }
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
+  jerry_release_value(bus_value);
 
   // close the bus
   int ret = spi_close(bus);
