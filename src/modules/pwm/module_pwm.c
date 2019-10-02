@@ -52,6 +52,8 @@ JERRYXX_FUN(pwm_start_fn) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "PWM pin is not setup.");
   }
   uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
+  jerry_release_value(pin_value);
+
   if (pwm_start(pin) == PWMPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
@@ -66,6 +68,8 @@ JERRYXX_FUN(pwm_stop_fn) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "PWM pin is not setup.");
   }
   uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
+  jerry_release_value(pin_value);
+
   if (pwm_stop(pin) == PWMPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
@@ -80,6 +84,8 @@ JERRYXX_FUN(pwm_get_frequency_fn) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "PWM pin is not setup.");
   }
   uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
+  jerry_release_value(pin_value);
+
   double frequency = pwm_get_frequency(pin);
   if (frequency == PWMPORT_ERROR) {
     char errmsg[255];
@@ -92,11 +98,14 @@ JERRYXX_FUN(pwm_get_frequency_fn) {
 JERRYXX_FUN(pwm_set_frequency_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "frequency");
   double frequency = JERRYXX_GET_ARG_NUMBER(0);
+
   jerry_value_t pin_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
   if (!jerry_value_is_number(pin_value)) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "PWM pin is not setup.");
   }
   uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
+  jerry_release_value(pin_value);
+
   if (pwm_set_frequency(pin, frequency) == PWMPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
@@ -111,6 +120,8 @@ JERRYXX_FUN(pwm_get_duty_fn) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "PWM pin is not setup.");
   }
   uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
+  jerry_release_value(pin_value);
+
   double duty = pwm_get_duty(pin);
   if (duty == PWMPORT_ERROR) {
     char errmsg[255];
@@ -127,11 +138,14 @@ JERRYXX_FUN(pwm_set_duty_fn) {
     duty = PWM_DUTY_MIN;
   else if (duty > PWM_DUTY_MAX)
     duty = PWM_DUTY_MAX;
+
   jerry_value_t pin_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
   if (!jerry_value_is_number(pin_value)) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "PWM pin is not setup.");
   }
   uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
+  jerry_release_value(pin_value);
+
   if (pwm_set_duty(pin, duty) == PWMPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
@@ -146,6 +160,8 @@ JERRYXX_FUN(pwm_close_fn) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "PWM pin is not setup.");
   }
   uint8_t pin = (uint8_t) jerry_get_number_value(pin_value);
+  jerry_release_value(pin_value);
+
   if (pwm_close(pin) == PWMPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);

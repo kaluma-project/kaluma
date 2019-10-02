@@ -63,11 +63,11 @@ static void uart_read_cb(io_uart_handle_t *handle, uint8_t *buf, size_t len) {
     jerry_value_t args_p[1] = { array_buffer };
     jerry_value_t ret_val = jerry_call_function (handle->read_js_cb, this_val, args_p, 1);
     if (jerry_value_is_error (ret_val)) {
-      // TODO: handle error and return value
+      jerryxx_print_error(ret_val, true);
     }
     jerry_release_value (ret_val);
     jerry_release_value (this_val);
-    jerry_release_value (array_buffer);  // TODO: Need to release array_buffer?
+    jerry_release_value (array_buffer);
   }
 }
 
@@ -151,6 +151,7 @@ JERRYXX_FUN(uart_write_fn) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "UART port is not initialized.");
   }
   uint8_t port = (uint8_t) jerry_get_number_value(port_value);
+  jerry_release_value(port_value);
 
   // write data to the port
   int ret = UARTPORT_ERROR;
@@ -215,6 +216,7 @@ JERRYXX_FUN(uart_close_fn) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "UART port is not initialized.");
   }
   uint8_t port = (uint8_t) jerry_get_number_value(port_value);
+  jerry_release_value(port_value);
 
   // close the port
   int ret = uart_close(port);
