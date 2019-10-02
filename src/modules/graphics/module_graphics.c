@@ -33,7 +33,6 @@
 gc_font_t custom_font;
 
 static void gc_handle_freecb (void *handle) {
-  gc_handle_t *gc_handle = (gc_handle_t *) handle;
   free (handle);
 }
 
