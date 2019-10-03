@@ -48,7 +48,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc_if.h"
-#include "tty.h"
+#include "kameleon_core.h"
 #include "repl.h"
 #include "runtime.h"
 

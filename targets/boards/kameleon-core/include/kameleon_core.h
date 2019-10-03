@@ -51,4 +51,18 @@
  * Error handler for the system driver error.
  */
 void _Error_Handler(char * file, uint32_t line);
+
+/**
+ * this function is called in the pendable interrupt service routine which has
+ * lowest priority to allow other interrupts service.
+ */
+void tty_transmit_data();
+
+/**
+ * return tx data length
+ */
+uint32_t tty_get_tx_data_length();
+
+uint32_t tty_fill_rx_bytes(uint8_t * buf, uint32_t nToWrite);
+
 #endif /* __KAMELEON_CORE_H */

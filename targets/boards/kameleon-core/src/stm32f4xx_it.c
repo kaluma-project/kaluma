@@ -34,8 +34,7 @@
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx.h"
 #include "stm32f4xx_it.h"
-#include "tty.h"
-#include "uart.h"
+#include "kameleon_core.h"
 #include "system.h"
 
 /* USER CODE BEGIN 0 */
