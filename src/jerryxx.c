@@ -90,14 +90,10 @@ bool jerryxx_delete_property(jerry_value_t object, const char *name) {
 void jerryxx_print_value(jerry_value_t value) {
   jerry_value_t str = jerry_value_to_string(value);
   jerry_size_t str_sz = jerry_get_string_size (str);
-  if (str_sz < 1024) {
-    jerry_char_t str_buf[str_sz + 1];
-    jerry_string_to_char_buffer (str, str_buf, str_sz);
-    str_buf[str_sz] = '\0';
-    tty_printf("%s", (char *) str_buf); // If possible, use tty_write() instead of print format
-  } else {
-    tty_printf("Buffer overflow\r\n");
-  }
+  jerry_char_t str_buf[str_sz + 1];
+  jerry_string_to_char_buffer (str, str_buf, str_sz);
+  for (int16_t i = 0; i < str_sz; i++)
+    tty_putc(str_buf[i]);
 }
 
 /**
