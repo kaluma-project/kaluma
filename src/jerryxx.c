@@ -94,6 +94,7 @@ void jerryxx_print_value(jerry_value_t value) {
   jerry_string_to_char_buffer (str, str_buf, str_sz);
   for (int16_t i = 0; i < str_sz; i++)
     tty_putc(str_buf[i]);
+  jerry_release_value(str);
 }
 
 /**
