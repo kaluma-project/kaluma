@@ -60,6 +60,7 @@
 #define MSTR_BINDING "binding"
 #define MSTR_BUILTIN_MODULES "builtin_modules"
 #define MSTR_GET_BUILTIN_MODULE "getBuiltinModule"
+#define MSTR_DEVICES "devices"
 #define MSTR_BOARD "board"
 #define MSTR_NAME "name"
 #define MSTR_PIN_NUM "PIN_NUM"

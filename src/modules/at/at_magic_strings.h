@@ -19,16 +19,14 @@
  * SOFTWARE.
  */
 
-#ifndef __STARTUP_MAGIC_STRINGS_H
-#define __STARTUP_MAGIC_STRINGS_H
+#ifndef __AT_MAGIC_STRINGS_H
+#define __AT_MAGIC_STRINGS_H
 
-#define MSTR_STARTUP_MODULE "Module"
-#define MSTR_STARTUP_LOAD_BUILTIN "loadBuiltin"
-#define MSTR_STARTUP_PRINT "print"
-#define MSTR_STARTUP_REQUIRE "require"
-#define MSTR_STARTUP_DEVICE_MANAGER "DeviceManager"
-#define MSTR_STARTUP_REGISTER "register"
-#define MSTR_STARTUP_UNREGISTER "unregister"
-#define MSTR_STARTUP_GET "get"
+#define MSTR_AT_ATCOMMAND "ATCommand"
+#define MSTR_AT_SEND "send"
+#define MSTR_AT_ADD_LINE_HANDLER "addLineHandler"
+#define MSTR_AT_REMOVE_LINE_HANDLER "removeLineHandler"
+#define MSTR_AT_ADD_RESPONSE_HANDLER "addResponseHandler"
+#define MSTR_AT_REMOVE_RESPONSE_HANDLER "removeResponseHandler"
 
-#endif /* __STARTUP_MAGIC_STRINGS_H */
+#endif /* __AT_MAGIC_STRINGS_H */

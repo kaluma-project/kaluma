@@ -9,7 +9,7 @@ Kameleon is a tiny and efficient JavaScript runtime for microcontrollers. The ma
 * ECMAScript 5.1/2015(subset) standard compliant (Powered by [JerryScript](http://jerryscript.net/))
 * Non-blocking I/O
 * REPL mode support
-* Portability (No RTOS)
+* Portability
 * Native modules (ADC, PWM, I2C, SPI, UART, etc.)
 
 Resources

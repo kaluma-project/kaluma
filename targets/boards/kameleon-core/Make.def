@@ -69,13 +69,14 @@ else
   TARGET_LDSCRIPT = $(TARGET_DIR)/src/STM32F411CETx_FLASH.ld
 endif
 
+TARGET_HEAPSIZE = 64
+
 # -----------------------------------------------------------------------------
 # Kameleon modules
 # -----------------------------------------------------------------------------
 
-KAMELEON_MODULES='events gpio led button pwm adc i2c spi uart graphics startup'
+KAMELEON_MODULES='events gpio led button pwm adc i2c spi uart graphics at startup'
 
-KAMELEON_MODULE_EVENTS = 1
 KAMELEON_MODULE_PWM = 1
 KAMELEON_MODULE_I2C = 1
 KAMELEON_MODULE_SPI = 1

@@ -47,6 +47,25 @@ SZ = $(PREFIX)size
 HEX = $(CP) -O ihex
 BIN = $(CP) -O binary -S
 
+# -----------------------------------------------------------------------------
+# Target-specific
+# -----------------------------------------------------------------------------
+
+ifndef TARGET
+TARGET = kameleon-core
+endif
+
+TARGET_DIR = targets/boards/$(TARGET)
+SHARED_DIR = targets/shared
+
+TARGET_ASM =
+TARGET_SRC =
+TARGET_INC =
+TARGET_DEF =
+
+TARGET_BIN = $(TARGET)
+
+-include $(TARGET_DIR)/Make.def
 
 # -----------------------------------------------------------------------------
 # Jerryscript
@@ -87,7 +106,7 @@ JERRY_ARGS = \
 --lto=OFF \
 --error-messages=ON \
 --js-parser=ON \
---mem-heap=96 \
+--mem-heap=${TARGET_HEAPSIZE} \
 --mem-stats=ON \
 --snapshot-exec=ON \
 --line-info=ON \
@@ -133,31 +152,8 @@ KAMELEON_INC = \
 -Isrc/modules
 
 # -----------------------------------------------------------------------------
-# Target-specific
-# -----------------------------------------------------------------------------
-
-ifndef TARGET
-TARGET = kameleon-core
-endif
-
-TARGET_DIR = targets/boards/$(TARGET)
-SHARED_DIR = targets/shared
-
-TARGET_ASM =
-TARGET_SRC =
-TARGET_INC =
-TARGET_DEF =
-
-TARGET_BIN = $(TARGET)
-
--include $(TARGET_DIR)/Make.def
-
-# -----------------------------------------------------------------------------
 # Kameleon Modules
 # -----------------------------------------------------------------------------
-
-ifdef KAMELEON_MODULE_EVENTS
-endif
 
 ifdef KAMELEON_MODULE_PWM
 KAMELEON_SRC += src/modules/pwm/module_pwm.c
@@ -254,7 +250,7 @@ all: $(BUILD_DIR)/$(TARGET_BIN).elf $(BUILD_DIR)/$(TARGET_BIN).hex $(BUILD_DIR)/
 # -----------------------------------------------------------------------------
 
 $(KAMELEON_GENERATED):
-	$(Q) python $(JERRY_ROOT)/tools/build.py --clean --jerry-cmdline-snapshot=ON --snapshot-save=ON --snapshot-exec=ON
+	$(Q) python $(JERRY_ROOT)/tools/build.py --clean --jerry-cmdline-snapshot=ON --snapshot-save=ON --snapshot-exec=ON --profile=es2015-subset
 	$(Q) node tools/js2c.js --modules=$(KAMELEON_MODULES) --target=$(TARGET)
 	$(Q) -rm -rf deps/jerryscript/build
 
