@@ -24,12 +24,12 @@
 #include "flash.h"
 #include "tty.h"
 
-#define SIZE_FLASH_USER_AREA            (128 * 1024)
-#define ADDR_FLASH_USER_AREA            (FLASH_BASE_ADDR + FLASH_SIZE - SIZE_FLASH_USER_AREA)
+#define SIZE_FLASH_USER_AREA            (80 * 1024)
+#define ADDR_FLASH_USER_AREA            (FLASH_BASE_ADDR + 0x8000) //Sector 2 and 3.
 #define ADDR_FLASH_USER_CODE_SIZE       (ADDR_FLASH_USER_AREA + 0)
 #define ADDR_FLASH_USER_CODE_CHECKSUM   (ADDR_FLASH_USER_AREA + 4)
 #define ADDR_FLASH_USER_CODE            (ADDR_FLASH_USER_AREA + 8)
-#define SECTOR_FLASH_USER_AREA          FLASH_SECTOR_7
+#define SECTOR_FLASH_USER_AREA          FLASH_SECTOR_2
 
 uint32_t code_offset;
 
@@ -63,7 +63,7 @@ static void flash_erase() {
   EraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
   EraseInitStruct.VoltageRange = FLASH_VOLTAGE_RANGE_3;
   EraseInitStruct.Sector = SECTOR_FLASH_USER_AREA;
-  EraseInitStruct.NbSectors = 1;
+  EraseInitStruct.NbSectors = 2;
   if (HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError) != HAL_OK) {
     /*
       Error occurred while sector erase.
