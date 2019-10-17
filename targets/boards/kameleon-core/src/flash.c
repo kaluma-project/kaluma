@@ -25,11 +25,11 @@
 #include "tty.h"
 
 #define SIZE_FLASH_USER_AREA            (80 * 1024)
-#define ADDR_FLASH_USER_AREA            (FLASH_BASE_ADDR + 0x8000) //Sector 2 and 3.
+#define ADDR_FLASH_USER_AREA            (FLASH_BASE_ADDR + 0xC000) //Sector 3 and 4.
 #define ADDR_FLASH_USER_CODE_SIZE       (ADDR_FLASH_USER_AREA + 0)
 #define ADDR_FLASH_USER_CODE_CHECKSUM   (ADDR_FLASH_USER_AREA + 4)
 #define ADDR_FLASH_USER_CODE            (ADDR_FLASH_USER_AREA + 8)
-#define SECTOR_FLASH_USER_AREA          FLASH_SECTOR_2
+#define SECTOR_FLASH_USER_AREA          FLASH_SECTOR_3
 
 uint32_t code_offset;
 
