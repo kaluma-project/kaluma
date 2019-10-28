@@ -1,6 +1,6 @@
 var EventEmitter = require('events').EventEmitter;
 
-// TODO: If "+IPD:" all response not arrived, skip all handlers.
+// TODO: How to skip all handlers if all response not arrived of "+IPD:" message.
 
 /**
  * ATCommand class.
@@ -11,7 +11,6 @@ var EventEmitter = require('events').EventEmitter;
  * @param {UART} serial
  * @param {object} options
  *   .debug {boolean}
- *   .responseParser {function(at,data)}
  */
 class ATCommand extends EventEmitter {
   constructor (serial, options) {
@@ -19,9 +18,10 @@ class ATCommand extends EventEmitter {
     this.job = null;
     this.queue = [];
     this.serial = serial;
-    this.data = '';
+    this.buffer = '';
     this.lineHandlers = {};
     this.responseHandlers = [];
+    this.paused = false;
     if (options) {
       this.debug = options.debug;
     }
@@ -30,10 +30,11 @@ class ATCommand extends EventEmitter {
       if (this.debug) {
         print(s);
       }
-      this.data += s;
-      this.processResponseHandlers();
-      this.processLineHandlers();
-      // process jobs in queue
+      this.buffer += s;
+      if (!this.paused) {
+        this.processResponseHandlers();
+        this.processLineHandlers();
+      }
       this.processJobs();
     }
     this.serial.on('data', this.handler);
@@ -45,16 +46,17 @@ class ATCommand extends EventEmitter {
   iterateLines (handler) {
     var sp = 0;
     var ep = 0;
-    while (ep < this.data.length) {
-      if (this.data[ep] === '\n') {
-        var l = this.data.substr(sp, ep - sp + 1).trim();
+    while (ep < this.buffer.length) {
+      if (this.buffer[ep] === '\n') {
+        var l = this.buffer.substr(sp, ep - sp + 1).trim();
         var handled = handler(l);
         if (handled) {
-          this.data = this.data.substr(0, sp) + this.data.substr(ep + 1);
+          this.buffer = this.buffer.substr(0, sp) + this.buffer.substr(ep + 1);
+          ep = sp;
+        } else {
+          sp = ep + 1;
           ep = sp;
         }
-        sp = ep + 1;
-        ep = sp;
       } else {
         ep++;
       }
@@ -66,15 +68,32 @@ class ATCommand extends EventEmitter {
    * @return {number} Position of the end of matched line + 1.
    */
   hasLine(line) {
-    if (this.data.startsWith(line + '\r\n')) {
+    if (this.buffer.startsWith(line + '\r\n')) {
       return line.length + 2;
     } else {
-      var idx = this.data.indexOf('\r\n' + line + '\r\n');
+      var idx = this.buffer.indexOf('\r\n' + line + '\r\n');
       if (idx > -1) {
         return idx + line.length + 4;
       }
     }
     return 0;
+  }
+
+  /**
+   * Pause to run process handlers
+   */
+  pause () {
+    this.paused = true;
+  }
+  
+  /**
+   * Resume to run process handlers
+   */
+  resume () {
+    this.paused = false;
+    this.processResponseHandlers();
+    this.processLineHandlers();
+    this.buffer = '';
   }
   
   /**
@@ -96,8 +115,8 @@ class ATCommand extends EventEmitter {
 
   /**
    * Add a response handler. A Reponse handler should return the rest of 
-   *     data after elimination of handled data.
-   * @param {function(data:string)} handler
+   *     response buffer after elimination of handled data.
+   * @param {function(buffer:string)} handler
    */
   addResponseHandler(handler) {
     this.responseHandlers.push(handler)
@@ -119,7 +138,7 @@ class ATCommand extends EventEmitter {
    */
   processResponseHandlers() {
     this.responseHandlers.forEach(fn => {
-      this.data = fn(this.data);
+      this.buffer = fn(this.buffer);
     })
   }
 
@@ -137,19 +156,17 @@ class ATCommand extends EventEmitter {
         }
       }
       return false;      
-    })    
+    });
   }
 
   /**
    * Create a job to send AT command
    *
    * @param {string} cmd  AT command
-   * @param {function(err:Error,res:any)} cb  Response callback
-   * @param {Array<string>|function|number} match  A function to parse data from serial.
-   *     It returns falsy value if response is not completed,
-   *     Otherwise, it returns response data or Error object
+   * @param {function(result:string, response:string)} cb  Response callback
+   * @param {Array<string>|function|number} match
    * @param {object} options
-   *   - timeout {number} Set timeout. Default: 10000. (10s).
+   *   - timeout {number} Set timeout. Default: 20000. (20s).
    *   - prepend {boolean} Add the job to first. Default: false.
    *   - clean {boolean} Clean the response data before sending AT command.
    */
@@ -160,7 +177,7 @@ class ATCommand extends EventEmitter {
       cb: cb,
       match: match || ['OK', 'ERROR', 'FAIL'],
       running: false,
-      timeout: options.timeout || 10000,
+      timeout: options.timeout || 20000,
       prepend: options.prepend ? true : false,
       clean: options.clean ? true : false
     }
@@ -181,13 +198,13 @@ class ATCommand extends EventEmitter {
       this.job = this.queue.shift();
       if (this.job) {
         if (this.job.clean) {
-          this.data = ''
+          this.buffer = ''
         }
         this.serial.write(this.job.cmd + '\r\n');
         this.job.running = true;
         this.job.timer = setTimeout(() => {
           if (this.job && this.job.running) {
-            if (this.job.cb) this.job.cb(null, 'TIMEOUT');
+            if (this.job.cb) this.job.cb('TIMEOUT');
             this.next();
           }
         }, this.job.timeout);
@@ -204,14 +221,16 @@ class ATCommand extends EventEmitter {
           for (var i = 0; i < match.length; i++) {
             var idx = this.hasLine(match[i]);
             if (idx) {
-              res = this.data.substr(0, idx);
+              res = this.buffer.substr(0, idx);
               result = match[i];
-              this.data = this.data.substr(idx);
+              if (!this.paused) {
+                this.buffer = this.buffer.substr(idx);
+              }
               break;
             }
           }
           if (result) {
-            this.completeJob(this.job, res, result);
+            this.completeJob(this.job, result, res);
             this.next();
           }
         } else if (typeof match === 'number') {
@@ -220,18 +239,22 @@ class ATCommand extends EventEmitter {
               clearTimeout(this.job.timer);
             }
             this.job.waiting = setTimeout(() => {
-              var res = this.data;
-              this.data = '';
-              this.completeJob(this.job, res);
+              var res = this.buffer;
+              if (!this.paused) {
+                this.buffer = '';
+              }
+              this.completeJob(this.job, null, res);
               this.next();
             }, match);
           }
         } else if (typeof match === 'function') {
-          idx = match(this.data);
+          idx = match(this.buffer);
           if (idx > 0) {
-            res = this.data.substr(0, idx);
-            this.data = this.data.substr(idx);
-            this.completeJob(this.job, res);
+            res = this.buffer.substr(0, idx);
+            if (!this.paused) {
+              this.buffer = this.buffer.substr(idx);
+            }
+            this.completeJob(this.job, null, res);
             this.next();
           }
         }
@@ -245,14 +268,14 @@ class ATCommand extends EventEmitter {
    * Complete the job
    *
    * @param {object} job
-   * @param {string} response
    * @param {string} result
+   * @param {string} response
    */
-  completeJob (job, response, result) {
+  completeJob (job, result, response) {
     if (job.timer) {
       clearTimeout(job.timer);
     }
-    if (job.cb) job.cb(response, result);
+    if (job.cb) job.cb(result, response);
     job.running = false;
   }
   
