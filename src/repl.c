@@ -167,26 +167,14 @@ static void run_code() {
     /* evaluate code */
     jerry_value_t parsed_code = jerry_parse(NULL, 0, (const jerry_char_t *) data, strlen(data), JERRY_PARSE_STRICT_MODE);
     if (jerry_value_is_error(parsed_code)) {
-      repl_set_output(REPL_OUTPUT_ERROR);
-      jerry_value_t parse_err = jerry_get_value_from_error(parsed_code, false);
-      repl_print_value(parse_err);
-      repl_println();
-      jerry_release_value(parse_err);
-      repl_set_output(REPL_OUTPUT_NORMAL);
+      jerryxx_print_error(parsed_code, false);
     } else {
       jerry_value_t ret_value = jerry_run(parsed_code);
       if (jerry_value_is_error(ret_value)) {
-        repl_set_output(REPL_OUTPUT_ERROR);
-        jerry_value_t err = jerry_get_value_from_error(ret_value, false);
-        repl_print_value(err);
-        repl_println();
-        jerry_release_value(err);
-        repl_set_output(REPL_OUTPUT_NORMAL);
+        jerryxx_print_error(ret_value, false);
       } else {
-        repl_set_output(REPL_OUTPUT_INFO);
-        repl_print_value(ret_value);
+        repl_pretty_print(0, 3, ret_value);
         repl_println();
-        repl_set_output(REPL_OUTPUT_ERROR);
       }
       jerry_release_value(ret_value);
     }
@@ -633,6 +621,259 @@ void repl_set_output(repl_output_t output) {
     case REPL_OUTPUT_ERROR:
       tty_printf("\33[31m"); /* set to red color */
       break;
+  }
+}
+
+static void repl_pretty_print_indent(uint8_t indent) {
+  for (uint8_t i = 0; i < indent; i++)
+    tty_putc(' ');
+}
+
+struct repl_pretty_print_object_foreach_data {
+  uint8_t indent;
+  uint8_t depth;
+  uint16_t count;
+};
+
+static bool repl_pretty_print_object_foreach_count(const jerry_value_t prop_name,
+    const jerry_value_t prop_value, void *user_data_p) {
+  if (jerry_value_is_string (prop_name)) {
+    struct repl_pretty_print_object_foreach_data *data = 
+        (struct repl_pretty_print_object_foreach_data *) user_data_p;
+    data->count++;
+  }
+  return true;
+}
+
+static bool repl_pretty_print_object_foreach(const jerry_value_t prop_name,
+    const jerry_value_t prop_value, void *user_data_p) {
+  if (jerry_value_is_string (prop_name)) {
+    jerry_char_t buf[128];
+    jerry_size_t len = jerry_substring_to_char_buffer (prop_name, 0, 127, buf, 127);
+    buf[len] = '\0';
+    struct repl_pretty_print_object_foreach_data *data = 
+        (struct repl_pretty_print_object_foreach_data *) user_data_p;
+    repl_pretty_print_indent(data->indent + 2);
+    tty_printf((const char *) buf);
+    tty_printf(": ");
+    repl_pretty_print(data->indent + 2, data->depth - 1, prop_value);
+    if (data->count > 1) {
+      tty_printf(",");
+    }
+    tty_printf("\r\n");
+    data->count--;
+  }
+  return true;
+}
+
+void repl_pretty_print(uint8_t indent, uint8_t depth, jerry_value_t value) {
+  if (depth < 0) {
+    return;
+  } else if (depth == 0) {
+    if (jerry_value_is_abort(value)) {
+      tty_printf("\33[31m"); // red
+      tty_printf("[Abort]");
+      tty_printf("\33[0m");
+    } else if (jerry_value_is_array(value)) {
+      tty_printf("\33[96m"); // cyan
+      tty_printf("[Array]");
+      tty_printf("\33[0m");
+    } else if (jerry_value_is_typedarray(value)) {
+      tty_printf("\33[96m"); // cyan
+      jerry_typedarray_type_t type = jerry_get_typedarray_type(value);
+      switch (type) {
+      case JERRY_TYPEDARRAY_UINT8:
+        tty_printf("[Uint8Array]");
+        break;
+      case JERRY_TYPEDARRAY_UINT8CLAMPED:
+        tty_printf("[Uint8ClampedArray]");
+        break;
+      case JERRY_TYPEDARRAY_INT8:
+        tty_printf("[Int8Array]");
+        break;
+      case JERRY_TYPEDARRAY_UINT16:
+        tty_printf("[Uint16Array]");
+        break;
+      case JERRY_TYPEDARRAY_INT16:
+        tty_printf("[Int16Array]");
+        break;
+      case JERRY_TYPEDARRAY_UINT32:
+        tty_printf("[Uint32Array]");
+        break;
+      case JERRY_TYPEDARRAY_INT32:
+        tty_printf("[Int32Array]");
+        break;
+      case JERRY_TYPEDARRAY_FLOAT32:
+        tty_printf("[Float32Array]");
+        break;
+      case JERRY_TYPEDARRAY_FLOAT64:
+        tty_printf("[Float64Array]");
+        break;
+      default:
+        tty_printf("[TypedArray]");
+        break;
+      }
+      tty_printf("\33[0m");
+    } else if (jerry_value_is_arraybuffer(value)) {      
+      jerry_length_t len = jerry_get_arraybuffer_byte_length(value);
+      tty_printf("ArrayBuffer { byteLength:");
+      tty_printf("\33[95m"); // magenta
+      tty_printf("%d", len);
+      tty_printf("\33[0m");
+      tty_printf("}");
+    } else if (jerry_value_is_boolean(value)) {
+      tty_printf("\33[95m"); // magenta
+      repl_print_value(value);
+      tty_printf("\33[0m");
+    } else if (jerry_value_is_constructor(value)) {
+      tty_printf("\33[96m"); // cyan
+      tty_printf("[Function]");
+      tty_printf("\33[0m");
+    } else if (jerry_value_is_dataview(value)) {
+      tty_printf("\33[96m"); // cyan
+      tty_printf("[DataView]");
+      tty_printf("\33[0m");
+    } else if (jerry_value_is_error(value)) {
+      tty_printf("\33[31m"); // red
+      tty_printf("[Error]");
+      tty_printf("\33[0m");
+    } else if (jerry_value_is_function(value)) {
+      tty_printf("\33[96m"); // cyan
+      tty_printf("[Function]");
+      tty_printf("\33[0m");
+    } else if (jerry_value_is_number(value)) {
+      tty_printf("\33[95m"); // magenda
+      repl_print_value(value);
+      tty_printf("\33[0m");
+    } else if (jerry_value_is_null(value)) {
+      tty_printf("\33[90m"); // dark gray
+      tty_printf("null");
+      tty_printf("\33[0m");
+    } else if (jerry_value_is_promise(value)) {
+      tty_printf("\33[96m"); // cyan
+      tty_printf("[Promise]");
+      tty_printf("\33[0m");
+    } else if (jerry_value_is_object(value)) {
+      tty_printf("\33[96m"); // cyan
+      tty_printf("[Object]");
+      tty_printf("\33[0m");
+    } else if (jerry_value_is_string(value)) {
+      tty_printf("\33[93m"); // yellow
+      tty_printf("'");
+      repl_print_value(value);
+      tty_printf("'");
+      tty_printf("\33[0m");
+    } else if (jerry_value_is_symbol(value)) {
+      tty_printf("\33[96m"); // cyan
+      tty_printf("[Symbol]");
+      tty_printf("\33[0m");
+    } else if (jerry_value_is_undefined(value)) {
+      tty_printf("\33[90m"); // dark gray
+      tty_printf("undefined");
+      tty_printf("\33[0m");
+    }
+  } else {
+    if (jerry_value_is_abort(value)) {
+      repl_pretty_print(indent, 0, value);
+    } else if (jerry_value_is_array(value)) {
+      uint32_t len = jerry_get_array_length (value);
+      tty_printf("[");
+      if (len > 0) {
+        tty_printf("\r\n");
+        for (int i = 0; i < len; i++) {
+          jerry_value_t item = jerry_get_property_by_index(value, i);
+          repl_pretty_print_indent(indent + 2);
+          repl_pretty_print(indent + 2, depth - 1, item);
+          jerry_release_value(item);
+          if (i < len - 1) tty_printf(",");
+          tty_printf("\r\n");
+        }
+        repl_pretty_print_indent(indent);
+      }
+      tty_printf("]");
+    } else if (jerry_value_is_typedarray(value)) {
+      jerry_typedarray_type_t type = jerry_get_typedarray_type(value);
+      switch (type) {
+      case JERRY_TYPEDARRAY_UINT8:
+        tty_printf("Uint8Array [");
+        break;
+      case JERRY_TYPEDARRAY_UINT8CLAMPED:
+        tty_printf("Uint8ClampedArray [");
+        break;
+      case JERRY_TYPEDARRAY_INT8:
+        tty_printf("Int8Array [");
+        break;
+      case JERRY_TYPEDARRAY_UINT16:
+        tty_printf("Uint16Array [");
+        break;
+      case JERRY_TYPEDARRAY_INT16:
+        tty_printf("Int16Array [");
+        break;
+      case JERRY_TYPEDARRAY_UINT32:
+        tty_printf("Uint32Array [");
+        break;
+      case JERRY_TYPEDARRAY_INT32:
+        tty_printf("Int32Array [");
+        break;
+      case JERRY_TYPEDARRAY_FLOAT32:
+        tty_printf("Float32Array [");
+        break;
+      case JERRY_TYPEDARRAY_FLOAT64:
+        tty_printf("Float64Array [");
+        break;
+      default:
+        tty_printf("TypedArray [");
+        break;
+      }
+      uint32_t len = jerry_get_typedarray_length (value);
+      if (len > 0) {
+        tty_printf("\r\n");
+        for (int i = 0; i < len; i++) {
+          jerry_value_t item = jerry_get_property_by_index(value, i);
+          repl_pretty_print_indent(indent + 2);
+          repl_pretty_print(indent + 2, depth - 1, item);
+          if (i < len - 1) tty_printf(",");
+          tty_printf("\r\n");
+          jerry_release_value(item);
+        }
+        repl_pretty_print_indent(indent);
+      }
+      tty_printf("]");
+    } else if (jerry_value_is_arraybuffer(value)) {
+      repl_pretty_print(indent, 0, value);
+    } else if (jerry_value_is_boolean(value)) {
+      repl_pretty_print(indent, 0, value);
+    } else if (jerry_value_is_constructor(value)) {
+      repl_pretty_print(indent, 0, value);
+    } else if (jerry_value_is_dataview(value)) {
+      repl_pretty_print(indent, 0, value);
+    } else if (jerry_value_is_error(value)) {
+      repl_pretty_print(indent, 0, value);
+    } else if (jerry_value_is_function(value)) {
+      repl_pretty_print(indent, 0, value);
+    } else if (jerry_value_is_number(value)) {
+      repl_pretty_print(indent, 0, value);
+    } else if (jerry_value_is_null(value)) {
+      repl_pretty_print(indent, 0, value);
+    } else if (jerry_value_is_promise(value)) {
+      repl_pretty_print(indent, 0, value);
+    } else if (jerry_value_is_object(value)) {
+      struct repl_pretty_print_object_foreach_data foreach_data = {indent, depth};
+      jerry_foreach_object_property(value, repl_pretty_print_object_foreach_count, &foreach_data);
+      tty_printf("{");
+      if (foreach_data.count > 0) {
+        tty_printf("\r\n");
+        jerry_foreach_object_property(value, repl_pretty_print_object_foreach, &foreach_data);
+        repl_pretty_print_indent(indent);
+      }
+      tty_printf("}");
+    } else if (jerry_value_is_string(value)) {
+      repl_pretty_print(indent, 0, value);
+    } else if (jerry_value_is_symbol(value)) {
+      repl_pretty_print(indent, 0, value);
+    } else if (jerry_value_is_undefined(value)) {
+      repl_pretty_print(indent, 0, value);
+    }
   }
 }
 

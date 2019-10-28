@@ -110,7 +110,7 @@ void jerryxx_print_error (jerry_value_t value, bool print_stacktrace) {
   repl_set_output(REPL_OUTPUT_NORMAL);
   jerry_release_value (err_str);
   // print stack trace
-  if (jerry_value_is_object (error_value)) {
+  if (print_stacktrace && jerry_value_is_object (error_value)) {
     jerry_value_t stack_str = jerry_create_string ((const jerry_char_t *) "stack");
     jerry_value_t backtrace_val = jerry_get_property (error_value, stack_str);
     jerry_release_value (stack_str);

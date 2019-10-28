@@ -375,7 +375,11 @@ JERRYXX_FUN(console_log_fn) {
       if (i > 0) {
         repl_printf(" ");
       }
-      repl_print_value(JERRYXX_GET_ARG(i));
+      if (jerry_value_is_string(JERRYXX_GET_ARG(i))) {
+        repl_print_value(JERRYXX_GET_ARG(i));
+      } else {
+        repl_pretty_print(0, 3, JERRYXX_GET_ARG(i));
+      }
     }
     repl_println();
   }
@@ -384,17 +388,19 @@ JERRYXX_FUN(console_log_fn) {
 
 JERRYXX_FUN(console_error_fn) {
   if (JERRYXX_GET_ARG_COUNT > 0) {
-    repl_set_output(REPL_OUTPUT_ERROR);
     repl_printf("\33[2K\r"); // set column to 0
-    repl_printf("\33[31m"); // red
+    repl_printf("\33[0m"); // set to normal color
     for (int i = 0; i < JERRYXX_GET_ARG_COUNT; i++) {
       if (i > 0) {
         repl_printf(" ");
       }
-      repl_print_value(JERRYXX_GET_ARG(i));
+      if (jerry_value_is_string(JERRYXX_GET_ARG(i))) {
+        repl_print_value(JERRYXX_GET_ARG(i));
+      } else {
+        repl_pretty_print(0, 3, JERRYXX_GET_ARG(i));
+      }
     }
     repl_println();
-    repl_set_output(REPL_OUTPUT_NORMAL);
   }
   return jerry_create_undefined();
 }
@@ -603,7 +609,11 @@ JERRYXX_FUN(print_fn) {
       if (i > 0) {
         repl_printf(" ");
       }
-      repl_print_value(JERRYXX_GET_ARG(i));
+      if (jerry_value_is_string(JERRYXX_GET_ARG(i))) {
+        repl_print_value(JERRYXX_GET_ARG(i));
+      } else {
+        repl_pretty_print(0, 3, JERRYXX_GET_ARG(i));
+      }
     }
   }
   return jerry_create_undefined();

@@ -66,6 +66,7 @@ void repl_print_prompt();
 #define repl_printf(format,args...) tty_printf(format, ## args)
 #define repl_print_value(value) jerryxx_print_value(value)
 #define repl_putc(ch) tty_putc(ch)
+void repl_pretty_print(uint8_t indent, uint8_t depth, jerry_value_t value);
 void repl_println();
 
 #endif /* __REPL_H */
