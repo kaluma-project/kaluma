@@ -22,6 +22,7 @@
 #ifndef __MAGIC_STRINGS_H
 #define __MAGIC_STRINGS_H
 
+/* global */
 #define MSTR_GLOBAL "global"
 #define MSTR_HIGH "HIGH"
 #define MSTR_LOW "LOW"
@@ -77,5 +78,40 @@
 #define MSTR_ADC "adc"
 #define MSTR_ID "id"
 #define MSTR_EXPORTS "exports"
+
+/* netdev */
+#define MSTR___NETDEV "__netdev"
+#define MSTR_FD "fd"
+#define MSTR_PTCL "ptcl"
+#define MSTR_STREAM "STREAM"
+#define MSTR_DGRAM "DGRAM"
+#define MSTR_STATE "state"
+#define MSTR_LADDR "laddr"
+#define MSTR_LPORT "lport"
+#define MSTR_RADDR "raddr"
+#define MSTR_RPORT "rport"
+#define MSTR_CONNECT_CB "connect_cb"
+#define MSTR_CLOSE_CB "close_cb"
+#define MSTR_READ_CB "read_cb"
+#define MSTR_ACCEPT_CB "accept_cb"
+#define MSTR_SHUTDOWN_CB "shutdown_cb"
+#define MSTR_ERRNO "errno"
+#define MSTR_MAC "mac"
+#define MSTR_IP "ip"
+#define MSTR_SOCKET "socket"
+#define MSTR_DOMAIN "domain"
+#define MSTR_PROTOCOL "protocol"
+#define MSTR_GET "get"
+#define MSTR_CONNECT "connect"
+#define MSTR_ADDR "addr"
+#define MSTR_PORT "port"
+#define MSTR_CALLBACK "callback"
+#define MSTR_WRITE "write"
+#define MSTR_CLOSE "close"
+#define MSTR_SHUTDOWN "shutdown"
+#define MSTR_BIND "bind"
+#define MSTR_LISTEN "listen"
+
+/* ieee80211dev */
 
 #endif /* __MAGIC_STRINGS_H */

@@ -19,17 +19,32 @@
  * SOFTWARE.
  */
 
-#ifndef __STARTUP_MAGIC_STRINGS_H
-#define __STARTUP_MAGIC_STRINGS_H
+#ifndef __NET_MAGIC_STRINGS_H
+#define __NET_MAGIC_STRINGS_H
 
-#define MSTR_STARTUP_MODULE "Module"
-#define MSTR_STARTUP_LOAD_BUILTIN "loadBuiltin"
-#define MSTR_STARTUP_PRINT "print"
-#define MSTR_STARTUP_REQUIRE "require"
-#define MSTR_STARTUP_DEVICE_MANAGER "DeviceManager"
-#define MSTR_STARTUP_REGISTER "register"
-#define MSTR_STARTUP_UNREGISTER "unregister"
-#define MSTR_STARTUP_GET "get"
-#define MSTR_STARTUP_SYSTEM_ERROR "SystemError"
+#define MSTR_NET_NET "net"
+#define MSTR_NET_CREATE_CONNECTION "createConnection"
+#define MSTR_NET_CONNECT "connect"
+#define MSTR_NET_CREATE_SERVER "createServer"
+#define MSTR_NET_SOCKET "Socket"
+#define MSTR_NET__DEV "_dev"
+#define MSTR_NET_LOCAL_ADDRESS "localAddress"
+#define MSTR_NET_LOCAL_PORT "localPort"
+#define MSTR_NET_REMOTE_ADDRESS "remoteAddress"
+#define MSTR_NET_REMOTE_PORT "remotePort"
+#define MSTR_NET__SOCKET "_socket"
+#define MSTR_NET__ON_CONNECT "_onConnect"
+#define MSTR_NET__DESTROY "_destroy"
+#define MSTR_NET__WRITE "_write"
+#define MSTR_NET__FINISH "_finish"
+#define MSTR_NET_CONNECTION "connection"
+#define MSTR_NET_READY "ready"
+#define MSTR_NET_ERROR "error"
+#define MSTR_NET_LISTENING "listening"
+#define MSTR_NET_SERVER "Server"
+#define MSTR_NET_LISTEN "listen"
+#define MSTR_NET_CLOSE "close"
+#define MSTR_NET_CONNECT_LISTENER "connectListener"
+#define MSTR_NET_CONNECTION_LISTENER "connectionListener"
 
-#endif /* __STARTUP_MAGIC_STRINGS_H */
+#endif /* __NET_MAGIC_STRINGS_H */

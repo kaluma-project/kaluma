@@ -27,7 +27,18 @@ Module.prototype.loadBuiltin = function () {
   fn(this.exports, Module.require, this);
 }
 
+class SystemError extends Error {
+  constructor(errno, code, message) {
+    super(message);
+    this.name = 'SystemError';
+    this.errno = errno;
+    this.code = code;
+    this.message = `(errno:${this.errno})`;
+  }
+}
+
 global.require = Module.require;
+global.SystemError = SystemError;
 
 /**
  * Board object
