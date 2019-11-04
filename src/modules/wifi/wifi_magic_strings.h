@@ -19,30 +19,19 @@
  * SOFTWARE.
  */
 
-#ifndef __NET_MAGIC_STRINGS_H
-#define __NET_MAGIC_STRINGS_H
+#ifndef __WIFI_MAGIC_STRINGS_H
+#define __WIFI_MAGIC_STRINGS_H
 
-#define MSTR_NET_NET "net"
-#define MSTR_NET_CREATE_CONNECTION "createConnection"
-#define MSTR_NET_CONNECT "connect"
-#define MSTR_NET_CREATE_SERVER "createServer"
-#define MSTR_NET_SOCKET "Socket"
-#define MSTR_NET__DEV "_dev"
-#define MSTR_NET__FD "_fd"
-#define MSTR_NET_LOCAL_ADDRESS "localAddress"
-#define MSTR_NET_LOCAL_PORT "localPort"
-#define MSTR_NET_REMOTE_ADDRESS "remoteAddress"
-#define MSTR_NET_REMOTE_PORT "remotePort"
-#define MSTR_NET__SOCKET "_socket"
-#define MSTR_NET_CONNECT "connect"
-#define MSTR_NET__DO_DESTROY "_doDestroy"
-#define MSTR_NET__DO_WRITE "_doWrite"
-#define MSTR_NET__DO_FINISH "_doFinish"
-#define MSTR_NET_ERROR "error"
-#define MSTR_NET_SERVER "Server"
-#define MSTR_NET_CONNECTION "connection"
-#define MSTR_NET_LISTEN "listen"
-#define MSTR_NET_LISTENING "listening"
-#define MSTR_NET_CLOSE "close"
+#define MSTR_WIFI_WIFI "wifi"
+#define MSTR_WIFI_WIFI_ "WiFi"
+#define MSTR_WIFI__dev "_dev"
+#define MSTR_WIFI_ASSOCIATED "associated"
+#define MSTR_WIFI_CONNECTED "connected"
+#define MSTR_WIFI_DISCONNECTED "disconnected"
+#define MSTR_WIFI_RESET "reset"
+#define MSTR_WIFI_SCAN "scan"
+#define MSTR_WIFI_CONNECT "connect"
+#define MSTR_WIFI_DISCONNECT "disconnect"
+#define MSTR_WIFI_GET_CONNECTION "getConnection"
 
-#endif /* __NET_MAGIC_STRINGS_H */
+#endif /* __WIFI_MAGIC_STRINGS_H */

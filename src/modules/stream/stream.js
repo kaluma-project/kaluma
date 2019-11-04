@@ -6,29 +6,45 @@ var EventEmitter = require('events').EventEmitter;
 class Stream extends EventEmitter {
   constructor () {
     super();
-    this.destroyed = false;    
-  }
-
-  _destroy (cb) {
-    if (cb) cb();
+    this.destroyed = false;
   }
   
-  _onDestroy() {
+  /**
+   * @protected
+   * @abstract
+   * Implement how to destroy the stream
+   * 
+   * @param {Function} callback
+   */  
+  _doDestroy (callback) {} // eslint-disable-line
+
+  /**
+   * @protected
+   * Should be called when after destroyed
+   */
+  _afterDestroy () {
     if (!this.destroyed) {
       this.destroyed = true;
       this.emit('close');
-    }    
+    }
   }
   
   /**
    * Destroy the stream
-   */
+   * 
+   * @return {this}
+   */  
   destroy () {
-    this._destroy(() => {
-      this._onDestroy();
-    })
-    return this;
-  }  
+    if (!this.destroyed) {
+      this._doDestroy((err) => {
+        if (err) {
+          this.emit('error', err);
+        } else {
+          this._afterDestroy();
+        }
+      });      
+    }
+  }
 }
 
 /**
@@ -37,233 +53,190 @@ class Stream extends EventEmitter {
 class Readable extends Stream {
   constructor () {
     super();
-    this._rbuf = '';
-    this.readableFlowing = true;
     this.readableEnded = false;
-    this.readable = false;
   }
-
-  _onEnd () {
+  
+  /**
+   * @protected
+   * Should be called when there is no more data to read.
+   */
+  _afterEnd () {
     if (!this.readableEnded) {
       this.readableEnded = true;
-      this.readableFlowing = false;
-      this.readable = false;
-      this._rbuf = '';
       this.emit('end');
     }
-  }
-
-  _onDestroy () {
-    this._onEnd();
-    super._onDestroy();
-  }
-
-  /**
-   * Return whether stream is paused or not
-   * @return {boolean}
-   */
-  isPaused () {
-    return !this.readableFlowing;
-  }
-  
-  /**
-   * Pause the stream
-   */
-  pause () {
-    this.readableFlowing = false;
-    this.emit('pause');
-  }
-  
-  /**
-   * Resume the stream
-   */
-  resume () {
-    this.readableFlowing = true;
-    this.emit('resume');
   }
 
   /**
    * @protected
    * Push a chunk of data to this readable stream.
-   * This method is only allowed to the descendants.
-   * 
    * @param {string} chunk
-   */
+   * @return {this}
+   */  
   push (chunk) {
-    if (this.readableFlowing && this.listenerCount('data') < 1) {
-      this.readableFlowing = false;
-    }
-    if (this.readableFlowing) {
-      this._rbuf += chunk;
-      this.emit('data', this._rbuf);
-      this._rbuf = '';
-      this.readable = false;
-    } else {
-      this._rbuf += chunk;
-      this.readable = true;
-      this.emit('readable');      
-    }
-  }
-  
-  /**
-   * Read data
-   * 
-   * @param {number} size
-   * @return {string}
-   */
-  read (size) {
-    var chunk = null;
-    if (this._rbuf.length > 0) {
-      if (size > 0) {
-        chunk = this._rbuf.substr(0, size);
-        this._rbuf = this._rbuf.substr(size);
-      } else {
-        chunk = this._rbuf;
-        this._rbuf = '';
-      }
-    }
-    if (this._rbuf.length === 0) {
-      this.readable = false;
-    }
-    return chunk;
+    this.emit('data', chunk);
+    return this;
   }
 }
 
 /**
- * Writable
+ * Writable class
  */
 class Writable extends Stream {
   constructor () {
     super();
-    this._wbuf = ''
-    this.writable = true;
+    this._wbuf = '';
+    this.writableEnded = false;
     this.writableFinished = false;
-    this.destroyed = false;
   }
 
-  _onDestroy () {
-    if (!this.destroyed) {
-      this._wbuf = '';
-      this.writable = false;
+  /**
+   * @protected
+   * @abstract
+   * Implement how to write data on the stream
+   * 
+   * @param {Function} callback
+   */
+  _doWrite (data, callback) {} // eslint-disable-line
+
+  /**
+   * @protected
+   * @abstract
+   * Implement how to finish to write on the stream
+   * 
+   * @param {Function} callback
+   */
+  _doFinish (callback) {} // eslint-disable-line
+
+  
+  /**
+   * @protected
+   * Should be called when after finished
+   */
+  _afterFinish () {
+    if (!this.writableFinished) {
+      this.emit('finish');
       this.writableFinished = true;
-      this.destroyed = true;
-      this.emit('close');
     }
   }
-
+  
   /**
-   * @protected
-   * @param {string} chunk 
-   * @param {Function} cb 
-   */
-  _write (chunk, cb) {}
-
-  /**
-   * @protected
-   * @param {Function} cb
-   */
-  _finish (cb) {}
-    
-  /**
-   * @abstract
-   * Abstrct method for writing a chunk of data to the stream
+   * Write a chunk of data to the stream
    * 
    * @param {string} chunk
    * @param {Function} callback
    * @return {boolean}
    */
   write (chunk, callback) {
-    if (this.writable) {
-      this.writable = false;
-      this._write(chunk, () => {
-        this.afterWrite(callback);
-      })
-    } else {
-      this._wbuf += chunk;
+    if (!this.writableEnded) {
+      if (chunk) {
+        this._wbuf += chunk;
+      }
+      setTimeout(() => this.flush(), 0);
+      if (callback) callback();
     }
-    return this.writable;
+    return this._wbuf.length === 0;
   }
-
+  
   /**
-   * Signals that no more data to write.
+   * Finish to write on the stream.
    * 
    * @param {string} chunk
    * @param {Function} callback
    * @return {Writable}
-   */
+   */  
   end (chunk, callback) {
     if (typeof chunk === 'function') {
-      chunk = undefined;
       callback = chunk;
+      chunk = undefined;
+    }
+    if (chunk) {
+      this._wbuf += chunk;
     }
     if (callback) {
       this.once('finish', callback);
     }
-    if (chunk) {
-      var done = this.write(chunk, () => {
-        if (!this.writableFinished) this.finish();
-      })
-      if (done) {
-        this.finish();
-      }
+    this.writableEnded = true;
+    if (this._wbuf.length > 0) {
+      this.flush();
     } else {
       this.finish();
     }
     return this;
   }
-  
-  afterWrite (callback) {
-    if (this._wbuf.length > 0) {
-      setTimeout(() => {
-        this.write(this._wbuf, callback);
-      }, 0);
-    } else {
-      this.writable = true;
-      if (callback) callback();
-      this.emit('drain');
+
+ /**
+  * @protected
+  * Flush data in internal buffer
+  */  
+  flush () {
+    if (!this.writableFinished) {
+      if (this._wbuf.length > 0) {
+        this._doWrite(this._wbuf, (err) => {
+          if (err) {
+            this.emit('error', err);
+          } else {
+            if (this._wbuf.length > 0) {
+              setTimeout(() => this.flush(), 0);
+            } else {
+              this.emit('drain');
+              this.finish();
+            }
+          }
+        })
+        this._wbuf = '';
+      }
     }
   }
   
-  /**
-   * @projected
-   * Signal finish.
-   */
+ /**
+  * @protected
+  * Finish to write on the stream
+  */
   finish () {
-    this._finish(() => {
-      this.writableFinished = true;
-      this.writable = false;
-      this.emit('finish');          
-    })
-  }  
+    if (this.writableEnded && this._wbuf.length === 0) {
+      this._doFinish((err) => {
+        if (err) {
+          this.emit('error', err);
+        } else {
+          this._afterFinish();
+        }
+      });
+    }
+  }
 }
 
 /**
  * Duplex class
  */
-class Duplex extends Readable {
+class Duplex extends Writable /*, Readable */ {
   constructor () {
     super();
-    this._wbuf = ''
-    this.writable = true;
-    this.writableFinished = false;
+    this.readableEnded = false;
   }
   
-  _onDestroy () {
-    this._onEnd();
-    if (!this.destroyed) {
-      this._wbuf = '';
-      this.writable = false;
-      this.writableFinished = true;
-      this.destroyed = true;
-      this.emit('close');
+  /**
+   * @protected
+   * Should be called when there is no more data to read.
+   */
+  _afterEnd () {
+    if (!this.readableEnded) {
+      this.readableEnded = true;
+      this.emit('end');
     }
   }
-}
 
-Duplex.prototype.write = Writable.prototype.write;
-Duplex.prototype.end = Writable.prototype.end;
-Duplex.prototype.afterWrite = Writable.prototype.afterWrite;
-Duplex.prototype.finish = Writable.prototype.finish;
+  /**
+   * @protected
+   * Push a chunk of data to this readable stream.
+   * @param {string} chunk
+   * @return {this}
+   */  
+  push (chunk) {
+    this.emit('data', chunk);
+    return this;
+  }  
+}
 
 exports.Readable = Readable;
 exports.Writable = Writable;

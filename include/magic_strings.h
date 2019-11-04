@@ -79,8 +79,9 @@
 #define MSTR_ID "id"
 #define MSTR_EXPORTS "exports"
 
-/* netdev */
+/* device drivers: __netdev, __ieee80211dev */
 #define MSTR___NETDEV "__netdev"
+#define MSTR___IEEE80211dev "__ieee80211dev"
 #define MSTR_FD "fd"
 #define MSTR_PTCL "ptcl"
 #define MSTR_STREAM "STREAM"
@@ -111,7 +112,16 @@
 #define MSTR_SHUTDOWN "shutdown"
 #define MSTR_BIND "bind"
 #define MSTR_LISTEN "listen"
-
-/* ieee80211dev */
+#define MSTR_ASSOC_CB "assoc_cb"
+#define MSTR_DISCONNECT_CB "disconnect_cb"
+#define MSTR_RESET "reset"
+#define MSTR_SCAN "scan"
+#define MSTR_DISCONNECT "disconnect"
+#define MSTR_GET_CONNECTION "get_connection"
+#define MSTR_BSSID "bssid"
+#define MSTR_SSID "ssid"
+#define MSTR_SECURITY "security"
+#define MSTR_RSSI "rssi"
+#define MSTR_CHANNEL "channel"
 
 #endif /* __MAGIC_STRINGS_H */

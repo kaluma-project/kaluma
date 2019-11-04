@@ -2,7 +2,7 @@ var EventEmitter = require('events').EventEmitter;
 var stream = require('stream');
 
 if (!global.__netdev) {
-  throw new Error('Network Device Not Found');
+  throw new Error('Network device not found');
 }
 
 /**
@@ -32,22 +32,17 @@ class Socket extends stream.Duplex {
         this.localPort = sck.lport;
         this.remoteAddress = sck.raddr;
         this.remotePort = sck.rport;
-        this._onConnect();
+        this.emit('connect');
+        this.emit('ready');        
       }
-      sck.close_cb = () => { this._onDestroy() }
+      sck.close_cb = () => { this._afterDestroy() }
       sck.read_cb = (data) => { this.push(data) }
-      sck.shutdown_cb = () => { this._onEnd() }
+      sck.shutdown_cb = () => { this._afterEnd() }
     }
   }
 
-  _onConnect () {
-    this.connecting = false;
-    this.emit('connect');
-    this.emit('ready');
-  }
-  
   /**
-   * Establish a connection
+   * Initiates a connection
    * @param {object} options
    *   .host {string}
    *   .port {number}
@@ -56,9 +51,11 @@ class Socket extends stream.Duplex {
    */
   connect (options, connectListener) {
     var fd = this._dev.socket(null, 'STREAM');    
+    if (connectListener) {
+      this.on('connect', connectListener);
+    }
     if (fd > -1) {
       this._socket(fd);
-      this.on('connect', connectListener);
       this._dev.connect(this._fd, options.host, options.port, (err) => {
         if (err) {
           this.emit('error', new SystemError(this._dev.errno));
@@ -73,10 +70,10 @@ class Socket extends stream.Duplex {
    * Destroy the connection
    * @param {function} cb
    */
-  _destroy(cb) {
+  _doDestroy(cb) {
     this._dev.close(this._fd, (err) => {
       if (err) {
-        this.emit('error', new SystemError(this._dev.errno))
+        if (cb) cb(new SystemError(this._dev.errno));
       } else {
         if (cb) cb();
       }
@@ -90,10 +87,10 @@ class Socket extends stream.Duplex {
    * @param {string} chunk
    * @param {function} cb
    */
-  _write (chunk, cb) {
+  _doWrite (chunk, cb) {
     this._dev.write(this._fd, chunk, (err) => {
       if (err) {
-        this.emit('error', new SystemError(this._dev.errno));
+        if (cb) cb(new SystemError(this._dev.errno)); // eslint-disable-line
       } else {
         if (cb) cb();
       }
@@ -106,10 +103,10 @@ class Socket extends stream.Duplex {
    * 
    * @param {function} cb
    */
-  _finish (cb) {
-    this._dev.close(this._fd, (err) => {
+  _doFinish (cb) {
+    this._dev.shutdown(this._fd, 1, (err) => {
       if (err) {
-        this.emit('error', new SystemError(this._dev.errno))
+        if (cb) cb(new SystemError(this._dev.errno)); // eslint-disable-line
       } else {
         if (cb) cb();
       }
@@ -164,9 +161,9 @@ class Server extends EventEmitter {
             if (callback) this.on('listening', callback);
             this.emit('listening');
           }
-        })        
+        })
       }
-    });    
+    });
     return this;
   }
 

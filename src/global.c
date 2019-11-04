@@ -378,7 +378,7 @@ JERRYXX_FUN(console_log_fn) {
       if (jerry_value_is_string(JERRYXX_GET_ARG(i))) {
         repl_print_value(JERRYXX_GET_ARG(i));
       } else {
-        repl_pretty_print(0, 3, JERRYXX_GET_ARG(i));
+        repl_pretty_print(0, 2, JERRYXX_GET_ARG(i));
       }
     }
     repl_println();
@@ -397,7 +397,7 @@ JERRYXX_FUN(console_error_fn) {
       if (jerry_value_is_string(JERRYXX_GET_ARG(i))) {
         repl_print_value(JERRYXX_GET_ARG(i));
       } else {
-        repl_pretty_print(0, 3, JERRYXX_GET_ARG(i));
+        repl_pretty_print(0, 2, JERRYXX_GET_ARG(i));
       }
     }
     repl_println();
@@ -612,7 +612,7 @@ JERRYXX_FUN(print_fn) {
       if (jerry_value_is_string(JERRYXX_GET_ARG(i))) {
         repl_print_value(JERRYXX_GET_ARG(i));
       } else {
-        repl_pretty_print(0, 3, JERRYXX_GET_ARG(i));
+        repl_pretty_print(0, 2, JERRYXX_GET_ARG(i));
       }
     }
   }
