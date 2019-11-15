@@ -101,6 +101,79 @@ JERRYXX_FUN(digital_toggle_fn) {
   return jerry_create_undefined();
 }
 
+JERRYXX_FUN(pulse_read_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
+  JERRYXX_CHECK_ARG_NUMBER(1, "count");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(2, "timeout");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(3, "startState");
+  uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
+  if (gpio_set_io_mode(pin, GPIO_IO_MODE_INPUT) == GPIOPORT_ERROR) {
+    char errmsg[255];
+    sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
+  }
+  uint8_t count;
+  if (JERRYXX_GET_ARG_NUMBER(1) > 128)
+    count = 128; /* MAX is 128 */
+  else
+    count = (uint8_t) JERRYXX_GET_ARG_NUMBER(1);
+  uint32_t timeout = JERRYXX_GET_ARG_NUMBER_OPT(2, 5000000U); /* Default is 5s */
+  if (timeout > 40000000U) { /* MAX 40s */
+    timeout = 40000000U;
+  }
+  uint8_t state = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(3, 2); /* 2 means undefined. */
+  uint16_t *buf = malloc(256); /* MAX is 128 */
+
+  count = pulse_read(pin, state, buf, count, timeout);
+  free(buf);
+  if (count) {
+    jerry_value_t output_array = jerry_create_array(count);
+    for (int i = 0; i < count; i++) {
+      jerry_value_t val = jerry_create_number(buf[i]);
+      jerry_release_value(jerry_set_property_by_index(output_array, i, val));
+      jerry_release_value(val);
+    }
+    return output_array;
+  }
+  return jerry_create_null();
+}
+
+JERRYXX_FUN(pulse_write_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
+  JERRYXX_CHECK_ARG_NUMBER(1, "value");
+  JERRYXX_CHECK_ARG(2, "interval")
+  uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
+  if (gpio_set_io_mode(pin, GPIO_IO_MODE_OUTPUT) == GPIOPORT_ERROR) {
+    char errmsg[255];
+    sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
+  }
+  size_t length = 0;
+  uint8_t value = (uint8_t) JERRYXX_GET_ARG_NUMBER(1);
+  jerry_value_t intervalArr = JERRYXX_GET_ARG(2);
+  if (jerry_value_is_array(intervalArr)) { /* for Array<number> */
+    length = jerry_get_array_length(intervalArr);
+    uint16_t buf[length];
+    for (int i = 0; i < length; i++) {
+      jerry_value_t item = jerry_get_property_by_index(intervalArr, i);
+      if (jerry_value_is_number(item)) {
+        if (jerry_get_number_value(item) > 0xFFFFU)
+          buf[i] = 0xFFFF;
+        else
+          buf[i] = (uint16_t) jerry_get_number_value(item);
+      } else {
+        buf[i] = 0; // write 0 for non-number item.
+      }
+    }
+    pulse_write(pin, value, buf, length);
+  } else {
+    char errmsg[255];
+    sprintf(errmsg, "The interval is not an array type");
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
+  }
+  return jerry_create_number(length);
+}
+
 static void watch_close_cb(io_handle_t *handle) {
   free(handle);
 }
@@ -168,6 +241,8 @@ static void register_global_digital_io() {
   jerryxx_set_property_function(global, MSTR_DIGITAL_READ, digital_read_fn);
   jerryxx_set_property_function(global, MSTR_DIGITAL_WRITE, digital_write_fn);
   jerryxx_set_property_function(global, MSTR_DIGITAL_TOGGLE, digital_toggle_fn);
+  jerryxx_set_property_function(global, MSTR_PULSE_READ, pulse_read_fn);
+  jerryxx_set_property_function(global, MSTR_PULSE_WRITE, pulse_write_fn);
   jerryxx_set_property_function(global, MSTR_SET_WATCH, set_watch_fn);
   jerryxx_set_property_function(global, MSTR_CLEAR_WATCH, clear_watch_fn);
   jerry_release_value(global);

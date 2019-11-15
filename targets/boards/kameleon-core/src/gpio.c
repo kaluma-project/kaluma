@@ -54,6 +54,7 @@ const struct {
    {GPIOA, GPIO_PIN_4},     // 21 (BUTTON)
 };
 
+static uint32_t microseconds_cycle;
 
 /**
  * Initialize all GPIO when system started
@@ -62,6 +63,13 @@ void gpio_init() {
   HAL_GPIO_DeInit(GPIOA, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_9|GPIO_PIN_10);
   HAL_GPIO_DeInit(GPIOB, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_12);
   HAL_GPIO_DeInit(GPIOC, GPIO_PIN_15);
+
+  /** micro seconds timer init.
+  */
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+  DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+  DWT->CYCCNT = 0;
+  microseconds_cycle = HAL_RCC_GetHCLKFreq() / 1000000; /* 96 */
 }
 
 /**
@@ -117,3 +125,93 @@ int gpio_toggle(uint8_t pin) {
   return 0;
 }
 
+
+/**
+ * Return MAX of the micro seconde counter 44739242
+*/
+__STATIC_INLINE uint32_t micro_maxtime() {
+  return (0xFFFFFFFFU / microseconds_cycle);
+}
+/**
+ * Return micro seconde counter
+*/
+__STATIC_INLINE uint32_t micro_gettime() {
+  return (DWT->CYCCNT / microseconds_cycle);
+}
+
+/**
+ * micro secoded delay
+*/
+void micro_delay(uint32_t usec) {
+  uint32_t time_diff;
+  uint32_t start = DWT->CYCCNT;
+  do {
+    uint32_t now = DWT->CYCCNT;
+    if (now >= start)
+      time_diff = now - start;
+    else
+      time_diff = (0xFFFFFFFFU - start) + now;
+  } while (time_diff / microseconds_cycle < usec);
+}
+
+/**
+ * make pulse on the GPIO pin.
+*/
+int pulse_write(uint8_t pin, uint8_t state, uint16_t *arr, uint8_t length) {
+  uint8_t cnt;
+  uint16_t delay;
+  GPIO_PinState pin_state = (state == GPIO_LOW) ? GPIO_PIN_RESET : GPIO_PIN_SET;
+  HAL_GPIO_WritePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin, pin_state);
+  for (cnt = 0; cnt < length; cnt++) {
+    delay = arr[cnt];
+    micro_delay(delay);
+    HAL_GPIO_TogglePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
+  }
+  return 0;
+}
+
+uint8_t check_timeout(uint32_t start, uint32_t timeout) {
+  uint32_t tout, now;
+  now = micro_gettime();
+  if (now >= start)
+    tout = now - start;
+  else
+    tout = (micro_maxtime() - start) + now;
+  if (tout > timeout)
+    return 1;
+  return 0;
+}
+
+/**
+ * Read pulse signal on the GPIO pin.
+*/
+int pulse_read(uint8_t pin, uint8_t state, uint16_t *arr, uint8_t length, uint32_t timeout) {
+  uint8_t cnt = 0;
+  uint32_t start, last, now;
+  GPIO_PinState pin_state;
+  GPIO_PinState pre_pin_state = HAL_GPIO_ReadPin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
+  start = micro_gettime();
+  while ((state < 2) && (pre_pin_state != state)) {
+    if (check_timeout(start, timeout))
+      return 0;
+    pre_pin_state = HAL_GPIO_ReadPin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
+  }
+  start = micro_gettime();
+  last = start;
+  do {
+    pin_state = HAL_GPIO_ReadPin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
+    now = micro_gettime();
+    if (pin_state != pre_pin_state) {
+      pre_pin_state = pin_state;
+      if (now >= last)
+        arr[cnt++] = now - last;
+      else
+        arr[cnt++] = (micro_maxtime() - last) + now;
+      last = now;
+    } else {
+      if (check_timeout(start, timeout))
+        return cnt;
+    }
+  } while (cnt < length);
+  return cnt;
+}

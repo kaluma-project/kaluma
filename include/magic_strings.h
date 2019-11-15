@@ -35,6 +35,8 @@
 #define MSTR_DIGITAL_READ "digitalRead"
 #define MSTR_DIGITAL_WRITE "digitalWrite"
 #define MSTR_DIGITAL_TOGGLE "digitalToggle"
+#define MSTR_PULSE_READ "pulseRead"
+#define MSTR_PULSE_WRITE "pulseWrite"
 #define MSTR_SET_WATCH "setWatch"
 #define MSTR_CLEAR_WATCH "clearWatch"
 #define MSTR_ANALOG_READ "analogRead"

@@ -59,5 +59,7 @@ int gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode);
 int gpio_write(uint8_t pin, uint8_t value);
 int gpio_toggle(uint8_t pin);
 int gpio_read(uint8_t pin);
+int pulse_write(uint8_t pin, uint8_t state, uint16_t *arr, uint8_t length);
+int pulse_read(uint8_t pin, uint8_t state, uint16_t *arr, uint8_t length, uint32_t timeout);
 
 #endif /* __GPIO_H */
