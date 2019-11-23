@@ -101,6 +101,55 @@ JERRYXX_FUN(digital_toggle_fn) {
   return jerry_create_undefined();
 }
 
+/**
+ * Timeout check function
+*/
+uint8_t check_timeout(uint32_t start, uint32_t timeout) {
+  uint32_t tout, now;
+  now = micro_gettime();
+  if (now >= start)
+    tout = now - start;
+  else
+    tout = (micro_maxtime() - start) + now;
+  if (tout > timeout)
+    return 1;
+  return 0;
+}
+
+/**
+ * Read pulse signal on the GPIO pin.
+*/
+int pulse_read(uint8_t pin, uint8_t state, uint16_t *arr, uint8_t length, uint32_t timeout) {
+  uint8_t cnt = 0;
+  uint32_t start, last, now;
+  int pin_state;
+  int pre_pin_state = gpio_read(pin);
+  start = micro_gettime();
+  while ((state < 2) && (pre_pin_state != state)) {
+    if (check_timeout(start, timeout))
+      return 0;
+    pre_pin_state = gpio_read(pin);
+  }
+  start = micro_gettime();
+  last = start;
+  do {
+    pin_state = gpio_read(pin);
+    now = micro_gettime();
+    if (pin_state != pre_pin_state) {
+      pre_pin_state = pin_state;
+      if (now >= last)
+        arr[cnt++] = now - last;
+      else
+        arr[cnt++] = (micro_maxtime() - last) + now;
+      last = now;
+    } else {
+      if (check_timeout(start, timeout))
+        return cnt;
+    }
+  } while (cnt < length);
+  return cnt;
+}
+
 JERRYXX_FUN(pulse_read_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   JERRYXX_CHECK_ARG_NUMBER(1, "count");
@@ -136,6 +185,22 @@ JERRYXX_FUN(pulse_read_fn) {
     return output_array;
   }
   return jerry_create_null();
+}
+
+/**
+ * make pulse on the GPIO pin.
+*/
+int pulse_write(uint8_t pin, uint8_t state, uint16_t *arr, uint8_t length) {
+  uint8_t cnt;
+  uint16_t delay;
+  int pin_state = (state == GPIO_LOW) ? GPIO_LOW : GPIO_HIGH;
+  gpio_write(pin, pin_state);
+  for (cnt = 0; cnt < length; cnt++) {
+    delay = arr[cnt];
+    micro_delay(delay);
+    gpio_toggle(pin);
+  }
+  return 0;
 }
 
 JERRYXX_FUN(pulse_write_fn) {
