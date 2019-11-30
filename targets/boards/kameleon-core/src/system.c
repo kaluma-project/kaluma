@@ -37,6 +37,7 @@ const char system_arch[] = "cortex-m4";
 const char system_platform[] = "unknown";
 
 static uint64_t tick_count;
+static uint32_t microseconds_cycle;
 
 /** GPIO Clock Enable
 */
@@ -96,6 +97,13 @@ void SystemClock_Config() {
 
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+
+  /** micro seconds timer init.
+  */
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+  DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+  DWT->CYCCNT = 0;
+  microseconds_cycle = HAL_RCC_GetHCLKFreq() / 1000000; /* 96 */
 }
 
 /** USB Device Configuation
@@ -188,6 +196,34 @@ void settime(uint64_t time) {
   __set_PRIMASK(1);
  tick_count = time;
   __set_PRIMASK(0);
+}
+
+/**
+ * Return MAX of the micro seconde counter 44739242
+*/
+uint32_t micro_maxtime() {
+  return (0xFFFFFFFFU / microseconds_cycle);
+}
+/**
+ * Return micro seconde counter
+*/
+ uint32_t micro_gettime() {
+  return (DWT->CYCCNT / microseconds_cycle);
+}
+
+/**
+ * micro secoded delay
+*/
+void micro_delay(uint32_t usec) {
+  uint32_t time_diff;
+  uint32_t start = DWT->CYCCNT;
+  do {
+    uint32_t now = DWT->CYCCNT;
+    if (now >= start)
+      time_diff = now - start;
+    else
+      time_diff = (0xFFFFFFFFU - start) + now;
+  } while (time_diff / microseconds_cycle < usec);
 }
 
 /**

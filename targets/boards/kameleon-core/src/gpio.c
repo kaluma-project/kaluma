@@ -54,8 +54,6 @@ const struct {
    {GPIOA, GPIO_PIN_4},     // 21 (BUTTON)
 };
 
-static uint32_t microseconds_cycle;
-
 /**
  * Initialize all GPIO when system started
  */
@@ -63,13 +61,6 @@ void gpio_init() {
   HAL_GPIO_DeInit(GPIOA, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_9|GPIO_PIN_10);
   HAL_GPIO_DeInit(GPIOB, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_12);
   HAL_GPIO_DeInit(GPIOC, GPIO_PIN_15);
-
-  /** micro seconds timer init.
-  */
-  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-  DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
-  DWT->CYCCNT = 0;
-  microseconds_cycle = HAL_RCC_GetHCLKFreq() / 1000000; /* 96 */
 }
 
 /**
@@ -123,33 +114,4 @@ int gpio_toggle(uint8_t pin) {
     return GPIOPORT_ERROR;
   HAL_GPIO_TogglePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
   return 0;
-}
-
-
-/**
- * Return MAX of the micro seconde counter 44739242
-*/
-uint32_t micro_maxtime() {
-  return (0xFFFFFFFFU / microseconds_cycle);
-}
-/**
- * Return micro seconde counter
-*/
- uint32_t micro_gettime() {
-  return (DWT->CYCCNT / microseconds_cycle);
-}
-
-/**
- * micro secoded delay
-*/
-void micro_delay(uint32_t usec) {
-  uint32_t time_diff;
-  uint32_t start = DWT->CYCCNT;
-  do {
-    uint32_t now = DWT->CYCCNT;
-    if (now >= start)
-      time_diff = now - start;
-    else
-      time_diff = (0xFFFFFFFFU - start) + now;
-  } while (time_diff / microseconds_cycle < usec);
 }
