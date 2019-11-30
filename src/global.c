@@ -174,7 +174,6 @@ JERRYXX_FUN(pulse_read_fn) {
   uint16_t *buf = malloc(256); /* MAX is 128 */
 
   count = pulse_read(pin, state, buf, count, timeout);
-  free(buf);
   if (count) {
     jerry_value_t output_array = jerry_create_array(count);
     for (int i = 0; i < count; i++) {
@@ -182,8 +181,10 @@ JERRYXX_FUN(pulse_read_fn) {
       jerry_release_value(jerry_set_property_by_index(output_array, i, val));
       jerry_release_value(val);
     }
+    free(buf);
     return output_array;
   }
+  free(buf);
   return jerry_create_null();
 }
 
