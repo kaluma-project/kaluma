@@ -54,7 +54,6 @@ const struct {
    {GPIOA, GPIO_PIN_4},     // 21 (BUTTON)
 };
 
-
 /**
  * Initialize all GPIO when system started
  */
@@ -116,4 +115,3 @@ int gpio_toggle(uint8_t pin) {
   HAL_GPIO_TogglePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
   return 0;
 }
-

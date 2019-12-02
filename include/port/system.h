@@ -62,6 +62,22 @@ uint64_t gettime();
 void settime(uint64_t time);
 
 /**
+ * Return MAX of the micro seconde counter
+ * Use this value to detect counter overflow
+*/
+uint32_t micro_maxtime(void);
+
+/**
+ * Return micro seconde counter
+*/
+uint32_t micro_gettime(void);
+
+/**
+ * micro secoded delay
+*/
+void micro_delay(uint32_t usec);
+
+/**
  * Firmware update request
  */
 void request_firmup();
