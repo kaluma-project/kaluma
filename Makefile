@@ -300,6 +300,6 @@ clean:
 	$(Q) -rm -fR $(BUILD_DIR)
 
 flash:
-	$(Q) st-flash write build/kameleon.bin 0x8008000
+	$(Q) st-flash write build/$(TARGET).bin 0x8008000
 
 # *** EOF ***
