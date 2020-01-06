@@ -170,6 +170,11 @@ KAMELEON_SRC += src/modules/spi/module_spi.c
 KAMELEON_INC += -Isrc/modules/spi
 endif
 
+ifdef KAMELEON_MODULE_STORAGE
+KAMELEON_SRC += src/modules/storage/module_storage.c
+KAMELEON_INC += -Isrc/modules/storage
+endif
+
 ifdef KAMELEON_MODULE_UART
 KAMELEON_SRC += src/modules/uart/module_uart.c
 KAMELEON_INC += -Isrc/modules/uart

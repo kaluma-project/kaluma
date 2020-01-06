@@ -73,7 +73,7 @@
   */
 #define USBD_VID                        0x1209
 #define USBD_LANGID_STRING              1033
-#define USBD_MANUFACTURER_STRING        (uint8_t *) "Kameleon"
+#define USBD_MANUFACTURER_STRING        (uint8_t *) "Kameleon (kameleon.io)"
 #define USBD_PID_FS                     0x7600
 #define USBD_PRODUCT_STRING_FS          (uint8_t *) "Kameleon Core"
 #define USBD_SERIALNUMBER_STRING_FS     (uint8_t *) "kameleon-core-0001"

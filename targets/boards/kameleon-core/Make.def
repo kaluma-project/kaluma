@@ -76,10 +76,11 @@ TARGET_HEAPSIZE = 64
 # Kameleon modules
 # -----------------------------------------------------------------------------
 
-KAMELEON_MODULES='events gpio led button pwm adc i2c spi uart graphics at stream net http wifi startup'
+KAMELEON_MODULES='events gpio led button pwm adc i2c spi uart graphics at storage stream net http wifi startup'
 
 KAMELEON_MODULE_PWM = 1
 KAMELEON_MODULE_I2C = 1
 KAMELEON_MODULE_SPI = 1
+KAMELEON_MODULE_STORAGE = 1
 KAMELEON_MODULE_UART = 1
 KAMELEON_MODULE_GRAPHICS = 1

@@ -41,6 +41,15 @@ global.require = Module.require;
 global.SystemError = SystemError;
 
 /**
+ * Storage object
+ */
+
+if (process.builtin_modules.indexOf('storage') > -1) {
+  var Storage = Module.require('storage').Storage;
+  global.storage = new Storage();
+}
+
+/**
  * Board object
  */
 
