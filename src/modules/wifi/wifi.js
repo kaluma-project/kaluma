@@ -55,13 +55,46 @@ class WiFi extends EventEmitter {
    * @param {function} cb
    */
   connect (connectInfo, cb) {
-    this._dev.connect(connectInfo, err => {
-      if (err) {
-        if (cb) cb(new SystemError(this._dev.errno));
-      } else {
-        if (cb) cb();
-      }
-    });
+    if (typeof connectInfo === 'function') {
+      cb = connectInfo
+      connectInfo = null
+    }
+    if (!connectInfo) {
+      connectInfo = { enforce: false }
+    }
+    if (!connectInfo.ssid) {
+      connectInfo.ssid = storage ? storage.getItem('WIFI_SSID') : null
+    }
+    if (!connectInfo.password) {
+      connectInfo.password = storage ? storage.getItem('WIFI_PASSWORD') : null
+    }
+    if (connectInfo.enforce) {
+      this._dev.connect(connectInfo, err => {
+        if (err) {
+          if (cb) cb(new SystemError(this._dev.errno));
+        } else {
+          if (cb) cb(null, connectInfo);
+        }
+      });
+    } else {
+      this._dev.get_connection((err, connectionInfo) => {
+        if (err) {
+          if (cb) cb(new SystemError(this._dev.errno));
+        } else {
+          if (!connectionInfo) {
+            this._dev.connect(connectInfo, err => {
+              if (err) {
+                if (cb) cb(new SystemError(this._dev.errno));
+              } else {
+                if (cb) cb(null, connectInfo);
+              }
+            });
+          } else {
+            if (cb) cb(null, connectionInfo);
+          }
+        }
+      });
+    }
   }
 
   /**
