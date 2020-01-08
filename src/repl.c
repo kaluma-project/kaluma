@@ -563,7 +563,7 @@ static void cmd_hi(repl_state_t *state) {
   repl_printf("\\---------------------------/\r\n");
   repl_printf("\r\n");
   repl_printf("Welcome to Kameleon!\r\n");
-  repl_printf("%s %s\r\n", "Version:", CONFIG_KAMELEON_VERSION);
+  repl_printf("%s %s\r\n", "Version:", KAMELEON_VERSION);
   repl_printf("For more info: https://kameleon.io\r\n");
   repl_println();
 }

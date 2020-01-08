@@ -51,6 +51,8 @@
 #include "usbd_core.h"
 #include "usbd_desc.h"
 #include "usbd_conf.h"
+#include "kameleon_config.h"
+#include "kameleon_core.h"
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
   * @{
@@ -73,10 +75,10 @@
   */
 #define USBD_VID                        0x1209
 #define USBD_LANGID_STRING              1033
-#define USBD_MANUFACTURER_STRING        (uint8_t *) "Kameleon (kameleon.io)"
+#define USBD_MANUFACTURER_STRING        (uint8_t *) KAMELEON_MANUFACTURER_STRING
 #define USBD_PID_FS                     0x7600
-#define USBD_PRODUCT_STRING_FS          (uint8_t *) "Kameleon Core"
-#define USBD_SERIALNUMBER_STRING_FS     (uint8_t *) "kameleon-core-0001"
+#define USBD_PRODUCT_STRING_FS          (uint8_t *) KAMELEON_PRODUCT_STRING
+#define USBD_SERIALNUMBER_STRING_FS     (uint8_t *) KAMELEON_VERSION_CONDENSED "-" KAMELEON_SERIALNUMBER_STRING
 #define USBD_CONFIGURATION_STRING_FS    (uint8_t *) "CDC Config"
 #define USBD_INTERFACE_STRING_FS        (uint8_t *) "CDC Interface"
 #define USB_SIZ_BOS_DESC                0x0C

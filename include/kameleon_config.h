@@ -22,6 +22,17 @@
 #ifndef __KAMELEON_CONFIG_H
 #define __KAMELEON_CONFIG_H
 
-#define CONFIG_KAMELEON_VERSION "1.0.0-beta.1"
+/**
+ * Condensed version string to be appears in USB serial number string
+ * 5-Digits (e.g. 100B1 = 1.0.0-beta.1)
+ * - 1st (1) : Major version number in HEX
+ * - 2nd (0) : Minor version number in HEX
+ * - 3rd (0) : Patch version number in HEX
+ * - 4th (B) : Prerelease (A = alpha, B = beta, R = rc)
+ * - 5th (1) : Prerelease number in HEX
+ */
+
+#define KAMELEON_VERSION "1.0.0-beta.1"
+#define KAMELEON_VERSION_CONDENSED "100B1"
 
 #endif /* __KAMELEON_CONFIG_H */

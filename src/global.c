@@ -620,7 +620,7 @@ static void register_global_process_object() {
   jerry_value_t process = jerry_create_object();
   jerryxx_set_property_string(process, MSTR_ARCH, (char *)system_arch);
   jerryxx_set_property_string(process, MSTR_PLATFORM, (char *)system_platform);
-  jerryxx_set_property_string(process, MSTR_VERSION, CONFIG_KAMELEON_VERSION);
+  jerryxx_set_property_string(process, MSTR_VERSION, KAMELEON_VERSION);
 
   /* Add `process.binding` function and it's properties */
   jerry_value_t binding_fn = jerry_create_external_function(process_binding_fn);

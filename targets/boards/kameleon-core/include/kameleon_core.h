@@ -24,6 +24,10 @@
 
 #include "stm32f4xx.h"
 
+#define KAMELEON_MANUFACTURER_STRING "Kameleon (kameleon.io)"
+#define KAMELEON_PRODUCT_STRING "Kameleon Core"
+#define KAMELEON_SERIALNUMBER_STRING "0000000001"
+
 #define PLL_M 8
 #define PLL_N 192
 #define PLL_Q 4
