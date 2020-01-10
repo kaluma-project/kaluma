@@ -51,7 +51,7 @@ struct gc_handle_s {
   int16_t width;
   int16_t height;
   uint8_t rotation;
-  uint8_t colorbits;
+  uint8_t bpp;
   uint8_t *buffer;
   uint16_t buffer_size;
   uint16_t color;
@@ -118,7 +118,7 @@ void gc_draw_char(gc_handle_t *handle, int16_t x, int16_t y, const char ch);
 void gc_draw_text(gc_handle_t *handle, int16_t x, int16_t y, const char *text);
 void gc_measure_text(gc_handle_t *handle, const char *text, uint16_t *w, uint16_t *h);
 void gc_draw_bitmap(gc_handle_t *handle, int16_t x, int16_t y, uint8_t *bitmap,
-    int16_t w, int16_t h, uint8_t colorbits, uint16_t color, bool transparent,
+    int16_t w, int16_t h, uint8_t bpp, uint16_t color, bool transparent,
     uint16_t transparent_color);
 
 #endif /* __GC_H */

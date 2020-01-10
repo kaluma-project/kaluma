@@ -478,7 +478,7 @@ JERRYXX_FUN(gc_measure_text_fn) {
 }
 
 /**
- * GraphicsContext.prototype.drawBitmap(x, y, bitmap, w, h, colorbits, {color,transparent})
+ * GraphicsContext.prototype.drawBitmap(x, y, bitmap, w, h, bpp, {color,transparent})
  */
 JERRYXX_FUN(gc_draw_bitmap_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "x")
@@ -486,15 +486,15 @@ JERRYXX_FUN(gc_draw_bitmap_fn) {
   JERRYXX_CHECK_ARG_ARRAYBUFFER(2, "bitmap")
   JERRYXX_CHECK_ARG_NUMBER(3, "w")
   JERRYXX_CHECK_ARG_NUMBER(4, "h")
-  JERRYXX_CHECK_ARG_NUMBER_OPT(5, "colorbits")
+  JERRYXX_CHECK_ARG_NUMBER_OPT(5, "bpp")
 
   int16_t x = (int16_t) JERRYXX_GET_ARG_NUMBER(0);
   int16_t y = (int16_t) JERRYXX_GET_ARG_NUMBER(1);
   jerry_value_t bitmap = JERRYXX_GET_ARG(2);
   int16_t w = (int16_t) JERRYXX_GET_ARG_NUMBER(3);
   int16_t h = (int16_t) JERRYXX_GET_ARG_NUMBER(4);
-  uint8_t colorbits = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(5, 1);
-  uint16_t color = colorbits == 1 ? 1 : 0xffff;
+  uint8_t bpp = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(5, 1);
+  uint16_t color = bpp == 1 ? 1 : 0xffff;
   bool transparent = false;
   uint16_t transparent_color = 0;
 
@@ -513,7 +513,7 @@ JERRYXX_FUN(gc_draw_bitmap_fn) {
 
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   uint8_t *buffer = jerry_get_arraybuffer_pointer(bitmap);
-  gc_draw_bitmap(gc_handle, x, y, buffer, w, h, colorbits, color, transparent,
+  gc_draw_bitmap(gc_handle, x, y, buffer, w, h, bpp, color, transparent,
       transparent_color);
   return jerry_create_undefined();
 }
@@ -569,13 +569,13 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
           MSTR_GRAPHICS_ROTATION, 0);
       gc_set_rotation(gc_handle, rotation);
 
-      // colorbits
-      uint8_t colorbits = (uint8_t) jerryxx_get_property_number(options,
-          MSTR_GRAPHICS_COLORBITS, 1); // should be 1 or 16
-      if (colorbits > 1) {
-        gc_handle->colorbits = 16;
+      // bpp
+      uint8_t bpp = (uint8_t) jerryxx_get_property_number(options,
+          MSTR_GRAPHICS_BPP, 1); // should be 1 or 16
+      if (bpp > 1) {
+        gc_handle->bpp = 16;
       } else {
-        gc_handle->colorbits = 1;
+        gc_handle->bpp = 1;
       }
 
       // display callback
@@ -588,7 +588,7 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
   }
 
   // setup primitive functions
-  if (gc_handle->colorbits == 1) {
+  if (gc_handle->bpp == 1) {
     gc_handle->set_pixel_cb = gc_prim_1bit_set_pixel;
     gc_handle->get_pixel_cb = gc_prim_1bit_get_pixel;
     gc_handle->draw_hline_cb = gc_prim_1bit_draw_hline;
@@ -605,7 +605,7 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
   }
   
   // allocate buffer
-  uint16_t size = (gc_handle->device_width * ((gc_handle->device_height + 7) / 8)) * gc_handle->colorbits;
+  uint16_t size = (gc_handle->device_width * ((gc_handle->device_height + 7) / 8)) * gc_handle->bpp;
   jerry_value_t buffer = jerry_create_arraybuffer(size);
   jerryxx_set_property(JERRYXX_GET_THIS, MSTR_GRAPHICS_BUFFER, buffer);
   gc_handle->buffer = jerry_get_arraybuffer_pointer(buffer);
