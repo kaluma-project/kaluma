@@ -33,7 +33,7 @@ JERRYXX_FUN(storage_set_item_fn) {
   JERRYXX_CHECK_ARG_STRING(1, "value")
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
   JERRYXX_GET_ARG_STRING_AS_CHAR(1, value)
-  int res = storage_set_item(key, value, value_sz);
+  int res = storage_set_item(key, value);
   if (res > -1) {
     return jerry_create_undefined();
   } else { /* failure (-1, -2) */
@@ -48,10 +48,9 @@ JERRYXX_FUN(storage_get_item_fn) {
   JERRYXX_CHECK_ARG_STRING(0, "key")
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
   char buf[256];
-  int buf_sz;
-  int res = storage_get_item(key, buf, &buf_sz);
+  int res = storage_get_item(key, buf);
   if (res > -1) {
-    return jerry_create_string_sz(buf, buf_sz);
+    return jerry_create_string(buf);
   } else { // key not found
     return jerry_create_null();
   }
@@ -102,10 +101,9 @@ JERRYXX_FUN(storage_key_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "index")
   int index = (int) JERRYXX_GET_ARG_NUMBER(0);
   char buf[256];
-  int buf_sz;
-  int res = storage_key(index, buf, &buf_sz);
+  int res = storage_key(index, buf);
   if (res > -1) {
-    return jerry_create_string_sz(buf, buf_sz);
+    return jerry_create_string(buf);
   } else { // failure
     return jerry_create_undefined();
   }
