@@ -34,11 +34,7 @@ JERRYXX_FUN(storage_set_item_fn) {
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
   JERRYXX_GET_ARG_STRING_AS_CHAR(1, value)
   int res = storage_set_item(key, value);
-  if (res > -1) {
-    return jerry_create_undefined();
-  } else { /* failure (-1, -2) */
-    return jerry_create_undefined();
-  }
+  return jerry_create_number(res);
 }
 
 /**
