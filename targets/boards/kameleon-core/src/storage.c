@@ -27,13 +27,15 @@
 #define ADDR_FLASH_STORAGE_AREA         (FLASH_BASE_ADDR + 0x8000)
 #define SECTOR_FLASH_STORAGE_AREA       FLASH_SECTOR_2
 
-#define STORAGE_INDEX_MAX   64
+#define STORAGE_SLOT_MAX   64
 #define STORAGE_DATA_MAX    253
 
 #define STORAGE_OK          0
 #define STORAGE_ERROR       -1
-#define STORAGE_FULL        -2
-#define STORAGE_FATAL       -3
+#define STORAGE_SWEEPREQ    -2
+#define STORAGE_FULL        -3
+#define STORAGE_OVERLENGTH  -4
+#define STORAGE_FATAL       -10 /* internal use */
 
 #define STORAGE_EMPTY       0
 #define STORAGE_ACTIVE      1
@@ -71,8 +73,8 @@ static void flush_cache() {
   __HAL_FLASH_DATA_CACHE_ENABLE();
 }
 
-static storage_data_t* get_storage_data(uint8_t index) {
-  return (storage_data_t *)(ADDR_FLASH_STORAGE_AREA + (index * 256));
+static storage_data_t* get_storage_data(uint8_t slot) {
+  return (storage_data_t *)(ADDR_FLASH_STORAGE_AREA + (slot * 256));
 }
 
 static int flash_byte_write(uint32_t addr, uint8_t data) {
@@ -88,32 +90,33 @@ static int flash_byte_write(uint32_t addr, uint8_t data) {
   return status;
 }
 
-static int storage_write(uint8_t index, storage_data_t data) {
+static int storage_write(uint8_t slot, storage_data_t data) {
   int status = STORAGE_OK;
   uint32_t address;
   if ((data.key_length + data.data_length) > STORAGE_DATA_MAX)
-    return STORAGE_ERROR;
-  address = ADDR_FLASH_STORAGE_AREA + (index * 256);
+    return STORAGE_OVERLENGTH;
+  address = ADDR_FLASH_STORAGE_AREA + (slot * 256);
   /* Unlock the Flash to enable the flash control register access */
   HAL_FLASH_Unlock();
   flush_cache();
   if (data.status == STORAGE_STATUS_USE) {
     if (flash_byte_write(address, data.status) == STORAGE_ERROR)
-      status = STORAGE_ERROR; //Error
+      status = STORAGE_ERROR;
     if ((status == STORAGE_OK) && (flash_byte_write(address + 1, data.key_length) != STORAGE_OK))
-      status = STORAGE_FATAL; //Error
+      status = STORAGE_FATAL;
     if ((status == STORAGE_OK) && (flash_byte_write(address + 2, data.data_length) != STORAGE_OK))
-      status = STORAGE_FATAL; //Error
+      status = STORAGE_FATAL;
     for (int i = 0; i < (data.key_length); i++) {
       if ((status == STORAGE_OK) && (flash_byte_write(address + 3 + i, data.data[i]) != STORAGE_OK))
-        status = STORAGE_FATAL; //Error
+        status = STORAGE_FATAL;
     }
     for (int i = 0; i < (data.data_length); i++) {
       if ((status == STORAGE_OK) && (flash_byte_write(address + 3 + data.key_length + i, data.data[data.key_length + i]) != STORAGE_OK))
-        status = STORAGE_FATAL; //Error
+        status = STORAGE_FATAL;
     }
     if (status == STORAGE_FATAL) {
       flash_byte_write(address, STORAGE_STATUS_REMOVED);
+      status = STORAGE_ERROR;
     }
   } else {
     status = STORAGE_ERROR;
@@ -124,8 +127,8 @@ static int storage_write(uint8_t index, storage_data_t data) {
   return status;
 }
 
-static int get_storage_state(int index) {
-  storage_data_t *storage_data = get_storage_data(index);
+static int get_storage_state(int slot) {
+  storage_data_t *storage_data = get_storage_data(slot);
   if ((storage_data->status == STORAGE_STATUS_USE) && (storage_data->key_length != STORAGE_KEY_UNUSED))
     return STORAGE_ACTIVE;
   else if ((storage_data->status == STORAGE_STATUS_EMPTY) && (storage_data->key_length == STORAGE_KEY_UNUSED))
@@ -134,31 +137,38 @@ static int get_storage_state(int index) {
     return STORAGE_INACTIVE;
 }
 
-static int get_empty_storage_index() {
-  int index = 0;
-  while (get_storage_state(index) != STORAGE_EMPTY) {
-    if (++index >= STORAGE_INDEX_MAX)
-      return STORAGE_FULL; //No more storage
-  }
-  return index;
-}
-
 static int get_number_of_storage(int status) {
   int number = 0;
-  for (int i = 0; i < STORAGE_INDEX_MAX; i++) {
+  for (int i = 0; i < STORAGE_SLOT_MAX; i++) {
     if (get_storage_state(i) == status)
       number++;
   }
   return number;
 }
 
-static int get_index_from_key(const char *key) {
-  int index = STORAGE_ERROR;
+static int get_status_of_full_storage() {
+  if (get_number_of_storage(STORAGE_INACTIVE) == 0)
+    return STORAGE_FULL;
+  else
+    return STORAGE_SWEEPREQ;
+}
+
+static int get_empty_storage_slot() {
+  int slot = 0;
+  while (get_storage_state(slot) != STORAGE_EMPTY) {
+    if (++slot >= STORAGE_SLOT_MAX)
+      slot = get_status_of_full_storage();
+  }
+  return slot;
+}
+
+static int get_slot_from_key(const char *key) {
+  int slot = STORAGE_ERROR;
   int input_key_length = 0;
   while (key[input_key_length] != '\0') {
     input_key_length++;
   }
-  for (int i = 0; i < STORAGE_INDEX_MAX; i++) {
+  for (int i = 0; i < STORAGE_SLOT_MAX; i++) {
     if (get_storage_state(i) == STORAGE_ACTIVE) {
       storage_data_t *storage_data = get_storage_data(i);
       if (input_key_length == storage_data->key_length) {
@@ -167,13 +177,28 @@ static int get_index_from_key(const char *key) {
           length++;
         }
         if (length == storage_data->key_length) {
-          index = i;
+          slot = i;
           break;
         }
       }
     }
   }
-  return index;
+  return slot;
+}
+
+static int get_slot_from_index (int index) {
+  int slot = STORAGE_ERROR;
+  for (int i = 0; i < STORAGE_SLOT_MAX; i++) {
+    if (get_storage_state(i) == STORAGE_ACTIVE) {
+      if (index == 0) {
+        slot = i;
+        break;
+      } else {
+        index--;
+      }
+    }
+  }
+  return slot;
 }
 
 static int storage_erase(void) {
@@ -225,47 +250,42 @@ int storage_length() {
 }
 
 /**
- * Return the number of empty items in the storage
- * @return The number of items, or -1 on failture
- */
-int storage_space() {
-  return get_number_of_storage(STORAGE_EMPTY);
-}
-
-/**
  * Get value of key index
  * @param key The point to key string
  * @param buf The pointer to the buffer to store value
- * @param size The size of the buffer
  * @return Returns the length of value or -1 on failure (key not found)
  */
-int storage_get_item(const char *key, char *buf, int *size) {
-  int status = 0;
-  int index = get_index_from_key(key);
-  if (index < 0)
-    return index;
-  storage_data_t *storage_data = get_storage_data(index);
-  *size = storage_data->data_length;
+int storage_get_item(const char *key, char *buf) {
+  int slot = get_slot_from_key(key);
+  if (slot < 0)
+    return slot;
+  storage_data_t *storage_data = get_storage_data(slot);
+  int length = storage_data->data_length;
   for (int i = 0; i < storage_data->data_length; i++) {
     buf[i] = storage_data->data[storage_data->key_length + i];
   }
-  return status;
+  buf[length] = '\0';
+  return length;
 }
 
 /**
  * Set the value with a key string
  * @param key The point to key string
  * @param buf The pointer to the buffer to store value
- * @param size The size of the buffer
- * @return Returns 0 on success or -1 on failure or -2 on no empty space.
+ * @return Returns 0 on success or -1 on failure or -2 on sweep required or -3 on full storage or -4 on over length.
  */
-int storage_set_item(const char *key, char *buf, int size) {
+int storage_set_item(const char *key, char *buf) {
   int status = STORAGE_OK;
-  if (get_number_of_storage(STORAGE_EMPTY) == 0)
-    return STORAGE_FULL;
-  int index = get_index_from_key(key);
-  if (index >= 0) {
-    storage_data_t *storage_data = get_storage_data(index);
+  if (get_number_of_storage(STORAGE_EMPTY) == 0) {
+    return get_status_of_full_storage();
+  }
+  int size = 0;
+  while (buf[size] != '\0') {
+    size++;
+  }
+  int slot = get_slot_from_key(key);
+  if (slot >= 0) {
+    storage_data_t *storage_data = get_storage_data(slot);
     if (size == storage_data->data_length) {
       int i;
       for (i = 0; i < size; i++) {
@@ -282,10 +302,10 @@ int storage_set_item(const char *key, char *buf, int size) {
         status = STORAGE_ERROR;
     }
   }
-  if (status == 0) {
+  if (status == STORAGE_OK) {
     storage_data_t storage_data;
-    index = get_empty_storage_index();
-    if (index >= 0) {
+    slot = get_empty_storage_slot();
+    if (slot >= 0) {
       int key_length = 0;
       storage_data.status = STORAGE_STATUS_USE;
       while (key[key_length] != '\0') {
@@ -297,10 +317,9 @@ int storage_set_item(const char *key, char *buf, int size) {
       for (int i = 0; i < storage_data.data_length; i++) {
         storage_data.data[storage_data.key_length + i] = buf[i];
       }
-      if (storage_write(index, storage_data) < 0)
-        status = STORAGE_ERROR;
+      status = storage_write(slot, storage_data);
     } else {
-      status = index;
+      status = slot;
     }
   }
   return status;
@@ -312,19 +331,18 @@ int storage_set_item(const char *key, char *buf, int size) {
  * @return Returns 0 on success or -1 on failure.
  */
 int storage_remove_item(const char *key) {
-  int status = 0;
-  int index = get_index_from_key(key);
-  if (index >= 0) {
-    uint32_t address = ADDR_FLASH_STORAGE_AREA + (index * 256);
+  int status;
+  int slot = get_slot_from_key(key);
+  if (slot >= 0) {
+    uint32_t address = ADDR_FLASH_STORAGE_AREA + (slot * 256);
     /* Unlock the Flash to enable the flash control register access */
     HAL_FLASH_Unlock();
     flush_cache();
-    if (flash_byte_write(address, STORAGE_STATUS_REMOVED) == STORAGE_ERROR)
-      status = STORAGE_ERROR;
+    status = flash_byte_write(address, STORAGE_STATUS_REMOVED);
     /* Lock the Flash to disable the flash control register access (recommended to protect the FLASH memory against possible unwanted operation) *********/
     HAL_FLASH_Lock();
   } else {
-    status = STORAGE_ERROR;
+    status = slot;
   }
   return status;
 }
@@ -333,23 +351,16 @@ int storage_remove_item(const char *key) {
  * Get key string of a given index
  * @param index The index of the key
  * @param buf The pointer to the buffer to store key string
- * @param size The size of the buffer
  * @return Returns 0 on success or -1 on failure.
  */
-int storage_key(const int index, char *buf, int *size) {
-  int status = 0;
-  if (get_storage_state(index) == STORAGE_ACTIVE) {
-    storage_data_t *storage_data = get_storage_data(index);
-    uint8_t key_length = storage_data->key_length;
-    if (key_length > 0) {
-      for (int i = 0; i < key_length; i++) {
-        buf[i] = storage_data->data[i];
-      }
-      buf[key_length] = '\0';
-      *size = key_length;
-    }
-  } else {
-    status = STORAGE_ERROR;
+int storage_key(const int index, char *buf) {
+  int slot = get_slot_from_index(index);
+  if (slot < 0)
+    return slot;
+  storage_data_t *storage_data = get_storage_data(slot);
+  for (int i = 0; i < storage_data->key_length; i++) {
+    buf[i] = storage_data->data[i];
   }
-  return status;
+  buf[storage_data->key_length] = '\0';
+  return STORAGE_OK;
 }
