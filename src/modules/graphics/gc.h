@@ -119,6 +119,6 @@ void gc_draw_text(gc_handle_t *handle, int16_t x, int16_t y, const char *text);
 void gc_measure_text(gc_handle_t *handle, const char *text, uint16_t *w, uint16_t *h);
 void gc_draw_bitmap(gc_handle_t *handle, int16_t x, int16_t y, uint8_t *bitmap,
     int16_t w, int16_t h, uint8_t bpp, uint16_t color, bool transparent,
-    uint16_t transparent_color);
+    uint16_t transparent_color, uint8_t scale_x, uint8_t scale_y);
 
 #endif /* __GC_H */

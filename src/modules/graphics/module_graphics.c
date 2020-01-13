@@ -478,7 +478,7 @@ JERRYXX_FUN(gc_measure_text_fn) {
 }
 
 /**
- * GraphicsContext.prototype.drawBitmap(x, y, bitmap, w, h, bpp, {color,transparent})
+ * GraphicsContext.prototype.drawBitmap(x, y, bitmap, w, h, bpp, {color,transparent,scaleX,scaleY})
  */
 JERRYXX_FUN(gc_draw_bitmap_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "x")
@@ -497,6 +497,8 @@ JERRYXX_FUN(gc_draw_bitmap_fn) {
   uint16_t color = bpp == 1 ? 1 : 0xffff;
   bool transparent = false;
   uint16_t transparent_color = 0;
+  uint8_t scale_x = 1;
+  uint8_t scale_y = 1;
 
   if (JERRYXX_HAS_ARG(6)) {
     jerry_value_t options = JERRYXX_GET_ARG(6);
@@ -508,13 +510,15 @@ JERRYXX_FUN(gc_draw_bitmap_fn) {
         transparent_color = (uint16_t) jerry_get_number_value(tp);
       }
       jerry_release_value(tp);
+      scale_x = jerryxx_get_property_number(options, MSTR_GRAPHICS_SCALE_X, scale_x);
+      scale_y = jerryxx_get_property_number(options, MSTR_GRAPHICS_SCALE_Y, scale_y);
     }
   }
 
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   uint8_t *buffer = jerry_get_arraybuffer_pointer(bitmap);
   gc_draw_bitmap(gc_handle, x, y, buffer, w, h, bpp, color, transparent,
-      transparent_color);
+      transparent_color, scale_x, scale_y);
   return jerry_create_undefined();
 }
 
