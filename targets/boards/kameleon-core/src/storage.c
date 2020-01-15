@@ -93,8 +93,6 @@ static int flash_byte_write(uint32_t addr, uint8_t data) {
 static int storage_write(uint8_t slot, storage_data_t data) {
   int status = STORAGE_OK;
   uint32_t address;
-  if ((data.key_length + data.data_length) > STORAGE_DATA_MAX)
-    return STORAGE_OVERLENGTH;
   address = ADDR_FLASH_STORAGE_AREA + (slot * 256);
   /* Unlock the Flash to enable the flash control register access */
   HAL_FLASH_Unlock();
@@ -312,12 +310,16 @@ int storage_set_item(const char *key, char *buf) {
         storage_data.data[key_length] = key[key_length];
         key_length++;
       }
-      storage_data.key_length = key_length;
-      storage_data.data_length = size;
-      for (int i = 0; i < storage_data.data_length; i++) {
-        storage_data.data[storage_data.key_length + i] = buf[i];
+      if ((key_length + size) > STORAGE_DATA_MAX) {
+        status = STORAGE_OVERLENGTH;
+      } else {
+        storage_data.key_length = key_length;
+        storage_data.data_length = size;
+        for (int i = 0; i < storage_data.data_length; i++) {
+          storage_data.data[storage_data.key_length + i] = buf[i];
+        }
+        status = storage_write(slot, storage_data);
       }
-      status = storage_write(slot, storage_data);
     } else {
       status = slot;
     }
