@@ -46,7 +46,7 @@ JERRYXX_FUN(storage_get_item_fn) {
   char buf[256];
   int res = storage_get_item(key, buf);
   if (res > -1) {
-    return jerry_create_string(buf);
+    return jerry_create_string((const jerry_char_t *) buf);
   } else { // key not found
     return jerry_create_null();
   }
@@ -99,7 +99,7 @@ JERRYXX_FUN(storage_key_fn) {
   char buf[256];
   int res = storage_key(index, buf);
   if (res > -1) {
-    return jerry_create_string(buf);
+    return jerry_create_string((const jerry_char_t *) buf);
   } else { // failure
     return jerry_create_undefined();
   }
