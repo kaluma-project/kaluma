@@ -39,6 +39,7 @@
 #define MSTR_GRAPHICS_BUFFER "buffer"
 #define MSTR_GRAPHICS_ROTATION "rotation"
 #define MSTR_GRAPHICS_BPP "bpp"
+#define MSTR_GRAPHICS_DATA "data"
 #define MSTR_GRAPHICS_SCALE_X "scaleX"
 #define MSTR_GRAPHICS_SCALE_Y "scaleY"
 #define MSTR_GRAPHICS_COLOR "color"

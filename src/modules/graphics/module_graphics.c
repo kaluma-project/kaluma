@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include "jerryscript.h"
 #include "jerryxx.h"
+#include "magic_strings.h"
 #include "graphics_magic_strings.h"
 #include "module_graphics.h"
 #include "gc.h"
@@ -269,6 +270,13 @@ JERRYXX_FUN(gc_set_font_fn) {
       if (jerry_value_is_arraybuffer(bitmap)) {
         custom_font.bitmap = jerry_get_arraybuffer_pointer(bitmap);
       }
+      /*
+      else if (jerry_value_is_string(bitmap)) {
+        jerry_value_t decode_fn = jerry_get_property(global, MSTR_DECODE);
+        jerry_value_t decoded_bitmap = jerry_call_function(decode_fn, ...., bitmap, ...)
+        custom_font.bitmap = jerry_get_arraybuffer_pointer(decoded_bitmap)
+      }
+      */
       jerry_release_value(bitmap);
       // get glyphs buffer
       jerry_value_t glyphs = jerryxx_get_property(font, MSTR_GRAPHICS_GLYPHS);
@@ -478,47 +486,71 @@ JERRYXX_FUN(gc_measure_text_fn) {
 }
 
 /**
- * GraphicsContext.prototype.drawBitmap(x, y, bitmap, w, h, bpp, {color,transparent,scaleX,scaleY})
+ * GraphicsContext.prototype.drawBitmap(x, y, bitmap, options)
+ * - bitmap: {width, height, data, bpp}
+ * - options: {color, transparent, scaleX, scaleY}
  */
 JERRYXX_FUN(gc_draw_bitmap_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "x")
   JERRYXX_CHECK_ARG_NUMBER(1, "y")
-  JERRYXX_CHECK_ARG_ARRAYBUFFER(2, "bitmap")
-  JERRYXX_CHECK_ARG_NUMBER(3, "w")
-  JERRYXX_CHECK_ARG_NUMBER(4, "h")
-  JERRYXX_CHECK_ARG_NUMBER_OPT(5, "bpp")
-
   int16_t x = (int16_t) JERRYXX_GET_ARG_NUMBER(0);
   int16_t y = (int16_t) JERRYXX_GET_ARG_NUMBER(1);
-  jerry_value_t bitmap = JERRYXX_GET_ARG(2);
-  int16_t w = (int16_t) JERRYXX_GET_ARG_NUMBER(3);
-  int16_t h = (int16_t) JERRYXX_GET_ARG_NUMBER(4);
-  uint8_t bpp = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(5, 1);
+  uint16_t w = 0;
+  uint16_t h = 0;
+  uint8_t bpp = 1;
   uint16_t color = bpp == 1 ? 1 : 0xffff;
   bool transparent = false;
   uint16_t transparent_color = 0;
   uint8_t scale_x = 1;
   uint8_t scale_y = 1;
 
-  if (JERRYXX_HAS_ARG(6)) {
-    jerry_value_t options = JERRYXX_GET_ARG(6);
-    if (jerry_value_is_object(options)) {
-      color = jerryxx_get_property_number(options, MSTR_GRAPHICS_COLOR, color);
-      jerry_value_t tp = jerryxx_get_property(options, MSTR_GRAPHICS_TRANSPARENT);
-      if (jerry_value_is_number(tp)) {
-        transparent = true;
-        transparent_color = (uint16_t) jerry_get_number_value(tp);
+  if (JERRYXX_HAS_ARG(2)) {
+    jerry_value_t bitmap = JERRYXX_GET_ARG(2);
+    if (jerry_value_is_object(bitmap)) {
+      w = (uint16_t) jerryxx_get_property_number(bitmap, MSTR_GRAPHICS_WIDTH, w);
+      h = (uint16_t) jerryxx_get_property_number(bitmap, MSTR_GRAPHICS_HEIGHT, h);
+      bpp = (uint8_t) jerryxx_get_property_number(bitmap, MSTR_GRAPHICS_BPP, bpp);
+
+      // get options
+      if (JERRYXX_HAS_ARG(3)) {
+        jerry_value_t options = JERRYXX_GET_ARG(3);
+        if (jerry_value_is_object(options)) {
+          color = jerryxx_get_property_number(options, MSTR_GRAPHICS_COLOR, color);
+          jerry_value_t tp = jerryxx_get_property(options, MSTR_GRAPHICS_TRANSPARENT);
+          if (jerry_value_is_number(tp)) {
+            transparent = true;
+            transparent_color = (uint16_t) jerry_get_number_value(tp);
+          }
+          jerry_release_value(tp);
+          scale_x = jerryxx_get_property_number(options, MSTR_GRAPHICS_SCALE_X, scale_x);
+          scale_y = jerryxx_get_property_number(options, MSTR_GRAPHICS_SCALE_Y, scale_y);
+        }
       }
-      jerry_release_value(tp);
-      scale_x = jerryxx_get_property_number(options, MSTR_GRAPHICS_SCALE_X, scale_x);
-      scale_y = jerryxx_get_property_number(options, MSTR_GRAPHICS_SCALE_Y, scale_y);
+
+      // draw bitmap
+      JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
+      jerry_value_t data = jerryxx_get_property(bitmap, MSTR_GRAPHICS_DATA);
+      if (jerry_value_is_string(data)) { /* decode base64 string */
+        jerry_value_t global = jerry_get_global_object();
+        jerry_value_t decode_fn = jerryxx_get_property(global, MSTR_DECODE);
+        jerry_value_t this_val = jerry_create_undefined ();
+        jerry_value_t args[] = { data };
+        jerry_value_t decoded = jerry_call_function(decode_fn, this_val, args, 1);
+        uint8_t *buffer = jerry_get_arraybuffer_pointer(decoded);
+        gc_draw_bitmap(gc_handle, x, y, buffer, w, h, bpp, color, transparent,
+            transparent_color, scale_x, scale_y);
+        jerry_release_value(decoded);
+        jerry_release_value(this_val);
+        jerry_release_value(decode_fn);
+        jerry_release_value(global);
+      } else if (jerry_value_is_arraybuffer(data)) {
+        uint8_t *buffer = jerry_get_arraybuffer_pointer(data);
+        gc_draw_bitmap(gc_handle, x, y, buffer, w, h, bpp, color, transparent,
+            transparent_color, scale_x, scale_y);
+      }
+      jerry_release_value(data);
     }
   }
-
-  JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
-  uint8_t *buffer = jerry_get_arraybuffer_pointer(bitmap);
-  gc_draw_bitmap(gc_handle, x, y, buffer, w, h, bpp, color, transparent,
-      transparent_color, scale_x, scale_y);
   return jerry_create_undefined();
 }
 
