@@ -23,3 +23,26 @@ Supported Targets
 
 * [Kameleon Core](https://docs.kameleon.io/boards/kameleon-core)
 * Contributions required for other boards
+
+Contributions are welcome!
+==========================
+
+Your any contributions are welcome! Followings are expected contributions. Please contact us (support@kameleon.io) if you have any questions.
+
+* Porting
+  * ESP-8266 / ESP-32
+  * NRF52x boards
+  * Raspberry Pi (Linux)
+  * STM32 boards
+  * Any others ...
+* Functionalities
+  * File System
+  * Crypto
+  * HTTPS
+  * MQTT
+  * Bluetooth
+  * ...
+* Test automation
+* Implementing JS modules for various sensors and parts
+* ...
+
