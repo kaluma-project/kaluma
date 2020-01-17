@@ -3,9 +3,7 @@ var storage_native = process.binding(process.binding.storage);
 class Storage {
   setItem (key, value) {
     var res = storage_native.setItem(key, value.toString());
-    if (res === -1) {
-      return undefined;
-    } else if (res === -2) { // sweep required
+    if (res === -2) { // sweep required
       var cache = {}
       var len = storage_native.length();
       for (var i = 0; i < len; i++) {
@@ -20,10 +18,11 @@ class Storage {
       }
       res = storage_native.setItem(key, value.toString());  
     } else if (res === -3) { // storage full
-      return new Error("Storage full");
+      throw new Error("Storage full");
     } else if (res === -4) { // over length
-      return new Error("The length of key and value is too long");
+      throw new Error("The length of key and value is too long");
     }
+    return undefined;
   }
 
   getItem (key) {
