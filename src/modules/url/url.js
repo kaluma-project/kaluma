@@ -13,15 +13,18 @@ class URL {
     this.pathname = '';
     this.search = '';
     this.hash = '';
+    this.searchParams = null;
     // protocol
     var _i0 = input.indexOf('://');
     if (_i0 > 0) {
       this.protocol = input.substr(0, _i0 + 1);
       var rest = input.substr(_i0 + 3);
       // origin and path
-      var _i1 = rest.indexOf('/');
       var auth_host = rest;
       var path_hash = '';
+      var _i1 = rest.indexOf('/');
+      if (_i1 < 0) _i1 = rest.indexOf('?');
+      if (_i1 < 0) _i1 = rest.indexOf('#');
       if (_i1 > -1) {
         auth_host = rest.substr(0, _i1);
         path_hash = rest.substr(_i1);
@@ -62,6 +65,7 @@ class URL {
         if (_i6 > -1) {
           this.pathname = path.substr(0, _i6);
           this.search = path.substr(_i6);
+          this.searchParams = new URLSearchParams(this.search);
         } else {
           this.pathname = path;
         }
@@ -97,4 +101,84 @@ class URL {
   }
 }
 
+/**
+ * URLSearchParams class
+ */
+class URLSearchParams {
+  constructor (input) {
+    this.pairs = [];
+    if (input) {
+      if (input.startsWith('?')) {
+        input = input.substr(1);
+      }
+      var ps = input.split('&');
+      ps.forEach(p => {
+        if (p.indexOf('=') > -1) {
+          var pair = p.split('=');
+          pair = pair.map(i => decodeURIComponent(i));
+          this.pairs.push(pair);
+        }
+      })
+    }
+  }
+
+  append (name, value) {
+    this.pairs.push([name, value]);
+  }
+
+  delete (name) {
+    this.pairs = this.pairs.filter(p => p[0] !== name);
+  }
+
+  entries () {
+    return this.pairs;
+  }
+
+  get (name) {
+    var pair = this.pairs.find(p => p[0] === name);
+    if (pair) {
+      return pair[1];
+    }
+    return null;
+  }
+
+  getAll (name) {
+    var values = []
+    this.pairs.forEach(p => {
+      if (p[0] === name) {
+        values.push(p[1]);
+      }
+    })
+    return values;
+  }
+
+  has (name) {
+    return this.pairs.find(p => p[0] === name) !== undefined;
+  }
+
+  set (name, value) {
+    var pair = this.pairs.find(p => p[0] === name);
+    if (pair) {
+      pair[1] = value;
+      this.pairs = this.pairs.filter(p => p[0] !== name || p === pair);
+    } else {
+      this.append(name, value);
+    }
+  }
+
+  keys () {
+    return this.pairs.map(p => p[0]);
+  }
+
+  values () {
+    return this.pairs.map(p => p[1]);
+  }
+
+  toString () {
+    var encoded = this.pairs.map(p => `${encodeURIComponent(p[0])}=${encodeURIComponent(p[1])}`);
+    return encoded.join('&');
+  }
+}
+
 exports.URL = URL;
+exports.URLSearchParams = URLSearchParams;
