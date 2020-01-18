@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "utils.h"
 #include "jerryscript.h"
 #include "jerryscript-ext/handler.h"
 #include "runtime.h"
@@ -663,7 +664,7 @@ static void register_global_process_object() {
 
 /****************************************************************************/
 /*                                                                          */
-/*                      BASE64 ENCODE/DECODE FUNCTIONS                      */
+/*                         ENCODE/DECODE FUNCTIONS                          */
 /*                                                                          */
 /****************************************************************************/
 
@@ -731,10 +732,74 @@ JERRYXX_FUN(decode_fn) {
   }
 }
 
-static void register_global_base64() {
+static bool is_uri_char (char ch) {
+  return ((ch >= 0x30 && ch <= 0x39) ||  // numeric
+         (ch >= 0x41 && ch <= 0x5A) ||  // alpha (upper)
+         (ch >= 0x61 && ch <= 0x7A) ||  // alpha (lower)
+         (ch == '-') || (ch == '_') || (ch =='.') ||
+         (ch == '!') || (ch == '~') || (ch == '*') ||
+         (ch == '\'') ||  (ch == '(') ||  (ch == ')'));
+}
+
+JERRYXX_FUN(encode_uri_component_fn) {
+  JERRYXX_CHECK_ARG(0, "data")
+  JERRYXX_GET_ARG_STRING_AS_CHAR(0, data)
+  int size = 0;
+  for (int i = 0; i < data_sz; i++) {
+    char ch = data[i];
+    if (is_uri_char(ch)) {
+      size++;
+    } else {
+      size += 3;
+    }
+  }
+  unsigned char encoded[size + 1];
+  int p = 0;
+  const char hex[] = "0123456789ABCDEF";
+  for (int i = 0; i < data_sz; i++) {
+    char ch = data[i];
+    if (is_uri_char(ch)) {
+      encoded[p] = ch;
+      p++;
+    } else {
+      encoded[p] = '%';
+      encoded[p + 1] = hex[ch >> 4];
+      encoded[p + 2] = hex[ch & 0x0F];
+      p += 3;
+    }
+  }
+  encoded[size] = '\0';
+  return jerry_create_string(encoded);
+}
+
+JERRYXX_FUN(decode_uri_component_fn) {
+  JERRYXX_CHECK_ARG(0, "data")
+  JERRYXX_GET_ARG_STRING_AS_CHAR(0, data)
+  unsigned char decoded[data_sz];
+  int i = 0, p = 0;
+  while (i < data_sz) {
+    char ch = data[i];
+    if (ch == '%') {
+      uint8_t bin = hex1(data[i + 1]) << 4 | hex1(data[i + 2]);
+      decoded[p] = bin;
+      i += 3;
+      p++;
+    } else {
+      decoded[p] = ch;
+      i++;
+      p++;
+    }
+  }
+  decoded[p] = '\0';
+  return jerry_create_string(decoded);
+}
+
+static void register_global_encoders() {
   jerry_value_t global = jerry_get_global_object();
   jerryxx_set_property_function(global, MSTR_ENCODE, encode_fn);
   jerryxx_set_property_function(global, MSTR_DECODE, decode_fn);
+  jerryxx_set_property_function(global, MSTR_ENCODE_URI_COMPONENT, encode_uri_component_fn);
+  jerryxx_set_property_function(global, MSTR_DECODE_URI_COMPONENT, decode_uri_component_fn);
   jerry_release_value(global);
 }
 
@@ -793,7 +858,7 @@ void global_init() {
   register_global_timers();
   register_global_console_object();
   register_global_process_object();
-  register_global_base64();
+  register_global_encoders();
   register_global_etc();
   run_startup_module();
   run_board_module();

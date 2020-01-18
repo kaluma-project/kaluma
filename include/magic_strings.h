@@ -57,6 +57,8 @@
 #define MSTR_PROCESS "process"
 #define MSTR_ENCODE "encode"
 #define MSTR_DECODE "decode"
+#define MSTR_ENCODE_URI_COMPONENT "encodeURIComponent"
+#define MSTR_DECODE_URI_COMPONENT "decodeURIComponent"
 #define MSTR_ARCH "arch"
 #define MSTR_PLATFORM "platform"
 #define MSTR_VERSION "version"

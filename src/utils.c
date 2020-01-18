@@ -57,7 +57,7 @@ void list_remove(list_t *list, list_node_t *node) {
   }
 }
 
-static unsigned char hex1(char hex) {
+uint8_t hex1(char hex) {
   if (hex >= 'a') {
     return (hex - 'a' + 10);
   } else if (hex >= 'A') {
@@ -67,10 +67,10 @@ static unsigned char hex1(char hex) {
   }
 }
 
-uint8_t hex2bin(char *hex) {
+uint8_t hex2bin(unsigned char *hex) {
   uint8_t hh = hex1(hex[0]);
   uint8_t hl = hex1(hex[1]);
-  return hh * 16 + hl;
+  return hh << 4 | hl;
 }
 
 /*

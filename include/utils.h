@@ -22,6 +22,8 @@
 #ifndef __UTILS_H
 #define __UTILS_H
 
+#include <stdint.h>
+
 typedef struct list_node_s list_node_t;
 typedef struct list_s list_t;
 
@@ -39,6 +41,7 @@ void list_init(list_t *list);
 void list_append(list_t *list, list_node_t *node);
 void list_remove(list_t *list, list_node_t *node);
 
-uint8_t hex2bin(char *hex);
+uint8_t hex1(char hex);
+uint8_t hex2bin(unsigned char *hex);
 
 #endif /* __UTILS_H */
