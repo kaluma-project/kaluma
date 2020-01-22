@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "jerryscript.h"
 #include "system.h"
 #include "io.h"
 #include "tty.h"
@@ -70,6 +71,14 @@ static void io_update_time() {
   loop.time = gettime();
 }
 
+static void io_run_all_enqueued_jobs() {
+  jerry_value_t ret_val = jerry_run_all_enqueued_jobs();
+  if (jerry_value_is_error(ret_val)) {
+    jerryxx_print_error(ret_val, true);
+  }
+  jerry_release_value(ret_val);
+}
+
 static void io_handle_closing() {
   while (loop.closing_handles.head != NULL) {
     io_handle_t *handle = (io_handle_t *) loop.closing_handles.head;
@@ -98,6 +107,7 @@ void io_run() {
     io_tty_run();
     io_watch_run();
     io_uart_run();
+    io_run_all_enqueued_jobs();
     io_handle_closing();
   }
 }
