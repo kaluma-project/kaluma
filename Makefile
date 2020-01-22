@@ -192,11 +192,6 @@ KAMELEON_SRC += \
 KAMELEON_INC += -Isrc/modules/graphics
 endif
 
-ifdef KAMELEON_MODULE_URL
-KAMELEON_SRC += src/modules/url/module_url.c
-KAMELEON_INC += -Isrc/modules/url
-endif
-
 # -----------------------------------------------------------------------------
 # CFLAGS
 # -----------------------------------------------------------------------------
