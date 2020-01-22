@@ -70,7 +70,7 @@ else
   TARGET_LDSCRIPT = $(TARGET_DIR)/src/STM32F411CETx_FLASH.ld
 endif
 
-TARGET_HEAPSIZE = 64
+TARGET_HEAPSIZE = 96
 
 # -----------------------------------------------------------------------------
 # Kameleon modules
@@ -84,3 +84,4 @@ KAMELEON_MODULE_SPI = 1
 KAMELEON_MODULE_STORAGE = 1
 KAMELEON_MODULE_UART = 1
 KAMELEON_MODULE_GRAPHICS = 1
+KAMELEON_MODULE_URL = 1
