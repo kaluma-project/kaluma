@@ -23,7 +23,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "jerryscript.h"
 #include "system.h"
 #include "io.h"
 #include "tty.h"
@@ -38,6 +37,7 @@ static void io_timer_run();
 static void io_tty_run();
 static void io_watch_run();
 static void io_uart_run();
+static void io_idle_run();
 
 /* general handle functions */
 
@@ -71,14 +71,6 @@ static void io_update_time() {
   loop.time = gettime();
 }
 
-static void io_run_all_enqueued_jobs() {
-  jerry_value_t ret_val = jerry_run_all_enqueued_jobs();
-  if (jerry_value_is_error(ret_val)) {
-    jerryxx_print_error(ret_val, true);
-  }
-  jerry_release_value(ret_val);
-}
-
 static void io_handle_closing() {
   while (loop.closing_handles.head != NULL) {
     io_handle_t *handle = (io_handle_t *) loop.closing_handles.head;
@@ -107,7 +99,7 @@ void io_run() {
     io_tty_run();
     io_watch_run();
     io_uart_run();
-    io_run_all_enqueued_jobs();
+    io_idle_run();
     io_handle_closing();
   }
 }
@@ -341,5 +333,49 @@ static void io_uart_run() {
       }
     }
     handle = (io_uart_handle_t *) ((list_node_t *) handle)->next;
+  }
+}
+
+/* idle functions */
+
+void io_idle_init(io_idle_handle_t *idle) {
+  io_handle_init((io_handle_t *) idle, IO_IDLE);
+  idle->idle_cb = NULL;
+}
+
+void io_idle_start(io_idle_handle_t *idle, io_idle_cb idle_cb) {
+  IO_SET_FLAG_ON(idle->base.flags, IO_FLAG_ACTIVE);
+  idle->idle_cb = idle_cb;
+  list_append(&loop.idle_handles, (list_node_t *) idle);
+}
+
+void io_idle_stop(io_idle_handle_t *idle) {
+  IO_SET_FLAG_OFF(idle->base.flags, IO_FLAG_ACTIVE);
+  list_remove(&loop.idle_handles, (list_node_t *) idle);
+}
+
+io_idle_handle_t *io_idle_get_by_id(uint32_t id) {
+  return (io_idle_handle_t *) io_handle_get_by_id(id, &loop.idle_handles);
+}
+
+void io_idle_cleanup() {
+  io_idle_handle_t *handle = (io_idle_handle_t *) loop.idle_handles.head;
+  while (handle != NULL) {
+    io_idle_handle_t *next = (io_idle_handle_t *) ((list_node_t *) handle)->next;
+    free(handle);
+    handle = next;
+  }
+  list_init(&loop.idle_handles);
+}
+
+static void io_idle_run() {
+  io_idle_handle_t *handle = (io_idle_handle_t *) loop.idle_handles.head;
+  while (handle != NULL) {
+    if (IO_HAS_FLAG(handle->base.flags, IO_FLAG_ACTIVE)) {
+      if (handle->idle_cb) {
+        handle->idle_cb(handle);
+      }
+    }
+    handle = (io_idle_handle_t *) ((list_node_t *) handle)->next;
   }
 }

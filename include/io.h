@@ -35,6 +35,7 @@ typedef struct io_timer_handle_s io_timer_handle_t;
 typedef struct io_tty_handle_s io_tty_handle_t;
 typedef struct io_watch_handle_s io_watch_handle_t;
 typedef struct io_uart_handle_s io_uart_handle_t;
+typedef struct io_idle_handle_s io_idle_handle_t;
 
 /* handle flags */
 
@@ -51,7 +52,8 @@ typedef enum io_type {
   IO_TIMER,
   IO_TTY,
   IO_WATCH,
-  IO_UART
+  IO_UART,
+  IO_IDLE
 } io_type_t;
 
 typedef void (* io_close_cb)(io_handle_t *);
@@ -123,6 +125,15 @@ struct io_uart_handle_s {
   int temp;
 };
 
+/* idle handle types */
+
+typedef void (* io_idle_cb)(io_idle_handle_t *);
+
+struct io_idle_handle_s {
+  io_handle_t base;
+  io_idle_cb idle_cb;
+};
+
 /* loop type */
 
 struct io_loop_s {
@@ -132,6 +143,7 @@ struct io_loop_s {
   list_t tty_handles;
   list_t watch_handles;
   list_t uart_handles;
+  list_t idle_handles;
   list_t closing_handles;
 };
 
@@ -176,5 +188,13 @@ void io_uart_read_start(io_uart_handle_t *uart, uint8_t port, io_uart_available_
 void io_uart_read_stop(io_uart_handle_t *uart);
 io_uart_handle_t *io_uart_get_by_id(uint32_t id);
 void io_uart_cleanup();
+
+/* idle function */
+
+void io_idle_init(io_idle_handle_t *idle);
+void io_idle_start(io_idle_handle_t *idle, io_idle_cb idle_cb);
+void io_idle_stop(io_idle_handle_t *idle);
+io_idle_handle_t *io_idle_get_by_id(uint32_t id);
+void io_idle_cleanup();
 
 #endif /* __IO_H */

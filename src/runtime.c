@@ -34,12 +34,21 @@
 #include "kameleon_magic_strings.h"
 #include "jerryxx.h"
 
+// --------------------------------------------------------------------------
+// PRIVATE VARIABLES
+// --------------------------------------------------------------------------
+
 /**
  * Runtime VM stop
  * - 0: normal
  * - 1: break VM execution 
  */
 static uint8_t runtime_vm_stop = 0;
+
+/**
+ * idle handle for processing enqueued jobs
+ */
+static io_idle_handle_t idler;
 
 // --------------------------------------------------------------------------
 // PRIVATE FUNCTIONS
@@ -51,6 +60,14 @@ static jerry_value_t vm_exec_stop_callback (void *user_p) {
     return jerry_create_string ((const jerry_char_t *) "Abort script"); 
   }
   return jerry_create_undefined ();
+}
+
+static void idler_cb() {
+  jerry_value_t ret_val = jerry_run_all_enqueued_jobs();
+  if (jerry_value_is_error(ret_val)) {
+    jerryxx_print_error(ret_val, true);
+  }
+  jerry_release_value(ret_val);
 }
 
 // --------------------------------------------------------------------------
@@ -66,6 +83,8 @@ void runtime_init(bool run_main) {
   if (run_main) {
     runtime_run_main();
   }
+  io_idle_init(&idler);
+  io_idle_start(&idler, idler_cb);
 }
 
 void runtime_cleanup() {
@@ -74,6 +93,7 @@ void runtime_cleanup() {
   io_timer_cleanup();
   io_watch_cleanup();
   io_uart_cleanup();
+  io_idle_cleanup();
   // Do not cleanup tty I/O to keep terminal communication
 }
 
