@@ -219,6 +219,14 @@ static void handle_normal(char ch) {
       }
       repl_print_prompt();      
       break;
+    case 0x01: /* Ctrl + A */
+      state.position = 0;
+      set_cursor_to_position();
+      break;
+    case 0x05: /* Ctrl + E */
+      state.position = state.buffer_length;
+      set_cursor_to_position();
+      break;      
     case 0x08: /* backspace */
     case 0x7f: /* also backspace in some terminal */
       if (state.buffer_length > 0 && state.position > 0) {
