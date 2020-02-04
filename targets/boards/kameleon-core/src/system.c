@@ -261,7 +261,6 @@ void system_cleanup() {
 }
 
 uint8_t running_script_check() {
-  delay(1000); //wait 1sec
   GPIO_PinState pin_state = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4); //Check status of the button
   if (pin_state == GPIO_PIN_RESET) //Button is pressed.
     return false; //Skip loading the user script
