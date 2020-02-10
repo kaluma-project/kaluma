@@ -60,7 +60,7 @@ class HTTPParser {
     for (var i = 1; i < ls.length; i++) {
       if (ls[i].includes(':')) {
         var ht = ls[i].split(':');
-        this.incoming.headers[ht[0].trim()] = ht[1].trim();
+        this.incoming.headers[ht[0].trim().toLowerCase()] = ht[1].trim();
       }
     }
   }
@@ -69,7 +69,7 @@ class HTTPParser {
    * Parse HTTP body
    */
   parseBody () {
-    if (this.incoming.headers['Transfer-Encoding'] === 'chunked') {
+    if (this.incoming.headers['transfer-encoding'] === 'chunked') {
       var quit = false;
       while (!quit) {
         var idx = this._buf.indexOf('\r\n');
@@ -93,7 +93,7 @@ class HTTPParser {
         }
       }
     } else {
-      var len = parseInt(this.incoming.headers['Content-Length'] || '0');
+      var len = parseInt(this.incoming.headers['content-length'] || '0');
       if (this._buf.length >= len) {
         this.body = this._buf;
         this._buf = '';
@@ -157,7 +157,7 @@ class OutgoingMessage extends stream.Writable {
    * @return {boolean}
    */
   _isTransferChunked () {
-    return (this.headers['Transfer-Encoding'] === 'chunked');
+    return (this.headers['transfer-encoding'] === 'chunked');
   }
   
   /**
@@ -196,7 +196,7 @@ class OutgoingMessage extends stream.Writable {
    * @param {string} value 
    */
   setHeader (name, value) {
-    this.headers[name] = value;
+    this.headers[name.toLowerCase()] = value;
   }
   
   /**
@@ -205,7 +205,7 @@ class OutgoingMessage extends stream.Writable {
    * @return {string}
    */
   getHeader (name) {
-    return this.headers[name];
+    return this.headers[name.toLowerCase()];
   }
   
   /**
@@ -213,7 +213,7 @@ class OutgoingMessage extends stream.Writable {
    * @param {string} name 
    */
   removeHeader (name) {
-    delete this.headers[name];
+    delete this.headers[name.toLowerCase()];
   }
 }
 
@@ -239,8 +239,8 @@ class ClientRequest extends OutgoingMessage {
    * Flush headers to buffer.
    */
   flushHeaders () {
-    if (!this.headers.hasOwnProperty['Content-Length']) {
-      this.setHeader('Transfer-Encoding', 'chunked');
+    if (!this.headers.hasOwnProperty['content-length']) {
+      this.setHeader('transfer-encoding', 'chunked');
     }
     this._wbuf += `${this.options.method} ${this.path} HTTP/1.1\r\n`;
     for (var key in this.headers) {
@@ -323,8 +323,8 @@ class ServerResponse extends OutgoingMessage {
       this.statusCode = statusCode;
       if (statusMessage) this.statusMessage = statusMessage;
       if (headers) Object.assign(this.headers, headers);
-      if (!this.headers.hasOwnProperty['Content-Length']) { // chunked transfer mode
-        this.headers['Transfer-Encoding'] = 'chunked';
+      if (!this.headers.hasOwnProperty['content-length']) { // chunked transfer mode
+        this.headers['transfer-encoding'] = 'chunked';
       }
       var msg = `HTTP/1.1 ${this.statusCode} ${this.statusMessage}\r\n`;
       for (var name in this.headers) {

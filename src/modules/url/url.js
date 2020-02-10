@@ -73,6 +73,9 @@ class URL {
     } else {
       throw TypeError("Invalid URL");
     }
+    if (!this.searchParams) {
+      this.searchParams = new URLSearchParams();
+    }
   }
 
   get href () {

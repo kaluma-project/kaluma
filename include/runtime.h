@@ -24,9 +24,9 @@
 
 #include "jerryscript.h"
 
-void runtime_init(bool run_main);
+void runtime_init(bool load, bool first);
 void runtime_cleanup();
-void runtime_run_main();
+void runtime_load();
 void runtime_set_vm_stop(uint8_t stop);
 
 #endif /* __RUNTIME_H */

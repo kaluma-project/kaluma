@@ -49,7 +49,7 @@ static uint8_t runtime_vm_stop = 0;
 /**
  * idle handle for processing enqueued jobs
  */
-static io_idle_handle_t *idler;
+static io_idle_handle_t idler;
 
 // --------------------------------------------------------------------------
 // PRIVATE FUNCTIONS
@@ -75,19 +75,20 @@ static void idler_cb() {
 // PUBLIC FUNCTIONS
 // --------------------------------------------------------------------------
 
-void runtime_init(bool run_main) {
+void runtime_init(bool load, bool first) {
   jerry_init (JERRY_INIT_EMPTY);
   jerry_set_vm_exec_stop_callback (vm_exec_stop_callback, &runtime_vm_stop, 16);
   jerry_register_magic_strings (magic_string_items, num_magic_string_items, magic_string_lengths);
   global_init();
   jerry_gc(JERRY_GC_PRESSURE_HIGH);
-  if (run_main) {
-    runtime_run_main();
+  if (load) {
+    runtime_load();
   }
-  // Initialize idler handle for queued jobs in jerryscript
-  idler = malloc(sizeof(io_idle_handle_t));
-  io_idle_init(idler);
-  io_idle_start(idler, idler_cb);
+  if (first) {
+    // Initialize idler handle for queued jobs in jerryscript
+    io_idle_init(&idler);
+    io_idle_start(&idler, idler_cb);
+  }
 }
 
 void runtime_cleanup() {
@@ -96,11 +97,11 @@ void runtime_cleanup() {
   io_timer_cleanup();
   io_watch_cleanup();
   io_uart_cleanup();
-  io_idle_cleanup();
+  // io_idle_cleanup();
   // Do not cleanup tty I/O to keep terminal communication
 }
 
-void runtime_run_main() {
+void runtime_load() {
   uint32_t size = flash_get_data_size();
   if (size > 0) {
     uint8_t *script = flash_get_data();
@@ -110,7 +111,7 @@ void runtime_run_main() {
       if (jerry_value_is_error (ret_value)) {
         jerryxx_print_error(ret_value, true);
         runtime_cleanup();
-        runtime_init(false);
+        runtime_init(false, false);
         return;
       }
       jerry_release_value (ret_value);

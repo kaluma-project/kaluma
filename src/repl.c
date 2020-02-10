@@ -418,7 +418,7 @@ static void cmd_echo(repl_state_t *state, char *arg) {
  */
 static void cmd_reset(repl_state_t *state) {
   runtime_cleanup();
-  runtime_init(false);
+  runtime_init(false, false);
 }
 
 static size_t bytes_remained = 0;
@@ -523,7 +523,7 @@ static void cmd_flash(repl_state_t *state, char *arg) {
  */
 static void cmd_load(repl_state_t *state) {
   runtime_cleanup();
-  runtime_init(true);
+  runtime_init(true, false);
 }
 
 /**
