@@ -19,6 +19,7 @@
  * SOFTWARE.
  */
 
+#include <stdlib.h>
 #include <string.h>
 #include "tty.h"
 #include "flash.h"
@@ -48,7 +49,7 @@ static uint8_t runtime_vm_stop = 0;
 /**
  * idle handle for processing enqueued jobs
  */
-static io_idle_handle_t idler;
+static io_idle_handle_t *idler;
 
 // --------------------------------------------------------------------------
 // PRIVATE FUNCTIONS
@@ -83,8 +84,10 @@ void runtime_init(bool run_main) {
   if (run_main) {
     runtime_run_main();
   }
-  io_idle_init(&idler);
-  io_idle_start(&idler, idler_cb);
+  // Initialize idler handle for queued jobs in jerryscript
+  idler = malloc(sizeof(io_idle_handle_t));
+  io_idle_init(idler);
+  io_idle_start(idler, idler_cb);
 }
 
 void runtime_cleanup() {

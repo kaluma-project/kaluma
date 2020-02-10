@@ -123,7 +123,7 @@ class URLSearchParams {
   }
 
   append (name, value) {
-    this.pairs.push([name, value]);
+    this.pairs.push([name, value.toString()]);
   }
 
   delete (name) {
