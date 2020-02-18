@@ -50,6 +50,7 @@
 #define MSTR_CLEAR_INTERVAL "clearInterval"
 #define MSTR_DELAY "delay"
 #define MSTR_MILLIS "millis"
+#define MSTR_SET_MILLIS "setMillis"
 #define MSTR_CONSOLE "console"
 #define MSTR_LOG "log"
 #define MSTR_ERROR "error"
