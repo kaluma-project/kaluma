@@ -233,6 +233,9 @@ class ClientRequest extends OutgoingMessage {
     this._parser.onHeadersComplete = () => {
       this.emit('response', this.incoming);
     }
+    this.socket.on('error', err => {
+      this.emit('error', err);
+    });
   }
 
   /**
