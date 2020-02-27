@@ -109,11 +109,15 @@ class HTTPParser {
    */
   end () {
     if (!this.incoming.complete) {
+      if (this._buf.length > 0) {
+        this.incoming.emit('data', this._buf);
+        this._buf = '';  
+      }
       this.incoming.complete = true;
       this.incoming.emit('end');
       if (this.onComplete) this.onComplete();
     }
-  }  
+  }
 }
 
 /**
