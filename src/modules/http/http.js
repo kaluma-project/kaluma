@@ -299,11 +299,15 @@ class ClientRequest extends OutgoingMessage {
    * @return {this}
    */
   end (chunk, cb) {
+    console.log("ClientRequest.end 1");
     if (!this.headersSent) {
+      console.log("ClientRequest.end 2");
       this.flushHeaders();
       this.headersSent = true;
     }
+    console.log("ClientRequest.end 3");
     if (chunk) {
+      console.log("ClientRequest.end 4");
       if (chunk instanceof Uint8Array)
         chunk = String.fromCharCode.apply(null, chunk);
       if (this._isTransferChunked()) {
@@ -312,11 +316,17 @@ class ClientRequest extends OutgoingMessage {
         this._wbuf += chunk;
       }
     }
+    console.log("ClientRequest.end 5");
     this.socket.connect(this.options, () => {
+      console.log("ClientRequest.end 6");
       var last = (this._isTransferChunked() ? '0\r\n\r\n' : undefined); // end of body
+      console.log("ClientRequest.end 7");
       super.end(last, cb);
+      console.log("ClientRequest.end 8");
       this._afterFinish();
+      console.log("ClientRequest.end 9");
     })
+    console.log("ClientRequest.end 10");
     return this;
   }
 }
@@ -439,12 +449,43 @@ exports.request = function (options, cb) {
 * @param {Function} cb
  */
 exports.get = function (options, cb) {
+  console.log("http.get 1");
   var socket = new net.Socket();
+  console.log("http.get 2");
   options.port = options.port || 80;
   options.method = 'GET';
+  console.log("http.get 3");
   var req = new ClientRequest(options, socket);
+  console.log("http.get 4");
   if (cb) req.once('response', cb);
+  console.log("http.get 5");
   req.end();
+  console.log("http.get 6");
+  return req;
+}
+
+/**
+ * HTTP GET request via WIFI
+ * @param {object} options
+ *   .host {string}
+ *   .port {number}
+ *   .path {string}
+ *   .headers {object}
+* @param {Function} cb
+ */
+exports.wifi_get = function (options, cb) {
+  console.log("http.get 1");
+  var socket = new net.Socket();
+  console.log("http.get 2");
+  options.port = options.port || 80;
+  options.method = 'GET';
+  console.log("http.get 3");
+  var req = new ClientRequest(options, socket);
+  console.log("http.get 4");
+  if (cb) req.once('response', cb);
+  console.log("http.get 5");
+  req.end();
+  console.log("http.get 6");
   return req;
 }
 

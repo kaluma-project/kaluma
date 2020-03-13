@@ -25,13 +25,18 @@ class Socket extends stream.Duplex {
     this._bindDev();
     if (this._dev) {
       this._fd = fd;
+      console.log("_socket 1");
       var sck = this._dev.get(this._fd);
+      console.log("_socket 2");
       if (sck) {
+        console.log("_socket 3");
         this.localAddress = sck.laddr;
         this.localPort = sck.lport;
         this.remoteAddress = sck.raddr;
         this.remotePort = sck.rport;      
+        console.log("_socket 4");
         sck.connect_cb = () => {
+          console.log("_socket 5");
           this.localAddress = sck.laddr;
           this.localPort = sck.lport;
           this.remoteAddress = sck.raddr;
@@ -39,11 +44,13 @@ class Socket extends stream.Duplex {
           this.emit('connect');
           this.emit('ready');        
         }
+        console.log("_socket 6");
         sck.close_cb = () => { this._afterDestroy() }
         sck.read_cb = (data) => { this.push(data) }
         sck.shutdown_cb = () => { this._afterEnd() }
       }
     } else {
+      console.log("_socket 7");
       throw new SystemError(6); // ENXIO
     }
   }
@@ -57,13 +64,20 @@ class Socket extends stream.Duplex {
    * @return {Socket}
    */
   connect (options, connectListener) {
+    console.log("Socket.connect 1");
     this._bindDev();
+    console.log("Socket.connect 2");
     if (this._dev) {
+      console.log("Socket.connect 3");
       var fd = this._dev.socket(null, 'STREAM');    
+      console.log("Socket.connect 4");
       if (connectListener) {
+        console.log("Socket.connect 5");
         this.on('connect', connectListener);
       }
+      console.log("Socket.connect 6");
       if (fd > -1) {
+        console.log("Socket.connect 7");
         this._socket(fd);
         this._dev.connect(this._fd, options.host, options.port, (err) => {
           if (err) {
@@ -71,9 +85,12 @@ class Socket extends stream.Duplex {
           }
         });
       }
+      console.log("Socket.connect 8");
     } else {
+      console.log("Socket.connect 9");
       this.emit('error', new SystemError(6)); // ENXIO
     }
+    console.log("Socket.connect 10");
     return this;
   }
 

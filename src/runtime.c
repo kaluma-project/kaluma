@@ -19,6 +19,11 @@
  * SOFTWARE.
  */
 
+#ifdef _TARGET_FREERTOS_
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include "tty.h"
@@ -34,6 +39,7 @@
 #include "runtime.h"
 #include "kameleon_magic_strings.h"
 #include "jerryxx.h"
+
 
 // --------------------------------------------------------------------------
 // PRIVATE VARIABLES
@@ -69,6 +75,10 @@ static void idler_cb() {
     jerryxx_print_error(ret_val, true);
   }
   jerry_release_value(ret_val);
+#ifdef _TARGET_FREERTOS_  
+  // ESP32 Kick the dog
+  vTaskDelay(10);
+#endif
 }
 
 // --------------------------------------------------------------------------

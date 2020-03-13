@@ -10,3 +10,8 @@ src/gen
 
 # Temp
 .vscode/ipch
+
+*~
+\#*
+.vscode/tasks.json
+cmake_build/
