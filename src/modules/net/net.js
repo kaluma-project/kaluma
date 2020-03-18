@@ -82,7 +82,7 @@ class Socket extends stream.Duplex {
    * Destroy the connection
    * @param {function} cb
    */
-  _doDestroy(cb) {
+  _destroy(cb) {
     this._bindDev();
     if (this._dev) {
       this._dev.close(this._fd, (err) => {
@@ -104,7 +104,7 @@ class Socket extends stream.Duplex {
    * @param {string} chunk
    * @param {function} cb
    */
-  _doWrite (chunk, cb) {
+  _write (chunk, cb) {
     this._bindDev();
     if (this._dev) {
       this._dev.write(this._fd, chunk, (err) => {
@@ -125,7 +125,7 @@ class Socket extends stream.Duplex {
    * 
    * @param {function} cb
    */
-  _doFinish (cb) {
+  _final (cb) {
     this._bindDev();
     if (this._dev) {
       this._dev.shutdown(this._fd, 1, (err) => {

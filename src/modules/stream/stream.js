@@ -13,10 +13,9 @@ class Stream extends EventEmitter {
    * @protected
    * @abstract
    * Implement how to destroy the stream
-   * 
    * @param {Function} callback
    */  
-  _doDestroy (callback) {} // eslint-disable-line
+  _destroy (callback) {} // eslint-disable-line
 
   /**
    * @protected
@@ -31,12 +30,11 @@ class Stream extends EventEmitter {
   
   /**
    * Destroy the stream
-   * 
    * @return {this}
    */  
   destroy () {
     if (!this.destroyed) {
-      this._doDestroy((err) => {
+      this._destroy((err) => {
         if (err) {
           this.emit('error', err);
         } else {
@@ -94,20 +92,17 @@ class Writable extends Stream {
    * @protected
    * @abstract
    * Implement how to write data on the stream
-   * 
    * @param {Function} callback
    */
-  _doWrite (data, callback) {} // eslint-disable-line
+  _write (data, callback) {} // eslint-disable-line
 
   /**
    * @protected
    * @abstract
    * Implement how to finish to write on the stream
-   * 
    * @param {Function} callback
    */
-  _doFinish (callback) {} // eslint-disable-line
-
+  _final (callback) {} // eslint-disable-line
   
   /**
    * @protected
@@ -122,7 +117,6 @@ class Writable extends Stream {
   
   /**
    * Write a chunk of data to the stream
-   * 
    * @param {string} chunk
    * @param {Function} callback
    * @return {boolean}
@@ -140,7 +134,6 @@ class Writable extends Stream {
   
   /**
    * Finish to write on the stream.
-   * 
    * @param {string} chunk
    * @param {Function} callback
    * @return {Writable}
@@ -165,14 +158,14 @@ class Writable extends Stream {
     return this;
   }
 
- /**
-  * @protected
-  * Flush data in internal buffer
-  */  
+  /**
+   * @protected
+   * Flush data in internal buffer
+   */  
   flush () {
     if (!this.writableFinished) {
       if (this._wbuf.length > 0) {
-        this._doWrite(this._wbuf, (err) => {
+        this._write(this._wbuf, (err) => {
           if (err) {
             this.emit('error', err);
           } else {
@@ -189,13 +182,13 @@ class Writable extends Stream {
     }
   }
   
- /**
-  * @protected
-  * Finish to write on the stream
-  */
+  /**
+   * @protected
+   * Finish to write on the stream
+   */
   finish () {
     if (this.writableEnded && this._wbuf.length === 0) {
-      this._doFinish((err) => {
+      this._final((err) => {
         if (err) {
           this.emit('error', err);
         } else {

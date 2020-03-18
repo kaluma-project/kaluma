@@ -176,21 +176,21 @@ class OutgoingMessage extends stream.Writable {
   /**
    * @override
    */
-  _doDestroy (callback) {
+  _destroy (callback) {
     this.socket.destroy(callback);
   }
   
   /**
    * @override
    */
-  _doWrite (chunk, callback) {
+  _write (chunk, callback) {
     this.socket.write(chunk, callback);    
   }
   
   /**
    * @override
    */
-  _doFinish (callback) {
+  _final (callback) {
     this.socket.end(callback);
   }
   
