@@ -13,9 +13,9 @@ class Stream extends EventEmitter {
    * @protected
    * @abstract
    * Implement how to destroy the stream
-   * @param {Function} callback
+   * @param {Function} cb
    */  
-  _destroy (callback) {} // eslint-disable-line
+  _destroy (cb) {} // eslint-disable-line
 
   /**
    * @protected
@@ -92,17 +92,17 @@ class Writable extends Stream {
    * @protected
    * @abstract
    * Implement how to write data on the stream
-   * @param {Function} callback
+   * @param {Function} cb
    */
-  _write (data, callback) {} // eslint-disable-line
+  _write (data, cb) {} // eslint-disable-line
 
   /**
    * @protected
    * @abstract
    * Implement how to finish to write on the stream
-   * @param {Function} callback
+   * @param {Function} cb
    */
-  _final (callback) {} // eslint-disable-line
+  _final (cb) {} // eslint-disable-line
   
   /**
    * @protected
@@ -118,16 +118,16 @@ class Writable extends Stream {
   /**
    * Write a chunk of data to the stream
    * @param {string} chunk
-   * @param {Function} callback
+   * @param {Function} cb
    * @return {boolean}
    */
-  write (chunk, callback) {
+  write (chunk, cb) {
     if (!this.writableEnded) {
       if (chunk) {
         this._wbuf += chunk;
       }
       setTimeout(() => this.flush(), 0);
-      if (callback) callback();
+      if (cb) cb();
     }
     return this._wbuf.length === 0;
   }
@@ -135,19 +135,19 @@ class Writable extends Stream {
   /**
    * Finish to write on the stream.
    * @param {string} chunk
-   * @param {Function} callback
+   * @param {Function} cb
    * @return {Writable}
    */  
-  end (chunk, callback) {
+  end (chunk, cb) {
     if (typeof chunk === 'function') {
-      callback = chunk;
+      cb = chunk;
       chunk = undefined;
     }
     if (chunk) {
       this._wbuf += chunk;
     }
-    if (callback) {
-      this.once('finish', callback);
+    if (cb) {
+      this.once('finish', cb);
     }
     this.writableEnded = true;
     if (this._wbuf.length > 0) {

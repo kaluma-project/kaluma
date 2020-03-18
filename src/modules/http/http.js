@@ -176,22 +176,22 @@ class OutgoingMessage extends stream.Writable {
   /**
    * @override
    */
-  _destroy (callback) {
-    this.socket.destroy(callback);
+  _destroy (cb) {
+    this.socket.destroy(cb);
   }
   
   /**
    * @override
    */
-  _write (chunk, callback) {
-    this.socket.write(chunk, callback);    
+  _write (chunk, cb) {
+    this.socket.write(chunk, cb);    
   }
   
   /**
    * @override
    */
-  _final (callback) {
-    this.socket.end(callback);
+  _final (cb) {
+    this.socket.end(cb);
   }
   
   /**
@@ -260,10 +260,10 @@ class ClientRequest extends OutgoingMessage {
    * @override
    * Write data on the stream
    * @param {string} chunk 
-   * @param {Function} callback
+   * @param {Function} cb
    * @return {this}
    */
-  write (chunk, callback) {
+  write (chunk, cb) {
     if (!this.headersSent) {
       this.flushHeaders();
       this.headersSent = true;
@@ -275,7 +275,7 @@ class ClientRequest extends OutgoingMessage {
         this._wbuf += chunk;
       }
     }
-    if (callback) callback();
+    if (cb) cb();
     return this;
   }
   
@@ -283,10 +283,10 @@ class ClientRequest extends OutgoingMessage {
    * @override
    * Finish to write data on the stream
    * @param {string} chunk
-   * @param {Function} callback
+   * @param {Function} cb
    * @return {this}
    */
-  end (chunk, callback) {
+  end (chunk, cb) {
     if (!this.headersSent) {
       this.flushHeaders();
       this.headersSent = true;
@@ -300,7 +300,7 @@ class ClientRequest extends OutgoingMessage {
     }
     this.socket.connect(this.options, () => {
       var last = (this._isTransferChunked() ? '0\r\n\r\n' : undefined); // end of body
-      super.end(last, callback);
+      super.end(last, cb);
       this._afterFinish();
     })
     return this;
@@ -348,21 +348,21 @@ class ServerResponse extends OutgoingMessage {
   /**
    * @override
    */
-  write (chunk, callback) {
+  write (chunk, cb) {
     if (!this.headersSent) {
       this.writeHead(200);
     }
     if (chunk && this._isTransferChunked()) {
       chunk = this._encodeChunk(chunk);
     }
-    super.write(chunk, callback);
+    super.write(chunk, cb);
     return this;
   }
 
   /**
    * @override
    */
-  end (chunk, callback) {
+  end (chunk, cb) {
     if (!this.headersSent) {
       this.writeHead(200);
     }
@@ -373,7 +373,7 @@ class ServerResponse extends OutgoingMessage {
         chunk = '0\r\n\r\n'; // end of body
       }      
     }
-    super.end(chunk, callback);
+    super.end(chunk, cb);
     this._afterFinish();
     return this;
   }
@@ -404,14 +404,14 @@ class Server extends net.Server {
  *   .method {string}
  *   .path {string}
  *   .headers {object}
- * @param {Function} callback
+ * @param {Function} cb
  */
-exports.request = function (options, callback) {
+exports.request = function (options, cb) {
   var socket = new net.Socket();
   options.port = options.port || 80;
   options.method = options.method || 'GET';
   var req = new ClientRequest(options, socket);
-  if (callback) req.once('response', callback);
+  if (cb) req.once('response', cb);
   return req;
 }
 
@@ -422,14 +422,14 @@ exports.request = function (options, callback) {
  *   .port {number}
  *   .path {string}
  *   .headers {object}
-* @param {Function} callback
+* @param {Function} cb
  */
-exports.get = function (options, callback) {
+exports.get = function (options, cb) {
   var socket = new net.Socket();
   options.port = options.port || 80;
   options.method = 'GET';
   var req = new ClientRequest(options, socket);
-  if (callback) req.once('response', callback);
+  if (cb) req.once('response', cb);
   req.end();
   return req;
 }
