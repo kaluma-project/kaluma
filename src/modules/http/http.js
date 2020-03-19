@@ -170,7 +170,7 @@ class OutgoingMessage extends stream.Writable {
    * @return {string}
    */
   _encodeChunk (chunk) {
-    return chunk.length.toString(16) + '\r\n' + chunk + 'r\n';
+    return chunk.length.toString(16) + '\r\n' + chunk + '\r\n';
   }
 
   /**
