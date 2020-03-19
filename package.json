@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "devDependencies": {
     "fs-extra": "^4.0.2",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.2",
     "mustache": "^2.3.0"
   }
 }
