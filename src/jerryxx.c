@@ -135,3 +135,41 @@ void jerryxx_print_error (jerry_value_t value, bool print_stacktrace) {
   }
   jerry_release_value (error_value);
 }
+
+jerry_size_t jerryxx_get_ascii_string_size(const jerry_value_t value) {
+  return jerry_get_string_length(value);
+}
+
+jerry_size_t jerryxx_get_ascii_string_length(const jerry_value_t value) {
+  return jerry_get_string_length(value);
+}
+
+jerry_size_t jerryxx_string_to_ascii_char_buffer(const jerry_value_t value, jerry_char_t *buf, jerry_size_t len) {
+  jerry_size_t utf8_sz = jerry_get_utf8_string_size(value);
+  jerry_char_t utf8_buf[utf8_sz];
+  jerry_string_to_utf8_char_buffer (value, utf8_buf, utf8_sz);
+  uint32_t utf8_p = 0;
+  uint32_t ascii_p = 0;
+  while (ascii_p < len) {
+    uint8_t ch = utf8_buf[utf8_p];
+    if (ch < 128) {             // 1 byte
+      buf[ascii_p] = ch;
+      utf8_p++;
+    } else if (ch >> 5 == 6) {  // 2 bytes
+      if (ch == 0xc2) {
+        buf[ascii_p] = utf8_buf[utf8_p + 1];
+      } else if (ch == 0xc3) {
+        buf[ascii_p] = utf8_buf[utf8_p + 1] + 64;
+      }
+      utf8_p += 2;
+    } else if (ch >> 4 == 14) { // 3 bytes
+      buf[ascii_p] = 0; // Don't encode over 2 bytes
+      utf8_p += 3;
+    } else if (ch >> 3 == 30) { // 4 bytes
+      buf[ascii_p] = 0; // Don't encode over 2 bytes
+      utf8_p += 4;
+    }
+    ascii_p++;
+  }
+  return ascii_p;
+}

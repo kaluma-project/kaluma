@@ -145,4 +145,8 @@ bool jerryxx_delete_property(jerry_value_t object, const char *name);
 void jerryxx_print_value(jerry_value_t value);
 void jerryxx_print_error(jerry_value_t value, bool print_stacktrace);
 
+jerry_size_t jerryxx_get_ascii_string_size(const jerry_value_t value);
+jerry_size_t jerryxx_get_ascii_string_length(const jerry_value_t value);
+jerry_size_t jerryxx_string_to_ascii_char_buffer(const jerry_value_t value, jerry_char_t *buf, jerry_size_t len);
+
 #endif /* __JERRYXX_H */

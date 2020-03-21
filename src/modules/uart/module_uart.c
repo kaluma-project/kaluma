@@ -189,9 +189,9 @@ JERRYXX_FUN(uart_write_fn) {
     }
     jerry_release_value(array_buffer);
   } else if (jerry_value_is_string(data)) { /* for string */
-    jerry_size_t len = jerry_get_string_size(data);
+    jerry_size_t len = jerryxx_get_ascii_string_size(data);
     uint8_t buf[len];
-    jerry_string_to_char_buffer(data, buf, len);
+    jerryxx_string_to_ascii_char_buffer(data, buf, len);
     for (int c = 0; c < count; c++) {
       ret = uart_write(port, buf, len);
       if (ret < 0) break;
