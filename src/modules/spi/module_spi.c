@@ -103,9 +103,12 @@ JERRYXX_FUN(spi_transfer_fn) {
       free(rx_buf);
       return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to transfer data via SPI bus.");
     } else {
-      jerry_value_t array_buffer = jerry_create_arraybuffer_external(len,
-          rx_buf, buffer_free_cb);
-      return array_buffer;
+      jerry_value_t buffer = jerry_create_arraybuffer_external(len, rx_buf,
+        buffer_free_cb);
+      jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
+        JERRY_TYPEDARRAY_UINT8, buffer);
+      jerry_release_value(buffer);
+      return array;
     }
     jerry_release_value(array_buffer);
   } else if (jerry_value_is_string(data)) { /* for string */
@@ -118,9 +121,12 @@ JERRYXX_FUN(spi_transfer_fn) {
       free(rx_buf);
       return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to transfer data via SPI bus.");
     } else {
-      jerry_value_t array_buffer = jerry_create_arraybuffer_external(len,
-          rx_buf, buffer_free_cb);
-      return array_buffer;
+      jerry_value_t buffer = jerry_create_arraybuffer_external(len, rx_buf,
+        buffer_free_cb);
+      jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
+        JERRY_TYPEDARRAY_UINT8, buffer);
+      jerry_release_value(buffer);
+      return array;
     }
   } else {
     return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "The data argument must be Uint8Array or string.");
@@ -198,14 +204,17 @@ JERRYXX_FUN(spi_recv_fn) {
   uint8_t *buf = malloc(length);
   int ret = spi_recv(bus, buf, length, timeout);
 
-  // return an array buffer
+  // return an Uin8Array
   if (ret == SPIPORT_ERROR) {
     free(buf);
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to receive data via SPI bus.");
   } else {
     jerry_value_t array_buffer = jerry_create_arraybuffer_external(length, buf,
         buffer_free_cb);
-    return array_buffer;
+    jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
+      JERRY_TYPEDARRAY_UINT8, array_buffer);
+    jerry_release_value(array_buffer);
+    return array;
   }
 }
 

@@ -193,14 +193,17 @@ JERRYXX_FUN(i2c_read_fn) {
     ret = i2c_read_master(bus, address, buf, length, timeout);
   }
 
-  // return an array buffer
+  // return an Uint8Array
   if (ret == I2CPORT_ERROR) {
     free(buf);
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to read data via I2C bus.");
   } else {
     jerry_value_t array_buffer = jerry_create_arraybuffer_external(length, buf,
         buffer_free_cb);
-    return array_buffer;
+    jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
+      JERRY_TYPEDARRAY_UINT8, array_buffer);
+    jerry_release_value(array_buffer);
+    return array;
   }
 }
 
@@ -298,14 +301,17 @@ JERRYXX_FUN(i2c_memread_fn) {
 
   int ret = i2c_memRead_master(bus, address, memAddress, memAddr16, buf, length, timeout);
 
-  // return an array buffer
+  // return an Uint8Array
   if (ret == I2CPORT_ERROR) {
     free(buf);
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to read data via I2C bus.");
   } else {
     jerry_value_t array_buffer = jerry_create_arraybuffer_external(length, buf,
         buffer_free_cb);
-    return array_buffer;
+    jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
+      JERRY_TYPEDARRAY_UINT8, array_buffer);
+    jerry_release_value(array_buffer);
+    return array;
   }
 }
 

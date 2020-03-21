@@ -59,15 +59,18 @@ static void uart_read_cb(io_uart_handle_t *handle, uint8_t *buf, size_t len) {
   if (jerry_value_is_function(handle->read_js_cb)) {
     jerry_value_t array_buffer = jerry_create_arraybuffer(len);
     jerry_arraybuffer_write(array_buffer, 0, buf, len);
-    jerry_value_t this_val = jerry_create_undefined ();
-    jerry_value_t args_p[1] = { array_buffer };
-    jerry_value_t ret_val = jerry_call_function (handle->read_js_cb, this_val, args_p, 1);
-    if (jerry_value_is_error (ret_val)) {
+    jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
+      JERRY_TYPEDARRAY_UINT8, array_buffer);
+    jerry_release_value(array_buffer);
+    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t args_p[1] = { array };
+    jerry_value_t ret_val = jerry_call_function(handle->read_js_cb, this_val, args_p, 1);
+    if (jerry_value_is_error(ret_val)) {
       jerryxx_print_error(ret_val, true);
     }
-    jerry_release_value (ret_val);
-    jerry_release_value (this_val);
-    jerry_release_value (array_buffer);
+    jerry_release_value(ret_val);
+    jerry_release_value(this_val);
+    jerry_release_value(array);
   }
 }
 
