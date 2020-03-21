@@ -26,7 +26,7 @@ class ATCommand extends EventEmitter {
       this.debug = options.debug;
     }
     this.handler = (data) => {
-      var s = String.fromCharCode.apply(null, new Uint8Array(data));
+      var s = String.fromCharCode.apply(null, data);
       if (this.debug) {
         print(s);
       }
@@ -160,15 +160,15 @@ class ATCommand extends EventEmitter {
   }
 
   /**
-   * Create a job to send AT command
-   *
-   * @param {string} cmd  AT command
+   * Create a job to send AT command or data
+   * @param {string|Uint8Array} cmd  AT command or data
    * @param {function(result:string, response:string)} cb  Response callback
    * @param {Array<string>|function|number} match
    * @param {object} options
    *   - timeout {number} Set timeout. Default: 20000. (20s).
    *   - prepend {boolean} Add the job to first. Default: false.
    *   - clean {boolean} Clean the response data before sending AT command.
+   *   - sendAsData {boolean} Send cmd argument as data (without appending '\r\n')
    */
   send(cmd, cb, match, options) {
     if (!options) options = {};
@@ -179,7 +179,8 @@ class ATCommand extends EventEmitter {
       running: false,
       timeout: options.timeout || 20000,
       prepend: options.prepend ? true : false,
-      clean: options.clean ? true : false
+      clean: options.clean ? true : false,
+      sendAsData: options.sendAsData ? true : false
     }
     if (job.prepend) {
       this.queue.unshift(job);
@@ -200,7 +201,9 @@ class ATCommand extends EventEmitter {
         if (this.job.clean) {
           this.buffer = ''
         }
-        this.serial.write(this.job.cmd + '\r\n');
+        var cmd = this.job.cmd;
+        if (typeof cmd === 'string' && !this.job.sendAsData) cmd += '\r\n';
+        this.serial.write(cmd);
         this.job.running = true;
         this.job.timer = setTimeout(() => {
           if (this.job && this.job.running) {
