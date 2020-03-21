@@ -155,29 +155,8 @@ JERRYXX_FUN(uart_write_fn) {
 
   // write data to the port
   int ret = UARTPORT_ERROR;
-  if (jerry_value_is_array(data)) { /* for Array<number> */
-    size_t len = jerry_get_array_length(data);
-    uint8_t buf[len];
-    for (int i = 0; i < len; i++) {
-      jerry_value_t item = jerry_get_property_by_index(data, i);
-      if (jerry_value_is_number(item)) {
-        buf[i] = (uint8_t) jerry_get_number_value(item);
-      } else {
-        buf[i] = 0; // write 0 for non-number item.
-      }
-    }
-    for (int c = 0; c < count; c++) {
-      ret = uart_write(port, buf, len);
-      if (ret < 0) break;
-    }
-  } else if (jerry_value_is_arraybuffer(data)) { /* for ArrayBuffer */
-    size_t len = jerry_get_arraybuffer_byte_length(data);
-    uint8_t *buf = jerry_get_arraybuffer_pointer(data);
-    for (int c = 0; c < count; c++) {
-      ret = uart_write(port, buf, len);
-      if (ret < 0) break;
-    }
-  } else if (jerry_value_is_typedarray(data)) { /* for TypedArrays (Uint8Array, Int16Array, ...) */
+  if (jerry_value_is_typedarray(data) && 
+      jerry_get_typedarray_type(data) == JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
     jerry_length_t byteLength = 0;
     jerry_length_t byteOffset = 0;
     jerry_value_t array_buffer = jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
@@ -197,7 +176,7 @@ JERRYXX_FUN(uart_write_fn) {
       if (ret < 0) break;
     }
   } else {
-    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "The data argument must be one of string, Array<number>, ArrayBuffer or TypedArray.");
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "The data argument must be Uint8Array or string.");
   }
   if (ret == UARTPORT_ERROR)
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to write data to UART port.");
