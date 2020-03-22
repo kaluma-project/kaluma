@@ -808,7 +808,7 @@ static void register_global_textdecoder() {
 
 /****************************************************************************/
 /*                                                                          */
-/*                         ENCODE/DECODE FUNCTIONS                          */
+/*                             BTOA/ATOB FUNCTIONS                          */
 /*                                                                          */
 /****************************************************************************/
 
@@ -816,28 +816,13 @@ static void base64_buffer_free_cb(void *native_p) {
   free(native_p);
 }
 
-JERRYXX_FUN(encode_fn) {
-  JERRYXX_CHECK_ARG(0, "binaryData")
+JERRYXX_FUN(btoa_fn) {
+  JERRYXX_CHECK_ARG(0, "data")
   jerry_value_t binary_data = JERRYXX_GET_ARG(0);
   size_t encoded_data_sz;
   unsigned char *encoded_data = NULL;
-  if (jerry_value_is_array(binary_data)) { /* for Array<number> */
-    size_t len = jerry_get_array_length(binary_data);
-    uint8_t buf[len];
-    for (int i = 0; i < len; i++) {
-      jerry_value_t item = jerry_get_property_by_index(binary_data, i);
-      if (jerry_value_is_number(item)) {
-        buf[i] = (uint8_t) jerry_get_number_value(item);
-      } else {
-        buf[i] = 0; // write 0 for non-number item.
-      }
-    }
-    encoded_data = base64_encode(buf, len, &encoded_data_sz);
-  } else if (jerry_value_is_arraybuffer(binary_data)) { /* for ArrayBuffer */
-    size_t len = jerry_get_arraybuffer_byte_length(binary_data);
-    uint8_t *buf = jerry_get_arraybuffer_pointer(binary_data);
-    encoded_data = base64_encode(buf, len, &encoded_data_sz);
-  } else if (jerry_value_is_typedarray(binary_data)) { /* for TypedArrays (Uint8Array, Int16Array, ...) */
+  if (jerry_value_is_typedarray(binary_data) &&
+      jerry_get_typedarray_type(binary_data) == JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
     jerry_length_t byteLength = 0;
     jerry_length_t byteOffset = 0;
     jerry_value_t array_buffer = jerry_get_typedarray_buffer(binary_data, &byteOffset, &byteLength);
@@ -846,9 +831,9 @@ JERRYXX_FUN(encode_fn) {
     encoded_data = base64_encode(buf, len, &encoded_data_sz);
     jerry_release_value(array_buffer);
   } else if (jerry_value_is_string(binary_data)) { /* for string */
-    jerry_size_t len = jerry_get_string_size(binary_data);
+    jerry_size_t len = jerryxx_get_ascii_string_size(binary_data);
     uint8_t buf[len];
-    jerry_string_to_char_buffer(binary_data, buf, len);
+    jerryxx_string_to_ascii_char_buffer(binary_data, buf, len);
     encoded_data = base64_encode(buf, len, &encoded_data_sz);
   } else {
     return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "Unsupported binary data.");
@@ -862,7 +847,7 @@ JERRYXX_FUN(encode_fn) {
   }
 }
 
-JERRYXX_FUN(decode_fn) {
+JERRYXX_FUN(atob_fn) {
   JERRYXX_CHECK_ARG_STRING(0, "encodedData")
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, encoded_data)
   size_t decoded_data_sz;
@@ -870,7 +855,10 @@ JERRYXX_FUN(decode_fn) {
       encoded_data_sz, &decoded_data_sz);
   if (decoded_data != NULL) {
     jerry_value_t buffer = jerry_create_arraybuffer_external(decoded_data_sz, decoded_data, base64_buffer_free_cb);
-    return buffer;
+    jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
+      JERRY_TYPEDARRAY_UINT8, buffer);
+    jerry_release_value(buffer);
+    return array;
   } else {
     return jerry_create_undefined();
   }
@@ -940,8 +928,8 @@ JERRYXX_FUN(decode_uri_component_fn) {
 
 static void register_global_encoders() {
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property_function(global, MSTR_ENCODE, encode_fn);
-  jerryxx_set_property_function(global, MSTR_DECODE, decode_fn);
+  jerryxx_set_property_function(global, MSTR_BTOA, btoa_fn);
+  jerryxx_set_property_function(global, MSTR_ATOB, atob_fn);
   jerryxx_set_property_function(global, MSTR_ENCODE_URI_COMPONENT, encode_uri_component_fn);
   jerryxx_set_property_function(global, MSTR_DECODE_URI_COMPONENT, decode_uri_component_fn);
   jerry_release_value(global);
