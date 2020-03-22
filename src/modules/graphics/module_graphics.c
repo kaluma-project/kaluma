@@ -267,23 +267,32 @@ JERRYXX_FUN(gc_set_font_fn) {
       custom_font.advance_y = (uint8_t) jerryxx_get_property_number(font, MSTR_GRAPHICS_ADVANCE_Y, 0);
       // get bitmap buffer
       jerry_value_t bitmap = jerryxx_get_property(font, MSTR_GRAPHICS_BITMAP);
-      if (jerry_value_is_arraybuffer(bitmap)) {
-        custom_font.bitmap = jerry_get_arraybuffer_pointer(bitmap);
+      if (jerry_value_is_typedarray(bitmap) && 
+          jerry_get_typedarray_type(bitmap) == JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
+        jerry_length_t byteLength = 0;
+        jerry_length_t byteOffset = 0;
+        jerry_value_t buffer = jerry_get_typedarray_buffer (bitmap, &byteOffset, &byteLength);
+        custom_font.bitmap = jerry_get_arraybuffer_pointer(buffer);
+        jerry_release_value(buffer);
+      // } else if (jerry_value_is_string(bitmap)) {
+      //   custom_font.bitmap = NULL;
+      } else {
+        return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "font.bitmap must be Uint8Array.");
       }
-      /*
-      else if (jerry_value_is_string(bitmap)) {
-        jerry_value_t decode_fn = jerry_get_property(global, MSTR_DECODE);
-        jerry_value_t decoded_bitmap = jerry_call_function(decode_fn, ...., bitmap, ...)
-        custom_font.bitmap = jerry_get_arraybuffer_pointer(decoded_bitmap)
-      }
-      */
       jerry_release_value(bitmap);
       // get glyphs buffer
       jerry_value_t glyphs = jerryxx_get_property(font, MSTR_GRAPHICS_GLYPHS);
-      if (jerry_value_is_arraybuffer(glyphs)) {
-        custom_font.glyphs = (gc_font_glyph_t *) jerry_get_arraybuffer_pointer(glyphs);
+      if (jerry_value_is_typedarray(glyphs) && 
+          jerry_get_typedarray_type(glyphs) == JERRY_TYPEDARRAY_UINT8) {
+        jerry_length_t byteLength = 0;
+        jerry_length_t byteOffset = 0;
+        jerry_value_t buffer = jerry_get_typedarray_buffer (glyphs, &byteOffset, &byteLength);
+        custom_font.glyphs = (gc_font_glyph_t *) jerry_get_arraybuffer_pointer(buffer);
+        jerry_release_value(buffer);
+      // } else if (jerry_value_is_string(glyphs)) {
+      //   custom_font.glyphs = NULL;
       } else {
-        custom_font.glyphs = NULL;
+        return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "font.glyph must be Uint8Array.");
       }
       jerry_release_value(glyphs);
       gc_handle->font = &custom_font;
@@ -530,23 +539,34 @@ JERRYXX_FUN(gc_draw_bitmap_fn) {
       // draw bitmap
       JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
       jerry_value_t data = jerryxx_get_property(bitmap, MSTR_GRAPHICS_DATA);
-      if (jerry_value_is_string(data)) { /* decode base64 string */
+      if (jerry_value_is_typedarray(data) && 
+          jerry_get_typedarray_type(data) == JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
+        jerry_length_t byteLength = 0;
+        jerry_length_t byteOffset = 0;
+        jerry_value_t buffer = jerry_get_typedarray_buffer (data, &byteOffset, &byteLength);
+        uint8_t *buf = jerry_get_arraybuffer_pointer(buffer);
+        gc_draw_bitmap(gc_handle, x, y, buf, w, h, bpp, color, transparent,
+            transparent_color, scale_x, scale_y);
+        jerry_release_value(buffer);
+      } else if (jerry_value_is_string(data)) { /* decode base64 string */
         jerry_value_t global = jerry_get_global_object();
-        jerry_value_t decode_fn = jerryxx_get_property(global, MSTR_DECODE);
+        jerry_value_t atob_fn = jerryxx_get_property(global, MSTR_ATOB);
         jerry_value_t this_val = jerry_create_undefined ();
         jerry_value_t args[] = { data };
-        jerry_value_t decoded = jerry_call_function(decode_fn, this_val, args, 1);
-        uint8_t *buffer = jerry_get_arraybuffer_pointer(decoded);
-        gc_draw_bitmap(gc_handle, x, y, buffer, w, h, bpp, color, transparent,
+        jerry_value_t decoded = jerry_call_function(atob_fn, this_val, args, 1);
+        jerry_length_t byteLength = 0;
+        jerry_length_t byteOffset = 0;
+        jerry_value_t buffer = jerry_get_typedarray_buffer (decoded, &byteOffset, &byteLength);
+        uint8_t *buf = jerry_get_arraybuffer_pointer(buffer);
+        gc_draw_bitmap(gc_handle, x, y, buf, w, h, bpp, color, transparent,
             transparent_color, scale_x, scale_y);
+        jerry_release_value(buffer);
         jerry_release_value(decoded);
         jerry_release_value(this_val);
-        jerry_release_value(decode_fn);
+        jerry_release_value(atob_fn);
         jerry_release_value(global);
-      } else if (jerry_value_is_arraybuffer(data)) {
-        uint8_t *buffer = jerry_get_arraybuffer_pointer(data);
-        gc_draw_bitmap(gc_handle, x, y, buffer, w, h, bpp, color, transparent,
-            transparent_color, scale_x, scale_y);
+      } else {
+        return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "bitmap.data must be Uint8Array or string.");
       }
       jerry_release_value(data);
     }
@@ -642,11 +662,14 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
   
   // allocate buffer
   uint16_t size = (gc_handle->device_width * ((gc_handle->device_height + 7) / 8)) * gc_handle->bpp;
-  jerry_value_t buffer = jerry_create_arraybuffer(size);
+  jerry_value_t buffer = jerry_create_typedarray(JERRY_TYPEDARRAY_UINT8, size);
   jerryxx_set_property(JERRYXX_GET_THIS, MSTR_GRAPHICS_BUFFER, buffer);
-  gc_handle->buffer = jerry_get_arraybuffer_pointer(buffer);
+  jerry_length_t byteOffset = 0;
+  jerry_length_t byteLength = 0;
+  jerry_value_t buf = jerry_get_typedarray_buffer(buffer, &byteOffset, &byteLength);
+  gc_handle->buffer = jerry_get_arraybuffer_pointer(buf);
   gc_handle->buffer_size = size;
-  
+  jerry_release_value(buf);
   return jerry_create_undefined();
 }
 
