@@ -23,6 +23,7 @@
 #define __MAGIC_STRINGS_H
 
 /* global */
+#define MSTR_PROTOTYPE "prototype"
 #define MSTR_GLOBAL "global"
 #define MSTR_HIGH "HIGH"
 #define MSTR_LOW "LOW"
@@ -55,8 +56,8 @@
 #define MSTR_ERROR "error"
 #define MSTR_PRINT "print"
 #define MSTR_PROCESS "process"
-#define MSTR_ENCODE "encode"
-#define MSTR_DECODE "decode"
+#define MSTR_ATOB "atob"
+#define MSTR_BTOA "btoa"
 #define MSTR_ENCODE_URI_COMPONENT "encodeURIComponent"
 #define MSTR_DECODE_URI_COMPONENT "decodeURIComponent"
 #define MSTR_ARCH "arch"
@@ -82,6 +83,11 @@
 #define MSTR_ADC "adc"
 #define MSTR_ID "id"
 #define MSTR_EXPORTS "exports"
+#define MSTR_TEXTENCODER "TextEncoder"
+#define MSTR_ENCODING "encoding"
+#define MSTR_ENCODE "encode"
+#define MSTR_TEXTDECODER "TextDecoder"
+#define MSTR_DECODE "decode"
 
 /* device drivers: __netdev, __ieee80211dev */
 #define MSTR___NETDEV "__netdev"
