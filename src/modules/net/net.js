@@ -100,8 +100,7 @@ class Socket extends stream.Duplex {
   /**
    * @override
    * Write data to the stream
-   * 
-   * @param {string} chunk
+   * @param {Uint8Array|string} chunk
    * @param {function} cb
    */
   _write (chunk, cb) {
@@ -122,7 +121,6 @@ class Socket extends stream.Duplex {
   /**
    * @override
    * Signal finish to write data
-   * 
    * @param {function} cb
    */
   _final (cb) {

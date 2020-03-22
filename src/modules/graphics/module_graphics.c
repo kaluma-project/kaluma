@@ -291,8 +291,6 @@ JERRYXX_FUN(gc_set_font_fn) {
         jerry_release_value(buffer);
       // } else if (jerry_value_is_string(glyphs)) {
       //   custom_font.glyphs = NULL;
-      } else {
-        return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "font.glyph must be Uint8Array.");
       }
       jerry_release_value(glyphs);
       gc_handle->font = &custom_font;
@@ -551,12 +549,12 @@ JERRYXX_FUN(gc_draw_bitmap_fn) {
       } else if (jerry_value_is_string(data)) { /* decode base64 string */
         jerry_value_t global = jerry_get_global_object();
         jerry_value_t atob_fn = jerryxx_get_property(global, MSTR_ATOB);
-        jerry_value_t this_val = jerry_create_undefined ();
+        jerry_value_t this_val = jerry_create_undefined();
         jerry_value_t args[] = { data };
         jerry_value_t decoded = jerry_call_function(atob_fn, this_val, args, 1);
         jerry_length_t byteLength = 0;
         jerry_length_t byteOffset = 0;
-        jerry_value_t buffer = jerry_get_typedarray_buffer (decoded, &byteOffset, &byteLength);
+        jerry_value_t buffer = jerry_get_typedarray_buffer(decoded, &byteOffset, &byteLength);
         uint8_t *buf = jerry_get_arraybuffer_pointer(buffer);
         gc_draw_bitmap(gc_handle, x, y, buf, w, h, bpp, color, transparent,
             transparent_color, scale_x, scale_y);

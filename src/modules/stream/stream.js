@@ -68,7 +68,7 @@ class Readable extends Stream {
   /**
    * @protected
    * Push a chunk of data to this readable stream.
-   * @param {string} chunk
+   * @param {Uint8Array} chunk
    * @return {this}
    */  
   push (chunk) {
@@ -92,6 +92,7 @@ class Writable extends Stream {
    * @protected
    * @abstract
    * Implement how to write data on the stream
+   * @param {Uint8Array|string} data
    * @param {Function} cb
    */
   _write (data, cb) {} // eslint-disable-line
@@ -117,14 +118,18 @@ class Writable extends Stream {
   
   /**
    * Write a chunk of data to the stream
-   * @param {string} chunk
+   * @param {Uint8Array|string} chunk
    * @param {Function} cb
    * @return {boolean}
    */
   write (chunk, cb) {
     if (!this.writableEnded) {
       if (chunk) {
-        this._wbuf += chunk;
+        if (chunk instanceof Uint8Array) {
+          this._wbuf += String.fromCharCode.apply(null, chunk);
+        } else { // string
+          this._wbuf += chunk;
+        }
       }
       setTimeout(() => this.flush(), 0);
       if (cb) cb();
@@ -134,7 +139,7 @@ class Writable extends Stream {
   
   /**
    * Finish to write on the stream.
-   * @param {string} chunk
+   * @param {Uint8Array|string} chunk
    * @param {Function} cb
    * @return {Writable}
    */  
@@ -144,7 +149,11 @@ class Writable extends Stream {
       chunk = undefined;
     }
     if (chunk) {
-      this._wbuf += chunk;
+      if (chunk instanceof Uint8Array) {
+        this._wbuf += String.fromCharCode.apply(null, chunk);
+      } else { // string
+        this._wbuf += chunk;
+      }
     }
     if (cb) {
       this.once('finish', cb);
@@ -167,6 +176,7 @@ class Writable extends Stream {
       if (this._wbuf.length > 0) {
         this._write(this._wbuf, (err) => {
           if (err) {
+            this._wbuf = '';
             this.emit('error', err);
           } else {
             if (this._wbuf.length > 0) {
@@ -222,9 +232,9 @@ class Duplex extends Writable /*, Readable */ {
   /**
    * @protected
    * Push a chunk of data to this readable stream.
-   * @param {string} chunk
+   * @param {Uint8Array} chunk
    * @return {this}
-   */  
+   */
   push (chunk) {
     this.emit('data', chunk);
     return this;
