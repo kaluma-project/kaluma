@@ -1,4 +1,17 @@
 # -----------------------------------------------------------------------------
+# Toolchain
+# -----------------------------------------------------------------------------
+
+PREFIX = arm-none-eabi-
+CC = $(PREFIX)gcc
+AS = $(PREFIX)gcc -x assembler-with-cpp
+CP = $(PREFIX)objcopy
+AR = $(PREFIX)ar
+SZ = $(PREFIX)size
+HEX = $(CP) -O ihex
+BIN = $(CP) -O binary -S
+
+# -----------------------------------------------------------------------------
 # Target-specific for kameleon-core board
 # -----------------------------------------------------------------------------
 
@@ -70,10 +83,58 @@ else
   TARGET_LDSCRIPT = $(TARGET_DIR)/src/STM32F411CETx_FLASH.ld
 endif
 
-TARGET_HEAPSIZE = 96
+# -----------------------------------------------------------------------------
+# JERRYSCRIPT OPTIONS
+# -----------------------------------------------------------------------------
+
+JERRY_HEAPSIZE = 96
+JERRY_TOOLCHAIN = toolchain_mcu_stm32f4.cmake
 
 # -----------------------------------------------------------------------------
-# Kameleon modules
+# CFLAGS
+# -----------------------------------------------------------------------------
+
+# mcu
+MCU = -mcpu=cortex-m4 -mlittle-endian -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard
+
+# C defines
+C_DEFS = $(TARGET_DEF)
+
+CSRC = $(TARGET_SRC) $(KAMELEON_SRC)
+CINC = $(TARGET_INC) $(KAMELEON_INC) $(JERRY_INC)
+
+CFLAGS = $(MCU) $(C_DEFS) $(CINC) $(OPT) -Wall -fdata-sections -ffunction-sections
+
+ifeq ($(DEBUG), 1)
+CFLAGS += -g -gdwarf-2
+endif
+
+# Generate dependency information
+CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)"
+
+# -----------------------------------------------------------------------------
+# ASFLAGS
+# -----------------------------------------------------------------------------
+
+# AS defines
+AS_DEFS =
+
+ASRC = $(KAMELEON_ASM) $(TARGET_ASM)
+AINC =
+
+ASFLAGS = $(MCU) $(AS_DEFS) $(AINC) $(OPT) -Wall -fdata-sections -ffunction-sections
+
+# -----------------------------------------------------------------------------
+# LDFLAGS
+# -----------------------------------------------------------------------------
+
+# libraries
+LIBS = -ljerry-core -ljerry-ext -lc -lnosys -lm
+LIBDIR = -L$(JERRY_LIBDIR)
+LDFLAGS = $(MCU) -specs=nano.specs -u _printf_float -T$(TARGET_LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET_BIN).map,--cref -Wl,--gc-sections
+
+# -----------------------------------------------------------------------------
+# KAMELEON MODULES
 # -----------------------------------------------------------------------------
 
 KAMELEON_MODULES='events gpio led button pwm adc i2c spi uart graphics at storage stream net http url wifi startup'

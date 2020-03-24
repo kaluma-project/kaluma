@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include "kameleon_core.h"
 #include "main.h"
 #include "tty.h"
 #include "ymodem.h"

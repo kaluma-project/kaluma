@@ -38,14 +38,14 @@ BUILD_DIR = build
 # Toolchain
 # -----------------------------------------------------------------------------
 
-PREFIX = arm-none-eabi-
-CC = $(PREFIX)gcc
-AS = $(PREFIX)gcc -x assembler-with-cpp
-CP = $(PREFIX)objcopy
-AR = $(PREFIX)ar
-SZ = $(PREFIX)size
-HEX = $(CP) -O ihex
-BIN = $(CP) -O binary -S
+# PREFIX = arm-none-eabi-
+# CC = $(PREFIX)gcc
+# AS = $(PREFIX)gcc -x assembler-with-cpp
+# CP = $(PREFIX)objcopy
+# AR = $(PREFIX)ar
+# SZ = $(PREFIX)size
+# HEX = $(CP) -O ihex
+# BIN = $(CP) -O binary -S
 
 # -----------------------------------------------------------------------------
 # Target-specific
@@ -102,11 +102,11 @@ JERRY_INC = \
 -I${JERRY_ROOT}/jerry-libm
 
 JERRY_ARGS = \
---toolchain=cmake/toolchain_mcu_stm32f4.cmake \
+--toolchain=cmake/${JERRY_TOOLCHAIN} \
 --lto=OFF \
 --error-messages=ON \
 --js-parser=ON \
---mem-heap=${TARGET_HEAPSIZE} \
+--mem-heap=${JERRY_HEAPSIZE} \
 --mem-stats=ON \
 --snapshot-exec=ON \
 --line-info=ON \
@@ -191,57 +191,6 @@ KAMELEON_SRC += \
   src/modules/graphics/module_graphics.c
 KAMELEON_INC += -Isrc/modules/graphics
 endif
-
-# -----------------------------------------------------------------------------
-# CFLAGS
-# -----------------------------------------------------------------------------
-
-# cpu
-CPU = -mcpu=cortex-m4
-
-# fpu
-FPU = -mfpu=fpv4-sp-d16
-
-# float-abi
-FLOAT-ABI = -mfloat-abi=hard
-
-# mcu
-MCU = $(CPU) -mlittle-endian -mthumb $(FPU) $(FLOAT-ABI)
-
-# macros for gcc
-# AS defines
-AS_DEFS =
-
-# C defines
-C_DEFS = $(TARGET_DEF)
-
-ASRC = $(KAMELEON_ASM) $(TARGET_ASM)
-AINC =
-
-CSRC = $(TARGET_SRC) $(KAMELEON_SRC)
-CINC = $(TARGET_INC) $(KAMELEON_INC) $(JERRY_INC)
-
-# compile gcc flags
-ASFLAGS = $(MCU) $(AS_DEFS) $(AINC) $(OPT) -Wall -fdata-sections -ffunction-sections
-
-CFLAGS = $(MCU) $(C_DEFS) $(CINC) $(OPT) -Wall -fdata-sections -ffunction-sections
-
-ifeq ($(DEBUG), 1)
-CFLAGS += -g -gdwarf-2
-endif
-
-# Generate dependency information
-CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)"
-
-#######################################
-# LDFLAGS
-#######################################
-
-# libraries
-LIBS = -ljerry-core -ljerry-ext -lc -lnosys -lm
-LIBDIR = -L$(JERRY_LIBDIR)
-LDFLAGS = $(MCU) -specs=nano.specs -u _printf_float -T$(TARGET_LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET_BIN).map,--cref -Wl,--gc-sections
-
 
 # -----------------------------------------------------------------------------
 # Default action: build all
