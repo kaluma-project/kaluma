@@ -51,10 +51,15 @@ uint8_t tty_getc() {
 }
 
 void tty_putc(char ch) {
+  putchar(ch);
 }
 
 /**
  * Print formatted string to TTY
  */
 void tty_printf(const char *fmt, ...) {
+  va_list ap;
+  va_start(ap,fmt);
+  vprintf(fmt, ap);
+  va_end(ap);
 }
