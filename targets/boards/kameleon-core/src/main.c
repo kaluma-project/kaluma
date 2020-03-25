@@ -19,9 +19,20 @@
  * SOFTWARE.
  */
 
-#ifndef __MAIN_H
-#define __MAIN_H
+#include "system.h"
+#include "gpio.h"
+#include "tty.h"
+#include "io.h"
+#include "repl.h"
+#include "runtime.h"
 
-#include <stdint.h>
-
-#endif /* __GPIO_H */
+int main(void) {
+  bool load = false;
+  system_init();
+  load = running_script_check();
+  tty_init();
+  io_init();
+  repl_init();
+  runtime_init(load, true);
+  io_run();
+}

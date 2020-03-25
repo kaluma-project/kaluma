@@ -134,7 +134,6 @@ KAMELEON_DEF =
 KAMELEON_ASM =
 
 KAMELEON_SRC = \
-src/main.c \
 src/utils.c \
 src/base64.c \
 src/io.c \

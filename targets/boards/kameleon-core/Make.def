@@ -24,6 +24,7 @@ TARGET_ASM += \
 $(TARGET_DIR)/src/startup_stm32f411xe.s
 
 TARGET_SRC += \
+$(TARGET_DIR)/src/main.c \
 $(TARGET_DIR)/src/adc.c \
 $(TARGET_DIR)/src/ringbuffer.c \
 $(TARGET_DIR)/src/system.c \
