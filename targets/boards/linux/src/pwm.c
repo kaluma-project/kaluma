@@ -19,9 +19,66 @@
  * SOFTWARE.
  */
 
-#ifndef __MAIN_H
-#define __MAIN_H
-
 #include <stdint.h>
+#include "pwm.h"
 
-#endif /* __GPIO_H */
+/**
+ * Initialize all PWM when system started
+ */
+void pwm_init() {
+}
+
+/**
+ * Cleanup all PWM when system cleanup
+ */
+void pwm_cleanup() {
+}
+
+/**
+ * return Returns 0 on success or -1 on failure.
+*/
+int pwm_setup(uint8_t pin, double frequency, double duty) {
+  return 0;
+}
+
+/**
+*/
+int pwm_start(uint8_t pin) {
+  return 0;
+}
+
+/**
+*/
+int pwm_stop(uint8_t pin) {
+  return 0;
+}
+
+/**
+*/
+double pwm_get_frequency(uint8_t pin) {
+  return 0;
+}
+
+/**
+*/
+double pwm_get_duty(uint8_t pin) {
+  return 0;
+}
+
+/**
+*/
+int pwm_set_duty(uint8_t pin, double duty) {
+  return 0;
+}
+
+/**
+*/
+int pwm_set_frequency(uint8_t pin, double frequency) {
+  return 0;
+}
+
+/**
+*/
+int pwm_close(uint8_t pin) {
+  return 0;
+}

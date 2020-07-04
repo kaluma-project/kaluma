@@ -23,6 +23,7 @@
 #define __I2C_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 typedef enum {
   I2C_MASTER,

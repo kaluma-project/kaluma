@@ -23,6 +23,8 @@
 #define __SPI_H
 
 #include <stdint.h>
+#include <stddef.h>
+
 #define SPIPORT_ERROR -1
 
 typedef enum {

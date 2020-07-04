@@ -1,0 +1,101 @@
+# -----------------------------------------------------------------------------
+# Toolchain
+# -----------------------------------------------------------------------------
+
+PREFIX =
+CC = $(PREFIX)gcc
+AS = $(PREFIX)gcc -x assembler-with-cpp
+CP = $(PREFIX)objcopy
+AR = $(PREFIX)ar
+SZ = $(PREFIX)size
+HEX = $(CP) -O ihex
+BIN = $(CP) -O binary -S
+
+# -----------------------------------------------------------------------------
+# Target-specific for linux
+# -----------------------------------------------------------------------------
+
+TARGET_DEF += \
+-DUSE_HAL_DRIVER \
+-DSTM32F411xE \
+-DUSE_FULL_ASSERT
+
+# TARGET_ASM += \
+# $(TARGET_DIR)/src/startup_stm32f411xe.s
+
+TARGET_SRC += \
+$(TARGET_DIR)/src/main.c \
+$(TARGET_DIR)/src/adc.c \
+$(TARGET_DIR)/src/ringbuffer.c \
+$(TARGET_DIR)/src/system.c \
+$(TARGET_DIR)/src/gpio.c \
+$(TARGET_DIR)/src/pwm.c \
+$(TARGET_DIR)/src/tty.c \
+$(TARGET_DIR)/src/flash.c \
+$(TARGET_DIR)/src/storage.c \
+$(TARGET_DIR)/src/uart.c \
+$(TARGET_DIR)/src/i2c.c \
+$(TARGET_DIR)/src/spi.c \
+
+TARGET_INC += \
+-I$(TARGET_DIR)/include \
+
+# -----------------------------------------------------------------------------
+# JERRYSCRIPT OPTIONS
+# -----------------------------------------------------------------------------
+
+JERRY_HEAPSIZE = 96
+JERRY_TOOLCHAIN = toolchain_linux_i686.cmake
+
+# -----------------------------------------------------------------------------
+# CFLAGS
+# -----------------------------------------------------------------------------
+
+# C defines
+C_DEFS = $(TARGET_DEF)
+
+CSRC = $(TARGET_SRC) $(KAMELEON_SRC)
+CINC = $(TARGET_INC) $(KAMELEON_INC) $(JERRY_INC)
+
+CFLAGS = $(C_DEFS) $(CINC) $(OPT) -Wall -fdata-sections -ffunction-sections
+
+ifeq ($(DEBUG), 1)
+CFLAGS += -g -gdwarf-2
+endif
+
+# Generate dependency information
+CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)"
+
+# -----------------------------------------------------------------------------
+# ASFLAGS
+# -----------------------------------------------------------------------------
+
+# AS defines
+AS_DEFS =
+
+ASRC = $(KAMELEON_ASM) $(TARGET_ASM)
+AINC =
+
+ASFLAGS = $(AS_DEFS) $(AINC) $(OPT) -Wall -fdata-sections -ffunction-sections
+
+# -----------------------------------------------------------------------------
+# LDFLAGS
+# -----------------------------------------------------------------------------
+
+# libraries
+LIBS = -ljerry-core -ljerry-ext -lc -lm
+LIBDIR = -L$(JERRY_LIBDIR)
+LDFLAGS = -u _printf_float $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET_BIN).map,--cref -Wl,--gc-sections
+
+# -----------------------------------------------------------------------------
+# KAMELEON MODULES
+# -----------------------------------------------------------------------------
+
+KAMELEON_MODULES='events gpio led button pwm adc i2c spi uart graphics at storage stream net http url wifi startup'
+
+KAMELEON_MODULE_PWM = 1
+KAMELEON_MODULE_I2C = 1
+KAMELEON_MODULE_SPI = 1
+KAMELEON_MODULE_STORAGE = 1
+KAMELEON_MODULE_UART = 1
+KAMELEON_MODULE_GRAPHICS = 1
