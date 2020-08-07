@@ -22,6 +22,7 @@
 #ifndef __I2C_H
 #define __I2C_H
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stddef.h>
 

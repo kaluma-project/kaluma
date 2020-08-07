@@ -983,6 +983,11 @@ static void run_board_module() {
   jerry_release_value (res);
 }
 
+#ifdef _TARGET_FREERTOS_
+extern void register_global_ieee80211dev();
+extern void register_global_pwm();
+#endif
+
 void global_init() {
   register_global_objects();
   register_global_digital_io();
@@ -994,6 +999,10 @@ void global_init() {
   register_global_textdecoder();
   register_global_encoders();
   register_global_etc();
+#ifdef _TARGET_FREERTOS_
+  register_global_ieee80211dev();
+  register_global_pwm();
+#endif
   run_startup_module();
   run_board_module();
 }
