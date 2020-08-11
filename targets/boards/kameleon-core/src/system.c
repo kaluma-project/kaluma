@@ -246,7 +246,7 @@ void system_init() {
   UsbDevice_Config();
   adc_init();
   pwm_init();
-  i2c_init();
+  kameleon_i2c_init();
   spi_init();
   uart_init();
 }
@@ -254,7 +254,7 @@ void system_init() {
 void system_cleanup() {
   adc_cleanup();
   pwm_cleanup();
-  i2c_cleanup();
+  kameleon_i2c_cleanup();
   spi_cleanup();
   uart_cleanup();
   gpio_cleanup();
