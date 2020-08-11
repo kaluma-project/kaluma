@@ -33,20 +33,20 @@ static I2C_TypeDef * instance[] = {I2C1, I2C2};
 /**
  * Initialize all I2C when system started
  */
-void i2c_init() {
+void kameleon_i2c_init() {
 }
 
 /**
  * Cleanup all I2C when system cleanup
  */
-void i2c_cleanup() {
+void kameleon_i2c_cleanup() {
   for (int k = 0; k < I2C_NUM; k++) {
     if (handle[k]->Instance == instance[k])
       i2c_close(k);
   }
 }
 
-int i2c_setup_master(uint8_t bus, uint32_t speed) {
+int kameleon_i2c_setup_master(uint8_t bus, uint32_t speed) {
   if ((bus != 0) && (bus != 1))
     return I2CPORT_ERROR;
   if (speed >= I2C_MAXSPEED)
@@ -68,7 +68,7 @@ int i2c_setup_master(uint8_t bus, uint32_t speed) {
   return I2CPORT_ERROR;
 }
 
-int i2c_setup_slave(uint8_t bus, uint8_t address) {
+int kameleon_i2c_setup_slave(uint8_t bus, uint8_t address) {
   if ((bus != 0) && (bus != 1))
     return I2CPORT_ERROR;
 
@@ -89,7 +89,7 @@ int i2c_setup_slave(uint8_t bus, uint8_t address) {
   return I2CPORT_ERROR;
 }
 
-int i2c_memWrite_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout) {
+int kameleon_i2c_memWrite_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout) {
   uint16_t memAddSize;
   HAL_StatusTypeDef hal_status;
 
@@ -107,7 +107,7 @@ int i2c_memWrite_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8
   return I2CPORT_ERROR;
 }
 
-int i2c_memRead_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout) {
+int kameleon_i2c_memRead_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout) {
   uint16_t memAddSize;
   HAL_StatusTypeDef hal_status;
 
@@ -126,7 +126,7 @@ int i2c_memRead_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_
 
 }
 
-int i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uint32_t timeout) {
+int kameleon_i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uint32_t timeout) {
   HAL_StatusTypeDef hal_status;
 
   if ((bus != 0) && (bus != 1))
@@ -139,7 +139,7 @@ int i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uin
   return I2CPORT_ERROR;
 }
 
-int i2c_write_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
+int kameleon_i2c_write_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   HAL_StatusTypeDef hal_status;
 
   if ((bus != 0) && (bus != 1))
@@ -153,7 +153,7 @@ int i2c_write_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   return I2CPORT_ERROR;
 }
 
-int i2c_read_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uint32_t timeout) {
+int kameleon_i2c_read_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uint32_t timeout) {
   HAL_StatusTypeDef hal_status;
 
   if ((bus != 0) && (bus != 1))
@@ -167,7 +167,7 @@ int i2c_read_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uint
   return I2CPORT_ERROR;
 }
 
-int i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
+int kameleon_i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   HAL_StatusTypeDef hal_status;
 
   if ((bus != 0) && (bus != 1))
@@ -181,7 +181,7 @@ int i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   return I2CPORT_ERROR;
 }
 
-int i2c_close(uint8_t bus) {
+int kameleon_i2c_close(uint8_t bus) {
   if ((bus != 0) && (bus != 1))
     return I2CPORT_ERROR;
   HAL_StatusTypeDef hal_status = HAL_I2C_DeInit(handle[bus]);

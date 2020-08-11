@@ -36,12 +36,12 @@ typedef enum {
 /**
  * Initialize all I2C when system started
  */
-void i2c_init();
+void kameleon_i2c_init();
 
 /**
  * Cleanup all I2C when system cleanup
  */
-void i2c_cleanup();
+void kameleon_i2c_cleanup();
 
 /**
  * Setup a I2C bus as master.
@@ -50,7 +50,7 @@ void i2c_cleanup();
  * @param speed i2c speed
  * @return Returns 0 on success or -1 on failure.
  */
-int i2c_setup_master(uint8_t bus, uint32_t speed);
+int kameleon_i2c_setup_master(uint8_t bus, uint32_t speed);
 
 /**
  * Setup a I2C bus as slave.
@@ -59,7 +59,7 @@ int i2c_setup_master(uint8_t bus, uint32_t speed);
  * @param address Address of the slave.
  * @return Returns 0 on success or -1 on failure.
  */
-int i2c_setup_slave(uint8_t bus, uint8_t address);
+int kameleon_i2c_setup_slave(uint8_t bus, uint8_t address);
 
 /**
  * Memory Write a given buffer to the bus (in master mode).
@@ -73,7 +73,7 @@ int i2c_setup_slave(uint8_t bus, uint8_t address);
  * @param timeout Timeout in milliseconds.
  * @return The number of bytes written or -1 on timeout or failed to write.
  */
-int i2c_memWrite_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout);
+int kameleon_i2c_memWrite_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout);
 
 /**
  * Memory Read bytes from the bus and store them into a given buffer (in master mode).
@@ -87,7 +87,7 @@ int i2c_memWrite_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8
  * @param timeout Timeout in milliseconds.
  * @return The number of bytes read or -1 on timeout or failed to read.
  */
-int i2c_memRead_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout);
+int kameleon_i2c_memRead_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout);
 
 /**
  * Write a given buffer to the bus (in master mode).
@@ -99,7 +99,7 @@ int i2c_memRead_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_
  * @param timeout Timeout in milliseconds.
  * @return The number of bytes written or -1 on timeout or failed to write.
  */
-int i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
+int kameleon_i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
   uint32_t timeout);
 
 /**
@@ -111,7 +111,7 @@ int i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
  * @param timeout Timeout in milliseconds.
  * @return The number of bytes written or -1 on timeout or failed to write.
  */
-int i2c_write_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
+int kameleon_i2c_write_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
 
 /**
  * Read bytes from the bus and store them into a given buffer (in master mode).
@@ -123,7 +123,7 @@ int i2c_write_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
  * @param timeout Timeout in milliseconds.
  * @return The number of bytes read or -1 on timeout or failed to read.
  */
-int i2c_read_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
+int kameleon_i2c_read_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
   uint32_t timeout);
 
 /**
@@ -135,7 +135,7 @@ int i2c_read_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
  * @param timeout Timeout in milliseconds.
  * @return The number of bytes read or -1 on timeout or failed to read.
  */
-int i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
+int kameleon_i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
 
 
 /**
@@ -144,6 +144,6 @@ int i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
  * @param bus The bus number.
  * @return Returns 0 on success or -1 on failure.
  */
-int i2c_close(uint8_t bus);
+int kameleon_i2c_close(uint8_t bus);
 
 #endif /* __I2C_H */

@@ -66,12 +66,12 @@ JERRYXX_FUN(i2c_ctor_fn) {
   // initialize the bus
   if (mode == I2C_SLAVE) { /* slave mode */
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_ADDRESS, address);
-    int ret = i2c_setup_slave(bus, address);
+    int ret = kameleon_i2c_setup_slave(bus, address);
     if (ret < 0) {
       return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to initialize I2C bus.");
     }
   } else { /* master mode */
-    int ret = i2c_setup_master(bus, baudrate);
+    int ret = kameleon_i2c_setup_master(bus, baudrate);
     if (ret == I2CPORT_ERROR) {
       jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to initialize I2C bus.");
     }
@@ -124,12 +124,12 @@ JERRYXX_FUN(i2c_write_fn) {
     uint8_t *buf = jerry_get_arraybuffer_pointer(array_buffer);
     if (i2cmode == I2C_SLAVE) {
       for (int c = 0; c < count; c++) {
-        ret = i2c_write_slave(bus, buf, len, timeout);
+        ret = kameleon_i2c_write_slave(bus, buf, len, timeout);
         if (ret < 0) break;
       }
     } else {
       for (int c = 0; c < count; c++) {
-        ret = i2c_write_master(bus, address, buf, len, timeout);
+        ret = kameleon_i2c_write_master(bus, address, buf, len, timeout);
         if (ret < 0) break;
       }
     }
@@ -140,12 +140,12 @@ JERRYXX_FUN(i2c_write_fn) {
     jerryxx_string_to_ascii_char_buffer(data, buf, len);
     if (i2cmode == I2C_SLAVE) {
       for (int c = 0; c < count; c++) {
-        ret = i2c_write_slave(bus, buf, len, timeout);
+        ret = kameleon_i2c_write_slave(bus, buf, len, timeout);
         if (ret < 0) break;
       }
     } else {
       for (int c = 0; c < count; c++) {
-        ret = i2c_write_master(bus, address, buf, len, timeout);
+        ret = kameleon_i2c_write_master(bus, address, buf, len, timeout);
         if (ret < 0) break;
       }
     }
@@ -184,13 +184,13 @@ JERRYXX_FUN(i2c_read_fn) {
   if (i2cmode == I2C_SLAVE) {
     JERRYXX_CHECK_ARG_NUMBER_OPT(1, "timeout");
     timeout = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 5000);
-    ret = i2c_read_slave(bus, buf, length, timeout);
+    ret = kameleon_i2c_read_slave(bus, buf, length, timeout);
   } else {
     JERRYXX_CHECK_ARG_NUMBER(1, "address");
     JERRYXX_CHECK_ARG_NUMBER_OPT(2, "timeout");
     address = (uint8_t) JERRYXX_GET_ARG_NUMBER(1);
     timeout = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(2, 5000);
-    ret = i2c_read_master(bus, address, buf, length, timeout);
+    ret = kameleon_i2c_read_master(bus, address, buf, length, timeout);
   }
 
   // return an Uint8Array
@@ -248,7 +248,7 @@ JERRYXX_FUN(i2c_memwrite_fn) {
     size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
     uint8_t *buf = jerry_get_arraybuffer_pointer(array_buffer);
     for (int c = 0; c < count; c++) {
-      ret = i2c_memWrite_master(bus, address, memAddress, memAddr16, buf, len, timeout);
+      ret = kameleon_i2c_memWrite_master(bus, address, memAddress, memAddr16, buf, len, timeout);
       if (ret < 0) break;
     }
     jerry_release_value(array_buffer);
@@ -257,7 +257,7 @@ JERRYXX_FUN(i2c_memwrite_fn) {
     uint8_t buf[len];
     jerryxx_string_to_ascii_char_buffer(data, buf, len);
     for (int c = 0; c < count; c++) {
-      ret = i2c_memWrite_master(bus, address, memAddress, memAddr16, buf, len, timeout);
+      ret = kameleon_i2c_memWrite_master(bus, address, memAddress, memAddr16, buf, len, timeout);
       if (ret < 0) break;
     }
   } else {
@@ -299,7 +299,7 @@ JERRYXX_FUN(i2c_memread_fn) {
   uint16_t memAddr16 = (uint16_t) JERRYXX_GET_ARG_NUMBER_OPT(3, 0);
   uint32_t timeout = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(4, 5000);
 
-  int ret = i2c_memRead_master(bus, address, memAddress, memAddr16, buf, length, timeout);
+  int ret = kameleon_i2c_memRead_master(bus, address, memAddress, memAddr16, buf, length, timeout);
 
   // return an Uint8Array
   if (ret == I2CPORT_ERROR) {
@@ -327,7 +327,7 @@ JERRYXX_FUN(i2c_close_fn) {
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
 
   // close the bus
-  int ret = i2c_close(bus);
+  int ret = kameleon_i2c_close(bus);
   if (ret == I2CPORT_ERROR) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to close I2C bus.");
   }
