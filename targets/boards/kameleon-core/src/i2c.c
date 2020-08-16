@@ -42,7 +42,7 @@ void kameleon_i2c_init() {
 void kameleon_i2c_cleanup() {
   for (int k = 0; k < I2C_NUM; k++) {
     if (handle[k]->Instance == instance[k])
-      i2c_close(k);
+      kameleon_i2c_close(k);
   }
 }
 
