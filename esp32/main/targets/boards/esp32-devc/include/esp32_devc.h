@@ -22,7 +22,6 @@
 #ifndef __ESP32_DEVC_H
 #define __ESP32_DEVC_H
 
-//#include <stdint.h>
 #include <sys/types.h>
 #define KAMELEON_MANUFACTURER_STRING "Kameleon (kameleon.io)"
 #define KAMELEON_PRODUCT_STRING "ESP32 DevC"
