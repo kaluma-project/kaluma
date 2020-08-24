@@ -26,7 +26,7 @@
 
 #include "system.h"
 #include "tty.h"
-#include "kameleon_core.h"
+#include "esp32_devc.h"
 #include "gpio.h"
 #include "adc.h"
 #include "pwm.h"

@@ -1,14 +1,14 @@
 global.board = {
-  name: 'esp-wrover-kit',
-  NUM_GPIO: 22,
-  NUM_LED: 3,
-  NUM_BUTTON: 0,
+  name: 'esp32-devc',
+  NUM_GPIO: 32,
+  NUM_LED: 0,
+  NUM_BUTTON: 1,
   NUM_PWM: 0,
   NUM_ADC: 0,
-  NUM_I2C: 2,
-  NUM_SPI: 1,
+  NUM_I2C: 0,
+  NUM_SPI: 0,
   NUM_UART: 0,
-    led_pins: [0,2,4],
+  led_pins: [],
   button_pins: [],
   pwm_pins: [],
   adc_pins: [],
@@ -21,13 +21,24 @@ global.board = {
     return new LED(pin);
   },
   button: function (pin, pull, debounce) {
-      return null;
+    var Button = global.require('button').Button;
+    return new Button(pin, pull, debounce);
   },
   pwm: function (pin, frequency, duty) {
-      return null;
+    if (this.pwm_pins.indexOf(pin) < 0) {
+      throw Error('The pin is not PWM capable.');
+    }
+    var PWM = global.require('pwm').PWM;
+    frequency = (typeof frequency === 'number' ? frequency : 490);
+    duty = (typeof duty === 'number' ? duty : 1);
+    return new PWM(pin, frequency, duty);
   },
   adc: function (pin) {
-      return null;
+    if (this.adc_pins.indexOf(pin) < 0) {
+      throw Error('The pin is not ADC capable.');
+    }
+    var ADC = global.require('adc').ADC;
+    return new ADC(pin);
   },
   i2c: function (bus, mode, mode_option) {
     if (bus < 0 || bus >= this.NUM_I2C) {
@@ -50,30 +61,21 @@ global.board = {
     }
   },
   uart: function (port, options) {
-      return null;
-  },
-  get LED0() {
-    if (!this._led0) {
-      var LED = global.require('led').LED;
-      this._led0 = new LED(this.led_pins[0]);
+    if (port < 0 || port >= this.NUM_UART) {
+      throw Error('Unsupported UART port.');
     }
-    return this._led0
-  },
-  get LED1() {
-    if (!this._led1) {
-      var LED = global.require('led').LED;
-      this._led1 = new LED(this.led_pins[1]);
+    var UART = global.require('uart').UART;
+    if (arguments.length > 1) {
+      return new UART(port, options);
+    } else {
+      return new UART(port);
     }
-    return this._led1
-  },
-    get LED2() {
-    if (!this._led2) {
-      var LED = global.require('led').LED;
-      this._led2 = new LED(this.led_pins[2]);
-    }
-    return this._led2
   },
   get BTN0() {
-      return null;
+    if (!this._btn0) {
+      var Button = global.require('button').Button;
+      this._btn0 = new Button(this.button_pins[0], FALLING);
+    }
+    return this._btn0;
   }
 }

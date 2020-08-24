@@ -19,56 +19,88 @@
  * SOFTWARE.
  */
 
-#ifndef __KAMELEON_CORE_H
-#define __KAMELEON_CORE_H
+#include "system.h"
+#include "tty.h"
+#include "gpio.h"
+#include "adc.h"
+#include "pwm.h"
+#include "i2c.h"
+#include "spi.h"
+#include "uart.h"
 
-#include <stdint.h>
+const char system_arch[] = "esp32";
+const char system_platform[] = "unknown";
 
-#define KAMELEON_MANUFACTURER_STRING ""
-#define KAMELEON_PRODUCT_STRING "ESP32-WROVER-B"
-#define KAMELEON_SERIALNUMBER_STRING "00000000001A"
+static uint64_t tick_count;
 
-#define PLL_M 8
-#define PLL_N 192
-#define PLL_Q 4
-
-/*
-#define FLASH_SIZE (512 * 1024)
-#define FLASH_BASE_ADDR (0x08000000)
-
-#define SRAM_SIZE (128 * 1024)
-#define SRAM_BASE_ADDR (0x20000000)
-
-#define GPIO_NUM  22
-#define ADC_NUM 6
-#define PWM_NUM 6
-#define I2C_NUM 2
-#define SPI_NUM 2
-#define UART_NUM 2
-#define LED_NUM 1
-#define BUTTON_NUM 1
-
-#define APB1    0
-#define APB2    1
-
-#define ADC_RESOLUTION_BIT 12
+/** increment system timer tick every 1msec
 */
-/**
- * Error handler for the system driver error.
- */
-void _Error_Handler(char * file, uint32_t line);
+void inc_tick() {
+  tick_count++;
+}
 
 /**
- * this function is called in the pendable interrupt service routine which has
- * lowest priority to allow other interrupts service.
- */
-void tty_transmit_data();
+*/
+void delay(uint64_t msec) {
+}
 
 /**
- * return tx data length
+*/
+uint64_t gettime() {
+  return tick_count;
+}
+
+/**
+*/
+void settime(uint64_t time) {
+  tick_count = time;
+}
+
+/**
+ * Return MAX of the micro seconde counter 44739242
+*/
+uint32_t micro_maxtime() {
+  return 0;
+}
+/**
+ * Return micro seconde counter
+*/
+ uint32_t micro_gettime() {
+  return 0;
+}
+
+/**
+ * micro secoded delay
+*/
+void micro_delay(uint32_t usec) {
+}
+
+/**
+*/
+void request_firmup() {
+}
+
+/**
+ * Kameleon Hardware System Initializations
  */
-uint32_t tty_get_tx_data_length();
+void system_init() {
+  gpio_init();
+  adc_init();
+  pwm_init();
+  kameleon_i2c_init();
+  spi_init();
+  uart_init();
+}
 
-uint32_t tty_fill_rx_bytes(uint8_t * buf, uint32_t nToWrite);
+void system_cleanup() {
+  adc_cleanup();
+  pwm_cleanup();
+  kameleon_i2c_cleanup();
+  spi_cleanup();
+  uart_cleanup();
+  gpio_cleanup();
+}
 
-#endif /* __KAMELEON_CORE_H */
+uint8_t running_script_check() {
+  return false;
+}

@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-#include "kameleon_core.h"
+#include "esp32_devc.h"
 #include "spi.h"
 #include "gpio.h"
 #include <driver/spi_master.h>
