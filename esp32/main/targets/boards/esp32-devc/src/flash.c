@@ -141,7 +141,7 @@ const char* const flash_test_script =
 "print(\"in flash script ok\\n\");"
 ;
 
-const char* const test_script = http_test_script;
+const char* const test_script = flash_test_script;
 #else
 char* program_buff = NULL;
 #endif

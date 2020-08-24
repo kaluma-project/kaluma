@@ -24,22 +24,6 @@
 #include "esp32_devc.h"
 
 /**
- * Get ADC index
- *
- * @param pin Pin number.
- * @return Returns index on success or -1 on failure.
- */
-
-/**
- * input : pinNumber
- * output : pinIndex or ADC_PORTERRROR (-1)
- *          0xFF means the pin is not assigned for ADC
-*/
-static int get_adc_index(uint8_t pin) {
-  return 0;
-}
-
-/**
  * Initialize all ADC channels when system started
  */
 void adc_init() {
