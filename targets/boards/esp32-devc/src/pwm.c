@@ -20,62 +20,65 @@
  */
 
 #include <stdint.h>
-#include "kameleon_core.h"
-#include "gpio.h"
-#include <driver/gpio.h>
+#include "pwm.h"
 
-void gpio_init()
-{
+/**
+ * Initialize all PWM when system started
+ */
+void pwm_init() {
 }
 
-void gpio_cleanup()
-{
+/**
+ * Cleanup all PWM when system cleanup
+ */
+void pwm_cleanup() {
 }
 
-int gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode)
-{
-  printf("gpio_set_io_mode(%d, %d)\n", pin,mode);
-  gpio_config_t io_conf;
-  io_conf.intr_type = GPIO_PIN_INTR_DISABLE;
-  io_conf.pin_bit_mask = (1ULL << pin);
-  io_conf.pull_down_en = 0;
-  switch(mode){
-  case GPIO_IO_MODE_INPUT:
-    io_conf.mode = GPIO_MODE_INPUT;
-    io_conf.pull_up_en = 0;
-    break;
-  case GPIO_IO_MODE_OUTPUT:
-    io_conf.mode = GPIO_MODE_OUTPUT;
-    break;
-  case GPIO_IO_MODE_INPUT_PULLUP:
-    io_conf.mode = GPIO_MODE_INPUT;
-    io_conf.pull_up_en = 1;
-    break;
-  }
-  gpio_config(&io_conf);
+/**
+ * return Returns 0 on success or -1 on failure.
+*/
+int pwm_setup(uint8_t pin, double frequency, double duty) {
   return 0;
 }
 
-int gpio_write(uint8_t pin, uint8_t value)
-{
-  printf("gpio_write(%d,%d)\n", pin,value);
-  gpio_set_level(pin, value);
+/**
+*/
+int pwm_start(uint8_t pin) {
   return 0;
 }
 
-int gpio_toggle(uint8_t pin)
-{
-  int oldVal = (GPIO_REG_READ(GPIO_OUT_REG)  >> pin) & 1U;
-  int newVal = !oldVal;
-  printf("gpio_toggle(%d) old:%d, new:%d\n", pin, oldVal, newVal);
-  gpio_set_level(pin, newVal);
-  return newVal;
+/**
+*/
+int pwm_stop(uint8_t pin) {
+  return 0;
 }
 
-int gpio_read(uint8_t pin)
-{
-  int ret= gpio_get_level(pin);
-  printf("gpio_read(%d): %d\n", pin, ret);
-  return ret;
+/**
+*/
+double pwm_get_frequency(uint8_t pin) {
+  return 0;
 }
 
+/**
+*/
+double pwm_get_duty(uint8_t pin) {
+  return 0;
+}
+
+/**
+*/
+int pwm_set_duty(uint8_t pin, double duty) {
+  return 0;
+}
+
+/**
+*/
+int pwm_set_frequency(uint8_t pin, double frequency) {
+  return 0;
+}
+
+/**
+*/
+int pwm_close(uint8_t pin) {
+  return 0;
+}

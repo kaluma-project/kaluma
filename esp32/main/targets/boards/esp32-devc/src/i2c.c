@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-#include "kameleon_core.h"
+#include "esp32_devc.h"
 #include "system.h"
 #include "i2c.h"
 #include "tty.h"

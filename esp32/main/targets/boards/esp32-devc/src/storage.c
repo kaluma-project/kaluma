@@ -23,7 +23,7 @@
 #include <string.h>
 #include <nvs_flash.h>
 #include <nvs.h>
-#include "kameleon_core.h"
+#include "esp32_devc.h"
 #include "storage.h"
 
 

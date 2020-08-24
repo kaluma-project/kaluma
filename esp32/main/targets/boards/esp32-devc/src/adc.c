@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 #include "adc.h"
-#include "kameleon_core.h"
+#include "esp32_devc.h"
 #include <driver/adc.h>
 #include <driver/gpio.h>
 #include <esp_adc_cal.h>
