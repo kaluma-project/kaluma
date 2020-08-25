@@ -20,7 +20,7 @@
  */
 
 #include <stdint.h>
-#include "esp32_devc.h"
+#include "esp32_devkitc.h"
 #include "gpio.h"
 #include <driver/gpio.h>
 

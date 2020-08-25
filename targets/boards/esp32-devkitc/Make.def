@@ -12,7 +12,7 @@ HEX = $(CP) -O ihex
 BIN = $(CP) -O binary -S
 
 # -----------------------------------------------------------------------------
-# Target-specific for esp32-devc
+# Target-specific for esp32-devkitc
 # -----------------------------------------------------------------------------
 
 TARGET_DEF += \
@@ -37,7 +37,7 @@ $(TARGET_DIR)/src/spi.c \
 
 TARGET_INC += \
 -I$(TARGET_DIR)/include
-TARGET_LDSCRIPT = $(TARGET_DIR)/src/esp32_devc.ld
+TARGET_LDSCRIPT = $(TARGET_DIR)/src/esp32_devkitc.ld
 
 # -----------------------------------------------------------------------------
 # JERRYSCRIPT OPTIONS

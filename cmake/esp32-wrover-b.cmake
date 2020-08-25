@@ -1,6 +1,6 @@
 project(kameleon C)
  
-include(../targets/boards/esp32-wrover-b/target.cmake)
+include(../targets/boards/esp32-devkitc/target.cmake)
 
 set(JERRY_ROOT ${CMAKE_SOURCE_DIR}/../deps/jerryscript)
 set(JERRY_INC

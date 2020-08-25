@@ -19,42 +19,37 @@
  * SOFTWARE.
  */
 
-#ifndef __ESP32_DEVC_H
-#define __ESP32_DEVC_H
-
-#define KAMELEON_MANUFACTURER_STRING "Kameleon (kameleon.io)"
-#define KAMELEON_PRODUCT_STRING "ESP32 DevC"
-#define KAMELEON_SERIALNUMBER_STRING "00000000001A"
-
-#define GPIO_NUM  32
-#define ADC_NUM 6
-#define PWM_NUM 6
-#define I2C_NUM 2
-#define SPI_NUM 2
-#define UART_NUM 2
-#define LED_NUM 0
-#define BUTTON_NUM 1
-
-#define APB1    0
-#define APB2    1
-
-#define ADC_RESOLUTION_BIT 12
-/**
- * Error handler for the system driver error.
- */
-void _Error_Handler(char * file, uint32_t line);
+#include <stdint.h>
+#include "adc.h"
+#include "esp32_devkitc.h"
 
 /**
- * this function is called in the pendable interrupt service routine which has
- * lowest priority to allow other interrupts service.
+ * Initialize all ADC channels when system started
  */
-void tty_transmit_data();
+void adc_init() {
+}
 
 /**
- * return tx data length
+ * Cleanup all ADC channels when system cleanup
  */
-uint32_t tty_get_tx_data_length();
+void adc_cleanup() {
+}
 
-uint32_t tty_fill_rx_bytes(uint8_t * buf, uint32_t nToWrite);
+/**
+ * Read value from the ADC channel
+ *
+ * @param {uint8_t} adcIndex
+ * @return {double}
+ */
+double adc_read(uint8_t adcIndex) {
+  return 0.0d;
+}
 
-#endif /* __ESP32_DEVC_H */
+int adc_setup(uint8_t pin) {
+  return 0;
+}
+
+int adc_close(uint8_t pin) {
+  return 0;
+}
+

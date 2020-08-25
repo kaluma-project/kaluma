@@ -26,7 +26,7 @@
 
 #include "system.h"
 #include "tty.h"
-#include "esp32_devc.h"
+#include "esp32_devkitc.h"
 #include "gpio.h"
 #include "adc.h"
 #include "pwm.h"

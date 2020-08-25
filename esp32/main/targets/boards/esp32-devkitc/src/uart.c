@@ -18,38 +18,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include <stdlib.h>
+#include "esp32_devkitc.h"
+#include "uart.h"
 
-#include <stdint.h>
-#include "adc.h"
-#include "esp32_devc.h"
-
-/**
- * Initialize all ADC channels when system started
- */
-void adc_init() {
+void uart_init()
+{
 }
 
-/**
- * Cleanup all ADC channels when system cleanup
- */
-void adc_cleanup() {
+void uart_cleanup()
+{
 }
 
-/**
- * Read value from the ADC channel
- *
- * @param {uint8_t} adcIndex
- * @return {double}
- */
-double adc_read(uint8_t adcIndex) {
-  return 0.0d;
-}
-
-int adc_setup(uint8_t pin) {
+int uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
+  uart_parity_type_t parity, uint8_t stop, uart_flow_control_t flow,
+  size_t buffer_size)
+{
   return 0;
 }
 
-int adc_close(uint8_t pin) {
+int uart_write(uint8_t port, uint8_t *buf, size_t len)
+{
+  return 0;
+}
+
+uint32_t uart_available(uint8_t port)
+{
+  return 0;
+}
+
+uint8_t uart_available_at(uint8_t port, uint32_t offset)
+{
+  return 0;
+}
+
+uint32_t uart_buffer_size(uint8_t port)
+{
+  return 0;
+}
+
+uint32_t uart_read(uint8_t port, uint8_t *buf, size_t len)
+{
+  return 0;
+}
+
+int uart_close(uint8_t port)
+{
   return 0;
 }
 

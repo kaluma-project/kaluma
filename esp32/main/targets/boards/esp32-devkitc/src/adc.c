@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 #include "adc.h"
-#include "esp32_devc.h"
+#include "esp32_devkitc.h"
 #include <driver/adc.h>
 #include <driver/gpio.h>
 #include <esp_adc_cal.h>

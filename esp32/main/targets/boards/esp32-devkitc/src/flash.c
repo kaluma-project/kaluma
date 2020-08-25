@@ -21,7 +21,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include "esp32_devc.h"
+#include "esp32_devkitc.h"
 #include "flash.h"
 #include "tty.h"
 #define JS_NAMESPACE ("js")

@@ -23,7 +23,7 @@
 #include <freertos/FreeRTOS.h>
 #include <driver/ledc.h>
 #include "pwm.h"
-#include "esp32_devc.h"
+#include "esp32_devkitc.h"
 
 
 static ledc_timer_config_t timer_config = {
