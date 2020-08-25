@@ -18,44 +18,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include <stdlib.h>
+#include "esp32_devkitc.h"
+#include "uart.h"
 
-#ifndef __ESP32_DEVC_H
-#define __ESP32_DEVC_H
+void uart_init()
+{
+}
 
-#include <sys/types.h>
-#define KAMELEON_MANUFACTURER_STRING "Kameleon (kameleon.io)"
-#define KAMELEON_PRODUCT_STRING "ESP32 DevC"
-#define KAMELEON_SERIALNUMBER_STRING "00000000001A"
+void uart_cleanup()
+{
+}
 
-#define GPIO_NUM  32
-#define ADC_NUM 6
-#define PWM_NUM 6
-#define I2C_NUM 2
-#define SPI_NUM 2
-#define UART_NUM 2
-#define LED_NUM 0
-#define BUTTON_NUM 1
+int uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
+  uart_parity_type_t parity, uint8_t stop, uart_flow_control_t flow,
+  size_t buffer_size)
+{
+  return 0;
+}
 
-#define APB1    0
-#define APB2    1
+int uart_write(uint8_t port, uint8_t *buf, size_t len)
+{
+  return 0;
+}
 
-#define ADC_RESOLUTION_BIT 12
-/**
- * Error handler for the system driver error.
- */
-void _Error_Handler(char * file, uint32_t line);
+uint32_t uart_available(uint8_t port)
+{
+  return 0;
+}
 
-/**
- * this function is called in the pendable interrupt service routine which has
- * lowest priority to allow other interrupts service.
- */
-void tty_transmit_data();
+uint8_t uart_available_at(uint8_t port, uint32_t offset)
+{
+  return 0;
+}
 
-/**
- * return tx data length
- */
-uint32_t tty_get_tx_data_length();
+uint32_t uart_buffer_size(uint8_t port)
+{
+  return 0;
+}
 
-uint32_t tty_fill_rx_bytes(uint8_t * buf, uint32_t nToWrite);
+uint32_t uart_read(uint8_t port, uint8_t *buf, size_t len)
+{
+  return 0;
+}
 
-#endif /* __ESP32_DEVC_H */
+int uart_close(uint8_t port)
+{
+  return 0;
+}
+

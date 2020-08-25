@@ -21,7 +21,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include "esp32_devc.h"
+#include "esp32_devkitc.h"
 #include "flash.h"
 #include "tty.h"
 #define JS_NAMESPACE ("js")
@@ -141,7 +141,7 @@ const char* const flash_test_script =
 "print(\"in flash script ok\\n\");"
 ;
 
-const char* const test_script = http_test_script;
+const char* const test_script = flash_test_script;
 #else
 char* program_buff = NULL;
 #endif

@@ -1,4 +1,4 @@
-include(${CMAKE_CURRENT_LIST_DIR}/targets/boards/esp32-devc/target.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/targets/boards/esp32-devkitc/target.cmake)
 
 set(_SOURCE_DIR ../../src)
 

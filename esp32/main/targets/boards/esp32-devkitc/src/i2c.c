@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-#include "esp32_devc.h"
+#include "esp32_devkitc.h"
 #include "system.h"
 #include "i2c.h"
 #include "tty.h"

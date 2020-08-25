@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-#include "esp32_devc.h"
+#include "esp32_devkitc.h"
 #include "spi.h"
 #include "gpio.h"
 #include <driver/spi_master.h>
