@@ -1,6 +1,6 @@
 global.board = {
   name: 'esp32-devkitc',
-  NUM_GPIO: 33,
+  NUM_GPIO: 24,
   NUM_LED: 0,
   NUM_BUTTON: 1,
   NUM_PWM: 0,
