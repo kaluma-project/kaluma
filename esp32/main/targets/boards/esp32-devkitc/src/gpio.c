@@ -27,8 +27,6 @@
 const gpio_num_t gpio_port_pin[] = {
    GPIO_NUM_23,
    GPIO_NUM_22,
-   GPIO_NUM_1,
-   GPIO_NUM_3,
    GPIO_NUM_21,
    GPIO_NUM_19,
    GPIO_NUM_18,
@@ -39,12 +37,6 @@ const gpio_num_t gpio_port_pin[] = {
    GPIO_NUM_0, // Button
    GPIO_NUM_2,
    GPIO_NUM_15,
-   GPIO_NUM_8,
-   GPIO_NUM_7,
-   GPIO_NUM_6,
-   GPIO_NUM_11,
-   GPIO_NUM_10,
-   GPIO_NUM_9,
    GPIO_NUM_13,
    GPIO_NUM_12,
    GPIO_NUM_14,
@@ -61,15 +53,17 @@ const gpio_num_t gpio_port_pin[] = {
 
 void gpio_init()
 {
-#if 0 // TODO: disable due to the system halt
   gpio_config_t io_conf;
   io_conf.intr_type = GPIO_PIN_INTR_DISABLE;
-  io_conf.pin_bit_mask = 0xFF0EEFFFFFULL;
+  io_conf.pin_bit_mask = 0xFF0EEFF034ULL;
   io_conf.pull_down_en = 0;
   io_conf.pull_up_en = 0;
   io_conf.mode = GPIO_MODE_INPUT;
   gpio_config(&io_conf);
-#endif
+  // GPIO 0 pullup as a default
+  io_conf.pin_bit_mask = 0x1ULL;
+  io_conf.pull_up_en = 1;
+  gpio_config(&io_conf);
 }
 
 void gpio_cleanup()
@@ -86,7 +80,7 @@ int gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode)
     mode = GPIO_IO_MODE_OUTPUT;
   //printf("gpio_set_io_mode(%d, %d)\n", gpio_port_pin[pin],mode);
   io_conf.intr_type = GPIO_PIN_INTR_DISABLE;
-  io_conf.pin_bit_mask = (1ULL << gpio_port_pin[pin]);
+  io_conf.pin_bit_mask = (uint64_t)(1ULL << gpio_port_pin[pin]);
   io_conf.pull_down_en = 0;
   io_conf.pull_up_en = 0;
   io_conf.mode = GPIO_MODE_INPUT;
