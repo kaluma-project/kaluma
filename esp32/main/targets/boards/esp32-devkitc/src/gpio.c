@@ -50,12 +50,16 @@ const gpio_num_t gpio_port_pin[] = {
    GPIO_NUM_39, // Input only
    GPIO_NUM_36  // Input only
 };
-
+// #define ESP32_JTAG_ENABLE // Enable it just for the test
 void gpio_init()
 {
   gpio_config_t io_conf;
   io_conf.intr_type = GPIO_PIN_INTR_DISABLE;
+#ifdef ESP32_JTAG_ENABLE
+  io_conf.pin_bit_mask = 0xFF0EEF0034ULL;
+#else
   io_conf.pin_bit_mask = 0xFF0EEFF034ULL;
+#endif
   io_conf.pull_down_en = 0;
   io_conf.pull_up_en = 0;
   io_conf.mode = GPIO_MODE_INPUT;
@@ -76,8 +80,6 @@ int gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode)
   gpio_config_t io_conf;
   if (pin >= GPIO_NUM)
     return GPIOPORT_ERROR;
-  if ((mode != GPIO_IO_MODE_INPUT) && (mode != GPIO_IO_MODE_INPUT_PULLUP))
-    mode = GPIO_IO_MODE_OUTPUT;
   //printf("gpio_set_io_mode(%d, %d)\n", gpio_port_pin[pin],mode);
   io_conf.intr_type = GPIO_PIN_INTR_DISABLE;
   io_conf.pin_bit_mask = (uint64_t)(1ULL << gpio_port_pin[pin]);
@@ -87,11 +89,11 @@ int gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode)
   switch(mode) {
   case GPIO_IO_MODE_INPUT:
     break;
-  case GPIO_IO_MODE_OUTPUT:
-    io_conf.mode = GPIO_MODE_OUTPUT;
-    break;
   case GPIO_IO_MODE_INPUT_PULLUP:
     io_conf.pull_up_en = 1;
+    break;
+  default:
+    io_conf.mode = GPIO_MODE_OUTPUT;
     break;
   }
   gpio_config(&io_conf);
