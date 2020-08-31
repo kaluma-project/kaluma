@@ -4,7 +4,10 @@ function Button (pin, event, debounce) {
   EventEmitter.call(this);
   this.pin = pin;
   pinMode(this.pin, INPUT);
-  this.mode = event;
+  this.mode = (typeof event === 'undefined' ? FALLING : event);
+  if ((this.mode < FALLING) || (this.mode > CHANGE)) {
+    this.mode = FALLING;
+  }
   this.debounce = (typeof debounce === 'number' ? debounce : 50);
   var self = this;
   this.watchId = setWatch(function () {
