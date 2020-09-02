@@ -93,7 +93,7 @@ int gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode)
     io_conf.pull_up_en = 1;
     break;
   default:
-    io_conf.mode = GPIO_MODE_OUTPUT;
+    io_conf.mode = GPIO_MODE_INPUT_OUTPUT;
     break;
   }
   gpio_config(&io_conf);
