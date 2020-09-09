@@ -96,7 +96,6 @@ const char* const pwm_test_script =
   "print(\"PWM start\\n\");";
 
 const char* const wifi_test_script =
-  "print(\"in script ok\\n\");"
   "var wifi = require('wifi');"
   "wifi.scan(function(err, scanResult){"
   "if(err != null){"
@@ -104,26 +103,6 @@ const char* const wifi_test_script =
   "} else {"
   "print(\"scanResult: \", scanResult);"
   "}});";
-
-const char* const http_test_script = 
-"print(\"in http_test_script ok\\n\");"
-"global.__netdev = global.__ieee80211dev;"
-"var http = require('http');"
-"http.get({"
-"  host : '192.168.17.103',"
-"  port : 8000,"
-"  path : '/index.js'"
-"}, (res) => {"
-"  res.resume();"
-"  res.on('data', (chunk) => {"
-"    console.log(`Chunk : ${chunk}`);"
-"  });"
-"  res.on('end', () => {"
-"    console.log('Done.');"
-"  });"
-"});"
-"print(\"check 1\");"
-;
 
 const char* const storage_test_script =
 "print(\"in script ok\\n\");"
@@ -141,7 +120,29 @@ const char* const flash_test_script =
 "print(\"in flash script ok\\n\");"
 ;
 
-const char* const test_script = flash_test_script;
+const char* const http_test_script =
+"print(\"in http script ok\\n\");"
+"var http=require('http');"
+"http.get({"
+"    host:'192.168.17.103',"
+"    port:3000,"
+"    path:'/'"
+"}, function(resp) {"
+"    var str= '';"
+"    resp.on('data', function(chunk) {"
+"        console.log('chunk: ' + chunk);"
+"        str += chunk;"
+"    });"
+"    resp.on('end', function() {"
+"        console.log('resp.end : ' + str);"
+"    });"
+"});"
+;
+
+#include "network_test_script.c"
+#include "net_test_script.c"
+
+const char* const test_script = net_test_script;
 #else
 char* program_buff = NULL;
 #endif

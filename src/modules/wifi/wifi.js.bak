@@ -7,18 +7,21 @@ class WiFi extends EventEmitter {
   }
 
   _bindDev() {
-    if (!this._dev && global.__ieee80211dev) {
-      this._dev = global.__ieee80211dev;
-      this._dev.assoc_cb = () => {
-        this.emit('associated');
-      };
-      this._dev.connect_cb = () => {
-        this.emit('connected');
-      };
-      this._dev.disconnect_cb = () => {
-        this.emit('disconnected');
-      };
-    }
+      if (!this._dev && global.__ieee80211dev) {
+	  this._dev = global.__ieee80211dev;
+	  this._dev.assoc_cb = 
+              () => {
+		  this.emit('associated');
+              };
+	  this._dev.connect_cb = 
+              () => {
+		  this.emit('connected');
+              };
+	  this._dev.disconnect_cb = 
+              () => {
+		  this.emit('disconnected');
+              };
+      }
   }
 
   /**
@@ -66,7 +69,7 @@ class WiFi extends EventEmitter {
    *   .password {string}
    * @param {function} cb
    */
-  connect (connectInfo, cb) {
+    connect (connectInfo, cb) {
     this._bindDev();
     if (this._dev) {
       if (typeof connectInfo === 'function') {

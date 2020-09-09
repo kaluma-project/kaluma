@@ -18,7 +18,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 #include <stdlib.h>
 #include <string.h>
 #include "utils.h"
@@ -969,6 +968,10 @@ static void run_startup_module() {
   jerry_value_t res = jerry_exec_snapshot((const uint32_t *)module_startup_code, module_startup_size, 0, JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
   jerry_value_t this_val = jerry_create_undefined ();
   jerry_value_t ret_val = jerry_call_function (res, this_val, NULL, 0);
+  if (jerry_value_is_error (ret_val)) {
+    // print error
+    jerryxx_print_error(ret_val, true);
+  }
   jerry_release_value (ret_val);
   jerry_release_value (this_val);
   jerry_release_value (res);
@@ -983,9 +986,9 @@ static void run_board_module() {
   jerry_release_value (res);
 }
 
-#ifdef _TARGET_FREERTOS_
-extern void register_global_ieee80211dev();
-extern void register_global_pwm();
+
+#ifdef KAMELEON_MODULE_NET
+// void register_global_net_driver();
 #endif
 
 void global_init() {
@@ -999,10 +1002,9 @@ void global_init() {
   register_global_textdecoder();
   register_global_encoders();
   register_global_etc();
-#ifdef _TARGET_FREERTOS_
-  register_global_ieee80211dev();
-  register_global_pwm();
-#endif
-  run_startup_module();
+  #ifdef KAMELEON_MODULE_NET
+  // register_global_net_driver();
+  #endif
   run_board_module();
+  run_startup_module();
 }

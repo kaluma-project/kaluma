@@ -19,19 +19,60 @@
  * SOFTWARE.
  */
 
-#ifndef __WIFI_MAGIC_STRINGS_H
-#define __WIFI_MAGIC_STRINGS_H
+#pragma once
 
-#define MSTR_WIFI_WIFI "wifi"
-#define MSTR_WIFI_WIFI_ "WiFi"
-#define MSTR_WIFI__dev "_dev"
-#define MSTR_WIFI_ASSOCIATED "associated"
-#define MSTR_WIFI_CONNECTED "connected"
-#define MSTR_WIFI_DISCONNECTED "disconnected"
-#define MSTR_WIFI_RESET "reset"
-#define MSTR_WIFI_SCAN "scan"
-#define MSTR_WIFI_CONNECT "connect"
-#define MSTR_WIFI_DISCONNECT "disconnect"
-#define MSTR_WIFI_GET_CONNECTION "get_connection"
+#include <stdint.h>
 
-#endif /* __WIFI_MAGIC_STRINGS_H */
+/**
+ * Initialize the device driver.
+ */
+int kameleon_tcp_init();
+
+/**
+ * Cleanup the device driver.
+ */
+int kameleon_tcp_cleanup();
+
+int kameleon_tcp_socket();
+
+int kameleon_tcp_connect(int sock, const char* address, int port);
+
+int kameleon_tcp_send(int sock, const char* payload, int len);
+
+int kameleon_tcp_recv(int sock, char* buffer, int buffer_len);
+
+int kameleon_tcp_close(int sock);
+
+typedef enum {
+  TCP_EVENT_CONNECT = 0,
+  TCP_EVENT_DISCONNECT = 1,
+  TCP_EVENT_READ = 2
+} tcp_event_code_t;
+
+typedef struct {
+  tcp_event_code_t code;
+} tcp_event_connect_t;
+
+typedef struct {
+  tcp_event_code_t code;
+} tcp_event_disconnect_t;
+
+typedef struct {
+  tcp_event_code_t code;
+  char* message;
+  int len;
+} tcp_event_read_t;
+
+typedef union {
+  tcp_event_code_t code;
+  tcp_event_connect_t connect;
+  tcp_event_disconnect_t disconnect;
+  tcp_event_read_t read;
+} tcp_event_t;
+
+/**
+ * Get WIFI event in message queue
+ * 0 : if success, -1 : else
+ */
+int kameleon_tcp_get_event(tcp_event_t* out_event);
+

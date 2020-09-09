@@ -1,12 +1,12 @@
 (defun build()
   (interactive)
-  (let ((old-pwd (eshell/pwd))
-	(old-buf (current-buffer)))
-    (cd "~/kameleon/esp32/build")
-    (compile "ninja")
-    (set-buffer "*compilation*")
+  (let ((old-buf (current-buffer))
+	(new-buf (get-buffer-create "*compilation*")))
+    (set-buffer new-buf)
+    (cd "~/Work/kameleon/esp32")
+    (compile "bash build_all.sh")
     (goto-char (point-max))
-    (set-buffer old-buf)
-    (cd old-pwd)))
+    (set-buffer old-buf)))
+
 
 	

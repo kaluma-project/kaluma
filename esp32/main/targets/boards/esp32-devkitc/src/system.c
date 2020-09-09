@@ -33,6 +33,8 @@
 #include "i2c.h"
 #include "spi.h"
 #include "uart.h"
+#include "ieee80211.h"
+#include "tcp.h"
 
 #include <esp_wifi.h>
 #include <nvs_flash.h>
@@ -121,16 +123,11 @@ static void nvs_init(void)
     ESP_ERROR_CHECK( ret );
 }
 
-static void wifi_init(void)
+static void netif_init(void)
 {
-   tcpip_adapter_init();
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+  ESP_ERROR_CHECK(esp_netif_init());
+  ESP_ERROR_CHECK(esp_event_loop_create_default());
 }
-
-extern void wifi_start(void);
 
 /**
  * Kameleon Hardware System Initializations
@@ -143,11 +140,15 @@ void system_init() {
   spi_init();
   uart_init();
   nvs_init();
-  wifi_init();
-  wifi_start();
+  // keep the calling order of the following 3 stmt.
+  netif_init();
+  ieee80211_init();
+  kameleon_tcp_init();
 }
 
 void system_cleanup() {
+  // TODO clean up netif
+  ieee80211_cleanup();
   adc_cleanup();
   pwm_cleanup();
   kameleon_i2c_cleanup();

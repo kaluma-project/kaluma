@@ -12,8 +12,6 @@
 #include "repl.h"
 #include "runtime.h"
 
-static const char* TAG = "kameleon";
-
 void app_main()
 {
   bool load = false;

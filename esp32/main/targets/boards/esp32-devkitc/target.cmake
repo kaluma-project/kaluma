@@ -10,7 +10,10 @@ set(TARGET_SOURCE
   ${CMAKE_CURRENT_LIST_DIR}/src/storage.c
   ${CMAKE_CURRENT_LIST_DIR}/src/system.c
   ${CMAKE_CURRENT_LIST_DIR}/src/tty.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/uart.c)
+  ${CMAKE_CURRENT_LIST_DIR}/src/uart.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/ieee80211.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/tcp.c)
+
 
 set(TARGET_INCLUDE
   ${CMAKE_CURRENT_LIST_DIR}/include)

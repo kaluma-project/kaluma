@@ -7,6 +7,7 @@ find ../deps -name "*.cpp" >> cscope.files
 find main -name "*.h" >> cscope.files
 find ../src -name "*.h" >> cscope.files
 find ../deps -name "*.h" >> cscope.files
+find ../include -name "*.h" >> cscope.files
 
 for DIR in newlib vfs driver esp32 
 do
@@ -15,3 +16,6 @@ do
 done
 
 cscope -b
+
+rm tags
+xargs -a cscope.files -I{} ctags -a {}

@@ -43,7 +43,6 @@ global.SystemError = SystemError;
 /**
  * Storage object
  */
-
 if (process.builtin_modules.indexOf('storage') > -1) {
   var Storage = Module.require('storage').Storage;
   global.storage = new Storage();
@@ -65,4 +64,12 @@ if (process.builtin_modules.indexOf('led') > -1) {
     var LED = Module.require('led');
     return new LED(pin);
   }
+}
+
+/**
+ * PWM object
+ */
+if (process.builtin_modules.indexOf('pwm') > -1) {
+    var PWM = Module.require('pwm').PWM;
+    global.pwm = PWM;
 }

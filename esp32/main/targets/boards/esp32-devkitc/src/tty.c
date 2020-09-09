@@ -68,11 +68,14 @@ void tty_init()
 
     /* Tell VFS to use UART driver */
     esp_vfs_dev_uart_use_driver(CONFIG_ESP_CONSOLE_UART_NUM);
+    
+    esp_vfs_dev_uart_port_set_rx_line_endings(CONFIG_ESP_CONSOLE_UART_NUM, ESP_LINE_ENDINGS_CR);
+    /* Move the caret to the beginning of the next line on '\n' */
+    esp_vfs_dev_uart_port_set_tx_line_endings(CONFIG_ESP_CONSOLE_UART_NUM, ESP_LINE_ENDINGS_CRLF);
 
-	// 
-	uart_wait_tx_done(CONFIG_ESP_CONSOLE_UART_NUM, 1000);
-	uart_flush(CONFIG_ESP_CONSOLE_UART_NUM);
-	printf("\r\n");
+	  uart_wait_tx_done(CONFIG_ESP_CONSOLE_UART_NUM, 1000);
+	  uart_flush(CONFIG_ESP_CONSOLE_UART_NUM);
+  	printf("\r\n");
 }
 
 uint32_t tty_available()
