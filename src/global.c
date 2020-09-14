@@ -274,11 +274,7 @@ JERRYXX_FUN(set_watch_fn) {
   io_watch_handle_t *watch = malloc(sizeof(io_watch_handle_t));
   io_watch_init(watch);
   watch->watch_js_cb = jerry_acquire_value(callback);
-  if (io_watch_start(watch, set_watch_cb, pin, mode, debounce) == GPIOPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
-  }
+  io_watch_start(watch, set_watch_cb, pin, mode, debounce);
   return jerry_create_number(watch->base.id);
 }
 
@@ -301,9 +297,13 @@ static void register_global_digital_io() {
   jerryxx_set_property_number(global, MSTR_INPUT, (double) GPIO_IO_MODE_INPUT);
   jerryxx_set_property_number(global, MSTR_OUTPUT, (double) GPIO_IO_MODE_OUTPUT);
   jerryxx_set_property_number(global, MSTR_INPUT_PULLUP, (double) GPIO_IO_MODE_INPUT_PULLUP);
+  jerryxx_set_property_number(global, MSTR_INPUT_PULLDOWN, (double) GPIO_IO_MODE_INPUT_PULLDOWN);
   jerryxx_set_property_number(global, MSTR_CHANGE, (double) IO_WATCH_MODE_CHANGE);
   jerryxx_set_property_number(global, MSTR_RISING, (double) IO_WATCH_MODE_RISING);
   jerryxx_set_property_number(global, MSTR_FALLING, (double) IO_WATCH_MODE_FALLING);
+  jerryxx_set_property_number(global, MSTR_PULLNO, (double) IO_PULL_NO);
+  jerryxx_set_property_number(global, MSTR_PULLUP, (double) IO_PULL_UP);
+  jerryxx_set_property_number(global, MSTR_PULLDOWN, (double) IO_PULL_DOWN);
   jerryxx_set_property_function(global, MSTR_PIN_MODE, pin_mode_fn);
   jerryxx_set_property_function(global, MSTR_DIGITAL_READ, digital_read_fn);
   jerryxx_set_property_function(global, MSTR_DIGITAL_WRITE, digital_write_fn);

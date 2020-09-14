@@ -9,7 +9,7 @@ global.board = {
   NUM_SPI: 0,
   NUM_UART: 0,
   led_pins: [],
-  button_pins: [],
+  button_pins: [9],
   pwm_pins: [],
   adc_pins: [],
   gpio: function (pin, mode) {
@@ -20,9 +20,9 @@ global.board = {
     var LED = global.require('led').LED;
     return new LED(pin);
   },
-  button: function (pin, pull, debounce) {
+  button: function (pin, event, debounce, int_pull) {
     var Button = global.require('button').Button;
-    return new Button(pin, pull, debounce);
+    return new Button(pin, event, debounce, int_pull);
   },
   pwm: function (pin, frequency, duty) {
     if (this.pwm_pins.indexOf(pin) < 0) {
@@ -74,7 +74,7 @@ global.board = {
   get BTN0() {
     if (!this._btn0) {
       var Button = global.require('button').Button;
-      this._btn0 = new Button(this.button_pins[0], FALLING);
+      this._btn0 = new Button(this.button_pins[0], FALLING, 50, PULL_UP);
     }
     return this._btn0;
   }

@@ -97,6 +97,14 @@ typedef enum {
   IO_WATCH_MODE_CHANGE,
 } io_watch_mode_t;
 
+/* GPIO watch handle types */
+
+typedef enum {
+  IO_PULL_NO,
+  IO_PULL_UP,
+  IO_PULL_DOWN,
+} io_pull_t;
+
 typedef void (* io_watch_cb)(io_watch_handle_t *);
 
 struct io_watch_handle_s {
@@ -176,7 +184,7 @@ void io_tty_cleanup();
 /* GPIO watch functions */
 
 void io_watch_init(io_watch_handle_t *watch);
-uint8_t io_watch_start(io_watch_handle_t *watch, io_watch_cb watch_cb, uint8_t pin, io_watch_mode_t mode, uint32_t debounce);
+void io_watch_start(io_watch_handle_t *watch, io_watch_cb watch_cb, uint8_t pin, io_watch_mode_t mode, uint32_t debounce);
 void io_watch_stop(io_watch_handle_t *watch);
 io_watch_handle_t *io_watch_get_by_id(uint32_t id);
 void io_watch_cleanup();
