@@ -213,10 +213,8 @@ void io_watch_init(io_watch_handle_t *watch) {
   watch->watch_cb = NULL;
 }
 
-uint8_t io_watch_start(io_watch_handle_t *watch, io_watch_cb watch_cb, uint8_t pin, io_watch_mode_t mode, uint32_t debounce) {
+void io_watch_start(io_watch_handle_t *watch, io_watch_cb watch_cb, uint8_t pin, io_watch_mode_t mode, uint32_t debounce) {
   IO_SET_FLAG_ON(watch->base.flags, IO_FLAG_ACTIVE);
-  if (gpio_set_io_mode(pin, GPIO_IO_MODE_INPUT) == GPIOPORT_ERROR)
-    return GPIOPORT_ERROR;
   watch->watch_cb = watch_cb;
   watch->pin = pin;
   watch->mode = mode;
@@ -225,7 +223,6 @@ uint8_t io_watch_start(io_watch_handle_t *watch, io_watch_cb watch_cb, uint8_t p
   watch->last_val = (uint8_t)gpio_read(watch->pin);
   watch->val = (uint8_t)gpio_read(watch->pin);
   list_append(&loop.watch_handles, (list_node_t *) watch);
-  return 0;
 }
 
 void io_watch_stop(io_watch_handle_t *watch) {

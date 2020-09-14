@@ -1,10 +1,20 @@
 var EventEmitter = require('events').EventEmitter;
 
-function Button (pin, event, debounce) {
+function Button (pin, event, debounce, int_pull) {
   EventEmitter.call(this);
   this.pin = pin;
-  pinMode(this.pin, INPUT);
-  this.mode = (typeof event === 'undefined' ? FALLING : event);
+  this.int_pull = (typeof int_pull === 'number' ? int_pull : PULL_NO);
+  if ((this.int_pull < PULL_NO) || (this.int_pull > PULL_UP)) {
+    this.int_pull = PULL_NO;
+  }
+  if (this.int_pull == PULL_UP) {
+    pinMode(this.pin, INPUT_PULLUP);
+  } else if (this.int_pull == PULL_DOWN) {
+    pinMode(this.pin, INPUT_PULLDOWN);
+  } else {
+    pinMode(this.pin, INPUT);
+  }
+  this.mode = (typeof event === 'number' ? event : FALLING);
   if ((this.mode < FALLING) || (this.mode > CHANGE)) {
     this.mode = FALLING;
   }

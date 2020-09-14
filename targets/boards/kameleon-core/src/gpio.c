@@ -81,6 +81,7 @@ int gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode) {
   GPIO_InitStruct.Pin = gpio_port_pin[pin].pin;
   GPIO_InitStruct.Mode = (mode == GPIO_IO_MODE_OUTPUT) ? GPIO_MODE_OUTPUT_PP : GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = (mode == GPIO_IO_MODE_INPUT_PULLUP) ? GPIO_PULLUP : GPIO_NOPULL;
+  GPIO_InitStruct.Pull = (mode == GPIO_IO_MODE_INPUT_PULLDOWN) ? GPIO_PULLDOWN : GPIO_InitStruct.Pull;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(gpio_port_pin[pin].port, &GPIO_InitStruct);
   return 0;

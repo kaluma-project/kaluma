@@ -92,6 +92,9 @@ int gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode)
   case GPIO_IO_MODE_INPUT_PULLUP:
     io_conf.pull_up_en = 1;
     break;
+  case GPIO_IO_MODE_INPUT_PULLDOWN:
+    io_conf.pull_down_en = 1;
+    break;
   default:
     io_conf.mode = GPIO_MODE_INPUT_OUTPUT;
     break;
@@ -106,7 +109,7 @@ int gpio_write(uint8_t pin, uint8_t value)
     return GPIOPORT_ERROR;
   if (value != GPIO_LOW)
     value = GPIO_HIGH;
-  printf("gpio_write(%d,%d)\n", gpio_port_pin[pin],value);
+  //printf("gpio_write(%d,%d)\n", gpio_port_pin[pin],value);
   gpio_set_level(gpio_port_pin[pin], value);
   return 0;
 }
@@ -117,7 +120,7 @@ int gpio_toggle(uint8_t pin)
     return GPIOPORT_ERROR;
   int oldVal = (GPIO_REG_READ(GPIO_OUT_REG) >> gpio_port_pin[pin]) & 1U;
   int newVal = !oldVal;
-  printf("gpio_toggle(%d) old:%d, new:%d\n", gpio_port_pin[pin], oldVal, newVal);
+  //printf("gpio_toggle(%d) old:%d, new:%d\n", gpio_port_pin[pin], oldVal, newVal);
   gpio_set_level(gpio_port_pin[pin], newVal);
   return newVal;
 }
@@ -127,7 +130,7 @@ int gpio_read(uint8_t pin)
   if (pin >= GPIO_NUM)
     return GPIOPORT_ERROR;
   int ret= gpio_get_level(gpio_port_pin[pin]);
-  printf("gpio_read(%d): %d\n", gpio_port_pin[pin], ret);
+  //printf("gpio_read(%d): %d\n", gpio_port_pin[pin], ret);
   return ret;
 }
 
