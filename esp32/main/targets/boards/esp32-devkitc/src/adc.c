@@ -31,33 +31,27 @@
 #define NO_OF_SAMPLES 64
 
 static esp_adc_cal_characteristics_t *adc_chars = NULL;
-static const adc_bits_width_t width = ADC_WIDTH_BIT_12;
-static const adc_atten_t atten = ADC_ATTEN_DB_11;
-static const adc_unit_t unit = ADC_UNIT_1;
 
 void adc_init()
 {
-		
 }
 
 void adc_cleanup()
 {
 }
 
-static uint8_t pin_to_channel(uint8_t pin)
+static int8_t pin_to_channel(uint8_t pin)
 {
-	switch(pin)
-	{
-		case 32: return ADC1_GPIO32_CHANNEL;
-		case 33: return ADC1_GPIO33_CHANNEL;
-		case 34: return ADC1_GPIO34_CHANNEL;
-		case 35: return ADC1_GPIO35_CHANNEL;
-		case 36: return ADC1_GPIO36_CHANNEL;
-		case 37: return ADC1_GPIO37_CHANNEL;
-		case 38: return ADC1_GPIO38_CHANNEL;
-		case 39: return ADC1_GPIO39_CHANNEL;
-		default: return 0;
-	}
+  switch(pin)
+  {
+    case 18: return ADC1_GPIO33_CHANNEL;
+    case 19: return ADC1_GPIO32_CHANNEL;
+    case 20: return ADC1_GPIO35_CHANNEL;
+    case 21: return ADC1_GPIO34_CHANNEL;
+    case 22: return ADC1_GPIO39_CHANNEL;
+    case 23: return ADC1_GPIO36_CHANNEL;
+    default: return -1;
+  }
 }
 
 static void print_char_val_type(esp_adc_cal_value_t val_type)
@@ -73,31 +67,35 @@ static void print_char_val_type(esp_adc_cal_value_t val_type)
 
 int adc_setup(uint8_t pin)
 {
-	uint8_t channel = pin_to_channel(pin);
-	if ( channel == 0 ) return -1;
+  int8_t channel = pin_to_channel(pin);
+  if (channel < 0)
+    return -1;
 
-	if ( adc_chars ) return channel;
-	adc1_config_width(width);
-	adc1_config_channel_atten(channel, atten);
-	adc_chars = calloc(1, sizeof(esp_adc_cal_characteristics_t));
-	esp_adc_cal_value_t val_type = esp_adc_cal_characterize(unit, atten, width, DEFAULT_VREF, adc_chars);
-	print_char_val_type(val_type);
-	return channel;
+  adc1_config_width(ADC_WIDTH_BIT_12);
+  adc1_config_channel_atten(channel, ADC_ATTEN_DB_11);
+  if (adc_chars == NULL) {
+    adc_chars = calloc(1, sizeof(esp_adc_cal_characteristics_t));
+    esp_adc_cal_value_t val_type = esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, DEFAULT_VREF, adc_chars);
+    print_char_val_type(val_type);
+  }
+  return channel;
 }
 
 double adc_read(uint8_t adcIndex)
 {
-	uint32_t reading = adc1_get_raw(adcIndex);
-	uint32_t voltage = esp_adc_cal_raw_to_voltage(reading, adc_chars);
-	//printf("adc_read(%d) : %d, %d\n", adcIndex, reading, voltage);
-	return voltage / 1000.0;
+  uint32_t reading = adc1_get_raw(adcIndex);
+  //double voltage = esp_adc_cal_raw_to_voltage(reading, adc_chars);
+  //printf("adc_read(%d) : %d, %d\n", adcIndex, reading, voltage);
+  //return voltage / 1000.0;
+  return (reading / (double)0x0FFF);
 }
 
 int adc_close(uint8_t pin)
 {
-	if ( adc_chars == NULL ) return 0;
-	free(adc_chars);
-	adc_chars = NULL;
-	return 0;
+  if (adc_chars == NULL)
+    return 0;
+  free(adc_chars);
+  adc_chars = NULL;
+  return 0;
 }
 
