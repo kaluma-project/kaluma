@@ -4,14 +4,14 @@ global.board = {
   NUM_LED: 0,
   NUM_BUTTON: 1,
   NUM_PWM: 0,
-  NUM_ADC: 0,
+  NUM_ADC: 6,
   NUM_I2C: 0,
   NUM_SPI: 0,
   NUM_UART: 0,
   led_pins: [],
   button_pins: [9],
   pwm_pins: [],
-  adc_pins: [],
+  adc_pins: [18, 19, 20, 21, 22, 23],
   gpio: function (pin, mode) {
     var GPIO = global.require('gpio').GPIO;
     return new GPIO(pin, mode);
