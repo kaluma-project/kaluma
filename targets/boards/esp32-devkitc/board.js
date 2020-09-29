@@ -10,7 +10,7 @@ global.board = {
   NUM_UART: 2,
   led_pins: [],
   button_pins: [9],
-  pwm_pins: [2, 12, 20, 21],
+  pwm_pins: [2, 12, 18, 19],
   adc_pins: [18, 19, 20, 21, 22, 23],
   gpio: function (pin, mode) {
     var GPIO = global.require('gpio').GPIO;
