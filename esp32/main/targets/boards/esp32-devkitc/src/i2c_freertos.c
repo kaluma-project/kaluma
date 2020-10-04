@@ -3,13 +3,10 @@
 #include <freertos/task.h>
 #include <esp_system.h>
 
-#define I2C_MASTER_PORT_NUM 1
-#define I2C_MASTER_FREQUENCY 100000
-#define I2C_MASTER_SCL_IO 19
-#define I2C_MASTER_SDA_IO 18
-#define I2C_SLAVE_SCL_IO 26
-#define I2C_SLAVE_SDA_IO 25
-#define I2C_SLAVE_PORT_NUM 0
+#define I2C_BUS0_SCL_IO 23
+#define I2C_BUS0_SDA_IO 22
+#define I2C_BUS1_SCL_IO 14
+#define I2C_BUS1_SDA_IO 12
 #define I2C_MASTER_TX_BUF_DISABLE 0
 #define I2C_MASTER_RX_BUF_DISABLE 0
 
@@ -29,9 +26,16 @@ int _i2c_setup_master(uint8_t bus, uint32_t speed)
 {
   i2c_config_t conf;
   conf.mode = I2C_MODE_MASTER;
-  conf.sda_io_num = I2C_MASTER_SDA_IO;
+  if (bus == 0) {
+    conf.sda_io_num = I2C_BUS0_SDA_IO;
+    conf.scl_io_num = I2C_BUS0_SCL_IO;
+  } else if (bus == 1) {
+    conf.sda_io_num = I2C_BUS1_SDA_IO;
+    conf.scl_io_num = I2C_BUS1_SCL_IO;
+  } else {
+    return -1;
+  }
   conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
-  conf.scl_io_num = I2C_MASTER_SCL_IO;
   conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
   conf.master.clk_speed = speed;
   i2c_param_config(bus, &conf);
@@ -42,9 +46,16 @@ int _i2c_setup_slave(uint8_t bus, uint8_t address)
 {
   i2c_config_t conf;
   conf.mode = I2C_MODE_SLAVE;
-  conf.sda_io_num = I2C_SLAVE_SDA_IO;
+  if (bus == 0) {
+    conf.sda_io_num = I2C_BUS0_SDA_IO;
+    conf.scl_io_num = I2C_BUS0_SCL_IO;
+  } else if (bus == 1) {
+    conf.sda_io_num = I2C_BUS1_SDA_IO;
+    conf.scl_io_num = I2C_BUS1_SCL_IO;
+  } else {
+    return -1;
+  }
   conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
-  conf.scl_io_num = I2C_SLAVE_SCL_IO;
   conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
   conf.slave.addr_10bit_en = 0;
   conf.slave.slave_addr = address;
