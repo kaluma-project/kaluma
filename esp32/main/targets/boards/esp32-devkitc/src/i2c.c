@@ -30,7 +30,9 @@ int _i2c_master_read_slave(int i2c_num, int address, uint8_t *data_rd, size_t si
 int _i2c_master_write_slave(int i2c_num, int address, uint8_t *data_wr, size_t size, uint32_t timeout);
 int _i2c_slave_read_buffer(int i2c_num, uint8_t *data, size_t max_size, uint32_t timeout);
 int _i2c_slave_write_buffer(int i2c_num, const uint8_t *data, int size, uint32_t timeout);
-
+int _i2c_memWrite_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout);
+int _i2c_memRead_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout);
+int _i2c_close(uint8_t bus);
 
 void kameleon_i2c_init()
 {
@@ -50,30 +52,14 @@ int kameleon_i2c_setup_slave(uint8_t bus, uint8_t address)
   return _i2c_setup_slave(bus, address);
 }
 
-
-/**
- * @brief test function to show buffer
- */
-static void disp_buf(uint8_t *buf, int len)
-{
-    int i;
-    for (i = 0; i < len; i++) {
-        printf("%02x ", buf[i]);
-        if ((i + 1) % 16 == 0) {
-            printf("\n");
-        }
-    }
-    printf("\n");
-}
-
 int kameleon_i2c_memWrite_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout)
 {
-  return 0;
+  return _i2c_memWrite_master(bus, address, memAddress, memAdd16bit, buf, len, timeout);
 }
 
 int kameleon_i2c_memRead_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout)
 {
-  return 0;
+  return _i2c_memRead_master(bus, address, memAddress, memAdd16bit, buf, len, timeout);
 }
 
 int kameleon_i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
@@ -81,7 +67,7 @@ int kameleon_i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t
 {
   return _i2c_master_write_slave(bus, address, buf, len, timeout);
 }
-
+ 
 int kameleon_i2c_write_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout)
 {
   return _i2c_slave_write_buffer(bus, buf, len, timeout);
@@ -100,6 +86,6 @@ int kameleon_i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t time
 
 int kameleon_i2c_close(uint8_t bus)
 {
-  return 0;
+  return _i2c_close(bus);
 }
 
