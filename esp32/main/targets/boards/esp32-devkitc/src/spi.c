@@ -25,10 +25,12 @@
 #include <driver/spi_master.h>
 #include <string.h>
 
-#define GPIO_MOSI 12
-#define GPIO_MISO 13
-#define GPIO_SCLK 15
-#define GPIO_CS 14
+#define GPIO_MOSI_0 5
+#define GPIO_MISO_0 18
+#define GPIO_SCLK_0 19
+#define GPIO_MOSI_1 27
+#define GPIO_MISO_1 26
+#define GPIO_SCLK_1 25
 
 void spi_init()
 {
@@ -36,39 +38,59 @@ void spi_init()
 
 void spi_cleanup()
 {
+  for (int k = 0; k < SPI_NUM; k++) {
+    spi_close(k);
+  }
 }
 
-static spi_device_handle_t handle;
+static spi_device_handle_t handle[SPI_NUM];
 
 int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bitorder)
 {
     esp_err_t ret;
     //Configuration for the SPI bus
-    spi_bus_config_t buscfg={
-        .mosi_io_num=GPIO_MOSI,
-        .miso_io_num=GPIO_MISO,
-        .sclk_io_num=GPIO_SCLK,
-        .quadwp_io_num=-1,
-        .quadhd_io_num=-1
-    };
-
+    spi_bus_config_t buscfg[SPI_NUM];
+    spi_host_device_t hostid;
+    memset(buscfg, 0, sizeof(spi_bus_config_t) * SPI_NUM);
+    if (bus == 0) {
+        buscfg[bus].mosi_io_num = GPIO_MOSI_0;
+        buscfg[bus].miso_io_num = GPIO_MISO_0;
+        buscfg[bus].sclk_io_num = GPIO_SCLK_0;
+        buscfg[bus].quadwp_io_num = -1;
+        buscfg[bus].quadhd_io_num = -1;
+        buscfg[bus].flags = SPICOMMON_BUSFLAG_MASTER;
+        hostid = HSPI_HOST;
+    } else {
+        buscfg[bus].mosi_io_num = GPIO_MOSI_1;
+        buscfg[bus].miso_io_num = GPIO_MISO_1;
+        buscfg[bus].sclk_io_num = GPIO_SCLK_1;
+        buscfg[bus].quadwp_io_num = -1;
+        buscfg[bus].quadhd_io_num = -1;
+        buscfg[bus].flags = SPICOMMON_BUSFLAG_MASTER;
+        hostid = VSPI_HOST;
+    }
+    spi_device_interface_config_t devcfg[SPI_NUM];
+    memset(devcfg, 0, sizeof(spi_device_interface_config_t) * SPI_NUM);
     //Configuration for the SPI device on the other side of the bus
-    spi_device_interface_config_t devcfg={
-        .command_bits=0,
-        .address_bits=0,
-        .dummy_bits=0,
-        .clock_speed_hz=baudrate,
-        .duty_cycle_pos=128,        //50% duty cycle
-        .mode=2,
-        .spics_io_num=GPIO_CS,
-        .cs_ena_posttrans=3,        //Keep the CS low 3 cycles after transaction, to stop slave from missing the last bit when CS has less propagation delay than CLK
-        .queue_size=3
-    };
-    ret=spi_bus_initialize(HSPI_HOST, &buscfg, 1);
+    devcfg[bus].command_bits = 0;
+    devcfg[bus].address_bits = 0;
+    devcfg[bus].dummy_bits = 0;
+    devcfg[bus].clock_speed_hz = baudrate;
+    devcfg[bus].duty_cycle_pos = 128;        //50% duty cycle
+    devcfg[bus].mode = mode;
+    devcfg[bus].spics_io_num = -1;
+    devcfg[bus].cs_ena_posttrans = 3;        //Keep the CS low 3 cycles after transaction, to stop slave from missing the last bit when CS has less propagation delay than CLK
+    devcfg[bus].queue_size = 3;
+    if (bitorder == SPI_BITORDER_LSB) {
+        devcfg[bus].flags = SPI_DEVICE_BIT_LSBFIRST;
+    } else {
+        devcfg[bus].flags = 0;
+    }
+    ret=spi_bus_initialize(hostid, &buscfg[bus], bus);
     assert(ret==ESP_OK);
-    ret=spi_bus_add_device(HSPI_HOST, &devcfg, &handle);
+    ret=spi_bus_add_device(hostid, &devcfg[bus], &handle[bus]);
     assert(ret==ESP_OK);
-  return 0;
+  return ret;
 }
 
 int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint32_t timeout)
@@ -79,8 +101,8 @@ int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint
     t.length=len*8;
     t.tx_buffer=tx_buf;
     t.rx_buffer=rx_buf;
-    ret=spi_device_transmit(handle, &t);
-    return 0;
+    ret=spi_device_transmit(handle[bus], &t);
+    return ret;
 }
 
 int spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout)
@@ -90,8 +112,8 @@ int spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout)
     memset(&t, 0, sizeof(t));
     t.length=len*8;
     t.tx_buffer=buf;
-    ret=spi_device_polling_transmit(handle, &t);
-    return 0;
+    ret=spi_device_polling_transmit(handle[bus], &t);
+    return ret;
 }
 
 int spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout)
@@ -101,14 +123,14 @@ int spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout)
     memset(&t, 0, sizeof(t));
     t.length=len*8;
     t.rx_buffer=buf;
-    ret=spi_device_transmit(handle, &t);
-    return 0;
+    ret=spi_device_transmit(handle[bus], &t);
+    return ret;
 }
 
 int spi_close(uint8_t bus)
 {
     esp_err_t ret;
-    ret=spi_bus_remove_device(handle);
-    return 0;
+    ret=spi_bus_remove_device(handle[bus]);
+    return ret;
 }
 
