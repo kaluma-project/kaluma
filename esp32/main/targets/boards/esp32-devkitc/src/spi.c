@@ -32,6 +32,11 @@
 #define GPIO_MISO_1 26
 #define GPIO_SCLK_1 25
 
+#define SPI_PORT0      1 // Bit0
+#define SPI_PORT1      2 // Bit1
+
+static spi_device_handle_t handle[SPI_NUM];
+static uint8_t spi_status = 0;
 void spi_init()
 {
 }
@@ -43,52 +48,52 @@ void spi_cleanup()
   }
 }
 
-static spi_device_handle_t handle[SPI_NUM];
-
 int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bitorder)
 {
     esp_err_t ret;
+    if (spi_status & (1<<bus))
+    {
+        return -1; // BUSY
+    }
     //Configuration for the SPI bus
-    spi_bus_config_t buscfg[SPI_NUM];
     spi_host_device_t hostid;
-    memset(buscfg, 0, sizeof(spi_bus_config_t) * SPI_NUM);
+    spi_bus_config_t buscfg = {
+        .mosi_io_num = GPIO_MOSI_0,
+        .miso_io_num = GPIO_MISO_0,
+        .sclk_io_num = GPIO_SCLK_0,
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+        .flags = SPICOMMON_BUSFLAG_MASTER,
+    };
     if (bus == 0) {
-        buscfg[bus].mosi_io_num = GPIO_MOSI_0;
-        buscfg[bus].miso_io_num = GPIO_MISO_0;
-        buscfg[bus].sclk_io_num = GPIO_SCLK_0;
-        buscfg[bus].quadwp_io_num = -1;
-        buscfg[bus].quadhd_io_num = -1;
-        buscfg[bus].flags = SPICOMMON_BUSFLAG_MASTER;
         hostid = HSPI_HOST;
+        spi_status |= SPI_PORT0;
     } else {
-        buscfg[bus].mosi_io_num = GPIO_MOSI_1;
-        buscfg[bus].miso_io_num = GPIO_MISO_1;
-        buscfg[bus].sclk_io_num = GPIO_SCLK_1;
-        buscfg[bus].quadwp_io_num = -1;
-        buscfg[bus].quadhd_io_num = -1;
-        buscfg[bus].flags = SPICOMMON_BUSFLAG_MASTER;
+        buscfg.mosi_io_num = GPIO_MOSI_1;
+        buscfg.miso_io_num = GPIO_MISO_1;
+        buscfg.sclk_io_num = GPIO_SCLK_1;
         hostid = VSPI_HOST;
+        spi_status |= SPI_PORT1;
     }
-    spi_device_interface_config_t devcfg[SPI_NUM];
-    memset(devcfg, 0, sizeof(spi_device_interface_config_t) * SPI_NUM);
     //Configuration for the SPI device on the other side of the bus
-    devcfg[bus].command_bits = 0;
-    devcfg[bus].address_bits = 0;
-    devcfg[bus].dummy_bits = 0;
-    devcfg[bus].clock_speed_hz = baudrate;
-    devcfg[bus].duty_cycle_pos = 128;        //50% duty cycle
-    devcfg[bus].mode = mode;
-    devcfg[bus].spics_io_num = -1;
-    devcfg[bus].cs_ena_posttrans = 3;        //Keep the CS low 3 cycles after transaction, to stop slave from missing the last bit when CS has less propagation delay than CLK
-    devcfg[bus].queue_size = 3;
+    spi_device_interface_config_t devcfg = {
+        .command_bits = 0,
+        .address_bits = 0,
+        .dummy_bits = 0,
+        .clock_speed_hz = baudrate,
+        .duty_cycle_pos = 128,        //50% duty cycle
+        .mode = mode,
+        .spics_io_num = -1,
+        .cs_ena_posttrans = 3,        //Keep the CS low 3 cycles after transaction, to stop slave from missing the last bit when CS has less propagation delay than CLK
+        .queue_size = 3,
+    };
+
     if (bitorder == SPI_BITORDER_LSB) {
-        devcfg[bus].flags = SPI_DEVICE_BIT_LSBFIRST;
-    } else {
-        devcfg[bus].flags = 0;
+        devcfg.flags = SPI_DEVICE_BIT_LSBFIRST;
     }
-    ret=spi_bus_initialize(hostid, &buscfg[bus], bus);
+    ret=spi_bus_initialize(hostid, &buscfg, bus);
     assert(ret==ESP_OK);
-    ret=spi_bus_add_device(hostid, &devcfg[bus], &handle[bus]);
+    ret=spi_bus_add_device(hostid, &devcfg, &handle[bus]);
     assert(ret==ESP_OK);
   return ret;
 }
@@ -131,6 +136,7 @@ int spi_close(uint8_t bus)
 {
     esp_err_t ret;
     ret=spi_bus_remove_device(handle[bus]);
+    spi_status &= ~(1<<bus);
     return ret;
 }
 
