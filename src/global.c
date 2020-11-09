@@ -969,6 +969,10 @@ static void run_startup_module() {
   jerry_value_t res = jerry_exec_snapshot((const uint32_t *)module_startup_code, module_startup_size, 0, JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
   jerry_value_t this_val = jerry_create_undefined ();
   jerry_value_t ret_val = jerry_call_function (res, this_val, NULL, 0);
+  if (jerry_value_is_error (ret_val)) {
+    // print error
+    jerryxx_print_error(ret_val, true);
+  }
   jerry_release_value (ret_val);
   jerry_release_value (this_val);
   jerry_release_value (res);
@@ -984,7 +988,6 @@ static void run_board_module() {
 }
 
 #ifdef _TARGET_FREERTOS_
-extern void register_global_ieee80211dev();
 extern void register_global_pwm();
 #endif
 
@@ -1000,9 +1003,8 @@ void global_init() {
   register_global_encoders();
   register_global_etc();
 #ifdef _TARGET_FREERTOS_
-  register_global_ieee80211dev();
   register_global_pwm();
 #endif
-  run_startup_module();
   run_board_module();
+  run_startup_module();
 }
