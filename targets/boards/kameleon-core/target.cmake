@@ -68,7 +68,7 @@ else()
   set(TARGET_LDSCRIPT ${TARGET_SRC_DIR}/STM32F411CETx_FLASH.ld)
 endif()
 
-set(KAMELEON_MODULES events gpio led button pwm adc i2c spi uart graphics at storage stream net http url wifi startup)
+set(KAMELEON_MODULES events gpio led button pwm adc i2c spi uart graphics at storage stream http url startup)
 
 set(KAMELEON_MODULE_PWM 1)
 set(KAMELEON_MODULE_I2C 1)

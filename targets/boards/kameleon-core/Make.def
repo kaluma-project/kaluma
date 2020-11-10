@@ -138,7 +138,7 @@ LDFLAGS = $(MCU) -specs=nano.specs -u _printf_float -T$(TARGET_LDSCRIPT) $(LIBDI
 # KAMELEON MODULES
 # -----------------------------------------------------------------------------
 
-KAMELEON_MODULES='events gpio led button pwm adc i2c spi uart graphics at storage stream net http url wifi startup'
+KAMELEON_MODULES='events gpio led button pwm adc i2c spi uart graphics at storage stream http url startup'
 
 KAMELEON_MODULE_PWM = 1
 KAMELEON_MODULE_I2C = 1

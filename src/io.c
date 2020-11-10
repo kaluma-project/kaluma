@@ -28,6 +28,9 @@
 #include "tty.h"
 #include "gpio.h"
 #include "uart.h"
+#ifdef KAMELEON_MODULE_IEEE80211    
+#include "ieee80211.h"
+#endif//KAMELEON_MODULE_IEEE80211
 
 io_loop_t loop;
 
@@ -38,6 +41,10 @@ static void io_tty_run();
 static void io_watch_run();
 static void io_uart_run();
 static void io_idle_run();
+#ifdef KAMELEON_MODULE_IEEE80211    
+static void io_ieee80211_run();
+#endif//KAMELEON_MODULE_IEEE80211
+
 
 /* general handle functions */
 
@@ -90,6 +97,9 @@ void io_init() {
   list_init(&loop.watch_handles);
   list_init(&loop.uart_handles);
   list_init(&loop.closing_handles);
+#ifdef KAMELEON_MODULE_IEEE80211  
+  list_init(&loop.ieee80211_handles);
+#endif//KAMELEON_MODULE_IEEE80211
 }
 
 void io_run() {
@@ -99,6 +109,9 @@ void io_run() {
     io_tty_run();
     io_watch_run();
     io_uart_run();
+#ifdef KAMELEON_MODULE_IEEE80211    
+    io_ieee80211_run();
+#endif//KAMELEON_MODULE_IEEE80211
     io_idle_run();
     io_handle_closing();
   }
@@ -332,6 +345,89 @@ static void io_uart_run() {
     handle = (io_uart_handle_t *) ((list_node_t *) handle)->next;
   }
 }
+
+/* IEEE80211 functions */
+#ifdef KAMELEON_MODULE_IEEE80211
+void io_ieee80211_init(io_ieee80211_handle_t *ieee80211) {
+  io_handle_init((io_handle_t *) ieee80211, IO_IEEE80211);
+}
+
+io_ieee80211_handle_t *io_ieee80211_get_by_id(uint32_t id) {
+  return (io_ieee80211_handle_t *) io_handle_get_by_id(id, &loop.ieee80211_handles);
+}
+
+void io_ieee80211_cleanup() {
+  io_ieee80211_handle_t *handle = (io_ieee80211_handle_t *) loop.ieee80211_handles.head;
+  while (handle != NULL) {
+    io_ieee80211_handle_t *next = (io_ieee80211_handle_t *) ((list_node_t *) handle)->next;
+    free(handle);
+    handle = next;
+  }
+  list_init(&loop.ieee80211_handles);
+}
+
+void io_ieee80211_start(io_ieee80211_handle_t *ieee80211, io_ieee80211_scan_cb scan_cb, io_ieee80211_assoc_cb assoc_cb, io_ieee80211_connect_cb connect_cb, io_ieee80211_disconnect_cb disconnect_cb)
+{
+  IO_SET_FLAG_ON(ieee80211->base.flags, IO_FLAG_ACTIVE);
+  ieee80211->scan_cb = scan_cb;
+  ieee80211->assoc_cb = assoc_cb;
+  ieee80211->connect_cb = connect_cb;
+  ieee80211->disconnect_cb = disconnect_cb;
+
+  list_append(&loop.ieee80211_handles, (list_node_t *) ieee80211);
+}
+
+void io_ieee80211_stop(io_ieee80211_handle_t *ieee80211)
+{
+  IO_SET_FLAG_OFF(ieee80211->base.flags, IO_FLAG_ACTIVE);
+  list_remove(&loop.ieee80211_handles, (list_node_t *) ieee80211);
+}
+
+
+static void io_ieee80211_run() {
+  io_ieee80211_handle_t *handle = (io_ieee80211_handle_t *) loop.ieee80211_handles.head;
+
+  ieee80211_event_t message;
+
+  while (handle != NULL) {
+    if (IO_HAS_FLAG(handle->base.flags, IO_FLAG_ACTIVE)) {
+      if (ieee80211_get_event(&message)==0)
+      {
+        switch(message.code)
+        {
+          case IEEE80211_EVENT_SCAN:
+            if ( handle->scan_cb != NULL )
+            {
+              handle->scan_cb(handle, message.scan.count, message.scan.records);
+            }
+            free(message.scan.records);
+            break;
+          case IEEE80211_EVENT_ASSOC:
+            if ( handle->assoc_cb != NULL )
+            {
+              handle->assoc_cb(handle);
+            }
+            break;
+          case IEEE80211_EVENT_CONNECT:
+            if ( handle->connect_cb != NULL )
+            {
+              handle->connect_cb(handle);
+            }
+            break;
+          case IEEE80211_EVENT_DISCONNECT:
+            if ( handle->disconnect_cb != NULL )
+            {
+              handle->disconnect_cb(handle);
+            }
+            break;
+        }  
+      }
+
+    }
+    handle = (io_ieee80211_handle_t *) ((list_node_t *) handle)->next;
+  }
+}
+#endif//KAMELEON_MODULE_IEEE80211
 
 /* idle functions */
 

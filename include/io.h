@@ -27,6 +27,9 @@
 #include "utils.h"
 
 #include "jerryscript.h"
+#ifdef KAMELEON_MODULE_IEEE80211
+#include "ieee80211.h"
+#endif//KAMELEON_MODULE_IEEE80211
 
 typedef struct io_loop_s io_loop_t;
 typedef struct io_handle_s io_handle_t;
@@ -36,6 +39,10 @@ typedef struct io_tty_handle_s io_tty_handle_t;
 typedef struct io_watch_handle_s io_watch_handle_t;
 typedef struct io_uart_handle_s io_uart_handle_t;
 typedef struct io_idle_handle_s io_idle_handle_t;
+#ifdef KAMELEON_MODULE_IEEE80211
+typedef struct io_ieee80211_handle_s io_ieee80211_handle_t;
+#endif//KAMELEON_MODULE_IEEE80211
+
 
 /* handle flags */
 
@@ -53,6 +60,9 @@ typedef enum io_type {
   IO_TTY,
   IO_WATCH,
   IO_UART,
+#ifdef KAMELEON_MODULE_IEEE80211  
+  IO_IEEE80211,
+#endif//KAMELEON_MODULE_IEEE80211
   IO_IDLE
 } io_type_t;
 
@@ -133,6 +143,25 @@ struct io_uart_handle_s {
   int temp;
 };
 
+/* IEEE80211 handle type */
+#ifdef KAMELEON_MODULE_IEEE80211
+typedef void (* io_ieee80211_connect_cb)(io_ieee80211_handle_t *);
+typedef void (* io_ieee80211_assoc_cb)(io_ieee80211_handle_t *);
+typedef void (* io_ieee80211_disconnect_cb)(io_ieee80211_handle_t *);
+typedef void (* io_ieee80211_scan_cb)(io_ieee80211_handle_t *, int, ieee80211_scan_info_t*);
+
+struct io_ieee80211_handle_s {
+  io_handle_t base;
+  uint8_t port;
+  io_ieee80211_scan_cb scan_cb;
+  io_ieee80211_assoc_cb assoc_cb;
+  io_ieee80211_connect_cb connect_cb;
+  io_ieee80211_disconnect_cb disconnect_cb;
+  jerry_value_t this_val;
+  jerry_value_t scan_js_cb;
+};
+#endif//KAMELEON_MODULE_IEEE80211
+
 /* idle handle types */
 
 typedef void (* io_idle_cb)(io_idle_handle_t *);
@@ -151,6 +180,9 @@ struct io_loop_s {
   list_t tty_handles;
   list_t watch_handles;
   list_t uart_handles;
+#ifdef KAMELEON_MODULE_IEEE80211  
+  list_t ieee80211_handles;
+#endif//KAMELEON_MODULE_IEEE80211
   list_t idle_handles;
   list_t closing_handles;
 };
@@ -196,6 +228,19 @@ void io_uart_read_start(io_uart_handle_t *uart, uint8_t port, io_uart_available_
 void io_uart_read_stop(io_uart_handle_t *uart);
 io_uart_handle_t *io_uart_get_by_id(uint32_t id);
 void io_uart_cleanup();
+
+/* IEEE80211 function */
+#ifdef KAMELEON_MODULE_IEEE80211
+void io_ieee80211_init(io_ieee80211_handle_t *ieee80211);
+void io_ieee80211_start(io_ieee80211_handle_t *ieee80211, io_ieee80211_scan_cb scan_cb, io_ieee80211_assoc_cb assoc_cb, io_ieee80211_connect_cb connect_cb, io_ieee80211_disconnect_cb disconnect_cb);
+void io_ieee80211_stop(io_ieee80211_handle_t *ieee80211);
+void io_ieee80211_scan(io_ieee80211_handle_t *ieee80211, io_ieee80211_scan_cb scan_cb);
+void io_ieee80211_connect(io_ieee80211_handle_t *ieee80211, io_ieee80211_connect_cb connect_cb);
+void io_ieee80211_disconnect(io_ieee80211_handle_t *ieee80211, io_ieee80211_disconnect_cb disconnect_cb);
+io_ieee80211_handle_t *io_ieee80211_get_by_id(uint32_t id);
+void io_ieee80211_cleanup();
+#endif//KAMELEON_MODULE_IEEE80211
+
 
 /* idle function */
 
