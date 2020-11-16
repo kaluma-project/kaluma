@@ -10,6 +10,7 @@ set(TARGET_SOURCE
   ${CMAKE_CURRENT_LIST_DIR}/src/storage.c
   ${CMAKE_CURRENT_LIST_DIR}/src/system.c
   ${CMAKE_CURRENT_LIST_DIR}/src/tty.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/ringbuffer.c
   ${CMAKE_CURRENT_LIST_DIR}/src/uart.c)
 
 set(TARGET_INCLUDE
