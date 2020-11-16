@@ -66,6 +66,16 @@
     return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg); \
   }
 
+#define JERRYXX_CHECK_ARG_FUNCTION_OPT(index, argname) \
+  if (args_cnt > index) { \
+    if (!jerry_value_is_function(args_p[index])) { \
+      char errmsg[255]; \
+      sprintf(errmsg, "\"%s\" argument must be a function", argname); \
+      return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) errmsg); \
+    } \
+  }
+
+
 #define JERRYXX_CHECK_ARG_STRING(index, argname) \
   if ((args_cnt <= index) || (!jerry_value_is_string(args_p[index]))) { \
     char errmsg[255]; \
@@ -148,5 +158,15 @@ void jerryxx_print_error(jerry_value_t value, bool print_stacktrace);
 jerry_size_t jerryxx_get_ascii_string_size(const jerry_value_t value);
 jerry_size_t jerryxx_get_ascii_string_length(const jerry_value_t value);
 jerry_size_t jerryxx_string_to_ascii_char_buffer(const jerry_value_t value, jerry_char_t *buf, jerry_size_t len);
+
+#define JERRYXX_GET_PROPERTY_STRING_AS_CHAR(obj, name) \
+  jerry_value_t name##_n = jerry_create_string((jerry_char_t *)#name); \
+  jerry_value_t name##_p = jerry_get_property(obj, name##_n); \
+  jerry_size_t name##_sz = jerry_get_string_size(name##_p); \
+  jerry_char_t name[name##_sz + 1]; \
+  jerry_string_to_char_buffer(name##_p, (jerry_char_t *)name, name##_sz); \
+  name[name##_sz] = '\0'; \
+  jerry_release_value(name##_p); \
+  jerry_release_value(name##_n);
 
 #endif /* __JERRYXX_H */
