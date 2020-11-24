@@ -34,6 +34,7 @@
 #include "spi.h"
 #include "uart.h"
 #include "ieee80211.h"
+#include "tcp.h"
 
 #include <esp_wifi.h>
 #include <nvs_flash.h>
@@ -142,9 +143,11 @@ void system_init() {
   // keep the calling order of the following 3 stmt.
   netif_init();
   ieee80211_init();
+  kameleon_tcp_init();
 }
 
 void system_cleanup() {
+  // TODO clean up netif
   ieee80211_cleanup();
   adc_cleanup();
   pwm_cleanup();

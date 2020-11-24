@@ -23,6 +23,7 @@ set(_SOURCES
   "${_SOURCE_DIR}/modules/storage/module_storage.c"
   "${_SOURCE_DIR}/modules/uart/module_uart.c"
   "${_SOURCE_DIR}/modules/wifi/module_wifi.c"
+  "${_SOURCE_DIR}/modules/net/module_net.c"
   #"${_SOURCE_DIR}/modules/url/__module_url.c"
   "${_SOURCE_DIR}/repl.c"
   "${_SOURCE_DIR}/runtime.c"
@@ -40,13 +41,13 @@ set(_INCLUDES
   "${_SOURCE_DIR}/modules/net"
   "${_SOURCE_DIR}/modules/pwm"
   "${_SOURCE_DIR}/modules/spi"
-  "${_SOURCE_DIR}/modules/spi"
   "${_SOURCE_DIR}/modules/startup"
   "${_SOURCE_DIR}/modules/storage"
   "${_SOURCE_DIR}/modules/stream"
   "${_SOURCE_DIR}/modules/uart"
   "${_SOURCE_DIR}/modules/url"
-  "${_SOURCE_DIR}/modules/wifi")
+  "${_SOURCE_DIR}/modules/wifi"
+  "${_SOURCE_DIR}/modules/net")
   
 idf_component_register(SRCS
   "esp32_main.c"
@@ -59,5 +60,5 @@ idf_component_register(SRCS
   REQUIRES jerryscript spi_flash console log esp_adc_cal soc nvs_flash lwip)
 
 target_link_libraries(${COMPONENT_LIB} PRIVATE "-lm" "-lc")
-target_compile_definitions(${COMPONENT_TARGET} PRIVATE "-D_TARGET_FREERTOS_" "-DKAMELEON_MODULE_IEEE80211")
+target_compile_definitions(${COMPONENT_TARGET} PRIVATE "-D_TARGET_FREERTOS_" "-DKAMELEON_MODULE_IEEE80211" "-DKAMELEON_MODULE_TCP")
 

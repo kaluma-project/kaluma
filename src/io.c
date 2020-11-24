@@ -31,6 +31,9 @@
 #ifdef KAMELEON_MODULE_IEEE80211    
 #include "ieee80211.h"
 #endif//KAMELEON_MODULE_IEEE80211
+#ifdef KAMELEON_MODULE_TCP
+#include "tcp.h"
+#endif//KAMELEON_MODULE_TCP
 
 io_loop_t loop;
 
@@ -44,7 +47,11 @@ static void io_idle_run();
 #ifdef KAMELEON_MODULE_IEEE80211    
 static void io_ieee80211_run();
 #endif//KAMELEON_MODULE_IEEE80211
+#ifdef KAMELEON_MODULE_TCP
+static void io_tcp_run();
+#endif//KAMELEON_MODULE_TCP
 
+static void io_idle_run();
 
 /* general handle functions */
 
@@ -96,10 +103,13 @@ void io_init() {
   list_init(&loop.timer_handles);
   list_init(&loop.watch_handles);
   list_init(&loop.uart_handles);
-  list_init(&loop.closing_handles);
 #ifdef KAMELEON_MODULE_IEEE80211  
   list_init(&loop.ieee80211_handles);
 #endif//KAMELEON_MODULE_IEEE80211
+#ifdef KAMELEON_MODULE_TCP
+    list_init(&loop.tcp_handles);
+#endif//KAMELEON_MODULE_TCP
+    list_init(&loop.closing_handles);
 }
 
 void io_run() {
@@ -112,6 +122,9 @@ void io_run() {
 #ifdef KAMELEON_MODULE_IEEE80211    
     io_ieee80211_run();
 #endif//KAMELEON_MODULE_IEEE80211
+#ifdef KAMELEON_MODULE_TCP
+    io_tcp_run();
+#endif//KAMELEON_MODULE_TCP
     io_idle_run();
     io_handle_closing();
   }
@@ -428,6 +441,111 @@ static void io_ieee80211_run() {
   }
 }
 #endif//KAMELEON_MODULE_IEEE80211
+
+#ifdef KAMELEON_MODULE_TCP
+#include <esp_log.h>
+
+void io_tcp_init(io_tcp_handle_t *tcp) {
+    ESP_LOGI("io", "io_tcp_init");
+    io_handle_init((io_handle_t *) tcp, IO_TCP);
+}
+
+io_tcp_handle_t *io_tcp_get_by_fd(int fd) {
+    io_tcp_handle_t *handle = (io_tcp_handle_t *) loop.tcp_handles.head;
+    while (handle != NULL) {
+        if (handle->fd == fd) {
+            return handle;
+        }
+        handle = (io_tcp_handle_t *) ((list_node_t *) handle)->next;
+    }
+    return NULL;
+}
+
+void io_tcp_cleanup() {
+    ESP_LOGI("io", "io_tcp_cleanup");
+
+    io_tcp_handle_t *handle = (io_tcp_handle_t *) loop.tcp_handles.head;
+    while (handle != NULL) {
+        io_tcp_handle_t *next = (io_tcp_handle_t *) ((list_node_t *) handle)->next;
+        free(handle);
+        handle = next;
+    }
+    list_init(&loop.tcp_handles);
+}
+
+int io_tcp_connect(io_tcp_handle_t *tcp, const char *address, int port) {
+    int sock = tcp->fd;
+    ESP_LOGI("io", "io_tcp_connect sock:%d", sock);
+    return kameleon_tcp_connect(sock, address, port);
+}
+
+int io_tcp_send(io_tcp_handle_t *tcp, const char *message, int len) {
+    int sock = tcp->fd;
+    ESP_LOGI("io", "io_tcp_send sock:%d", sock);
+    return kameleon_tcp_send(sock, message, len);
+}
+
+int io_tcp_close(io_tcp_handle_t *tcp) {
+    int sock = tcp->fd;
+    ESP_LOGI("io", "io_tcp_close sock:%d", sock);
+    return kameleon_tcp_close(sock);
+}
+
+
+void io_tcp_start(io_tcp_handle_t *tcp, io_tcp_connect_cb connect_cb, io_tcp_disconnect_cb disconnect_cb,
+                  io_tcp_read_cb read_cb) {
+    ESP_LOGI("io", "io_tcp_start");
+    IO_SET_FLAG_ON(tcp->base.flags, IO_FLAG_ACTIVE);
+    tcp->connect_cb = connect_cb;
+    tcp->disconnect_cb = disconnect_cb;
+    tcp->read_cb = read_cb;
+
+    list_append(&loop.tcp_handles, (list_node_t *) tcp);
+}
+
+void io_tcp_stop(io_tcp_handle_t *net) {
+    ESP_LOGI("io", "io_tcp_stop");
+    IO_SET_FLAG_OFF(net->base.flags, IO_FLAG_ACTIVE);
+    list_remove(&loop.tcp_handles, (list_node_t *) net);
+}
+
+static void io_tcp_run() {
+    io_tcp_handle_t *handle = (io_tcp_handle_t *) loop.tcp_handles.head;
+
+    tcp_event_t message;
+
+    while (handle != NULL) {
+        if (IO_HAS_FLAG(handle->base.flags, IO_FLAG_ACTIVE)) {
+            if (kameleon_tcp_get_event(&message) == 0) {
+                switch (message.code) {
+                    case TCP_EVENT_CONNECT:
+                        ESP_LOGI("io", "io_tcp_run TCP_EVENT_CONNECT");
+                        if (handle->connect_cb != NULL) {
+                            handle->connect_cb(handle);
+                        }
+                        break;
+                    case TCP_EVENT_DISCONNECT:
+                        ESP_LOGI("io", "io_tcp_run TCP_EVENT_DISCONNECT");
+                        if (handle->disconnect_cb != NULL) {
+                            handle->disconnect_cb(handle);
+                        }
+                        break;
+                    case TCP_EVENT_READ:
+                        ESP_LOGI("io", "io_tcp_run TCP_EVENT_READ");
+                        if (handle->read_cb != NULL) {
+                            handle->read_cb(handle, message.read.message, message.read.len);
+                            free(message.read.message);
+                        }
+                        break;
+                }
+            }
+
+        }
+        handle = (io_tcp_handle_t *) ((list_node_t *) handle)->next;
+    }
+}
+
+#endif//KAMELEON_MODULE_TCP
 
 /* idle functions */
 
