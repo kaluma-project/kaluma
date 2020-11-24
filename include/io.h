@@ -30,6 +30,9 @@
 #ifdef KAMELEON_MODULE_IEEE80211
 #include "ieee80211.h"
 #endif//KAMELEON_MODULE_IEEE80211
+#ifdef KAMELEON_MODULE_TCP
+#include "tcp.h"
+#endif//KAMELEON_MODULE_TCP
 
 typedef struct io_loop_s io_loop_t;
 typedef struct io_handle_s io_handle_t;
@@ -38,11 +41,13 @@ typedef struct io_timer_handle_s io_timer_handle_t;
 typedef struct io_tty_handle_s io_tty_handle_t;
 typedef struct io_watch_handle_s io_watch_handle_t;
 typedef struct io_uart_handle_s io_uart_handle_t;
-typedef struct io_idle_handle_s io_idle_handle_t;
 #ifdef KAMELEON_MODULE_IEEE80211
 typedef struct io_ieee80211_handle_s io_ieee80211_handle_t;
 #endif//KAMELEON_MODULE_IEEE80211
-
+#ifdef KAMELEON_MODULE_TCP
+typedef struct io_tcp_handle_s io_tcp_handle_t;
+#endif//KAMELEON_MODULE_TCP
+typedef struct io_idle_handle_s io_idle_handle_t;
 
 /* handle flags */
 
@@ -63,6 +68,9 @@ typedef enum io_type {
 #ifdef KAMELEON_MODULE_IEEE80211  
   IO_IEEE80211,
 #endif//KAMELEON_MODULE_IEEE80211
+#ifdef KAMELEON_MODULE_TCP
+  IO_TCP,
+#endif//KAMELEON_MODULE_TCP
   IO_IDLE
 } io_type_t;
 
@@ -162,6 +170,21 @@ struct io_ieee80211_handle_s {
 };
 #endif//KAMELEON_MODULE_IEEE80211
 
+#ifdef KAMELEON_MODULE_TCP
+typedef void (* io_tcp_connect_cb)(io_tcp_handle_t *);
+typedef void (* io_tcp_disconnect_cb)(io_tcp_handle_t *);
+typedef void (* io_tcp_read_cb)(io_tcp_handle_t *, const char*, int);
+
+struct io_tcp_handle_s {
+  io_handle_t base;
+  io_tcp_connect_cb connect_cb;
+  io_tcp_disconnect_cb disconnect_cb;
+  io_tcp_read_cb read_cb;
+  jerry_value_t this_val;
+  int fd;
+};
+#endif//KAMELEON_MODULE_TCP
+
 /* idle handle types */
 
 typedef void (* io_idle_cb)(io_idle_handle_t *);
@@ -183,6 +206,9 @@ struct io_loop_s {
 #ifdef KAMELEON_MODULE_IEEE80211  
   list_t ieee80211_handles;
 #endif//KAMELEON_MODULE_IEEE80211
+#ifdef KAMELEON_MODULE_TCP
+  list_t tcp_handles;
+#endif//KAMELEON_MODULE_TCP
   list_t idle_handles;
   list_t closing_handles;
 };
@@ -240,8 +266,16 @@ void io_ieee80211_disconnect(io_ieee80211_handle_t *ieee80211, io_ieee80211_disc
 io_ieee80211_handle_t *io_ieee80211_get_by_id(uint32_t id);
 void io_ieee80211_cleanup();
 #endif//KAMELEON_MODULE_IEEE80211
-
-
+#ifdef KAMELEON_MODULE_TCP
+void io_tcp_init(io_tcp_handle_t *tcp);
+void io_tcp_start(io_tcp_handle_t *tcp, io_tcp_connect_cb connect_cb, io_tcp_disconnect_cb disconnect_cb, io_tcp_read_cb read_cb);
+void io_tcp_stop(io_tcp_handle_t *tcp);
+io_tcp_handle_t *io_tcp_get_by_fd(int fd);
+void io_tcp_cleanup();
+int io_tcp_connect(io_tcp_handle_t *tcp, const char* address, int port);
+int io_tcp_send(io_tcp_handle_t* tcp, const char* message, int len);
+int io_tcp_close(io_tcp_handle_t* tcp);
+#endif//KAMELEON_MODULE_TCP
 /* idle function */
 
 void io_idle_init(io_idle_handle_t *idle);
