@@ -149,7 +149,8 @@ KAMELEON_INC = \
 -Iinclude \
 -Iinclude/port \
 -Isrc/gen \
--Isrc/modules
+-Isrc/modules/net \
+-Isrc/modules/wifi
 
 # -----------------------------------------------------------------------------
 # Kameleon Modules

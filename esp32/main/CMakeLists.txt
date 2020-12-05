@@ -46,8 +46,7 @@ set(_INCLUDES
   "${_SOURCE_DIR}/modules/stream"
   "${_SOURCE_DIR}/modules/uart"
   "${_SOURCE_DIR}/modules/url"
-  "${_SOURCE_DIR}/modules/wifi"
-  "${_SOURCE_DIR}/modules/net")
+  "${_SOURCE_DIR}/modules/wifi")
   
 idf_component_register(SRCS
   "esp32_main.c"
