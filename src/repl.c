@@ -118,13 +118,19 @@ static void run_command() {
       tokenc++;
       tokenv[tokenc] = strtok (NULL, " ");
     }
-
     /* run command */
     if (strcmp(tokenv[0], ".echo") == 0) {
-      cmd_echo(&state, tokenv[1]);
+      if (tokenv[1] != NULL)
+      {
+        cmd_echo(&state, tokenv[1]);
+      }
     } else if (strcmp(tokenv[0], ".reset") == 0) {
       cmd_reset(&state);
     } else if (strcmp(tokenv[0], ".flash") == 0) {
+      if (tokenv[1] == NULL)
+      {
+        tokenv[1] = "";
+      }
       cmd_flash(&state, tokenv[1]);
     } else if (strcmp(tokenv[0], ".load") == 0) {
       cmd_load(&state);
@@ -217,7 +223,7 @@ static void handle_normal(char ch) {
       } else {
         run_code();
       }
-      repl_print_prompt();      
+      repl_print_prompt();
       break;
     case 0x01: /* Ctrl + A */
       state.position = 0;
@@ -226,7 +232,7 @@ static void handle_normal(char ch) {
     case 0x05: /* Ctrl + E */
       state.position = state.buffer_length;
       set_cursor_to_position();
-      break;      
+      break;
     case 0x08: /* backspace */
     case 0x7f: /* also backspace in some terminal */
       if (state.buffer_length > 0 && state.position > 0) {
@@ -646,7 +652,7 @@ struct repl_pretty_print_object_foreach_data {
 static bool repl_pretty_print_object_foreach_count(const jerry_value_t prop_name,
     const jerry_value_t prop_value, void *user_data_p) {
   if (jerry_value_is_string (prop_name)) {
-    struct repl_pretty_print_object_foreach_data *data = 
+    struct repl_pretty_print_object_foreach_data *data =
         (struct repl_pretty_print_object_foreach_data *) user_data_p;
     data->count++;
   }
@@ -659,7 +665,7 @@ static bool repl_pretty_print_object_foreach(const jerry_value_t prop_name,
     jerry_char_t buf[128];
     jerry_size_t len = jerry_substring_to_char_buffer (prop_name, 0, 127, buf, 127);
     buf[len] = '\0';
-    struct repl_pretty_print_object_foreach_data *data = 
+    struct repl_pretty_print_object_foreach_data *data =
         (struct repl_pretty_print_object_foreach_data *) user_data_p;
     repl_pretty_print_indent(data->indent + 2);
     tty_printf((const char *) buf);
@@ -722,7 +728,7 @@ void repl_pretty_print(uint8_t indent, uint8_t depth, jerry_value_t value) {
         break;
       }
       tty_printf("\33[0m");
-    } else if (jerry_value_is_arraybuffer(value)) {      
+    } else if (jerry_value_is_arraybuffer(value)) {
       jerry_length_t len = jerry_get_arraybuffer_byte_length(value);
       tty_printf("ArrayBuffer { byteLength:");
       tty_printf("\33[95m"); // magenta
