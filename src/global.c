@@ -157,11 +157,6 @@ JERRYXX_FUN(pulse_read_fn) {
   JERRYXX_CHECK_ARG_NUMBER_OPT(2, "timeout");
   JERRYXX_CHECK_ARG_NUMBER_OPT(3, "startState");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  if (gpio_set_io_mode(pin, GPIO_IO_MODE_INPUT) == GPIOPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
-  }
   uint8_t count;
   if (JERRYXX_GET_ARG_NUMBER(1) > 128)
     count = 128; /* MAX is 128 */
@@ -210,11 +205,6 @@ JERRYXX_FUN(pulse_write_fn) {
   JERRYXX_CHECK_ARG_NUMBER(1, "value");
   JERRYXX_CHECK_ARG(2, "interval")
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  if (gpio_set_io_mode(pin, GPIO_IO_MODE_OUTPUT) == GPIOPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
-  }
   size_t length = 0;
   uint8_t value = (uint8_t) JERRYXX_GET_ARG_NUMBER(1);
   jerry_value_t intervalArr = JERRYXX_GET_ARG(2);
@@ -755,7 +745,7 @@ JERRYXX_FUN(textdecoder_ctor_fn) {
 JERRYXX_FUN(textdecoder_decode_fn) {
   JERRYXX_CHECK_ARG(0, "input")
   jerry_value_t input = JERRYXX_GET_ARG(0);
-  if (jerry_value_is_typedarray(input) && 
+  if (jerry_value_is_typedarray(input) &&
       jerry_get_typedarray_type(input) == JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
     jerry_value_t encoding = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_ENCODING);
     jerry_size_t sz = jerry_get_string_size(encoding);
