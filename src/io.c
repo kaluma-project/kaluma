@@ -28,7 +28,7 @@
 #include "tty.h"
 #include "gpio.h"
 #include "uart.h"
-#ifdef KAMELEON_MODULE_IEEE80211    
+#ifdef KAMELEON_MODULE_IEEE80211
 #include "ieee80211.h"
 #endif//KAMELEON_MODULE_IEEE80211
 #ifdef KAMELEON_MODULE_TCP
@@ -44,7 +44,7 @@ static void io_tty_run();
 static void io_watch_run();
 static void io_uart_run();
 static void io_idle_run();
-#ifdef KAMELEON_MODULE_IEEE80211    
+#ifdef KAMELEON_MODULE_IEEE80211
 static void io_ieee80211_run();
 #endif//KAMELEON_MODULE_IEEE80211
 #ifdef KAMELEON_MODULE_TCP
@@ -103,7 +103,7 @@ void io_init() {
   list_init(&loop.timer_handles);
   list_init(&loop.watch_handles);
   list_init(&loop.uart_handles);
-#ifdef KAMELEON_MODULE_IEEE80211  
+#ifdef KAMELEON_MODULE_IEEE80211
   list_init(&loop.ieee80211_handles);
 #endif//KAMELEON_MODULE_IEEE80211
 #ifdef KAMELEON_MODULE_TCP
@@ -119,7 +119,7 @@ void io_run() {
     io_tty_run();
     io_watch_run();
     io_uart_run();
-#ifdef KAMELEON_MODULE_IEEE80211    
+#ifdef KAMELEON_MODULE_IEEE80211
     io_ieee80211_run();
 #endif//KAMELEON_MODULE_IEEE80211
 #ifdef KAMELEON_MODULE_TCP
@@ -433,7 +433,7 @@ static void io_ieee80211_run() {
               handle->disconnect_cb(handle);
             }
             break;
-        }  
+        }
       }
 
     }
