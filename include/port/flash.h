@@ -46,6 +46,10 @@ uint32_t flash_size();
 uint8_t *flash_get_data();
 
 /**
+ * Free memory that's allocated in flash_get_data()
+ */
+void flash_free_data(uint8_t *data);
+/**
  * Return the size of the data stored in the flash
  */
 uint32_t flash_get_data_size();

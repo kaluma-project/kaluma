@@ -486,7 +486,7 @@ static void cmd_flash(repl_state_t *state, char *arg) {
       repl_putc(ptr[i]);
     }
     repl_println();
-
+    flash_free_data(ptr);
   /* write a file to flash via Ymodem */
   } else if (strcmp(arg, "-w") == 0) {
     state->ymodem_state = 1; // transfering

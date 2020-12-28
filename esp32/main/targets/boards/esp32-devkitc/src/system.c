@@ -42,6 +42,7 @@
 const char system_arch[] = "esp32";
 const char system_platform[] = "unknown";
 
+int flash_init(void);
 /**
  * @brief  This function is executed in case of error occurrence.
  * @param  None
@@ -101,7 +102,7 @@ uint64_t gettime()
 void settime(uint64_t time)
 {
 }
-
+ 
 uint32_t micro_maxtime(void)
 {
   return 0;
@@ -112,7 +113,7 @@ uint32_t micro_gettime(void)
   return 0;
 }
 
-static void nvs_init(void)
+static void storage_init(void)
 {
     // Initialize NVS
     esp_err_t ret = nvs_flash_init();
@@ -139,7 +140,8 @@ void system_init() {
   kameleon_i2c_init();
   spi_init();
   uart_init();
-  nvs_init();
+  storage_init();
+  flash_init();
   // keep the calling order of the following 3 stmt.
   netif_init();
   ieee80211_init();

@@ -116,6 +116,7 @@ void runtime_load() {
   if (size > 0) {
     uint8_t *script = flash_get_data();
     jerry_value_t parsed_code = jerry_parse (NULL, 0, script, size, JERRY_PARSE_STRICT_MODE);
+    flash_free_data(script);
     if (!jerry_value_is_error (parsed_code)) {
       jerry_value_t ret_value = jerry_run (parsed_code);
       if (jerry_value_is_error (ret_value)) {

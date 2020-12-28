@@ -22,183 +22,138 @@
 #include <string.h>
 #include <stdlib.h>
 #include "esp32_devkitc.h"
+#include <esp_spiffs.h>
 #include "flash.h"
-#include "tty.h"
-#define JS_NAMESPACE ("js")
-#define KEY_APP ("program")
-int nvs_clear(const char* namespace);
-int nvs_get_item_len(const char* namespace, const char *key);
-int nvs_get_item_alloc(const char* namespace, const char *key, char **pbuf);
-int nvs_set_item(const char* namespace, const char *key, const char *buf);
 
-#define USE_CODED_SCRIPT
-
-#ifdef USE_CODED_SCRIPT
-
-const char* const timer_test_script = "print(\"in script ok\\n\");\nsetInterval(function(){ print(\"in timer ok\"); }, 1000);\nprint(\"the timer was set.\");\n\n";
-
-const char* const gpio_test_script =
-  "print(\"in script ok\\n\");"
-  "var pinR = board.gpio(0, OUTPUT);"
-  "var pinG = board.gpio(2, OUTPUT);"
-  "var pinB = board.gpio(4, OUTPUT);"
-  "setInterval(function(){ "
-  "pinR.toggle();"
-  "pinG.toggle();"
-  "pinB.toggle();"
-  "print(\"in timer ok\\n\"); "
-  "}, 1000);"
-  "print(\"the timer was set.\\n\");";
-
-const char* const spi_test_script =
-  "print(\"in script ok\\n\");"
-  "var GPIO = require('gpio').GPIO;"
-  "var SPI =require('spi').SPI;"
-  "var spi0cs = new GPIO(14, OUTPUT);"
-  "var spiOptions = { mode: SPI.MODE_0, baudrate: 800000, bitorder: SPI.MSB};"
-  "var spi = board.spi(0, spiOptions);"
-  "var array = new Uint8Array([104,101,108,108,111,0,0,0]);"
-  "spi0cs.write(LOW);"
-  "setInterval(function(){ "
-  "spi.send(array);"
-  "print(\"in timer ok\\n\"); "
-  "}, 1000);"
-  "print(\"the timer was set.\");";
-
-const char* const i2c_test_script =
-  "var I2C = require('i2c').I2C;"
-  "print(\"in script ok\\n\");"
-  "var array = new Uint8Array([79,75]);"
-  "var i2c0 = new I2C(0);"
-  "setInterval(function(){ "
-  "i2c0.write(array, 0x28);"
-  "print(\"in timer ok\\n\"); "
-  "}, 1000);"
-  "print(\"the timer was set.\\n\");";
-
-const char* const adc_test_script =
-  "var ADC = require('adc').ADC;"
-  "print(\"in script ok\\n\");"
-  "var adc = new ADC(34);"
-  "setInterval(function(){ "
-  "print(\"adc : \", adc.read(), \"\\n\");"
-  "}, 1000);"
-  "print(\"the timer was set.\\n\");";
-
-const char* const pwm_test_script =
-  "var PWM = require('pwm').PWM;"
-  "print(\"in script ok\\n\");"
-  "var pin = 18;"
-  "var freq = 5000;"
-  "var duty = 0.37;"
-  "var pwm = new PWM(pin, freq, duty);"
-  "pwm.start();"
-  "print(\"PWM start\\n\");";
-
-const char* const wifi_test_script =
-  "print(\"in script ok\\n\");"
-  "var wifi = require('wifi');"
-  "wifi.scan(function(err, scanResult){"
-  "if(err != null){"
-  "print(\"err: \", err);"
-  "} else {"
-  "print(\"scanResult: \", scanResult);"
-  "}});";
-
-const char* const http_test_script = 
-"print(\"in http_test_script ok\\n\");"
-"global.__netdev = global.__ieee80211dev;"
-"var http = require('http');"
-"http.get({"
-"  host : '192.168.17.103',"
-"  port : 8000,"
-"  path : '/index.js'"
-"}, (res) => {"
-"  res.resume();"
-"  res.on('data', (chunk) => {"
-"    console.log(`Chunk : ${chunk}`);"
-"  });"
-"  res.on('end', () => {"
-"    console.log('Done.');"
-"  });"
-"});"
-"print(\"check 1\");"
-;
-
-const char* const storage_test_script =
-"print(\"in script ok\\n\");"
-"var lib=require('storage');"
-"var storage = new lib.Storage();"
-"storage.setItem('value1', 'abcd');"
-"storage.setItem('value2', '1234');"
-"var val1 = storage.getItem('value1');"
-"var val2 = storage.getItem('value2');"
-"console.log('val1 : '+val1);"
-"console.log('val2 : '+val2);"
-;
+esp_vfs_spiffs_conf_t flash_conf = {
+  .base_path = "/spiffs",
+  .partition_label = NULL,
+  .max_files = 10, // What's the max?
+  .format_if_mount_failed = true
+};
 
 const char* const flash_test_script =
 "print(\"in flash script ok\\n\");"
 ;
 
-const char* const test_script = flash_test_script;
-#else
-char* program_buff = NULL;
-#endif
-
 void flash_clear()
 {
-  nvs_clear(JS_NAMESPACE);
+#if 0
+  esp_err_t err = esp_spiffs_format(flash_conf.partition_label);
+  if (err != ESP_OK) {
+    printf("ERROR (%s) Failed to format SPIFFS \n", esp_err_to_name(err));
+  }
+#else
+  remove("/spiffs/info.txt");
+  remove("/spiffs/index.js");
+  FILE* f = fopen("/spiffs/info.txt", "w+");
+  fprintf(f, "%d", 0);
+  fclose(f);
+  f = fopen("/spiffs/index.js", "w+");
+  fclose(f);
+#endif
 }
 
 uint32_t flash_size()
 {
-  // NVS entry size(32 bytes) * partition size(125 entries)
-  return 32*125;
+  size_t size = 0;
+  size_t used = 0;
+  esp_err_t err = esp_spiffs_info(flash_conf.partition_label, &size, &used);
+  if (err != ESP_OK) {
+    printf("ERROR (%s) Failed to get SPIFFS partition information\n", esp_err_to_name(err));
+  }
+  return size;
 }
 
-uint8_t *flash_get_data()
+uint8_t * flash_get_data()
 {
-#ifdef USE_CODED_SCRIPT
-  return test_script;
-#else
-  if (program_buff) {
-    free(program_buff);
-    program_buff = NULL;
-  }
-  if ( nvs_get_item_alloc(JS_NAMESPACE, KEY_APP, &program_buff) != 0 ) {
+  FILE* f = fopen("/spiffs/info.txt", "r");
+  uint32_t size = 0;
+  fscanf(f, "%d", &size);
+  fclose(f);
+  f = fopen("/spiffs/index.js", "r");
+  if (f == NULL) {
+    printf("ERROR Failed to create index.js\n");
     return NULL;
   }
-  return (uint8_t*)program_buff;
-#endif
+  uint8_t *data = (uint8_t *)malloc(sizeof(uint8_t) * size);
+  for (int i = 0; i < size; i++)
+  { 
+    *(data + i)= fgetc(f);
+  }
+  fclose(f);
+  return data;
+}
+
+void flash_free_data(uint8_t *data) {
+  free(data);
 }
 
 uint32_t flash_get_data_size()
 {
-#ifdef USE_CODED_SCRIPT
-  return (uint32_t)strlen(test_script);
-#else
-  uint32_t ret = nvs_get_item_len(JS_NAMESPACE, KEY_APP);
-  if ( ret > 0 ) return ret - 1; // except NULL char
-  return 0;
-#endif
+  size_t size = 0;
+  FILE* f = fopen("/spiffs/info.txt", "r");
+  fscanf(f, "%d", &size);
+  fclose(f);
+  return size;
 }
 
 void flash_program_begin()
 {
-  return;
+  flash_clear(); // format before program the file
 }
 
 flash_status_t flash_program(uint8_t* buf, uint32_t size)
 {
-  flash_status_t ret = nvs_set_item(JS_NAMESPACE, KEY_APP, (const char*)buf);
-  return ret;
+  FILE* f = fopen("/spiffs/index.js", "w+");
+  if (f == NULL) {
+    printf("ERROR Failed to create index.js\n");
+    return FLASH_FAIL;
+  }
+  FILE* f_info = fopen("/spiffs/info.txt", "w+");
+  if (f == NULL) {
+    printf("ERROR Failed to create info.txt\n");
+    return FLASH_FAIL;
+  }
+  fprintf(f_info, "%d", size);
+  fclose(f_info);
+  for (int i = 0; i < size; i++)
+  {
+    fputc(buf[i], f);
+  }
+  fclose(f);
+  return FLASH_SUCCESS;
 }
 
 flash_status_t flash_program_byte(uint8_t val)
 {
   return FLASH_FAIL;
 }
+
+int flash_init(void)
+{
+  esp_err_t err = esp_vfs_spiffs_register(&flash_conf);
+  if (err != ESP_OK) {
+      printf("ERROR (%s) esp_vfs_spiffs_register\n", esp_err_to_name(err));
+      return -1;
+  }
+  // Create file if there's no files.
+  FILE* f = fopen("/spiffs/info.txt", "r");
+  if (f == NULL) {
+    FILE* f = fopen("/spiffs/info.txt", "w+");
+    fprintf(f, "%d", 0);
+  }
+  f = fopen("/spiffs/index.js", "w+");
+  if (f == NULL) {
+    printf("ERROR Failed to create index.js\n");
+    return FLASH_FAIL;
+  }
+  //temp
+  flash_program(flash_test_script, strlen(flash_test_script));
+  //temp
+  fclose(f);
+  return 0;
+} 
 
 void flash_program_end()
 {
