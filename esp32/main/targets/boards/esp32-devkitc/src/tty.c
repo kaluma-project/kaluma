@@ -37,7 +37,7 @@
 #include "driver/uart.h"
 
 
-static const char* TAG = "kameleon";
+//static const char* TAG = "kameleon";
 
 void tty_init()
 {
@@ -64,15 +64,14 @@ void tty_init()
 
     /* Install UART driver for interrupt-driven reads and writes */
     ESP_ERROR_CHECK( uart_driver_install(CONFIG_ESP_CONSOLE_UART_NUM,
-            256, 0, 0, NULL, 0) );
+            2048, 0, 0, NULL, 0) );
 
     /* Tell VFS to use UART driver */
     esp_vfs_dev_uart_use_driver(CONFIG_ESP_CONSOLE_UART_NUM);
 
-	// 
-	uart_wait_tx_done(CONFIG_ESP_CONSOLE_UART_NUM, 1000);
-	uart_flush(CONFIG_ESP_CONSOLE_UART_NUM);
-	printf("\r\n");
+  uart_wait_tx_done(CONFIG_ESP_CONSOLE_UART_NUM, 1000);
+  uart_flush(CONFIG_ESP_CONSOLE_UART_NUM);
+  printf("\r\n");
 }
 
 uint32_t tty_available()
@@ -87,31 +86,25 @@ uint32_t tty_available()
 
 uint32_t tty_read(uint8_t *buf, size_t len)
 {
-  return read(CONFIG_ESP_CONSOLE_UART_NUM, (void*)buf, len);
+  return uart_read_bytes(CONFIG_ESP_CONSOLE_UART_NUM, (void*)buf, len, 1000);
 }
 
-
-uint32_t tty_read_sync(uint8_t *buf, size_t len, uint32_t _timeout)
-{
-  /*
-  int state;
-  fd_set readfds;
-  struct timeval timeout;
-  
-  FD_ZERO(&readfds);
-  FD_SET(0, &readfds);
-
-  timeout.tv_sec = _timeout;
-  timeout.tv_usec = 0;
-  
-  state = select(1, &readfds, NULL, NULL, &timeout);
-  if ( state <= 0 ) return 0;
-
-  return tty_read(buf, len);
-  */
-  return 0;
+uint32_t tty_read_sync(uint8_t *buf, size_t len, uint32_t timeout) {
+  uint32_t sz;
+  uint64_t current = gettime();
+  uint64_t due = current + timeout;
+  do {
+    delay(10); // for the watchdog reset
+    sz = tty_available();
+    current = gettime();
+  } while (current < due && sz < len);
+  if (sz >= len) {
+    uint32_t out = uart_read_bytes(CONFIG_ESP_CONSOLE_UART_NUM, (void*)buf, len, 1000);
+    return out;
+  } else {
+    return 0;
+  }
 }
-
 
 uint8_t tty_getc()
 {

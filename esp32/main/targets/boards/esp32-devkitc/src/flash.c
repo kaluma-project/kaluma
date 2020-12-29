@@ -32,10 +32,6 @@ esp_vfs_spiffs_conf_t flash_conf = {
   .format_if_mount_failed = true
 };
 
-const char* const flash_test_script =
-"print(\"in flash script ok\\r\\n\");"
-;
-
 uint32_t code_size;
 void flash_clear()
 {
@@ -161,20 +157,14 @@ int flash_init(void)
   // Create file if there's no files.
   FILE* f = fopen("/spiffs/info.txt", "r");
   if (f == NULL) {
-    FILE* f = fopen("/spiffs/info.txt", "w+");
+    f = fopen("/spiffs/info.txt", "w+");
     fprintf(f, "%d", 0);
   }
-  f = fopen("/spiffs/index.js", "w+");
+  fclose(f);
+  f = fopen("/spiffs/index.js", "r");
   if (f == NULL) {
-    printf("ERROR Failed to create index.js\n");
-    return FLASH_FAIL;
+    f = fopen("/spiffs/index.js", "w+");
   }
-  //temp
-  flash_program_begin();
-  flash_program(flash_test_script, strlen(flash_test_script));
-  flash_program(flash_test_script, strlen(flash_test_script));
-  flash_program_end();
-  //temp
   fclose(f);
   return 0;
 } 
