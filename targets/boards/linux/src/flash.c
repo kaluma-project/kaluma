@@ -29,6 +29,10 @@ uint8_t * flash_get_data() {
   return NULL;
 }
 
+void flash_free_data(uint8_t *data) {
+  (void)data; //Avoiding warning
+}
+
 uint32_t flash_size() {
   return 0;
 }

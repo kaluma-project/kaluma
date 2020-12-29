@@ -104,6 +104,10 @@ uint8_t * flash_get_data() {
   return (uint8_t *)ADDR_FLASH_USER_CODE;
 }
 
+void flash_free_data(uint8_t *data) {
+  (void)data; //Avoiding warning
+}
+
 /**
 */
 uint32_t flash_size() {

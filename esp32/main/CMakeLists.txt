@@ -56,7 +56,7 @@ idf_component_register(SRCS
   INCLUDE_DIRS
   ${_INCLUDES}
   ${TARGET_INCLUDE}
-  REQUIRES jerryscript spi_flash console log esp_adc_cal soc nvs_flash lwip)
+  REQUIRES jerryscript spi_flash console log esp_adc_cal soc nvs_flash lwip spiffs)
 
 target_link_libraries(${COMPONENT_LIB} PRIVATE "-lm" "-lc")
 target_compile_definitions(${COMPONENT_TARGET} PRIVATE "-D_TARGET_FREERTOS_" "-DKAMELEON_MODULE_IEEE80211" "-DKAMELEON_MODULE_TCP")
