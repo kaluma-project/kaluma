@@ -33,9 +33,10 @@ esp_vfs_spiffs_conf_t flash_conf = {
 };
 
 const char* const flash_test_script =
-"print(\"in flash script ok\\n\");"
+"print(\"in flash script ok\\r\\n\");"
 ;
 
+uint32_t code_size;
 void flash_clear()
 {
 #if 0
@@ -65,7 +66,7 @@ uint32_t flash_size()
   return size;
 }
 
-uint8_t * flash_get_data()
+uint8_t *flash_get_data()
 {
   FILE* f = fopen("/spiffs/info.txt", "r");
   uint32_t size = 0;
@@ -93,6 +94,10 @@ uint32_t flash_get_data_size()
 {
   size_t size = 0;
   FILE* f = fopen("/spiffs/info.txt", "r");
+  if (f == NULL) {
+    printf("ERROR Failed to read info.txt\n");
+    return 0;
+  }
   fscanf(f, "%d", &size);
   fclose(f);
   return size;
@@ -101,33 +106,49 @@ uint32_t flash_get_data_size()
 void flash_program_begin()
 {
   flash_clear(); // format before program the file
+  code_size = 0;
 }
 
 flash_status_t flash_program(uint8_t* buf, uint32_t size)
 {
-  FILE* f = fopen("/spiffs/index.js", "w+");
+  FILE* f = fopen("/spiffs/index.js", "a");
   if (f == NULL) {
-    printf("ERROR Failed to create index.js\n");
+    printf("ERROR Failed to open index.js\n");
     return FLASH_FAIL;
   }
-  FILE* f_info = fopen("/spiffs/info.txt", "w+");
-  if (f == NULL) {
-    printf("ERROR Failed to create info.txt\n");
-    return FLASH_FAIL;
-  }
-  fprintf(f_info, "%d", size);
-  fclose(f_info);
+
   for (int i = 0; i < size; i++)
   {
     fputc(buf[i], f);
   }
   fclose(f);
+  code_size += size;
   return FLASH_SUCCESS;
 }
 
 flash_status_t flash_program_byte(uint8_t val)
 {
-  return FLASH_FAIL;
+  FILE* f = fopen("/spiffs/index.js", "a");
+  if (f == NULL) {
+    printf("ERROR Failed to open index.js\n");
+    return FLASH_FAIL;
+  }
+  fputc(val, f);
+  fclose(f);
+  code_size += 1;
+  return FLASH_SUCCESS;
+}
+
+void flash_program_end(void)
+{
+  FILE* f_info = fopen("/spiffs/info.txt", "w+");
+  if (f_info == NULL) {
+    printf("ERROR Failed to create info.txt\n");
+    return;
+  }
+  fprintf(f_info, "%d", code_size);
+  fclose(f_info);
+  code_size = 0;
 }
 
 int flash_init(void)
@@ -149,15 +170,14 @@ int flash_init(void)
     return FLASH_FAIL;
   }
   //temp
+  flash_program_begin();
   flash_program(flash_test_script, strlen(flash_test_script));
+  flash_program(flash_test_script, strlen(flash_test_script));
+  flash_program_end();
   //temp
   fclose(f);
   return 0;
 } 
-
-void flash_program_end()
-{
-}
 
 uint32_t flash_get_checksum()
 {
