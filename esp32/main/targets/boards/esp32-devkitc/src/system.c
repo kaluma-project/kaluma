@@ -37,6 +37,7 @@
 #include "tcp.h"
 
 #include <esp_wifi.h>
+#include <esp_timer.h>
 #include <nvs_flash.h>
 
 const char system_arch[] = "esp32";
@@ -82,16 +83,16 @@ void delay(uint64_t msec) {
  * micro secoded delay
 */
 void micro_delay(uint32_t usec) {
-  // TODO
+  ets_delay_us(usec);
 }
 
 void inc_tick()
 {
-  
+  //It's not needed.
 }
 
-// ms 단위의 시간 return
-// jerryscript setInterval 구현을 위해 필수적.
+// return ms time
+// Need for jerryscript setInterval
 uint64_t gettime()
 {
   struct timeval tv_now;
@@ -101,16 +102,18 @@ uint64_t gettime()
 
 void settime(uint64_t time)
 {
+  struct timeval now = { .tv_sec = time };
+  settimeofday(&now, NULL);
 }
  
 uint32_t micro_maxtime(void)
 {
-  return 0;
+  return 0xFFFFFFFFU;
 }
 
 uint32_t micro_gettime(void)
 {
-  return 0;
+  return (uint32_t)(esp_timer_get_time() & 0xFFFFFFFFU);
 }
 
 static void storage_init(void)
@@ -160,7 +163,7 @@ void system_cleanup() {
 }
 
 uint8_t running_script_check() {
-  // TODO
+  // TODO Need to make a user scenario
   return true;
 }
 
