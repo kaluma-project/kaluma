@@ -44,7 +44,9 @@ void spi_init()
 void spi_cleanup()
 {
   for (int k = 0; k < SPI_NUM; k++) {
-    spi_close(k);
+    if (handle[k] != NULL) {
+      spi_close(k);
+    }
   }
 }
 
