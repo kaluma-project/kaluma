@@ -257,6 +257,7 @@ int ieee80211_get_event(ieee80211_event_t* out_event)
 
 int ieee80211_reset()
 {
+   // @todo Need to check how to reset the 802.11 device
     return 0;
 }
 

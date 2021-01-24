@@ -25,7 +25,6 @@
 #include "wifi_magic_strings.h"
 #include "ieee80211.h"
 #include "io.h"
-#include <esp_log.h>
 
 static void scan_cb(io_ieee80211_handle_t *, int count, ieee80211_scan_info_t* records);
 static void assoc_cb(io_ieee80211_handle_t *);
@@ -47,19 +46,19 @@ JERRYXX_FUN(wifi_ctor_fn) {
 JERRYXX_FUN(wifi_reset_fn) {
     JERRYXX_CHECK_ARG_FUNCTION(0, "cb");
     jerry_value_t callback = JERRYXX_GET_ARG(0);
-
     int ret = ieee80211_reset();
-
     jerry_value_t arg = jerry_create_number(ret);
-    jerry_value_t args[1] = { arg };
+    if (jerry_value_is_function(callback)) {
+        jerry_value_t args[1] = { arg };
 
-    jerry_value_t ret_val = jerry_call_function(callback, JERRYXX_GET_THIS, args, 1);
-    if (jerry_value_is_error(ret_val)) {
-        jerryxx_print_error(ret_val, true);
+        jerry_value_t ret_val = jerry_call_function(callback, jerry_create_undefined(), args, 1);
+        if (jerry_value_is_error(ret_val)) {
+            jerryxx_print_error(ret_val, true);
+        }
+        jerry_release_value(ret_val);
+        jerry_release_value(args);
     }
-    jerry_release_value(ret_val);
     jerry_release_value(arg);
-
     return jerry_create_undefined();
 }
 
@@ -269,5 +268,4 @@ jerry_value_t module_wifi_init() {
     jerry_release_value (wifi_ctor);
 
     return exports;
-
 }

@@ -11,6 +11,9 @@ src/gen
 # Temp
 .vscode/ipch
 
+# cmake
+cmake
+
 *~
 \#*
 .vscode/tasks.json
