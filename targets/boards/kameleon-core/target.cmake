@@ -61,6 +61,7 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/include
   ${TARGET_SHARED_DIR}/drivers/CMSIS/Include)
 
 set(TARGET_HEAPSIZE 96)
+set(JERRY_TOOLCHAIN toolchain_mcu_stm32f4.cmake)
 
 if (BOOTLOADER)
   set(TARGET_LDSCRIPT ${TARGET_SRC_DIR}/STM32F411CETx_FLASH_BOOT.ld)
@@ -76,5 +77,6 @@ set(KAMELEON_MODULE_SPI 1)
 set(KAMELEON_MODULE_STORAGE 1)
 set(KAMELEON_MODULE_UART 1)
 set(KAMELEON_MODULE_GRAPHICS 1)
+
 
 set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -T${TARGET_LDSCRIPT} -Wl,-Map=kameleon-core.map,--cref -Wl,--gc-sections")
