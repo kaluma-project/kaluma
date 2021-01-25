@@ -241,6 +241,8 @@ int ieee80211_cleanup()
     esp_netif_destroy(wifi_netif);
     s_esp_netif = NULL;
     vQueueDelete(s_message_queue);
+    // Re-init
+    ieee80211_init();
     return 0;
 }
 
