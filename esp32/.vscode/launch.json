@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "gdb",
+      "request": "launch",
+      "name": "Launch Program",
+      "target": "./build/kameleon.elf",
+      "cwd": "${workspaceFolder}",
+      "gdbpath": "/home/jaykim/.espressif/tools/xtensa-esp32-elf/esp-2020r2-8.2.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb",
+      "autorun": [
+        "target remote 192.168.208.1:3333",
+        "mon reset halt",
+        "flushregs",
+        "thb app_main",
+        "c"
+      ],
+      "preLaunchTask": "openocd"
+    }
+  ]
+}

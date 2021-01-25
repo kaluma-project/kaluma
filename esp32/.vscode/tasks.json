@@ -1,0 +1,14 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "openocd",
+      "type": "shell",
+      "isBackground": true,
+      "options": {
+        "cwd": "/mnt/c/tools/openocd-esp32"
+      },
+      "command": "bin/openocd -s /mnt/c/tools/openocd-esp32/share/openocd/scripts -f interface/jlink.cfg -f board/esp-wroom-32.cfg",
+    }
+  ]
+}
