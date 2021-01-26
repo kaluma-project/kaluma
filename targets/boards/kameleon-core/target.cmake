@@ -1,5 +1,5 @@
 add_definitions(-DUSE_HAL_DRIVER
-  -DSTM32F411xE 
+  -DSTM32F411xE
   -DUSE_FULL_ASSERT)
 
 set(TARGET_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
@@ -51,7 +51,7 @@ set(SOURCES
   ${TARGET_SHARED_DIR}/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c
   ${TARGET_SHARED_DIR}/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c
   ${TARGET_SHARED_DIR}/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc)
-  
+
 include_directories(${CMAKE_CURRENT_LIST_DIR}/include
   ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Inc
   ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Inc/Legacy
