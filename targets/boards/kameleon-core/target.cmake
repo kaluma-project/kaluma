@@ -1,5 +1,10 @@
+# with bootloader
+project(kameleon-project C ASM)
+
+set(BOOTLOADER 1)
+
 add_definitions(-DUSE_HAL_DRIVER
-  -DSTM32F411xE 
+  -DSTM32F411xE
   -DUSE_FULL_ASSERT)
 
 set(TARGET_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
@@ -51,7 +56,7 @@ set(SOURCES
   ${TARGET_SHARED_DIR}/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c
   ${TARGET_SHARED_DIR}/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c
   ${TARGET_SHARED_DIR}/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc)
-  
+
 include_directories(${CMAKE_CURRENT_LIST_DIR}/include
   ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Inc
   ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Inc/Legacy
@@ -78,5 +83,20 @@ set(KAMELEON_MODULE_STORAGE 1)
 set(KAMELEON_MODULE_UART 1)
 set(KAMELEON_MODULE_GRAPHICS 1)
 
+set(CMAKE_SYSTEM_PROCESSOR cortex-m4)
+set(CMAKE_C_FLAGS "-mcpu=cortex-m4 -mlittle-endian -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard ${OPT} -Wall -fdata-sections -ffunction-sections")
+if(DEBUG EQUAL 1)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -gdwarf-2")
+endif()
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -MMD -MP")
 
-set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -T${TARGET_LDSCRIPT} -Wl,-Map=kameleon-core.map,--cref -Wl,--gc-sections")
+set(PREFIX arm-none-eabi-)
+set(CMAKE_ASM_COMPILER ${PREFIX}gcc)
+set(CMAKE_C_COMPILER ${PREFIX}gcc)
+set(CMAKE_CXX_COMPILER ${PREFIX}g++)
+set(CMAKE_LINKER ${PREFIX}ld)
+set(CMAKE_OBJCOPY ${PREFIX}objcopy)
+set(CMAKE_ASM_FLAGS "-x assembler-with-cpp")
+
+set(TARGET_LIBS c nosys m)
+set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -T${TARGET_LDSCRIPT} -Wl,-Map=${TARGET}.map,--cref -Wl,--gc-sections")
