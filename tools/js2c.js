@@ -8,7 +8,7 @@ const minimist = require('minimist')
 const magicStrings = require('./magic_strings')
 
 var modulesPath = path.join(__dirname, '../src/modules')
-var boardPath = path.join(__dirname, '../targets/boards')
+var boardPath = path.join(__dirname, '../targets')
 
 // Parse modules for generate
 var argv = minimist(process.argv.slice(2))
