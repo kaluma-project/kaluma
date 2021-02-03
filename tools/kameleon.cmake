@@ -6,7 +6,7 @@ set(DEBUG 1)
 # optimization
 set(OPT -Og)
 
-include(${CMAKE_SOURCE_DIR}/targets/boards/${TARGET}/target.cmake)
+include(${CMAKE_SOURCE_DIR}/targets/${TARGET}/target.cmake)
 
 set(JERRY_ROOT ${CMAKE_SOURCE_DIR}/deps/jerryscript)
 set(JERRY_INC

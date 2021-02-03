@@ -4,11 +4,10 @@ set(KM_CMAKE_DIR ${CMAKE_SOURCE_DIR}/tools)
 # Available targets : kameleon-core linux
 
 if(NOT TARGET)
-  # Use parameter input
-  # cmake . -DTARGET=linux
+  # Use parameter input to set the TARGET
+  # cd build
+  # cmake .. -DTARGET=linux
   set(TARGET kameleon-core)
 endif()
 
 include(${KM_CMAKE_DIR}/kameleon.cmake)
-
-

@@ -1,7 +1,6 @@
 project(kameleon-project C)
 set(TARGET_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 set(TARGET_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
-set(TARGET_SHARED_DIR ${CMAKE_CURRENT_LIST_DIR}/../../shared)
 
 set(SOURCES
   ${SOURCES}
