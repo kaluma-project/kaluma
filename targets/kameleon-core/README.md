@@ -1,11 +1,14 @@
 Target: Kameleon Core
 =====================
 
-Build commands
-* please create build folder if you don't have a build folder in the kamelecon folder.
+## Build
+
+```sh
+# assume at /kaluma
+$ mkdir build # if not exist
+$ cd build 
+$ cmake .. -DTARGET=kameleon-core
+$ make
 ```
-cd build
-cmake .. -DTARGET=kameleon-core
-make
-```
-The kameleon-core.hex will be created in the build folder.
+
+The `kameleon-core.hex`, `kameleon-core.bin` will be created in the build folder.
