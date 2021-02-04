@@ -43,8 +43,8 @@ Follows the conventions from the [Google C/C++ style guide](https://google.githu
 1. Checkout repository
 
 ```sh
-$ git clone https://github.com/kameleon-project/kameleon.git
-$ cd kameleon
+$ git clone https://github.com/kaluma-project/kaluma.git
+$ cd kaluma
 $ git submodule init
 $ git submodule update
 $ npm install
