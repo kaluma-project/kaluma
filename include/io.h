@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,12 +27,12 @@
 #include "utils.h"
 
 #include "jerryscript.h"
-#ifdef KAMELEON_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_IEEE80211
 #include "ieee80211.h"
-#endif//KAMELEON_MODULE_IEEE80211
-#ifdef KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_TCP
 #include "tcp.h"
-#endif//KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_TCP
 
 typedef struct io_loop_s io_loop_t;
 typedef struct io_handle_s io_handle_t;
@@ -41,12 +41,12 @@ typedef struct io_timer_handle_s io_timer_handle_t;
 typedef struct io_tty_handle_s io_tty_handle_t;
 typedef struct io_watch_handle_s io_watch_handle_t;
 typedef struct io_uart_handle_s io_uart_handle_t;
-#ifdef KAMELEON_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_IEEE80211
 typedef struct io_ieee80211_handle_s io_ieee80211_handle_t;
-#endif//KAMELEON_MODULE_IEEE80211
-#ifdef KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_TCP
 typedef struct io_tcp_handle_s io_tcp_handle_t;
-#endif//KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_TCP
 typedef struct io_idle_handle_s io_idle_handle_t;
 
 /* handle flags */
@@ -65,12 +65,12 @@ typedef enum io_type {
   IO_TTY,
   IO_WATCH,
   IO_UART,
-#ifdef KAMELEON_MODULE_IEEE80211  
+#ifdef KALAMU_MODULE_IEEE80211  
   IO_IEEE80211,
-#endif//KAMELEON_MODULE_IEEE80211
-#ifdef KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_TCP
   IO_TCP,
-#endif//KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_TCP
   IO_IDLE
 } io_type_t;
 
@@ -152,7 +152,7 @@ struct io_uart_handle_s {
 };
 
 /* IEEE80211 handle type */
-#ifdef KAMELEON_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_IEEE80211
 typedef void (* io_ieee80211_connect_cb)(io_ieee80211_handle_t *);
 typedef void (* io_ieee80211_assoc_cb)(io_ieee80211_handle_t *);
 typedef void (* io_ieee80211_disconnect_cb)(io_ieee80211_handle_t *);
@@ -168,9 +168,9 @@ struct io_ieee80211_handle_s {
   jerry_value_t this_val;
   jerry_value_t scan_js_cb;
 };
-#endif//KAMELEON_MODULE_IEEE80211
+#endif//KALAMU_MODULE_IEEE80211
 
-#ifdef KAMELEON_MODULE_TCP
+#ifdef KALAMU_MODULE_TCP
 typedef void (* io_tcp_connect_cb)(io_tcp_handle_t *);
 typedef void (* io_tcp_disconnect_cb)(io_tcp_handle_t *);
 typedef void (* io_tcp_read_cb)(io_tcp_handle_t *, const char*, int);
@@ -183,7 +183,7 @@ struct io_tcp_handle_s {
   jerry_value_t this_val;
   int fd;
 };
-#endif//KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_TCP
 
 /* idle handle types */
 
@@ -203,12 +203,12 @@ struct io_loop_s {
   list_t tty_handles;
   list_t watch_handles;
   list_t uart_handles;
-#ifdef KAMELEON_MODULE_IEEE80211  
+#ifdef KALAMU_MODULE_IEEE80211  
   list_t ieee80211_handles;
-#endif//KAMELEON_MODULE_IEEE80211
-#ifdef KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_TCP
   list_t tcp_handles;
-#endif//KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_TCP
   list_t idle_handles;
   list_t closing_handles;
 };
@@ -256,7 +256,7 @@ io_uart_handle_t *io_uart_get_by_id(uint32_t id);
 void io_uart_cleanup();
 
 /* IEEE80211 function */
-#ifdef KAMELEON_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_IEEE80211
 void io_ieee80211_init(io_ieee80211_handle_t *ieee80211);
 void io_ieee80211_start(io_ieee80211_handle_t *ieee80211, io_ieee80211_scan_cb scan_cb, io_ieee80211_assoc_cb assoc_cb, io_ieee80211_connect_cb connect_cb, io_ieee80211_disconnect_cb disconnect_cb);
 void io_ieee80211_stop(io_ieee80211_handle_t *ieee80211);
@@ -265,8 +265,8 @@ void io_ieee80211_connect(io_ieee80211_handle_t *ieee80211, io_ieee80211_connect
 void io_ieee80211_disconnect(io_ieee80211_handle_t *ieee80211, io_ieee80211_disconnect_cb disconnect_cb);
 io_ieee80211_handle_t *io_ieee80211_get_by_id(uint32_t id);
 void io_ieee80211_cleanup();
-#endif//KAMELEON_MODULE_IEEE80211
-#ifdef KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_TCP
 void io_tcp_init(io_tcp_handle_t *tcp);
 void io_tcp_start(io_tcp_handle_t *tcp, io_tcp_connect_cb connect_cb, io_tcp_disconnect_cb disconnect_cb, io_tcp_read_cb read_cb);
 void io_tcp_stop(io_tcp_handle_t *tcp);
@@ -275,7 +275,7 @@ void io_tcp_cleanup();
 int io_tcp_connect(io_tcp_handle_t *tcp, const char* address, int port);
 int io_tcp_send(io_tcp_handle_t* tcp, const char* message, int len);
 int io_tcp_close(io_tcp_handle_t* tcp);
-#endif//KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_TCP
 /* idle function */
 
 void io_idle_init(io_idle_handle_t *idle);

@@ -54,23 +54,23 @@ $ npm install
 
 ```sh
 # build default target (kameleon-core)
+$ mkdir build
+$ cd build
+$ cmake ..
 $ make
 
 # or specify target
-$ make TARGET=stm32f4discovery
+$ mkdir build
+$ cd build
+$ cmake .. -DTARGET=kameleon-core
+$ make
 ```
 
-You can find `kameleon.elf`, `kameleon.bin` in `/build` folder.
+You can find `kameleon-core.elf`, `kameleon-core.bin` in `/build` folder.
 
 3. Flash
 
 If you are using `kameleon-core` target, then flash as below:
-
-```sh
-$ make flash
-# or
-$ st-flash write build/kameleon.bin 0x8000000
-```
 
 4. Connect via Terminal
 

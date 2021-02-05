@@ -104,8 +104,8 @@ function removeSnapshots() {
 }
 
 function generateSources() {
-  const template_h = fs.readFileSync(__dirname + '/kameleon_modules.h.mustache', 'utf8')
-  const template_c = fs.readFileSync(__dirname + '/kameleon_modules.c.mustache', 'utf8')
+  const template_h = fs.readFileSync(__dirname + '/kalamu_modules.h.mustache', 'utf8')
+  const template_c = fs.readFileSync(__dirname + '/kalamu_modules.c.mustache', 'utf8')
   // Convert snapshot to an array of byte.
   modules.forEach(mod => {
     if (mod.snapshot) {
@@ -135,6 +135,6 @@ function generateSources() {
   var rendered_c = mustache.render(template_c, view)
   var genPath = path.join(__dirname, '../src/gen')
   fs.ensureDirSync(genPath)
-  fs.writeFileSync(path.join(genPath, 'kameleon_modules.h'), rendered_h, 'utf8')
-  fs.writeFileSync(path.join(genPath, 'kameleon_modules.c'), rendered_c, 'utf8')
+  fs.writeFileSync(path.join(genPath, 'kalamu_modules.h'), rendered_h, 'utf8')
+  fs.writeFileSync(path.join(genPath, 'kalamu_modules.c'), rendered_c, 'utf8')
 }

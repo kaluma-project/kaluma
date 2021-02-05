@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -234,7 +234,7 @@ void request_firmup() {
 }
 
 /**
- * Kameleon Hardware System Initializations
+ * Kalamu Hardware System Initializations
  */
 void system_init() {
   HAL_Init();

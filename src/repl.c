@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@
 #include "system.h"
 #include "jerryscript.h"
 #include "utils.h"
-#include "kameleon_config.h"
+#include "kalamu_config.h"
 #include "ymodem.h"
 
 // --------------------------------------------------------------------------
@@ -576,9 +576,9 @@ static void cmd_hi(repl_state_t *state) {
   repl_printf("|                       ****|\r\n");
   repl_printf("\\---------------------------/\r\n");
   repl_printf("\r\n");
-  repl_printf("Welcome to Kameleon!\r\n");
-  repl_printf("%s %s\r\n", "Version:", KAMELEON_VERSION);
-  repl_printf("For more info: https://kameleon.io\r\n");
+  repl_printf("Welcome to Kalamu!\r\n");
+  repl_printf("%s %s\r\n", "Version:", KALAMU_VERSION);
+  repl_printf("For more info: https://kalamu.io\r\n");
   repl_println();
 }
 

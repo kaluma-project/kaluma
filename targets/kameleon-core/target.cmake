@@ -1,5 +1,5 @@
 # with bootloader
-project(kameleon-project C ASM)
+project(kalamu-project C ASM)
 
 set(BOOTLOADER 1)
 
@@ -74,14 +74,14 @@ else()
   set(TARGET_LDSCRIPT ${TARGET_SRC_DIR}/STM32F411CETx_FLASH.ld)
 endif()
 
-set(KAMELEON_MODULES events gpio led button pwm adc i2c spi uart graphics at storage stream http url startup)
+set(KALAMU_MODULES events gpio led button pwm adc i2c spi uart graphics at storage stream http url startup)
 
-set(KAMELEON_MODULE_PWM 1)
-set(KAMELEON_MODULE_I2C 1)
-set(KAMELEON_MODULE_SPI 1)
-set(KAMELEON_MODULE_STORAGE 1)
-set(KAMELEON_MODULE_UART 1)
-set(KAMELEON_MODULE_GRAPHICS 1)
+set(KALAMU_MODULE_PWM 1)
+set(KALAMU_MODULE_I2C 1)
+set(KALAMU_MODULE_SPI 1)
+set(KALAMU_MODULE_STORAGE 1)
+set(KALAMU_MODULE_UART 1)
+set(KALAMU_MODULE_GRAPHICS 1)
 
 set(CMAKE_SYSTEM_PROCESSOR cortex-m4)
 set(CMAKE_C_FLAGS "-mcpu=cortex-m4 -mlittle-endian -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard ${OPT} -Wall -fdata-sections -ffunction-sections")

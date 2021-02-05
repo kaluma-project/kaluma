@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@
 #include "runtime.h"
 #include "global.h"
 #include "jerryxx.h"
-#include "kameleon_modules.h"
+#include "kalamu_modules.h"
 #include "magic_strings.h"
 #include "tty.h"
 #include "repl.h"
@@ -36,7 +36,7 @@
 #include "adc.h"
 #include "pwm.h"
 #include "system.h"
-#include "kameleon_config.h"
+#include "kalamu_config.h"
 #include "base64.h"
 
 static void register_global_objects() {
@@ -611,7 +611,7 @@ static void register_global_process_object() {
   jerry_value_t process = jerry_create_object();
   jerryxx_set_property_string(process, MSTR_ARCH, (char *)system_arch);
   jerryxx_set_property_string(process, MSTR_PLATFORM, (char *)system_platform);
-  jerryxx_set_property_string(process, MSTR_VERSION, KAMELEON_VERSION);
+  jerryxx_set_property_string(process, MSTR_VERSION, KALAMU_VERSION);
 
   /* Add `process.binding` function and it's properties */
   jerry_value_t binding_fn = jerry_create_external_function(process_binding_fn);

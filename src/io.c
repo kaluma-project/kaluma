@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,12 +28,12 @@
 #include "tty.h"
 #include "gpio.h"
 #include "uart.h"
-#ifdef KAMELEON_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_IEEE80211
 #include "ieee80211.h"
-#endif//KAMELEON_MODULE_IEEE80211
-#ifdef KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_TCP
 #include "tcp.h"
-#endif//KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_TCP
 
 io_loop_t loop;
 
@@ -44,12 +44,12 @@ static void io_tty_run();
 static void io_watch_run();
 static void io_uart_run();
 static void io_idle_run();
-#ifdef KAMELEON_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_IEEE80211
 static void io_ieee80211_run();
-#endif//KAMELEON_MODULE_IEEE80211
-#ifdef KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_TCP
 static void io_tcp_run();
-#endif//KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_TCP
 
 static void io_idle_run();
 
@@ -103,12 +103,12 @@ void io_init() {
   list_init(&loop.timer_handles);
   list_init(&loop.watch_handles);
   list_init(&loop.uart_handles);
-#ifdef KAMELEON_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_IEEE80211
   list_init(&loop.ieee80211_handles);
-#endif//KAMELEON_MODULE_IEEE80211
-#ifdef KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_TCP
     list_init(&loop.tcp_handles);
-#endif//KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_TCP
     list_init(&loop.closing_handles);
 }
 
@@ -119,12 +119,12 @@ void io_run() {
     io_tty_run();
     io_watch_run();
     io_uart_run();
-#ifdef KAMELEON_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_IEEE80211
     io_ieee80211_run();
-#endif//KAMELEON_MODULE_IEEE80211
-#ifdef KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_TCP
     io_tcp_run();
-#endif//KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_TCP
     io_idle_run();
     io_handle_closing();
   }
@@ -360,7 +360,7 @@ static void io_uart_run() {
 }
 
 /* IEEE80211 functions */
-#ifdef KAMELEON_MODULE_IEEE80211
+#ifdef KALAMU_MODULE_IEEE80211
 void io_ieee80211_init(io_ieee80211_handle_t *ieee80211) {
   io_handle_init((io_handle_t *) ieee80211, IO_IEEE80211);
 }
@@ -440,9 +440,9 @@ static void io_ieee80211_run() {
     handle = (io_ieee80211_handle_t *) ((list_node_t *) handle)->next;
   }
 }
-#endif//KAMELEON_MODULE_IEEE80211
+#endif//KALAMU_MODULE_IEEE80211
 
-#ifdef KAMELEON_MODULE_TCP
+#ifdef KALAMU_MODULE_TCP
 #include <esp_log.h>
 
 void io_tcp_init(io_tcp_handle_t *tcp) {
@@ -545,7 +545,7 @@ static void io_tcp_run() {
     }
 }
 
-#endif//KAMELEON_MODULE_TCP
+#endif//KALAMU_MODULE_TCP
 
 /* idle functions */
 

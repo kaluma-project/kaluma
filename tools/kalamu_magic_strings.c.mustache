@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,28 +19,20 @@
  * SOFTWARE.
  */
 
-#ifndef KAMELEON_MODULES_H
-#define KAMELEON_MODULES_H
-
 #include <stdint.h>
 #include "jerryscript.h"
+#include "kalamu_magic_strings.h"
 
-typedef jerry_value_t (* initialize_fn)();
+const uint32_t num_magic_string_items = {{magicStrings.length}};
 
-{{#modules}}
-extern const char module_{{name}}_name[];
-extern const uint8_t module_{{name}}_code[];
-extern const size_t module_{{name}}_size;
+const jerry_char_t *magic_string_items[] = {
+  {{#magicStrings}}
+  (const jerry_char_t *) "{{id}}"{{^last}},{{/last}}
+  {{/magicStrings}}
+};
 
-{{/modules}}
-typedef struct {
-  const char* name;
-  const void* code;
-  const size_t size;
-  initialize_fn fn;
-} kameleon_builtin_module;
-
-extern const size_t builtin_modules_length;
-extern const kameleon_builtin_module builtin_modules[];
-
-#endif
+const jerry_length_t magic_string_lengths[] = {
+  {{#magicStrings}}
+  {{len}}{{^last}},{{/last}}
+  {{/magicStrings}}
+};

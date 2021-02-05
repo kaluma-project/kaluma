@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,9 +19,9 @@
  * SOFTWARE.
  */
 
-#ifndef __KAMELEON_CONFIG_H
-#define __KAMELEON_CONFIG_H
+#ifndef __KALAMU_CONFIG_H
+#define __KALAMU_CONFIG_H
 
-#define KAMELEON_VERSION "1.0.0"
+#define KALAMU_VERSION "1.0.0"
 
-#endif /* __KAMELEON_CONFIG_H */
+#endif /* __KALAMU_CONFIG_H */
