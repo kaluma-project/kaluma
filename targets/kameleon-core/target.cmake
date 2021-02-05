@@ -31,39 +31,39 @@ set(SOURCES
   ${TARGET_SRC_DIR}/uart.c
   ${TARGET_SRC_DIR}/i2c.c
   ${TARGET_SRC_DIR}/spi.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd_ex.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c
-  ${TARGET_SHARED_DIR}/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c
-  ${TARGET_SHARED_DIR}/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c
-  ${TARGET_SHARED_DIR}/middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c
-  ${TARGET_SHARED_DIR}/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc)
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd_ex.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c
+  ${TARGET_SHARED_DIR}/STM32_USB_Device_Library/Core/Src/usbd_core.c
+  ${TARGET_SHARED_DIR}/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c
+  ${TARGET_SHARED_DIR}/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c
+  ${TARGET_SHARED_DIR}/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc)
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/include
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Inc
-  ${TARGET_SHARED_DIR}/drivers/STM32F4xx_HAL_Driver/Inc/Legacy
-  ${TARGET_SHARED_DIR}/middlewares/ST/STM32_USB_Device_Library/Core/Inc
-  ${TARGET_SHARED_DIR}/middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc
-  ${TARGET_SHARED_DIR}/drivers/CMSIS/Device/ST/STM32F4xx/Include
-  ${TARGET_SHARED_DIR}/drivers/CMSIS/Include)
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Inc
+  ${TARGET_SHARED_DIR}/STM32F4xx_HAL_Driver/Inc/Legacy
+  ${TARGET_SHARED_DIR}/STM32_USB_Device_Library/Core/Inc
+  ${TARGET_SHARED_DIR}/STM32_USB_Device_Library/Class/CDC/Inc
+  ${TARGET_SHARED_DIR}/CMSIS/Device/ST/STM32F4xx/Include
+  ${TARGET_SHARED_DIR}/CMSIS/Include)
 
 set(TARGET_HEAPSIZE 96)
 set(JERRY_TOOLCHAIN toolchain_mcu_stm32f4.cmake)
