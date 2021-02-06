@@ -28,80 +28,80 @@
 #include "spi.h"
 #include "uart.h"
 
-const char system_arch[] = "i686";
-const char system_platform[] = "linux";
+const char km_system_arch[] = "i686";
+const char km_system_platform[] = "linux";
 
 static uint64_t tick_count;
 static uint32_t microseconds_cycle;
 
 /** increment system timer tick every 1msec
 */
-void inc_tick() {
+void km_inc_tick() {
   tick_count++;
 }
 
 /**
 */
-void delay(uint64_t msec) {
+void km_delay(uint64_t msec) {
 }
 
 /**
 */
-uint64_t gettime() {
+uint64_t km_gettime() {
   return tick_count;
 }
 
 /**
 */
-void settime(uint64_t time) {
+void km_settime(uint64_t time) {
   tick_count = time;
 }
 
 /**
  * Return MAX of the micro seconde counter 44739242
 */
-uint32_t micro_maxtime() {
+uint32_t km_micro_maxtime() {
   return 0;
 }
 /**
  * Return micro seconde counter
 */
- uint32_t micro_gettime() {
+ uint32_t km_micro_gettime() {
   return 0;
 }
 
 /**
  * micro secoded delay
 */
-void micro_delay(uint32_t usec) {
+void km_micro_delay(uint32_t usec) {
 }
 
 /**
 */
-void request_firmup() {
+void km_request_firmup() {
 }
 
 /**
  * Kalamu Hardware System Initializations
  */
-void system_init() {
-  gpio_init();
-  adc_init();
-  pwm_init();
-  kameleon_i2c_init();
-  spi_init();
-  uart_init();
+void km_system_init() {
+  km_gpio_init();
+  km_adc_init();
+  km_pwm_init();
+  km_i2c_init();
+  km_spi_init();
+  km_uart_init();
 }
 
-void system_cleanup() {
-  adc_cleanup();
-  pwm_cleanup();
-  kameleon_i2c_cleanup();
-  spi_cleanup();
-  uart_cleanup();
-  gpio_cleanup();
+void km_system_cleanup() {
+  km_adc_cleanup();
+  km_pwm_cleanup();
+  km_i2c_cleanup();
+  km_spi_cleanup();
+  km_uart_cleanup();
+  km_gpio_cleanup();
 }
 
-uint8_t running_script_check() {
+uint8_t km_running_script_check() {
   return false;
 }

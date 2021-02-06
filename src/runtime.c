@@ -50,20 +50,20 @@
  * - 0: normal
  * - 1: break VM execution 
  */
-static uint8_t runtime_vm_stop = 0;
+static uint8_t km_runtime_vm_stop = 0;
 
 /**
  * idle handle for processing enqueued jobs
  */
-static io_idle_handle_t idler;
+static km_io_idle_handle_t idler;
 
 // --------------------------------------------------------------------------
 // PRIVATE FUNCTIONS
 // --------------------------------------------------------------------------
 
 static jerry_value_t vm_exec_stop_callback (void *user_p) {
-  if (runtime_vm_stop > 0) {
-    runtime_vm_stop = 0;
+  if (km_runtime_vm_stop > 0) {
+    km_runtime_vm_stop = 0;
     return jerry_create_string ((const jerry_char_t *) "Abort script"); 
   }
   return jerry_create_undefined ();
@@ -85,44 +85,44 @@ static void idler_cb() {
 // PUBLIC FUNCTIONS
 // --------------------------------------------------------------------------
 
-void runtime_init(bool load, bool first) {
+void km_runtime_init(bool load, bool first) {
   jerry_init (JERRY_INIT_EMPTY);
-  jerry_set_vm_exec_stop_callback (vm_exec_stop_callback, &runtime_vm_stop, 16);
+  jerry_set_vm_exec_stop_callback (vm_exec_stop_callback, &km_runtime_vm_stop, 16);
   jerry_register_magic_strings (magic_string_items, num_magic_string_items, magic_string_lengths);
-  global_init();
+  km_global_init();
   jerry_gc(JERRY_GC_PRESSURE_HIGH);
   if (load) {
-    runtime_load();
+    km_runtime_load();
   }
   if (first) {
     // Initialize idler handle for queued jobs in jerryscript
-    io_idle_init(&idler);
-    io_idle_start(&idler, idler_cb);
+    km_io_idle_init(&idler);
+    km_io_idle_start(&idler, idler_cb);
   }
 }
 
-void runtime_cleanup() {
+void km_runtime_cleanup() {
   jerry_cleanup();
-  system_cleanup();
-  io_timer_cleanup();
-  io_watch_cleanup();
-  io_uart_cleanup();
-  // io_idle_cleanup();
+  km_system_cleanup();
+  km_io_timer_cleanup();
+  km_io_watch_cleanup();
+  km_io_uart_cleanup();
+  // km_io_idle_cleanup();
   // Do not cleanup tty I/O to keep terminal communication
 }
 
-void runtime_load() {
-  uint32_t size = flash_get_data_size();
+void km_runtime_load() {
+  uint32_t size = km_flash_get_data_size();
   if (size > 0) {
-    uint8_t *script = flash_get_data();
+    uint8_t *script = km_flash_get_data();
     jerry_value_t parsed_code = jerry_parse (NULL, 0, script, size, JERRY_PARSE_STRICT_MODE);
-    flash_free_data(script);
+    km_flash_free_data(script);
     if (!jerry_value_is_error (parsed_code)) {
       jerry_value_t ret_value = jerry_run (parsed_code);
       if (jerry_value_is_error (ret_value)) {
         jerryxx_print_error(ret_value, true);
-        runtime_cleanup();
-        runtime_init(false, false);
+        km_runtime_cleanup();
+        km_runtime_init(false, false);
         return;
       }
       jerry_release_value (ret_value);
@@ -133,6 +133,6 @@ void runtime_load() {
   }
 }
 
-void runtime_set_vm_stop(uint8_t stop) {
-  runtime_vm_stop = stop;
+void km_runtime_set_vm_stop(uint8_t stop) {
+  km_runtime_vm_stop = stop;
 }

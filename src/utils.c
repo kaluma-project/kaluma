@@ -23,12 +23,12 @@
 #include <stdlib.h>
 #include "utils.h"
 
-void list_init(list_t *list) {
+void km_list_init(km_list_t *list) {
   list->head = NULL;
   list->tail = NULL;
 }
 
-void list_append(list_t *list, list_node_t *node) {
+void km_list_append(km_list_t *list, km_list_node_t *node) {
   if (list->tail == NULL && list->head == NULL) {
     list->head = node;
     list->tail = node;
@@ -42,7 +42,7 @@ void list_append(list_t *list, list_node_t *node) {
   }
 }
 
-void list_remove(list_t *list, list_node_t *node) {
+void km_list_remove(km_list_t *list, km_list_node_t *node) {
   if (list->head == node) {
     list->head = node->next;
   }
@@ -57,7 +57,7 @@ void list_remove(list_t *list, list_node_t *node) {
   }
 }
 
-uint8_t hex1(char hex) {
+uint8_t km_hex1(char hex) {
   if (hex >= 'a') {
     return (hex - 'a' + 10);
   } else if (hex >= 'A') {
@@ -67,15 +67,15 @@ uint8_t hex1(char hex) {
   }
 }
 
-uint8_t hex2bin(unsigned char *hex) {
-  uint8_t hh = hex1(hex[0]);
-  uint8_t hl = hex1(hex[1]);
+uint8_t km_hex2bin(unsigned char *hex) {
+  uint8_t hh = km_hex1(hex[0]);
+  uint8_t hl = km_hex1(hex[1]);
   return hh << 4 | hl;
 }
 
 /*
 int main(void) {
-  list_t list;
+  km_list_t list;
 
   text_node_t *node1 = (text_node_t *) malloc(sizeof(text_node_t));
   node1->text = "node1";
@@ -86,18 +86,18 @@ int main(void) {
   text_node_t *node4 = (text_node_t *) malloc(sizeof(text_node_t));
   node4->text = "node4";
 
-  list_init(&list);
-  list_append(&list, (list_node_t *) node1);
-  list_append(&list, (list_node_t *) node2);
-  list_append(&list, (list_node_t *) node3);
-  list_append(&list, (list_node_t *) node4);
+  km_list_init(&list);
+  km_list_append(&list, (km_list_node_t *) node1);
+  km_list_append(&list, (km_list_node_t *) node2);
+  km_list_append(&list, (km_list_node_t *) node3);
+  km_list_append(&list, (km_list_node_t *) node4);
 
-  list_remove(&list, (list_node_t *) node1);
-  list_remove(&list, (list_node_t *) node2);
-  list_remove(&list, (list_node_t *) node3);
-  // list_remove(&list, (list_node_t *) node4);
+  km_list_remove(&list, (km_list_node_t *) node1);
+  km_list_remove(&list, (km_list_node_t *) node2);
+  km_list_remove(&list, (km_list_node_t *) node3);
+  // km_list_remove(&list, (km_list_node_t *) node4);
 
-  list_node_t *p = list.head;
+  km_list_node_t *p = list.head;
   while (p != NULL) {
     text_node_t *tn = (text_node_t *) p;
     printf("%s\n", tn->text);

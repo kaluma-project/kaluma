@@ -19,13 +19,11 @@
  * SOFTWARE.
  */
 
-#ifndef __GLOBAL_H
-#define __GLOBAL_H
+#ifndef __KM_GLOBAL_H
+#define __KM_GLOBAL_H
 
 #include "jerryscript.h"
 
-void global_init();
-jerry_value_t global_get_process();
-jerry_value_t global_get_process_binding();
+void km_global_init();
 
-#endif /* __GLOBAL_H */
+#endif /* __KM_GLOBAL_H */

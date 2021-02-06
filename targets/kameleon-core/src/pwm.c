@@ -78,7 +78,7 @@ static const struct __pwm_config {
 */
 static int get_pwm_index(uint8_t pin) {
   uint32_t n = sizeof(pwm_config) / sizeof(struct __pwm_config);
-  int index = PWMPORT_ERROR;
+  int index = KM_PWMPORT_ERROR;
 
   for (int k=0; k<n; k++) {
     if (pwm_config[k].pin_number == pin) {
@@ -331,29 +331,29 @@ static void tim5_pwm_setup(uint32_t channel, uint32_t prescaler, uint32_t arr, u
 /**
  * Initialize all PWM when system started
  */
-void pwm_init() {
+void km_pwm_init() {
 }
 
 /**
  * Cleanup all PWM when system cleanup
  */
-void pwm_cleanup() {
+void km_pwm_cleanup() {
   uint32_t n = sizeof(pwm_config) / sizeof(struct __pwm_config);
   for (int k=0; k<n; k++) {
     if (pwm_configured[k])
-      pwm_close(pwm_config[k].pin_number);
+      km_pwm_close(pwm_config[k].pin_number);
   }
 }
 
 /**
  * return Returns 0 on success or -1 on failure.
 */
-int pwm_setup(uint8_t pin, double frequency, double duty) {
+int km_pwm_setup(uint8_t pin, double frequency, double duty) {
   uint32_t tick_freq, ch, prescaler, arr, pulse;
   uint8_t pduty = (duty + 0.005f) * 100;
   int n = get_pwm_index(pin);
-  if (n == PWMPORT_ERROR) //Not a index of PWM pin
-    return PWMPORT_ERROR;
+  if (n == KM_PWMPORT_ERROR) //Not a index of PWM pin
+    return KM_PWMPORT_ERROR;
 
   if (frequency > PWMMAXFREQ) //Max
     frequency = PWMMAXFREQ;
@@ -376,40 +376,40 @@ int pwm_setup(uint8_t pin, double frequency, double duty) {
 
 /**
 */
-int pwm_start(uint8_t pin) {
+int km_pwm_start(uint8_t pin) {
   int n = get_pwm_index(pin);
-  if (n == PWMPORT_ERROR) //PWM pin index
-    return PWMPORT_ERROR;
+  if (n == KM_PWMPORT_ERROR) //PWM pin index
+    return KM_PWMPORT_ERROR;
   pwm_config[n].start(pwm_config[n].handle, pwm_config[n].channel);
   return 0;
 }
 
 /**
 */
-int pwm_stop(uint8_t pin) {
+int km_pwm_stop(uint8_t pin) {
   int n = get_pwm_index(pin);
-  if (n == PWMPORT_ERROR) //PWM pin index
-    return PWMPORT_ERROR;
+  if (n == KM_PWMPORT_ERROR) //PWM pin index
+    return KM_PWMPORT_ERROR;
   pwm_config[n].stop(pwm_config[n].handle, pwm_config[n].channel);
   return 0;
 }
 
 /**
 */
-double pwm_get_frequency(uint8_t pin) {
+double km_pwm_get_frequency(uint8_t pin) {
   int n = get_pwm_index(pin);
-  if (n == PWMPORT_ERROR) //PWM pin index
-    return PWMPORT_ERROR;
+  if (n == KM_PWMPORT_ERROR) //PWM pin index
+    return KM_PWMPORT_ERROR;
   uint32_t tick_freq = get_tick_frequency(n);
   return (double)tick_freq/(pwm_config[n].handle->Init.Prescaler + 1)/(__HAL_TIM_GET_AUTORELOAD(pwm_config[n].handle) + 1);
 }
 
 /**
 */
-double pwm_get_duty(uint8_t pin) {
+double km_pwm_get_duty(uint8_t pin) {
   int n = get_pwm_index(pin);
-  if (n == PWMPORT_ERROR) //PWM pin index
-    return PWMPORT_ERROR;
+  if (n == KM_PWMPORT_ERROR) //PWM pin index
+    return KM_PWMPORT_ERROR;
   uint32_t arr = __HAL_TIM_GET_AUTORELOAD(pwm_config[n].handle);
   uint32_t pulse = __HAL_TIM_GET_COMPARE(pwm_config[n].handle, pwm_config[n].channel);
   return (double)(pulse)/(arr);
@@ -417,11 +417,11 @@ double pwm_get_duty(uint8_t pin) {
 
 /**
 */
-int pwm_set_duty(uint8_t pin, double duty) {
+int km_pwm_set_duty(uint8_t pin, double duty) {
   int n = get_pwm_index(pin);
   uint32_t pulse;
-  if (n == PWMPORT_ERROR) //PWM pin index
-    return PWMPORT_ERROR;
+  if (n == KM_PWMPORT_ERROR) //PWM pin index
+    return KM_PWMPORT_ERROR;
   while (__HAL_TIM_GET_COUNTER(pwm_config[n].handle) != 0);
   uint32_t arr = __HAL_TIM_GET_AUTORELOAD(pwm_config[n].handle);
   if (duty == 0)
@@ -434,24 +434,24 @@ int pwm_set_duty(uint8_t pin, double duty) {
 
 /**
 */
-int pwm_set_frequency(uint8_t pin, double frequency) {
+int km_pwm_set_frequency(uint8_t pin, double frequency) {
   int n = get_pwm_index(pin);
-  if (n == PWMPORT_ERROR) //PWM pin index
-    return PWMPORT_ERROR;
-  double previous_duty = pwm_get_duty(pin);
+  if (n == KM_PWMPORT_ERROR) //PWM pin index
+    return KM_PWMPORT_ERROR;
+  double previous_duty = km_pwm_get_duty(pin);
   /* The previous duty ratio must be hold up regardless of changing frequency */
   while (__HAL_TIM_GET_COUNTER(pwm_config[n].handle) != 0);
-  pwm_setup(pin, frequency, previous_duty);
+  km_pwm_setup(pin, frequency, previous_duty);
   pwm_config[n].start(pwm_config[n].handle, pwm_config[n].channel);
   return 0;
 }
 
 /**
 */
-int pwm_close(uint8_t pin) {
+int km_pwm_close(uint8_t pin) {
   int n = get_pwm_index(pin);
-  if (n == PWMPORT_ERROR) //PWM pin index
-    return PWMPORT_ERROR;
+  if (n == KM_PWMPORT_ERROR) //PWM pin index
+    return KM_PWMPORT_ERROR;
   HAL_TIM_PWM_DeInit(pwm_config[n].handle);
   HAL_GPIO_DeInit(pwm_config[n].port, pwm_config[n].pin);
   pwm_configured[n] = 0;

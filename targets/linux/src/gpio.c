@@ -22,24 +22,24 @@
 #include <stdint.h>
 #include "gpio.h"
 
-void gpio_init() {
+void km_gpio_init() {
 }
 
-void gpio_cleanup() {
+void km_gpio_cleanup() {
 }
 
-int gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode) {
+int km_gpio_set_io_mode(uint8_t pin, km_gpio_io_mode_t mode) {
   return 0;
 }
 
-int gpio_write(uint8_t pin, uint8_t value) {
+int km_gpio_write(uint8_t pin, uint8_t value) {
   return 0;
 }
 
-int gpio_read(uint8_t pin) {
+int km_gpio_read(uint8_t pin) {
   return 0;
 }
 
-int gpio_toggle(uint8_t pin) {
+int km_gpio_toggle(uint8_t pin) {
   return 0;
 }

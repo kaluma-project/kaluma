@@ -25,60 +25,60 @@
 /**
  * Initialize all PWM when system started
  */
-void pwm_init() {
+void km_pwm_init() {
 }
 
 /**
  * Cleanup all PWM when system cleanup
  */
-void pwm_cleanup() {
+void km_pwm_cleanup() {
 }
 
 /**
  * return Returns 0 on success or -1 on failure.
 */
-int pwm_setup(uint8_t pin, double frequency, double duty) {
+int km_pwm_setup(uint8_t pin, double frequency, double duty) {
   return 0;
 }
 
 /**
 */
-int pwm_start(uint8_t pin) {
+int km_pwm_start(uint8_t pin) {
   return 0;
 }
 
 /**
 */
-int pwm_stop(uint8_t pin) {
+int km_pwm_stop(uint8_t pin) {
   return 0;
 }
 
 /**
 */
-double pwm_get_frequency(uint8_t pin) {
+double km_pwm_get_frequency(uint8_t pin) {
   return 0;
 }
 
 /**
 */
-double pwm_get_duty(uint8_t pin) {
+double km_pwm_get_duty(uint8_t pin) {
   return 0;
 }
 
 /**
 */
-int pwm_set_duty(uint8_t pin, double duty) {
+int km_pwm_set_duty(uint8_t pin, double duty) {
   return 0;
 }
 
 /**
 */
-int pwm_set_frequency(uint8_t pin, double frequency) {
+int km_pwm_set_frequency(uint8_t pin, double frequency) {
   return 0;
 }
 
 /**
 */
-int pwm_close(uint8_t pin) {
+int km_pwm_close(uint8_t pin) {
   return 0;
 }

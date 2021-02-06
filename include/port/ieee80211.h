@@ -19,110 +19,112 @@
  * SOFTWARE.
  */
 
-#pragma once
+#ifndef __KM_IEEE80211_H
+#define __KM_IEEE80211_H
 
 #include <stdint.h>
 
 typedef enum {
-  OPEN = 0,
-  WEP = 1,
-  WPA_PSK = 2,
-  WPA2_PSK = 3,
-  WPA_WPA2_PSK = 4,
-  WPA2_ENTERPRISE = 5,
-  WPA3_PSK = 6,
-  WPA2_WPA3_PSK = 7
-} ieee80211_auth_t;
+  KM_AUTH_OPEN = 0,
+  KM_AUTH_WEP = 1,
+  KM_AUTH_WPA_PSK = 2,
+  KM_AUTH_WPA2_PSK = 3,
+  KM_AUTH_WPA_WPA2_PSK = 4,
+  KM_AUTH_WPA2_ENTERPRISE = 5,
+  KM_AUTH_WPA3_PSK = 6,
+  KM_AUTH_WPA2_WPA3_PSK = 7
+} km_ieee80211_auth_t;
 
 typedef enum {
-  NONE = 0,
-  WEP40 = 1,
-  WEP104 = 2,
-  TKIP = 3,
-  CCMP = 4,
-  TKIP_CCMP = 5,
-  AES_CMAC128 = 6
-} ieee80211_cipher_t;
+  KM_CIPHER_NONE = 0,
+  KM_CIPHER_WEP40 = 1,
+  KM_CIPHER_WEP104 = 2,
+  KM_CIPHER_TKIP = 3,
+  KM_CIPHER_CCMP = 4,
+  KM_CIPHER_TKIP_CCMP = 5,
+  KM_CIPHER_AES_CMAC128 = 6
+} km_ieee80211_cipher_t;
 
 typedef struct {
   uint8_t bssid[6];
   uint8_t ssid[33];
   uint8_t primary_channel;
   int8_t rssi;
-  ieee80211_auth_t authmode;
-  ieee80211_cipher_t cipher;
-} ieee80211_scan_info_t;
+  km_ieee80211_auth_t authmode;
+  km_ieee80211_cipher_t cipher;
+} km_ieee80211_scan_info_t;
 
 
 /**
  * Initialize the device driver.
  */
-int ieee80211_init();
+int km_ieee80211_init();
 
 /**
  * Cleanup the device driver.
  */
-int ieee80211_cleanup();
+int km_ieee80211_cleanup();
 
 
-int ieee80211_reset();
+int km_ieee80211_reset();
 
 /**
  * Start wifi network service and connect to AP(ssid) 
  */
-int ieee80211_connect(const char* ssid, const char* password);
+int km_ieee80211_connect(const char* ssid, const char* password);
 
 /**
  * Stop wifi network service
  */
-int ieee80211_disconnect();
+int km_ieee80211_disconnect();
 
 /**
  * Start scanning AP
  */
-int ieee80211_scan();
+int km_ieee80211_scan();
 
 /**
  * Get AP information which is connected.
  */
-int ieee80211_sta_get_ap_info(ieee80211_scan_info_t* ap_info);
+int km_ieee80211_sta_get_ap_info(km_ieee80211_scan_info_t* ap_info);
 
 
 typedef enum {
-  IEEE80211_EVENT_SCAN = 0,
-  IEEE80211_EVENT_ASSOC = 1,
-  IEEE80211_EVENT_CONNECT = 2,
-  IEEE80211_EVENT_DISCONNECT = 3,
-} ieee80211_event_code_t;
+  KM_IEEE80211_EVENT_SCAN = 0,
+  KM_IEEE80211_EVENT_ASSOC = 1,
+  KM_IEEE80211_EVENT_CONNECT = 2,
+  KM_IEEE80211_EVENT_DISCONNECT = 3,
+} km_ieee80211_event_code_t;
 
 typedef struct {
-  ieee80211_event_code_t code;
+  km_ieee80211_event_code_t code;
   int count;
-  ieee80211_scan_info_t* records;
-} ieee80211_event_scan_t;
+  km_ieee80211_scan_info_t* records;
+} km_ieee80211_event_scan_t;
 
 typedef struct {
-  ieee80211_event_code_t code;
-} ieee80211_event_assoc_t;
+  km_ieee80211_event_code_t code;
+} km_ieee80211_event_assoc_t;
 
 typedef struct {
-  ieee80211_event_code_t code;
-} ieee80211_event_connect_t;
+  km_ieee80211_event_code_t code;
+} km_ieee80211_event_connect_t;
 
 typedef struct {
-  ieee80211_event_code_t code;
-} ieee80211_event_disconnect_t;
+  km_ieee80211_event_code_t code;
+} km_ieee80211_event_disconnect_t;
 
 typedef union {
-  ieee80211_event_code_t code;
-  ieee80211_event_scan_t scan;
-  ieee80211_event_assoc_t assoc;
-  ieee80211_event_connect_t connect;
-  ieee80211_event_disconnect_t disconnect;
-} ieee80211_event_t;
+  km_ieee80211_event_code_t code;
+  km_ieee80211_event_scan_t scan;
+  km_ieee80211_event_assoc_t assoc;
+  km_ieee80211_event_connect_t connect;
+  km_ieee80211_event_disconnect_t disconnect;
+} km_ieee80211_event_t;
 
 /**
  * Get WIFI event in message queue
  * 0 : if success, -1 : else
  */
-int ieee80211_get_event(ieee80211_event_t* out_event);
+int km_ieee80211_get_event(km_ieee80211_event_t* out_event);
+#endif /* __KM_IEEE80211_H */

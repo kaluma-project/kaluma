@@ -94,29 +94,29 @@ static uint32_t calculate_checksum(uint8_t * pbuf, uint32_t size) {
 
 /**
 */
-void flash_clear() {
+void km_flash_clear() {
   flash_erase();
 }
 
 /**
 */
-uint8_t * flash_get_data() {
+uint8_t * km_flash_get_data() {
   return (uint8_t *)ADDR_FLASH_USER_CODE;
 }
 
-void flash_free_data(uint8_t *data) {
+void km_flash_free_data(uint8_t *data) {
   (void)data; //Avoiding warning
 }
 
 /**
 */
-uint32_t flash_size() {
+uint32_t km_flash_size() {
   return SIZE_FLASH_USER_AREA - (ADDR_FLASH_USER_CODE - ADDR_FLASH_USER_AREA);
 }
 
 /**
 */
-uint32_t flash_get_data_size() {
+uint32_t km_flash_get_data_size() {
   uint32_t size = 0;
   uint32_t * p = (uint32_t *)ADDR_FLASH_USER_AREA;
 
@@ -129,15 +129,15 @@ uint32_t flash_get_data_size() {
 
 /**
 */
-void flash_program_begin() {
+void km_flash_program_begin() {
   code_offset = 0;
   flash_erase();
 }
 
 /**
 */
-flash_status_t flash_program(uint8_t * buf, uint32_t size) {
-  flash_status_t status = FLASH_SUCCESS;
+km_flash_status_t km_flash_program(uint8_t * buf, uint32_t size) {
+  km_flash_status_t status = KM_FLASH_SUCCESS;
   uint32_t address, start_address, end_address;
   uint32_t k=0;
   uint8_t * p = buf;
@@ -160,7 +160,7 @@ flash_status_t flash_program(uint8_t * buf, uint32_t size) {
       /* Error occurred while writing data in Flash memory. User can add here some code to deal with this error */
       /* FLASH_ErrorTypeDef errorcode = HAL_FLASH_GetError(); */
       _Error_Handler(__FILE__, __LINE__);
-      status = FLASH_FAIL;
+      status = KM_FLASH_FAIL;
       break;
     }
   }
@@ -172,8 +172,8 @@ flash_status_t flash_program(uint8_t * buf, uint32_t size) {
 
 /**
 */
-flash_status_t flash_program_byte(uint8_t val) {
-  flash_status_t status = FLASH_SUCCESS;
+km_flash_status_t km_flash_program_byte(uint8_t val) {
+  km_flash_status_t status = KM_FLASH_SUCCESS;
   uint32_t address;
 
   address = ADDR_FLASH_USER_CODE + code_offset;
@@ -189,7 +189,7 @@ flash_status_t flash_program_byte(uint8_t val) {
     /* Error occurred while writing data in Flash memory. User can add here some code to deal with this error */
     /* FLASH_ErrorTypeDef errorcode = HAL_FLASH_GetError(); */
     _Error_Handler(__FILE__, __LINE__);
-    status = FLASH_FAIL;
+    status = KM_FLASH_FAIL;
   }
 
   /* Lock the Flash to disable the flash control register access (recommended to protect the FLASH memory against possible unwanted operation) */
@@ -199,7 +199,7 @@ flash_status_t flash_program_byte(uint8_t val) {
 
 /**
 */
-void flash_program_end() {
+void km_flash_program_end() {
   uint32_t checksum;
 
   /* Unlock the Flash to enable the flash control register access */
@@ -219,6 +219,6 @@ void flash_program_end() {
 
 /**
 */
-uint32_t flash_get_checksum() {
+uint32_t km_flash_get_checksum() {
   return  *(uint32_t *)ADDR_FLASH_USER_CODE_CHECKSUM;
 }

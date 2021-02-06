@@ -47,7 +47,7 @@ void jerry_port_log(jerry_log_level_t level, /**< log level */
     va_list args;
     va_start (args, format);
     vsnprintf (buf, 256, format, args);
-    tty_printf ("%s\r", buf);
+    km_tty_printf ("%s\r", buf);
     va_end (args);
 } /* jerry_port_log */
 
@@ -108,5 +108,5 @@ jerry_port_release_source (uint8_t *buffer_p) /**< buffer to free */
  * Uses 'printf' to print a single character to standard output.
  */
 void jerryx_port_handler_print_char(char c) { /**< the character to print */
-  tty_putc(c);
+  km_tty_putc(c);
 } /* jerryx_port_handler_print_char */

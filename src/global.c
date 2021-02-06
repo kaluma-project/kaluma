@@ -57,8 +57,8 @@ JERRYXX_FUN(pin_mode_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   JERRYXX_CHECK_ARG_NUMBER_OPT(1, "mode");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  gpio_io_mode_t mode = (gpio_io_mode_t) JERRYXX_GET_ARG_NUMBER_OPT(1, GPIO_IO_MODE_INPUT);
-  if (gpio_set_io_mode(pin, mode) == GPIOPORT_ERROR) {
+  km_gpio_io_mode_t mode = (km_gpio_io_mode_t) JERRYXX_GET_ARG_NUMBER_OPT(1, KM_GPIO_IO_MODE_INPUT);
+  if (km_gpio_set_io_mode(pin, mode) == KM_GPIOPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
@@ -69,8 +69,8 @@ JERRYXX_FUN(pin_mode_fn) {
 JERRYXX_FUN(digital_read_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  int value = gpio_read(pin);
-  if (value == GPIOPORT_ERROR) {
+  int value = km_gpio_read(pin);
+  if (value == KM_GPIOPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
@@ -82,8 +82,8 @@ JERRYXX_FUN(digital_write_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   JERRYXX_CHECK_ARG_NUMBER_OPT(1, "value");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  uint8_t value = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(1, GPIO_LOW);
-  if (gpio_write(pin, value) == GPIOPORT_ERROR) {
+  uint8_t value = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(1, KM_GPIO_LOW);
+  if (km_gpio_write(pin, value) == KM_GPIOPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
@@ -94,7 +94,7 @@ JERRYXX_FUN(digital_write_fn) {
 JERRYXX_FUN(digital_toggle_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  if (gpio_toggle(pin) == GPIOPORT_ERROR) {
+  if (km_gpio_toggle(pin) == KM_GPIOPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
@@ -107,11 +107,11 @@ JERRYXX_FUN(digital_toggle_fn) {
 */
 uint8_t check_timeout(uint32_t start, uint32_t timeout) {
   uint32_t tout, now;
-  now = micro_gettime();
+  now = km_micro_gettime();
   if (now >= start)
     tout = now - start;
   else
-    tout = (micro_maxtime() - start) + now;
+    tout = (km_micro_maxtime() - start) + now;
   if (tout > timeout)
     return 1;
   return 0;
@@ -124,24 +124,24 @@ int pulse_read(uint8_t pin, uint8_t state, uint16_t *arr, uint8_t length, uint32
   uint8_t cnt = 0;
   uint32_t start, last, now;
   int pin_state;
-  int pre_pin_state = gpio_read(pin);
-  start = micro_gettime();
+  int pre_pin_state = km_gpio_read(pin);
+  start = km_micro_gettime();
   while ((state < 2) && (pre_pin_state != state)) {
     if (check_timeout(start, timeout))
       return 0;
-    pre_pin_state = gpio_read(pin);
+    pre_pin_state = km_gpio_read(pin);
   }
-  start = micro_gettime();
+  start = km_micro_gettime();
   last = start;
   do {
-    pin_state = gpio_read(pin);
-    now = micro_gettime();
+    pin_state = km_gpio_read(pin);
+    now = km_micro_gettime();
     if (pin_state != pre_pin_state) {
       pre_pin_state = pin_state;
       if (now >= last)
         arr[cnt++] = now - last;
       else
-        arr[cnt++] = (micro_maxtime() - last) + now;
+        arr[cnt++] = (km_micro_maxtime() - last) + now;
       last = now;
     } else {
       if (check_timeout(start, timeout))
@@ -190,12 +190,12 @@ JERRYXX_FUN(pulse_read_fn) {
 int pulse_write(uint8_t pin, uint8_t state, uint16_t *arr, uint8_t length) {
   uint8_t cnt;
   uint16_t delay;
-  int pin_state = (state == GPIO_LOW) ? GPIO_LOW : GPIO_HIGH;
-  gpio_write(pin, pin_state);
+  int pin_state = (state == KM_GPIO_LOW) ? KM_GPIO_LOW : KM_GPIO_HIGH;
+  km_gpio_write(pin, pin_state);
   for (cnt = 0; cnt < length; cnt++) {
     delay = arr[cnt];
-    micro_delay(delay);
-    gpio_toggle(pin);
+    km_micro_delay(delay);
+    km_gpio_toggle(pin);
   }
   return 0;
 }
@@ -231,11 +231,11 @@ JERRYXX_FUN(pulse_write_fn) {
   return jerry_create_number(length);
 }
 
-static void watch_close_cb(io_handle_t *handle) {
+static void watch_close_cb(km_io_handle_t *handle) {
   free(handle);
 }
 
-static void set_watch_cb(io_watch_handle_t *watch) {
+static void set_watch_cb(km_io_watch_handle_t *watch) {
   if (jerry_value_is_function(watch->watch_js_cb)) {
     jerry_value_t this_val = jerry_create_undefined ();
     jerry_value_t ret_val = jerry_call_function (watch->watch_js_cb, this_val, NULL, 0);
@@ -244,8 +244,8 @@ static void set_watch_cb(io_watch_handle_t *watch) {
       jerryxx_print_error(ret_val, true);
       // clear handle
       jerry_release_value(watch->watch_js_cb);
-      io_watch_stop(watch);
-      io_handle_close((io_handle_t *) watch, watch_close_cb);
+      km_io_watch_stop(watch);
+      km_io_handle_close((km_io_handle_t *) watch, watch_close_cb);
     }
     jerry_release_value (ret_val);
     jerry_release_value (this_val);
@@ -259,41 +259,41 @@ JERRYXX_FUN(set_watch_fn) {
   JERRYXX_CHECK_ARG_NUMBER_OPT(3, "debounce");
   jerry_value_t callback = JERRYXX_GET_ARG(0);
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(1);
-  io_watch_mode_t mode = JERRYXX_GET_ARG_NUMBER_OPT(2, IO_WATCH_MODE_CHANGE);
+  km_io_watch_mode_t mode = JERRYXX_GET_ARG_NUMBER_OPT(2, KM_IO_WATCH_MODE_CHANGE);
   uint32_t debounce = JERRYXX_GET_ARG_NUMBER_OPT(3, 0);
-  io_watch_handle_t *watch = malloc(sizeof(io_watch_handle_t));
-  io_watch_init(watch);
+  km_io_watch_handle_t *watch = malloc(sizeof(km_io_watch_handle_t));
+  km_io_watch_init(watch);
   watch->watch_js_cb = jerry_acquire_value(callback);
-  io_watch_start(watch, set_watch_cb, pin, mode, debounce);
+  km_io_watch_start(watch, set_watch_cb, pin, mode, debounce);
   return jerry_create_number(watch->base.id);
 }
 
 JERRYXX_FUN(clear_watch_fn) {
   JERRYXX_CHECK_ARG_NUMBER_OPT(0, "id");
   int id = (int) JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
-  io_watch_handle_t *watch = io_watch_get_by_id(id);
+  km_io_watch_handle_t *watch = km_io_watch_get_by_id(id);
   if (watch != NULL) {
     jerry_release_value(watch->watch_js_cb);
-    io_watch_stop(watch);
-    io_handle_close((io_handle_t *) watch, watch_close_cb);
+    km_io_watch_stop(watch);
+    km_io_handle_close((km_io_handle_t *) watch, watch_close_cb);
   }
   return jerry_create_undefined();
 }
 
 static void register_global_digital_io() {
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property_number(global, MSTR_HIGH, GPIO_HIGH);
-  jerryxx_set_property_number(global, MSTR_LOW, GPIO_LOW);
-  jerryxx_set_property_number(global, MSTR_INPUT, (double) GPIO_IO_MODE_INPUT);
-  jerryxx_set_property_number(global, MSTR_OUTPUT, (double) GPIO_IO_MODE_OUTPUT);
-  jerryxx_set_property_number(global, MSTR_INPUT_PULLUP, (double) GPIO_IO_MODE_INPUT_PULLUP);
-  jerryxx_set_property_number(global, MSTR_INPUT_PULLDOWN, (double) GPIO_IO_MODE_INPUT_PULLDOWN);
-  jerryxx_set_property_number(global, MSTR_CHANGE, (double) IO_WATCH_MODE_CHANGE);
-  jerryxx_set_property_number(global, MSTR_RISING, (double) IO_WATCH_MODE_RISING);
-  jerryxx_set_property_number(global, MSTR_FALLING, (double) IO_WATCH_MODE_FALLING);
-  jerryxx_set_property_number(global, MSTR_PULLNO, (double) IO_PULL_NO);
-  jerryxx_set_property_number(global, MSTR_PULLUP, (double) IO_PULL_UP);
-  jerryxx_set_property_number(global, MSTR_PULLDOWN, (double) IO_PULL_DOWN);
+  jerryxx_set_property_number(global, MSTR_HIGH, KM_GPIO_HIGH);
+  jerryxx_set_property_number(global, MSTR_LOW, KM_GPIO_LOW);
+  jerryxx_set_property_number(global, MSTR_INPUT, (double) KM_GPIO_IO_MODE_INPUT);
+  jerryxx_set_property_number(global, MSTR_OUTPUT, (double) KM_GPIO_IO_MODE_OUTPUT);
+  jerryxx_set_property_number(global, MSTR_INPUT_PULLUP, (double) KM_GPIO_IO_MODE_INPUT_PULLUP);
+  jerryxx_set_property_number(global, MSTR_INPUT_PULLDOWN, (double) KM_GPIO_IO_MODE_INPUT_PULLDOWN);
+  jerryxx_set_property_number(global, MSTR_CHANGE, (double) KM_IO_WATCH_MODE_CHANGE);
+  jerryxx_set_property_number(global, MSTR_RISING, (double) KM_IO_WATCH_MODE_RISING);
+  jerryxx_set_property_number(global, MSTR_FALLING, (double) KM_IO_WATCH_MODE_FALLING);
+  jerryxx_set_property_number(global, MSTR_PULLNO, (double) KM_IO_PULL_NO);
+  jerryxx_set_property_number(global, MSTR_PULLUP, (double) KM_IO_PULL_UP);
+  jerryxx_set_property_number(global, MSTR_PULLDOWN, (double) KM_IO_PULL_DOWN);
   jerryxx_set_property_function(global, MSTR_PIN_MODE, pin_mode_fn);
   jerryxx_set_property_function(global, MSTR_DIGITAL_READ, digital_read_fn);
   jerryxx_set_property_function(global, MSTR_DIGITAL_WRITE, digital_write_fn);
@@ -314,14 +314,14 @@ static void register_global_digital_io() {
 JERRYXX_FUN(analog_read_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  int adcIndex = adc_setup(pin);
+  int adcIndex = km_adc_setup(pin);
   if (adcIndex == ADCPORT_ERRROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for ADC channel", pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
   }
-  delay(1); // To prevent issue #55
-  double value = adc_read((uint8_t) adcIndex);
+  km_delay(1); // To prevent issue #55
+  double value = km_adc_read((uint8_t) adcIndex);
   return jerry_create_number(value);
 }
 
@@ -331,24 +331,24 @@ JERRYXX_FUN(analog_write_fn) {
   JERRYXX_CHECK_ARG_NUMBER_OPT(2, "frequency");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   double value = JERRYXX_GET_ARG_NUMBER_OPT(1, 0.5);
-  if (value < PWM_DUTY_MIN)
-    value = PWM_DUTY_MIN;
-  else if (value > PWM_DUTY_MAX)
-    value = PWM_DUTY_MAX;
+  if (value < KM_PWM_DUTY_MIN)
+    value = KM_PWM_DUTY_MIN;
+  else if (value > KM_PWM_DUTY_MAX)
+    value = KM_PWM_DUTY_MAX;
   double frequency = JERRYXX_GET_ARG_NUMBER_OPT(2, 490); // Default 490Hz
-  if (pwm_setup(pin, frequency, value) == PWMPORT_ERROR) {
+  if (km_pwm_setup(pin, frequency, value) == KM_PWMPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for analog out (PWM)", pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
   } else {
-    pwm_start(pin);
+    km_pwm_start(pin);
     return jerry_create_undefined();
   }
 }
 
-static void tone_timeout_cb(io_timer_handle_t *timer) {
+static void tone_timeout_cb(km_io_timer_handle_t *timer) {
   uint8_t pin = timer->tag;
-  pwm_stop(pin);
+  km_pwm_stop(pin);
 }
 
 JERRYXX_FUN(tone_fn) {
@@ -360,22 +360,22 @@ JERRYXX_FUN(tone_fn) {
   double frequency = JERRYXX_GET_ARG_NUMBER_OPT(1, 261.626); // C key frequency
   uint32_t duration = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(2, 0);
   double duty = JERRYXX_GET_ARG_NUMBER_OPT(3, 0.5);
-  if (duty < PWM_DUTY_MIN)
-    duty = PWM_DUTY_MIN;
-  else if (duty > PWM_DUTY_MAX)
-    duty = PWM_DUTY_MAX;
-  if (pwm_setup(pin, frequency, duty) == PWMPORT_ERROR) {
+  if (duty < KM_PWM_DUTY_MIN)
+    duty = KM_PWM_DUTY_MIN;
+  else if (duty > KM_PWM_DUTY_MAX)
+    duty = KM_PWM_DUTY_MAX;
+  if (km_pwm_setup(pin, frequency, duty) == KM_PWMPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for tone", pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
   } else {
-    pwm_start(pin);
+    km_pwm_start(pin);
     // setup timer for duration
     if (duration > 0) {
-      io_timer_handle_t *timer = malloc(sizeof(io_timer_handle_t));
-      io_timer_init(timer);
+      km_io_timer_handle_t *timer = malloc(sizeof(km_io_timer_handle_t));
+      km_io_timer_init(timer);
       timer->tag = pin;
-      io_timer_start(timer, tone_timeout_cb, duration, false);
+      km_io_timer_start(timer, tone_timeout_cb, duration, false);
     }
     return jerry_create_undefined();
   }
@@ -384,7 +384,7 @@ JERRYXX_FUN(tone_fn) {
 JERRYXX_FUN(no_tone_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  if (pwm_stop(pin) == PWMPORT_ERROR) {
+  if (km_pwm_stop(pin) == KM_PWMPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);
@@ -407,11 +407,11 @@ static void register_global_analog_io() {
 /*                                                                          */
 /****************************************************************************/
 
-static void timer_close_cb(io_handle_t *handle) {
+static void timer_close_cb(km_io_handle_t *handle) {
   free(handle);
 }
 
-static void set_timer_cb(io_timer_handle_t *timer) {
+static void set_timer_cb(km_io_timer_handle_t *timer) {
   if (jerry_value_is_function(timer->timer_js_cb)) {
     jerry_value_t this_val = jerry_create_undefined ();
     jerry_value_t ret_val = jerry_call_function (timer->timer_js_cb, this_val, NULL, 0);
@@ -420,13 +420,13 @@ static void set_timer_cb(io_timer_handle_t *timer) {
       jerryxx_print_error(ret_val, true);
       // clear handle
       jerry_release_value(timer->timer_js_cb);
-      io_timer_stop(timer);
-      io_handle_close((io_handle_t *) timer, timer_close_cb);
+      km_io_timer_stop(timer);
+      km_io_handle_close((km_io_handle_t *) timer, timer_close_cb);
     } else {
       if (timer->repeat == false) {
         jerry_release_value(timer->timer_js_cb);
-        io_timer_stop(timer);
-        io_handle_close((io_handle_t *) timer, timer_close_cb);
+        km_io_timer_stop(timer);
+        km_io_handle_close((km_io_handle_t *) timer, timer_close_cb);
       }
     }
     jerry_release_value (ret_val);
@@ -439,10 +439,10 @@ JERRYXX_FUN(set_timeout_fn) {
   JERRYXX_CHECK_ARG_NUMBER(1, "delay");
   jerry_value_t callback = JERRYXX_GET_ARG(0);
   uint64_t delay = (uint64_t) JERRYXX_GET_ARG_NUMBER(1);
-  io_timer_handle_t *timer = malloc(sizeof(io_timer_handle_t));
-  io_timer_init(timer);
+  km_io_timer_handle_t *timer = malloc(sizeof(km_io_timer_handle_t));
+  km_io_timer_init(timer);
   timer->timer_js_cb = jerry_acquire_value(callback);
-  io_timer_start(timer, set_timer_cb, delay, false);
+  km_io_timer_start(timer, set_timer_cb, delay, false);
   return jerry_create_number(timer->base.id);
 }
 
@@ -451,21 +451,21 @@ JERRYXX_FUN(set_interval_fn) {
   JERRYXX_CHECK_ARG_NUMBER(1, "delay");
   jerry_value_t callback = JERRYXX_GET_ARG(0);
   uint64_t delay = (uint64_t) JERRYXX_GET_ARG_NUMBER(1);
-  io_timer_handle_t *timer = malloc(sizeof(io_timer_handle_t));
-  io_timer_init(timer);
+  km_io_timer_handle_t *timer = malloc(sizeof(km_io_timer_handle_t));
+  km_io_timer_init(timer);
   timer->timer_js_cb = jerry_acquire_value(callback);
-  io_timer_start(timer, set_timer_cb, delay, true);
+  km_io_timer_start(timer, set_timer_cb, delay, true);
   return jerry_create_number(timer->base.id);
 }
 
 JERRYXX_FUN(clear_timer_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "id");
   int id = (int) JERRYXX_GET_ARG_NUMBER(0);
-  io_timer_handle_t *timer = io_timer_get_by_id(id);
+  km_io_timer_handle_t *timer = km_io_timer_get_by_id(id);
   if (timer != NULL) {
     jerry_release_value(timer->timer_js_cb);
-    io_timer_stop(timer);
-    io_handle_close((io_handle_t *) timer, timer_close_cb);
+    km_io_timer_stop(timer);
+    km_io_handle_close((km_io_handle_t *) timer, timer_close_cb);
   }
   return jerry_create_undefined();
 }
@@ -473,12 +473,12 @@ JERRYXX_FUN(clear_timer_fn) {
 JERRYXX_FUN(delay_fn) {
   JERRYXX_CHECK_ARG_NUMBER_OPT(0, "id");
   uint64_t delay_val = (uint64_t) JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
-  delay(delay_val);
+  km_delay(delay_val);
   return jerry_create_undefined();
 }
 
 JERRYXX_FUN(millis_fn) {
-  uint64_t msec = gettime();
+  uint64_t msec = km_gettime();
   return jerry_create_number(msec);
 }
 
@@ -501,38 +501,38 @@ static void register_global_timers() {
 
 JERRYXX_FUN(console_log_fn) {
   if (JERRYXX_GET_ARG_COUNT > 0) {
-    repl_printf("\33[2K\r"); // set column to 0
-    repl_printf("\33[0m"); // set to normal color
+    km_repl_printf("\33[2K\r"); // set column to 0
+    km_repl_printf("\33[0m"); // set to normal color
     for (int i = 0; i < JERRYXX_GET_ARG_COUNT; i++) {
       if (i > 0) {
-        repl_printf(" ");
+        km_repl_printf(" ");
       }
       if (jerry_value_is_string(JERRYXX_GET_ARG(i))) {
-        repl_print_value(JERRYXX_GET_ARG(i));
+        km_repl_print_value(JERRYXX_GET_ARG(i));
       } else {
-        repl_pretty_print(0, 2, JERRYXX_GET_ARG(i));
+        km_repl_pretty_print(0, 2, JERRYXX_GET_ARG(i));
       }
     }
-    repl_println();
+    km_repl_println();
   }
   return jerry_create_undefined();
 }
 
 JERRYXX_FUN(console_error_fn) {
   if (JERRYXX_GET_ARG_COUNT > 0) {
-    repl_printf("\33[2K\r"); // set column to 0
-    repl_printf("\33[0m"); // set to normal color
+    km_repl_printf("\33[2K\r"); // set column to 0
+    km_repl_printf("\33[0m"); // set to normal color
     for (int i = 0; i < JERRYXX_GET_ARG_COUNT; i++) {
       if (i > 0) {
-        repl_printf(" ");
+        km_repl_printf(" ");
       }
       if (jerry_value_is_string(JERRYXX_GET_ARG(i))) {
-        repl_print_value(JERRYXX_GET_ARG(i));
+        km_repl_print_value(JERRYXX_GET_ARG(i));
       } else {
-        repl_pretty_print(0, 2, JERRYXX_GET_ARG(i));
+        km_repl_pretty_print(0, 2, JERRYXX_GET_ARG(i));
       }
     }
-    repl_println();
+    km_repl_println();
   }
   return jerry_create_undefined();
 }
@@ -609,8 +609,8 @@ JERRYXX_FUN(process_get_builtin_module_fn) {
 
 static void register_global_process_object() {
   jerry_value_t process = jerry_create_object();
-  jerryxx_set_property_string(process, MSTR_ARCH, (char *)system_arch);
-  jerryxx_set_property_string(process, MSTR_PLATFORM, (char *)system_platform);
+  jerryxx_set_property_string(process, MSTR_ARCH, (char *)km_system_arch);
+  jerryxx_set_property_string(process, MSTR_PLATFORM, (char *)km_system_platform);
   jerryxx_set_property_string(process, MSTR_VERSION, KALAMU_VERSION);
 
   /* Add `process.binding` function and it's properties */
@@ -818,13 +818,13 @@ JERRYXX_FUN(btoa_fn) {
     jerry_value_t array_buffer = jerry_get_typedarray_buffer(binary_data, &byteOffset, &byteLength);
     size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
     uint8_t *buf = jerry_get_arraybuffer_pointer(array_buffer);
-    encoded_data = base64_encode(buf, len, &encoded_data_sz);
+    encoded_data = km_base64_encode(buf, len, &encoded_data_sz);
     jerry_release_value(array_buffer);
   } else if (jerry_value_is_string(binary_data)) { /* for string */
     jerry_size_t len = jerryxx_get_ascii_string_size(binary_data);
     uint8_t buf[len];
     jerryxx_string_to_ascii_char_buffer(binary_data, buf, len);
-    encoded_data = base64_encode(buf, len, &encoded_data_sz);
+    encoded_data = km_base64_encode(buf, len, &encoded_data_sz);
   } else {
     return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "Unsupported binary data.");
   }
@@ -841,7 +841,7 @@ JERRYXX_FUN(atob_fn) {
   JERRYXX_CHECK_ARG_STRING(0, "encodedData")
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, encoded_data)
   size_t decoded_data_sz;
-  unsigned char *decoded_data = base64_decode((unsigned char *) encoded_data,
+  unsigned char *decoded_data = km_base64_decode((unsigned char *) encoded_data,
       encoded_data_sz, &decoded_data_sz);
   if (decoded_data != NULL) {
     jerry_value_t buffer = jerry_create_arraybuffer_external(decoded_data_sz, decoded_data, base64_buffer_free_cb);
@@ -902,7 +902,7 @@ JERRYXX_FUN(decode_uri_component_fn) {
   while (i < data_sz) {
     char ch = data[i];
     if (ch == '%') {
-      uint8_t bin = hex1(data[i + 1]) << 4 | hex1(data[i + 2]);
+      uint8_t bin = km_hex1(data[i + 1]) << 4 | km_hex1(data[i + 2]);
       decoded[p] = bin;
       i += 3;
       p++;
@@ -935,12 +935,12 @@ JERRYXX_FUN(print_fn) {
   if (JERRYXX_GET_ARG_COUNT > 0) {
     for (int i = 0; i < JERRYXX_GET_ARG_COUNT; i++) {
       if (i > 0) {
-        repl_printf(" ");
+        km_repl_printf(" ");
       }
       if (jerry_value_is_string(JERRYXX_GET_ARG(i))) {
-        repl_print_value(JERRYXX_GET_ARG(i));
+        km_repl_print_value(JERRYXX_GET_ARG(i));
       } else {
-        repl_pretty_print(0, 2, JERRYXX_GET_ARG(i));
+        km_repl_pretty_print(0, 2, JERRYXX_GET_ARG(i));
       }
     }
   }
@@ -981,7 +981,7 @@ static void run_board_module() {
 extern void register_global_pwm();
 #endif
 
-void global_init() {
+void km_global_init() {
   register_global_objects();
   register_global_digital_io();
   register_global_analog_io();

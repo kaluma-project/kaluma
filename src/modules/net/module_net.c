@@ -28,11 +28,11 @@
 
 #define TAG ("MODULE_NET")
 
-static void net_on_connect(io_tcp_handle_t *handle);
+static void net_on_connect(km_io_tcp_handle_t *handle);
 
-static void net_on_disconnect(io_tcp_handle_t *handle);
+static void net_on_disconnect(km_io_tcp_handle_t *handle);
 
-static void net_on_read(io_tcp_handle_t *handle, const char *message, int len);
+static void net_on_read(km_io_tcp_handle_t *handle, const char *message, int len);
 
 
 static void PrintJsType(jerry_value_t obj, const char *name) {
@@ -84,19 +84,19 @@ JERRYXX_FUN(net_connect_fn) {
     int port = JERRYXX_GET_ARG_NUMBER(2);
     jerry_value_t callback = JERRYXX_GET_ARG(3);
 
-    io_tcp_handle_t *handle = io_tcp_get_by_fd(fd);
+    km_io_tcp_handle_t *handle = km_io_tcp_get_by_fd(fd);
     if (handle == NULL) {
         return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "Invalid argument 'fd'");
     }
     jerry_value_t obj = handle->this_val;
     jerryxx_set_property(obj, "connect_cb", callback);
 
-    io_tcp_connect(handle, addr, port);
+    km_io_tcp_connect(handle, addr, port);
     return jerry_create_undefined();
 }
 
 
-static void net_on_connect(io_tcp_handle_t *handle) {
+static void net_on_connect(km_io_tcp_handle_t *handle) {
     ESP_LOGD(TAG, "net_on_connect");
     jerry_value_t thiz = handle->this_val;
     jerry_value_t callback = jerryxx_get_property(thiz, "connect_cb");
@@ -118,12 +118,12 @@ JERRYXX_FUN(net_write_fn) {
     JERRYXX_GET_ARG_STRING_AS_CHAR(1, data);
     jerry_value_t callback = JERRYXX_GET_ARG(2);
 
-    io_tcp_handle_t *handle = io_tcp_get_by_fd(fd);
+    km_io_tcp_handle_t *handle = km_io_tcp_get_by_fd(fd);
     if (handle == NULL) {
         return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "Invalid argument 'fd'");
     }
 
-    io_tcp_send(handle, data, strlen(data));
+    km_io_tcp_send(handle, data, strlen(data));
     return jerry_create_undefined();
 }
 
@@ -136,12 +136,12 @@ JERRYXX_FUN(net_close_fn) {
     int fd = JERRYXX_GET_ARG_NUMBER(0);
     jerry_value_t callback = JERRYXX_GET_ARG(1);
 
-    io_tcp_handle_t *handle = io_tcp_get_by_fd(fd);
+    km_io_tcp_handle_t *handle = km_io_tcp_get_by_fd(fd);
     if (handle == NULL) {
         return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "Invalid argument 'fd'");
     }
 
-    io_tcp_close(handle);
+    km_io_tcp_close(handle);
     return jerry_create_undefined();
 }
 
@@ -156,12 +156,12 @@ JERRYXX_FUN(net_shutdown_fn) {
     int how = JERRYXX_GET_ARG_NUMBER(1);
     jerry_value_t callback = JERRYXX_GET_ARG(2);
 
-    io_tcp_handle_t *handle = io_tcp_get_by_fd(fd);
+    km_io_tcp_handle_t *handle = km_io_tcp_get_by_fd(fd);
     if (handle == NULL) {
         return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "Invalid argument 'fd'");
     }
 
-    io_tcp_close(handle);
+    km_io_tcp_close(handle);
     return jerry_create_undefined();
 }
 
@@ -203,7 +203,7 @@ JERRYXX_FUN(net_socket_fn) {
     if (strcmp(protocol, "STREAM") != 0) {
         return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "NOT SUPPORTED");
     }
-    int fd = kameleon_tcp_socket();
+    int fd = km_tcp_socket();
     jerry_value_t undefined = jerry_create_undefined();
     jerry_value_t obj = jerry_create_object();
 
@@ -215,16 +215,16 @@ JERRYXX_FUN(net_socket_fn) {
     jerryxx_set_property(obj, "raddr", undefined);
     jerryxx_set_property(obj, "rport", undefined);
 
-    io_tcp_handle_t *handle = malloc(sizeof(io_tcp_handle_t));
-    io_tcp_init(handle);
+    km_io_tcp_handle_t *handle = malloc(sizeof(km_io_tcp_handle_t));
+    km_io_tcp_init(handle);
     handle->this_val = jerry_acquire_value(obj);
     handle->fd = fd;
-    io_tcp_start(handle, net_on_connect, net_on_disconnect, net_on_read);
+    km_io_tcp_start(handle, net_on_connect, net_on_disconnect, net_on_read);
 
     return jerry_create_number(fd);
 }
 
-static void net_on_disconnect(io_tcp_handle_t *handle) {
+static void net_on_disconnect(km_io_tcp_handle_t *handle) {
     ESP_LOGD(TAG, "net_on_disconnect");
     jerry_value_t thiz = handle->this_val;
     jerry_value_t callback = jerryxx_get_property(thiz, "shutdown_cb");
@@ -235,7 +235,7 @@ static void net_on_disconnect(io_tcp_handle_t *handle) {
     jerry_call_function(callback, thiz, NULL, 0);
 }
 
-static void net_on_read(io_tcp_handle_t *handle, const char *message, int len) {
+static void net_on_read(km_io_tcp_handle_t *handle, const char *message, int len) {
     ESP_LOGD(TAG, "net_on_read");
     jerry_value_t thiz = handle->this_val;
     jerry_value_t callback = jerryxx_get_property(thiz, "read_cb");
@@ -253,7 +253,7 @@ JERRYXX_FUN(net_get_fn) {
     JERRYXX_CHECK_ARG_NUMBER(0, "fd");
 
     int fd = JERRYXX_GET_ARG_NUMBER(0);
-    io_tcp_handle_t *handle = io_tcp_get_by_fd(fd);
+    km_io_tcp_handle_t *handle = km_io_tcp_get_by_fd(fd);
     if (!handle) {
         return jerry_create_undefined();
     }

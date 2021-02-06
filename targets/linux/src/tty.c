@@ -30,34 +30,34 @@
 #include "system.h"
 #include "ringbuffer.h"
 
-void tty_init() {
+void km_tty_init() {
 }
 
-uint32_t tty_available() {
+uint32_t km_tty_available() {
   return 0;
 }
 
-uint32_t tty_read(uint8_t *buf, size_t len) {
+uint32_t km_tty_read(uint8_t *buf, size_t len) {
   return 0;
 }
 
-uint32_t tty_read_sync(uint8_t *buf, size_t len, uint32_t timeout) {
+uint32_t km_tty_read_sync(uint8_t *buf, size_t len, uint32_t timeout) {
   return 0;
 }
 
 
-uint8_t tty_getc() {
+uint8_t km_tty_getc() {
   return 0;
 }
 
-void tty_putc(char ch) {
+void km_tty_putc(char ch) {
   putchar(ch);
 }
 
 /**
  * Print formatted string to TTY
  */
-void tty_printf(const char *fmt, ...) {
+void km_tty_printf(const char *fmt, ...) {
   va_list ap;
   va_start(ap,fmt);
   vprintf(fmt, ap);

@@ -19,37 +19,37 @@
  * SOFTWARE.
  */
 
-#ifndef __SPI_H
-#define __SPI_H
+#ifndef __KM_SPI_H
+#define __KM_SPI_H
 
 #include <stddef.h>
 #include <stdint.h>
 #include <stddef.h>
 
-#define SPIPORT_ERROR -1
+#define KM_SPIPORT_ERROR -1
 
 typedef enum {
-  SPI_MODE_0, // (CPOL=0/CPHA=0)
-  SPI_MODE_1, // (CPOL=0/CPHA=1)
-  SPI_MODE_2, // (CPOL=1/CPHA=0)
-  SPI_MODE_3  // (CPOL=1/CPHA=1)
-} spi_mode_t;
+  KM_SPI_MODE_0, // (CPOL=0/CPHA=0)
+  KM_SPI_MODE_1, // (CPOL=0/CPHA=1)
+  KM_SPI_MODE_2, // (CPOL=1/CPHA=0)
+  KM_SPI_MODE_3  // (CPOL=1/CPHA=1)
+} km_spi_mode_t;
 
 typedef enum {
-  SPI_BITORDER_MSB,
-  SPI_BITORDER_LSB
-} spi_bitorder_t;
+  KM_SPI_BITORDER_MSB,
+  KM_SPI_BITORDER_LSB
+} km_spi_bitorder_t;
 
 
 /**
  * Initialize all SPI when system started
  */
-void spi_init();
+void km_spi_init();
 
 /**
  * Cleanup all SPI when system cleanup
  */
-void spi_cleanup();
+void km_spi_cleanup();
 
 /**
  * Setup SPI bus as the master device
@@ -61,7 +61,7 @@ void spi_cleanup();
  * @param bits Number of bits in each transferred word.
  * @return Returns 0 on success or -1 on failure.
  */
-int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bitorder);
+int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate, km_spi_bitorder_t bitorder);
 
 
 /**
@@ -74,7 +74,7 @@ int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bi
  * @param timeout
  * @return the number of bytes read or -1 on timeout or nothing written.
  */
-int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint32_t timeout);
+int km_spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint32_t timeout);
 
 /**
  * Send data to the SPI bus
@@ -85,7 +85,7 @@ int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint
  * @param timeout
  * @return the number of bytes written or -1 on timeout or nothing written.
  */
-int spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
+int km_spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
 
 /**
  * Receive data from the SPI bus and store them into a given buffer.
@@ -96,11 +96,11 @@ int spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
  * @param {uint32_t} timeout
  * @return {int} the number of bytes read
  */
-int spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
+int km_spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
 
 /**
  * Close the SPI bus
  */
-int spi_close(uint8_t bus);
+int km_spi_close(uint8_t bus);
 
-#endif /* __SPI_H */
+#endif /* __KM_SPI_H */

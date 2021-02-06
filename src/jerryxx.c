@@ -93,7 +93,7 @@ void jerryxx_print_value(jerry_value_t value) {
   jerry_char_t str_buf[str_sz + 1];
   jerry_string_to_char_buffer (str, str_buf, str_sz);
   for (int16_t i = 0; i < str_sz; i++)
-    tty_putc(str_buf[i]);
+    km_tty_putc(str_buf[i]);
   jerry_release_value(str);
 }
 
@@ -104,10 +104,10 @@ void jerryxx_print_error (jerry_value_t value, bool print_stacktrace) {
   jerry_value_t error_value = jerry_get_value_from_error (value, false);
   // print error message  
   jerry_value_t err_str = jerry_value_to_string (error_value);
-  repl_set_output(REPL_OUTPUT_ERROR);
-  repl_print_value(err_str);
-  repl_println();
-  repl_set_output(REPL_OUTPUT_NORMAL);
+  km_repl_set_output(KM_REPL_OUTPUT_ERROR);
+  km_repl_print_value(err_str);
+  km_repl_println();
+  km_repl_set_output(KM_REPL_OUTPUT_NORMAL);
   jerry_release_value (err_str);
   // print stack trace
   if (print_stacktrace && jerry_value_is_object (error_value)) {
@@ -122,11 +122,11 @@ void jerryxx_print_error (jerry_value_t value, bool print_stacktrace) {
         jerry_value_t item_val = jerry_get_property_by_index (backtrace_val, i);
         if (!jerry_value_is_error (item_val)
             && jerry_value_is_string (item_val)) {
-          repl_set_output(REPL_OUTPUT_ERROR);
-          repl_printf("  at ");
-          repl_print_value(item_val);
-          repl_println();
-          repl_set_output(REPL_OUTPUT_NORMAL);
+          km_repl_set_output(KM_REPL_OUTPUT_ERROR);
+          km_repl_printf("  at ");
+          km_repl_print_value(item_val);
+          km_repl_println();
+          km_repl_set_output(KM_REPL_OUTPUT_NORMAL);
         }
         jerry_release_value (item_val);        
       }

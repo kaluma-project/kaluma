@@ -14,7 +14,7 @@ static const unsigned char base64_table[65] =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /**
- * base64_encode - Base64 encode
+ * km_base64_encode - Base64 encode
  * @src: Data to be encoded
  * @len: Length of the data to be encoded
  * @out_len: Pointer to output length variable, or %NULL if not used
@@ -25,7 +25,7 @@ static const unsigned char base64_table[65] =
  * nul terminated to make it easier to use as a C string. The nul terminator is
  * not included in out_len.
  */
-unsigned char * base64_encode(const unsigned char *src, size_t len,
+unsigned char * km_base64_encode(const unsigned char *src, size_t len,
     size_t *out_len) {
   unsigned char *out, *pos;
   const unsigned char *end, *in;
@@ -83,7 +83,7 @@ unsigned char * base64_encode(const unsigned char *src, size_t len,
 
 
 /**
- * base64_decode - Base64 decode
+ * km_base64_decode - Base64 decode
  * @src: Data to be decoded
  * @len: Length of the data to be decoded
  * @out_len: Pointer to output length variable
@@ -92,7 +92,7 @@ unsigned char * base64_encode(const unsigned char *src, size_t len,
  *
  * Caller is responsible for freeing the returned buffer.
  */
-unsigned char * base64_decode(const unsigned char *src, size_t len,
+unsigned char * km_base64_decode(const unsigned char *src, size_t len,
     size_t *out_len) {
   unsigned char dtable[256], *out, *pos, block[4], tmp;
   size_t i, count, olen;

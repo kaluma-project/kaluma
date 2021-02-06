@@ -301,10 +301,10 @@ static int8_t CDC_Receive_FS (uint8_t* Buf, uint32_t *Len)
   for (uint32_t i = 0; i < *Len; i++) {
     uint8_t ch = Buf[i];
     if (ch == 3) { /* Ctrl+C */
-      repl_state_t *state = get_repl_state();
+      km_repl_state_t *state = km_get_repl_state();
       if (state->ymodem_state == 0) {
         skip_copy = true;
-        runtime_set_vm_stop(1);
+        km_runtime_set_vm_stop(1);
       }
     }
   }

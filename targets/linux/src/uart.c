@@ -25,41 +25,41 @@
 /**
  * Initialize all UART when system started
  */
-void uart_init() {
+void km_uart_init() {
 }
 
 /**
  * Cleanup all UART when system cleanup
  */
-void uart_cleanup() {
+void km_uart_cleanup() {
 }
 
-int uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
-    uart_parity_type_t parity, uint8_t stop, uart_flow_control_t flow,
+int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
+    km_uart_parity_type_t parity, uint8_t stop, km_uart_flow_control_t flow,
     size_t buffer_size) {
   return 0;
 }
 
-int uart_write(uint8_t port, uint8_t *buf, size_t len) {
+int km_uart_write(uint8_t port, uint8_t *buf, size_t len) {
   return 0;
 }
 
-uint32_t uart_available(uint8_t port) {
+uint32_t km_uart_available(uint8_t port) {
   return 0;
 }
 
-uint8_t uart_available_at(uint8_t port, uint32_t offset) {
+uint8_t km_uart_available_at(uint8_t port, uint32_t offset) {
   return 0;
 }
 
-uint32_t uart_buffer_size(uint8_t port) {
+uint32_t km_uart_buffer_size(uint8_t port) {
   return 0;
 }
 
-uint32_t uart_read(uint8_t port, uint8_t *buf, size_t len) {
+uint32_t km_uart_read(uint8_t port, uint8_t *buf, size_t len) {
   return 0;
 }
 
-int uart_close(uint8_t port) {
+int km_uart_close(uint8_t port) {
   return 0;
 }

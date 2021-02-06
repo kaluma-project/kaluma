@@ -28,11 +28,11 @@
 
 int main(void) {
   bool load = false;
-  system_init();
-  load = running_script_check();
-  tty_init();
+  km_system_init();
+  load = km_running_script_check();
+  km_tty_init();
   io_init();
-  repl_init();
-  runtime_init(load, true);
+  km_repl_init();
+  km_runtime_init(load, true);
   io_run();
 }
