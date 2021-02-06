@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,33 +26,33 @@
 /**
  * Initialize all SPI when system started
  */
-void spi_init() {
+void km_spi_init() {
 }
 
 /**
  * Cleanup all SPI when system cleanup
  */
-void spi_cleanup() {
+void km_spi_cleanup() {
 }
 
 /** SPI Setup
 */
-int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bitorder) {
+int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate, km_spi_bitorder_t bitorder) {
   return 0;
 }
 
-int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint32_t timeout) {
+int km_spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint32_t timeout) {
   return 0;
 }
 
-int spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
+int km_spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   return 0;
 }
 
-int spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
+int km_spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   return 0;
 }
 
-int spi_close(uint8_t bus) {
+int km_spi_close(uint8_t bus) {
   return 0;
 }

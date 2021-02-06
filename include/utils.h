@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,29 +19,29 @@
  * SOFTWARE.
  */
 
-#ifndef __UTILS_H
-#define __UTILS_H
+#ifndef __KM_UTILS_H
+#define __KM_UTILS_H
 
 #include <stdint.h>
 
-typedef struct list_node_s list_node_t;
-typedef struct list_s list_t;
+typedef struct km_list_node_s km_list_node_t;
+typedef struct km_list_s km_list_t;
 
-struct list_node_s {
-  list_node_t *prev;
-  list_node_t *next;
+struct km_list_node_s {
+  km_list_node_t *prev;
+  km_list_node_t *next;
 };
 
-struct list_s {
-  list_node_t *head;
-  list_node_t *tail;
+struct km_list_s {
+  km_list_node_t *head;
+  km_list_node_t *tail;
 };
 
-void list_init(list_t *list);
-void list_append(list_t *list, list_node_t *node);
-void list_remove(list_t *list, list_node_t *node);
+void km_list_init(km_list_t *list);
+void km_list_append(km_list_t *list, km_list_node_t *node);
+void km_list_remove(km_list_t *list, km_list_node_t *node);
 
-uint8_t hex1(char hex);
-uint8_t hex2bin(unsigned char *hex);
+uint8_t km_hex1(char hex);
+uint8_t km_hex2bin(unsigned char *hex);
 
-#endif /* __UTILS_H */
+#endif /* __KM_UTILS_H */

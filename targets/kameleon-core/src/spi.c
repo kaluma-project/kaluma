@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -65,24 +65,24 @@ static uint32_t get_prescaler_factor(uint8_t bus, uint32_t baudrate) {
 /**
  * Initialize all SPI when system started
  */
-void spi_init() {
+void km_spi_init() {
 }
 
 /**
  * Cleanup all SPI when system cleanup
  */
-void spi_cleanup() {
+void km_spi_cleanup() {
   for (int k = 0; k < SPI_NUM; k++) {
     if (spi_handle[k]->Instance == spi_ch[k])
-      spi_close(k);
+      km_spi_close(k);
   }
 }
 
 /** SPI Setup
 */
-int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bitorder) {
+int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate, km_spi_bitorder_t bitorder) {
   if ((bus != 0) && (bus != 1))
-    return SPIPORT_ERROR;
+    return KM_SPIPORT_ERROR;
 
   SPI_HandleTypeDef * pspi = spi_handle[bus];
 
@@ -90,19 +90,19 @@ int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bi
   pspi->Init.Mode = SPI_MODE_MASTER;
   switch (mode)
   {
-    case SPI_MODE_0:
+    case KM_SPI_MODE_0:
       pspi->Init.CLKPolarity = SPI_POLARITY_LOW;
       pspi->Init.CLKPhase = SPI_PHASE_1EDGE;
       break;
-    case SPI_MODE_1:
+    case KM_SPI_MODE_1:
       pspi->Init.CLKPolarity = SPI_POLARITY_LOW;
       pspi->Init.CLKPhase = SPI_PHASE_2EDGE;
       break;
-    case SPI_MODE_2:
+    case KM_SPI_MODE_2:
       pspi->Init.CLKPolarity = SPI_POLARITY_HIGH;
       pspi->Init.CLKPhase = SPI_PHASE_1EDGE;
       break;
-    case SPI_MODE_3:
+    case KM_SPI_MODE_3:
       pspi->Init.CLKPolarity = SPI_POLARITY_HIGH;
       pspi->Init.CLKPhase = SPI_PHASE_2EDGE;
       break;
@@ -119,12 +119,12 @@ int spi_setup(uint8_t bus, spi_mode_t mode, uint32_t baudrate, spi_bitorder_t bi
   if (HAL_SPI_Init(pspi) == HAL_OK) {
     return 0;
   }
-  return SPIPORT_ERROR;
+  return KM_SPIPORT_ERROR;
 }
 
-int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint32_t timeout) {
+int km_spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint32_t timeout) {
   if ((bus != 0) && (bus != 1))
-    return SPIPORT_ERROR;
+    return KM_SPIPORT_ERROR;
 
   SPI_HandleTypeDef * hspi = spi_handle[bus];
   HAL_StatusTypeDef status = HAL_SPI_TransmitReceive(hspi, tx_buf, rx_buf, (uint16_t)len, timeout);
@@ -132,12 +132,12 @@ int spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint
   if (status == HAL_OK) {
     return (len-hspi->RxXferCount);
   }
-  return SPIPORT_ERROR;
+  return KM_SPIPORT_ERROR;
 }
 
-int spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
+int km_spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   if ((bus != 0) && (bus != 1))
-    return SPIPORT_ERROR;
+    return KM_SPIPORT_ERROR;
 
   SPI_HandleTypeDef * hspi = spi_handle[bus];
   HAL_StatusTypeDef status = HAL_SPI_Transmit(hspi, buf, (uint16_t)len, timeout);
@@ -145,13 +145,13 @@ int spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   if (status == HAL_OK) {
     return len;
   }
-  return SPIPORT_ERROR;
+  return KM_SPIPORT_ERROR;
 }
 
-int spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
+int km_spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   uint8_t emptyBuf[len];
   if ((bus != 0) && (bus != 1))
-    return SPIPORT_ERROR;
+    return KM_SPIPORT_ERROR;
 
   SPI_HandleTypeDef * hspi = spi_handle[bus];
   //I think SPI_Receive function has a bug (sending garbage data)
@@ -163,17 +163,17 @@ int spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   if (status == HAL_OK) {
     return (len-hspi->RxXferCount);
   }
-  return SPIPORT_ERROR;
+  return KM_SPIPORT_ERROR;
 }
 
 
-int spi_close(uint8_t bus) {
+int km_spi_close(uint8_t bus) {
   if ((bus != 0) && (bus != 1))
-    return SPIPORT_ERROR;
+    return KM_SPIPORT_ERROR;
 
   HAL_StatusTypeDef hal_status = HAL_SPI_DeInit(spi_handle[bus]);
   if (hal_status == HAL_OK) {
     return bus;
   }
-  return SPIPORT_ERROR;
+  return KM_SPIPORT_ERROR;
 }

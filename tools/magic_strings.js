@@ -42,15 +42,15 @@ function generateMagicStrings(modules) {
   magicStringItems = magicStrings.map(item => { return { id: item, len: item.length } })
   magicStringItems[magicStringItems.length - 1].last = true;
 
-  const template_h = fs.readFileSync(__dirname + '/kameleon_magic_strings.h.mustache', 'utf8')
+  const template_h = fs.readFileSync(__dirname + '/kalamu_magic_strings.h.mustache', 'utf8')
   var rendered_h = mustache.render(template_h, { magicStrings: magicStringItems })
-  const template_c = fs.readFileSync(__dirname + '/kameleon_magic_strings.c.mustache', 'utf8')
+  const template_c = fs.readFileSync(__dirname + '/kalamu_magic_strings.c.mustache', 'utf8')
   var rendered_c = mustache.render(template_c, { magicStrings: magicStringItems })
 
   var genPath = path.join(__dirname, '../src/gen')
   fs.ensureDirSync(genPath)
-  fs.writeFileSync(path.join(genPath, 'kameleon_magic_strings.h'), rendered_h, 'utf8')
-  fs.writeFileSync(path.join(genPath, 'kameleon_magic_strings.c'), rendered_c, 'utf8')
+  fs.writeFileSync(path.join(genPath, 'kalamu_magic_strings.h'), rendered_h, 'utf8')
+  fs.writeFileSync(path.join(genPath, 'kalamu_magic_strings.c'), rendered_c, 'utf8')
 }
 
 function extractMagicStrings(filePath) {

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,8 +19,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ERRNO_H
-#define __ERRNO_H
+#ifndef __KM_ERRNO_H
+#define __KM_ERRNO_H
 
 #define EPERM            1      /* Operation not permitted */
 #define ENOENT           2      /* No such file or directory */
@@ -156,4 +156,4 @@
 #define ERFKILL         132     /* Operation not possible due to RF-kill */
 #define EHWPOISON       133     /* Memory page has hardware error */
 
-#endif /* __ERRNO_H */
+#endif /* __KM_ERRNO_H */

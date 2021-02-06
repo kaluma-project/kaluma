@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,8 +19,8 @@
  * SOFTWARE.
  */
 
-#ifndef __TTY_H
-#define __TTY_H
+#ifndef __KM_TTY_H
+#define __KM_TTY_H
 
 #include <stdio.h>
 #include <stdint.h>
@@ -30,14 +30,14 @@
 /**
  * Initialize TTY
  */
-void tty_init();
+void km_tty_init();
 
 /**
  * Check the number of bytes available to read.
  *
  * @return the number of bytes in TTY read buffer.
  */
-uint32_t tty_available();
+uint32_t km_tty_available();
 
 /**
  * Read bytes from TTY read buffer.
@@ -46,7 +46,7 @@ uint32_t tty_available();
  * @param len
  * @return the number of bytes read
  */
-uint32_t tty_read(uint8_t *buf, size_t len);
+uint32_t km_tty_read(uint8_t *buf, size_t len);
 
 /**
  * Read bytes synchronously from TTY read buffer.
@@ -56,21 +56,21 @@ uint32_t tty_read(uint8_t *buf, size_t len);
  * @param timeout
  * @return the number of bytes read
  */
-uint32_t tty_read_sync(uint8_t *buf, size_t len, uint32_t timeout);
+uint32_t km_tty_read_sync(uint8_t *buf, size_t len, uint32_t timeout);
 
 /**
  * Read a char from TTY
  *
  * @return char
  */
-uint8_t tty_getc();
+uint8_t km_tty_getc();
 
 /**
  * Write a char to TTY
  *
  * @param ch a character to write
  */
-void tty_putc(char ch);
+void km_tty_putc(char ch);
 
 /**
  * Write a formatted string to TTY
@@ -78,6 +78,6 @@ void tty_putc(char ch);
  * @param fmt a string format
  * @param ... arguments for the format
  */
-void tty_printf(const char *fmt, ...);
+void km_tty_printf(const char *fmt, ...);
 
-#endif /* __TTY_H */
+#endif /* __KM_TTY_H */

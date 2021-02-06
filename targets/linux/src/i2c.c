@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,47 +26,47 @@
 /**
  * Initialize all I2C when system started
  */
-void kameleon_i2c_init() {
+void km_i2c_init() {
 }
 
 /**
  * Cleanup all I2C when system cleanup
  */
-void kameleon_i2c_cleanup() {
+void km_i2c_cleanup() {
 }
 
-int kameleon_i2c_setup_master(uint8_t bus, uint32_t speed) {
+int km_i2c_setup_master(uint8_t bus, uint32_t speed) {
   return 0;
 }
 
-int kameleon_i2c_setup_slave(uint8_t bus, uint8_t address) {
+int km_i2c_setup_slave(uint8_t bus, uint8_t address) {
   return 0;
 }
 
-int kameleon_i2c_memWrite_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout) {
+int km_i2c_memWrite_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout) {
   return 0;
 }
 
-int kameleon_i2c_memRead_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout) {
+int km_i2c_memRead_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout) {
   return 0;
 }
 
-int kameleon_i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uint32_t timeout) {
+int km_i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uint32_t timeout) {
   return 0;
 }
 
-int kameleon_i2c_write_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
+int km_i2c_write_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   return 0;
 }
 
-int kameleon_i2c_read_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uint32_t timeout) {
+int km_i2c_read_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len, uint32_t timeout) {
   return 0;
 }
 
-int kameleon_i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
+int km_i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   return 0;
 }
 
-int kameleon_i2c_close(uint8_t bus) {
+int km_i2c_close(uint8_t bus) {
   return 0;
 }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,14 +19,14 @@
  * SOFTWARE.
  */
 
-#ifndef __RUNTIME_H
-#define __RUNTIME_H
+#ifndef __KM_RUNTIME_H
+#define __KM_RUNTIME_H
 
 #include "jerryscript.h"
 
-void runtime_init(bool load, bool first);
-void runtime_cleanup();
-void runtime_load();
-void runtime_set_vm_stop(uint8_t stop);
+void km_runtime_init(bool load, bool first);
+void km_runtime_cleanup();
+void km_runtime_load();
+void km_runtime_set_vm_stop(uint8_t stop);
 
-#endif /* __RUNTIME_H */
+#endif /* __KM_RUNTIME_H */

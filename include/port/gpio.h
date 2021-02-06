@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,46 +19,39 @@
  * SOFTWARE.
  */
 
-#ifndef __GPIO_H
-#define __GPIO_H
+#ifndef __KM_GPIO_H
+#define __KM_GPIO_H
 
 #include <stdint.h>
 
 typedef enum {
-  GPIO_IO_MODE_INPUT,
-  GPIO_IO_MODE_OUTPUT,
-  GPIO_IO_MODE_INPUT_PULLUP,
-  GPIO_IO_MODE_INPUT_PULLDOWN,
-} gpio_io_mode_t;
+  KM_GPIO_IO_MODE_INPUT,
+  KM_GPIO_IO_MODE_OUTPUT,
+  KM_GPIO_IO_MODE_INPUT_PULLUP,
+  KM_GPIO_IO_MODE_INPUT_PULLDOWN,
+} km_gpio_io_mode_t;
 
-typedef enum {
-  POLARITY_LOW_PHASE_1EDGE,
-  POLARITY_LOW_PHASE_2EDGE,
-  POLARITY_HIGH_PHASE_1EDGE,
-  POLARITY_HIGH_PHASE_2EDGE,
-} spi_clk_mode_t;
+#define KM_GPIO_LOW 0
+#define KM_GPIO_HIGH 1
 
-#define GPIO_LOW 0
-#define GPIO_HIGH 1
+#define KM_GPIO_PULL_UP 0
+#define KM_GPIO_PULL_DOWN 1
 
-#define GPIO_PULL_UP 0
-#define GPIO_PULL_DOWN 1
-
-#define GPIOPORT_ERROR -1
+#define KM_GPIOPORT_ERROR -1
 
 /**
  * Initialize all GPIO when system started
  */
-void gpio_init();
+void km_gpio_init();
 
 /**
  * Cleanup all GPIO when system cleanup
  */
-void gpio_cleanup();
+void km_gpio_cleanup();
 
-int gpio_set_io_mode(uint8_t pin, gpio_io_mode_t mode);
-int gpio_write(uint8_t pin, uint8_t value);
-int gpio_toggle(uint8_t pin);
-int gpio_read(uint8_t pin);
+int km_gpio_set_io_mode(uint8_t pin, km_gpio_io_mode_t mode);
+int km_gpio_write(uint8_t pin, uint8_t value);
+int km_gpio_toggle(uint8_t pin);
+int km_gpio_read(uint8_t pin);
 
-#endif /* __GPIO_H */
+#endif /* __KM_GPIO_H */

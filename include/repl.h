@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,8 +19,8 @@
  * SOFTWARE.
  */
 
-#ifndef __REPL_H
-#define __REPL_H
+#ifndef __KM_REPL_H
+#define __KM_REPL_H
 
 #include "jerryscript.h"
 #include "jerryxx.h"
@@ -29,21 +29,21 @@
 #define MAX_COMMAND_HISTORY 10
 
 typedef enum {
-  REPL_MODE_NORMAL,
-  REPL_MODE_ESCAPE
-} repl_mode_t;
+  KM_REPL_MODE_NORMAL,
+  KM_REPL_MODE_ESCAPE
+} km_repl_mode_t;
 
 typedef enum {
-  REPL_OUTPUT_NORMAL,
-  REPL_OUTPUT_INFO,
-  REPL_OUTPUT_ERROR
-} repl_output_t;
+  KM_REPL_OUTPUT_NORMAL,
+  KM_REPL_OUTPUT_INFO,
+  KM_REPL_OUTPUT_ERROR
+} km_repl_output_t;
 
-typedef struct repl_state_s repl_state_t;
-typedef void (*repl_handler_t)(repl_state_t *, uint8_t *, size_t);
+typedef struct km_repl_state_s km_repl_state_t;
+typedef void (*repl_handler_t)(km_repl_state_t *, uint8_t *, size_t);
 
-struct repl_state_s {
-  repl_mode_t mode;
+struct km_repl_state_s {
+  km_repl_mode_t mode;
   bool echo;
   repl_handler_t handler;
   char buffer[MAX_BUFFER_LENGTH + 1];
@@ -58,15 +58,15 @@ struct repl_state_s {
   uint8_t ymodem_state; // 0=stopped, 1=transfering
 };
 
-void repl_init();
-repl_state_t *get_repl_state();
+void km_repl_init();
+km_repl_state_t *km_get_repl_state();
 
-void repl_set_output(repl_output_t output);
-void repl_print_prompt();
-#define repl_printf(format,args...) tty_printf(format, ## args)
-#define repl_print_value(value) jerryxx_print_value(value)
-#define repl_putc(ch) tty_putc(ch)
-void repl_pretty_print(uint8_t indent, uint8_t depth, jerry_value_t value);
-void repl_println();
+void km_repl_set_output(km_repl_output_t output);
+void km_repl_print_prompt();
+#define km_repl_printf(format,args...) km_tty_printf(format, ## args)
+#define km_repl_print_value(value) jerryxx_print_value(value)
+#define km_repl_putc(ch) km_tty_putc(ch)
+void km_repl_pretty_print(uint8_t indent, uint8_t depth, jerry_value_t value);
+void km_repl_println();
 
-#endif /* __REPL_H */
+#endif /* __KM_REPL_H */

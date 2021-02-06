@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,18 +26,18 @@
 #include "ieee80211.h"
 #include "io.h"
 
-static void scan_cb(io_ieee80211_handle_t *, int count, ieee80211_scan_info_t* records);
-static void assoc_cb(io_ieee80211_handle_t *);
-static void connect_cb(io_ieee80211_handle_t *);
-static void disconnect_cb(io_ieee80211_handle_t *);
+static void scan_cb(km_io_ieee80211_handle_t *, int count, km_ieee80211_scan_info_t* records);
+static void assoc_cb(km_io_ieee80211_handle_t *);
+static void connect_cb(km_io_ieee80211_handle_t *);
+static void disconnect_cb(km_io_ieee80211_handle_t *);
 
 JERRYXX_FUN(wifi_ctor_fn) {
-    io_ieee80211_handle_t *handle = malloc(sizeof(io_ieee80211_handle_t));
-    io_ieee80211_init(handle);
+    km_io_ieee80211_handle_t *handle = malloc(sizeof(km_io_ieee80211_handle_t));
+    km_io_ieee80211_init(handle);
     handle->scan_js_cb = jerry_create_null();
     handle->this_val = jerry_acquire_value(JERRYXX_GET_THIS);
 
-    io_ieee80211_start(handle, scan_cb, assoc_cb, connect_cb, disconnect_cb);
+    km_io_ieee80211_start(handle, scan_cb, assoc_cb, connect_cb, disconnect_cb);
     jerryxx_set_property_number(JERRYXX_GET_THIS, "handle_id", handle->base.id);
 
     return jerry_create_undefined();
@@ -46,7 +46,7 @@ JERRYXX_FUN(wifi_ctor_fn) {
 JERRYXX_FUN(wifi_reset_fn) {
     JERRYXX_CHECK_ARG_FUNCTION(0, "cb");
     jerry_value_t callback = JERRYXX_GET_ARG(0);
-    int ret = ieee80211_reset();
+    int ret = km_ieee80211_reset();
     jerry_value_t arg = jerry_create_number(ret);
     if (jerry_value_is_function(callback)) {
         jerry_value_t args[1] = { arg };
@@ -65,7 +65,7 @@ JERRYXX_FUN(wifi_reset_fn) {
 //===============================================
 // SCAN
 //#pragma region SCAN
-static jerry_value_t ap_list_to_jobject(const ieee80211_scan_info_t* ap_list, int count)
+static jerry_value_t ap_list_to_jobject(const km_ieee80211_scan_info_t* ap_list, int count)
 {
     jerry_value_t jobj = jerry_create_array(count);
     jerry_value_t ssidStr = jerry_create_string((const jerry_char_t*)"ssid");
@@ -89,7 +89,7 @@ static jerry_value_t ap_list_to_jobject(const ieee80211_scan_info_t* ap_list, in
     return jobj;
 }
 
-static void scan_cb(io_ieee80211_handle_t *handle, int count, ieee80211_scan_info_t* records)
+static void scan_cb(km_io_ieee80211_handle_t *handle, int count, km_ieee80211_scan_info_t* records)
 {
     if (jerry_value_is_function(handle->scan_js_cb)) {
         jerry_value_t err_js = jerry_create_number(0);
@@ -112,17 +112,17 @@ JERRYXX_FUN(wifi_scan_fn) {
     jerry_value_t callback = JERRYXX_GET_ARG(0);
 
     int handle_id = jerryxx_get_property_number(this_val, "handle_id", 0);
-    io_ieee80211_handle_t* handle = io_ieee80211_get_by_id(handle_id);
+    km_io_ieee80211_handle_t* handle = km_io_ieee80211_get_by_id(handle_id);
     jerry_release_value(handle->scan_js_cb);
     handle->scan_js_cb = jerry_acquire_value(callback);
 
-    int ret = ieee80211_scan();
+    int ret = km_ieee80211_scan();
     return jerry_create_number(ret);
 }
 
 //===============================================
 // ASSOC
-static void assoc_cb(io_ieee80211_handle_t *handle)
+static void assoc_cb(km_io_ieee80211_handle_t *handle)
 {
     jerry_value_t this_val = handle->this_val;
     jerry_value_t callback = jerryxx_get_property(this_val, "assoc_cb");
@@ -142,7 +142,7 @@ static void assoc_cb(io_ieee80211_handle_t *handle)
 
 //===============================================
 // CONNECT
-static void connect_cb(io_ieee80211_handle_t *handle)
+static void connect_cb(km_io_ieee80211_handle_t *handle)
 {
     jerry_value_t this_val = handle->this_val;
     jerry_value_t callback = jerryxx_get_property(this_val, "connect_cb");
@@ -174,7 +174,7 @@ JERRYXX_FUN(wifi_connect_fn) {
     JERRYXX_GET_PROPERTY_STRING_AS_CHAR(connectInfo, password);
 
     // connect
-    int retVal = ieee80211_connect((const char*)ssid, (const char*)password);
+    int retVal = km_ieee80211_connect((const char*)ssid, (const char*)password);
 
     // call callback
     jerry_value_t callback = JERRYXX_GET_ARG(1);
@@ -191,7 +191,7 @@ JERRYXX_FUN(wifi_connect_fn) {
 
 //===============================================
 // DISCONNECT
-static void disconnect_cb(io_ieee80211_handle_t *handle)
+static void disconnect_cb(km_io_ieee80211_handle_t *handle)
 {
     jerry_value_t this_val = handle->this_val;
     jerry_value_t callback = jerryxx_get_property(this_val, "disconnect_cb");
@@ -211,7 +211,7 @@ static void disconnect_cb(io_ieee80211_handle_t *handle)
 JERRYXX_FUN(wifi_disconnect_fn) {
     JERRYXX_CHECK_ARG_FUNCTION(0, "cb");
 
-    int retVal = ieee80211_disconnect();
+    int retVal = km_ieee80211_disconnect();
 
     jerry_value_t callback = JERRYXX_GET_ARG(0);
     jerry_value_t err_js = jerry_create_number(retVal);
@@ -227,8 +227,8 @@ JERRYXX_FUN(wifi_disconnect_fn) {
 }
 
 JERRYXX_FUN(wifi_get_connection_fn) {
-    ieee80211_scan_info_t ap_info;
-    int ret = ieee80211_sta_get_ap_info(&ap_info);
+    km_ieee80211_scan_info_t ap_info;
+    int ret = km_ieee80211_sta_get_ap_info(&ap_info);
 
     jerry_value_t jsinfo = jerry_create_object();
 

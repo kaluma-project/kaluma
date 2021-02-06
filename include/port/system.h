@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,72 +19,72 @@
  * SOFTWARE.
  */
 
-#ifndef __SYSTEM_H
-#define __SYSTEM_H
+#ifndef __KM_SYSTEM_H
+#define __KM_SYSTEM_H
 
 #include <stdint.h>
 
-extern const char system_arch[];
-extern const char system_platform[];
+extern const char km_system_arch[];
+extern const char km_system_platform[];
 
 /**
  * Initialize the system
  */
-void system_init();
+void km_system_init();
 
 /**
  * Cleanup all resources in the system
  */
-void system_cleanup();
+void km_system_cleanup();
 
 /**
  * Increment tick count
  */
-void inc_tick();
+void km_inc_tick();
 
 /**
  * Delay in milliseconds
  *
  * @param {uint64_t} msec
  */
-void delay(uint64_t msec);
+void km_delay(uint64_t msec);
 
 /**
  * Return current time (UNIX timestamp in milliseconds)
  */
-uint64_t gettime();
+uint64_t km_gettime();
 
 /**
  * Set current time (UNIX timestamp in milliseconds)
  *
  * @param {uint64_t} msec
  */
-void settime(uint64_t time);
+void km_settime(uint64_t time);
 
 /**
  * Return MAX of the micro seconde counter
  * Use this value to detect counter overflow
 */
-uint32_t micro_maxtime(void);
+uint32_t km_micro_maxtime(void);
 
 /**
  * Return micro seconde counter
 */
-uint32_t micro_gettime(void);
+uint32_t km_micro_gettime(void);
 
 /**
  * micro secoded delay
 */
-void micro_delay(uint32_t usec);
+void km_micro_delay(uint32_t usec);
 
 /**
  * Firmware update request
  */
-void request_firmup();
+void km_request_firmup();
 
 /**
  * check script running mode - skipping or running user script
  */
-uint8_t running_script_check();
+uint8_t km_running_script_check();
 
-#endif /* __SYSTEM_H */
+#endif /* __KM_SYSTEM_H */

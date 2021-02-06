@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,20 +19,14 @@
  * SOFTWARE.
  */
 
+#ifndef KALAMU_MAGIC_STRINGS_H
+#define KALAMU_MAGIC_STRINGS_H
+
 #include <stdint.h>
 #include "jerryscript.h"
-#include "kameleon_magic_strings.h"
 
-const uint32_t num_magic_string_items = {{magicStrings.length}};
+extern const uint32_t num_magic_string_items;
+extern const jerry_char_t *magic_string_items[];
+extern const jerry_length_t magic_string_lengths[];
 
-const jerry_char_t *magic_string_items[] = {
-  {{#magicStrings}}
-  (const jerry_char_t *) "{{id}}"{{^last}},{{/last}}
-  {{/magicStrings}}
-};
-
-const jerry_length_t magic_string_lengths[] = {
-  {{#magicStrings}}
-  {{len}}{{^last}},{{/last}}
-  {{/magicStrings}}
-};
+#endif

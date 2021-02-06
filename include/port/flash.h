@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,64 +19,64 @@
  * SOFTWARE.
  */
 
-#ifndef __FLASH_H
-#define __FLASH_H
+#ifndef __KM_FLASH_H
+#define __KM_FLASH_H
 
 #include <stdint.h>
 
 typedef enum {
-  FLASH_SUCCESS   = 0x00U,
-  FLASH_FAIL      = 0x01U,
-  FLASH_TIMEOUT   = 0x02U,
-} flash_status_t;
+  KM_FLASH_SUCCESS   = 0x00U,
+  KM_FLASH_FAIL      = 0x01U,
+  KM_FLASH_TIMEOUT   = 0x02U,
+} km_flash_status_t;
 
 /**
  * Erase all the data in the flash and set the data size to zero
  */
-void flash_clear();
+void km_flash_clear();
 
 /**
  * Return total size of flash
  */
-uint32_t flash_size();
+uint32_t km_flash_size();
 
 /**
  * Return a pointer to the data stored in the flash
  */
-uint8_t *flash_get_data();
+uint8_t *km_flash_get_data();
 
 /**
- * Free memory that's allocated in flash_get_data()
+ * Free memory that's allocated in km_flash_get_data()
  */
-void flash_free_data(uint8_t *data);
+void km_flash_free_data(uint8_t *data);
 /**
  * Return the size of the data stored in the flash
  */
-uint32_t flash_get_data_size();
+uint32_t km_flash_get_data_size();
 
 /**
  * Begin to write data to the flash
  */
-void flash_program_begin();
+void km_flash_program_begin();
 
 /**
  * Program data to the flash
  */
-flash_status_t flash_program(uint8_t * buf, uint32_t size);
+km_flash_status_t km_flash_program(uint8_t * buf, uint32_t size);
 
 /**
  * Program data to the flash
  */
-flash_status_t flash_program_byte(uint8_t val);
+km_flash_status_t km_flash_program_byte(uint8_t val);
 
 /**
  * Finish to write data to the flash
  */
-void flash_program_end();
+void km_flash_program_end();
 
 /**
  * Calcurate the checksum value for the written data in flash
  */
-uint32_t flash_get_checksum();
+uint32_t km_flash_get_checksum();
 
-#endif /* __FLASH_H */
+#endif /* __KM_FLASH_H */

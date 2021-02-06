@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
  * Erase all items in the storage
  * @return Return 0 on success or -1 on failture
  */
-int storage_clear(void) {
+int km_storage_clear(void) {
   return 0;
 }
 
@@ -33,7 +33,7 @@ int storage_clear(void) {
  * Return the number of items in the storage
  * @return The number of items, or -1 on failture
  */
-int storage_length() {
+int km_storage_length() {
   return 0;
 }
 
@@ -43,7 +43,7 @@ int storage_length() {
  * @param buf The pointer to the buffer to store value
  * @return Returns the length of value or -1 on failure (key not found)
  */
-int storage_get_item(const char *key, char *buf) {
+int km_storage_get_item(const char *key, char *buf) {
   return 0;
 }
 
@@ -53,7 +53,7 @@ int storage_get_item(const char *key, char *buf) {
  * @param buf The pointer to the buffer to store value
  * @return Returns 0 on success or -1 on failure or -2 on sweep required or -3 on full storage or -4 on over length.
  */
-int storage_set_item(const char *key, char *buf) {
+int km_storage_set_item(const char *key, char *buf) {
   return 0;
 }
 
@@ -62,7 +62,7 @@ int storage_set_item(const char *key, char *buf) {
  * @param key The point to key string
  * @return Returns 0 on success or -1 on failure.
  */
-int storage_remove_item(const char *key) {
+int km_storage_remove_item(const char *key) {
   return 0;
 }
 
@@ -72,6 +72,6 @@ int storage_remove_item(const char *key) {
  * @param buf The pointer to the buffer to store key string
  * @return Returns 0 on success or -1 on failure.
  */
-int storage_key(const int index, char *buf) {
+int km_storage_key(const int index, char *buf) {
   return 0;
 }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,8 +19,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ADC_H
-#define __ADC_H
+#ifndef __KM_ADC_H
+#define __KM_ADC_H
 
 #include <stdint.h>
 #define ADCPORT_ERRROR  -1
@@ -28,12 +28,12 @@
 /**
  * Initialize all ADC channels when system started
  */
-void adc_init();
+void km_adc_init();
 
 /**
  * Cleanup all ADC channels when system cleanup
  */
-void adc_cleanup();
+void km_adc_cleanup();
 
 /**
  * Setup a ADC channel
@@ -41,15 +41,15 @@ void adc_cleanup();
  * @param pin Pin number.
  * @return Returns channel number on success or -1 on failure.
  */
-int adc_setup(uint8_t pin);
+int km_adc_setup(uint8_t pin);
 
 /**
  * Read value from a ADC channel
  *
- * @param ADC index (output of adc_setup).
+ * @param ADC index (output of km_adc_setup).
  * @return Return a value read between 0 and 1.
  */
-double adc_read(uint8_t adcIndex);
+double km_adc_read(uint8_t adcIndex);
 
 /**
  * Close the ADC channel
@@ -57,6 +57,6 @@ double adc_read(uint8_t adcIndex);
  * @param pin Pin number.
  * @return Returns 0 on success or -1 on failure.
  */
-int adc_close(uint8_t pin);
+int km_adc_close(uint8_t pin);
 
-#endif /* __ADC_H */
+#endif /* __KM_ADC_H */

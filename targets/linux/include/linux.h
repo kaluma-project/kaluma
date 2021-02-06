@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,9 +22,9 @@
 #ifndef __LINUX_H
 #define __LINUX_H
 
-#define KAMELEON_MANUFACTURER_STRING "Kameleon (kameleon.io)"
-#define KAMELEON_PRODUCT_STRING "Kameleon Core"
-#define KAMELEON_SERIALNUMBER_STRING "00000000001A"
+#define KALAMU_MANUFACTURER_STRING "Kalamu (kalamu.io)"
+#define KALAMU_PRODUCT_STRING "Kameleon Core"
+#define KALAMU_SERIALNUMBER_STRING "00000000001A"
 
 #define PLL_M 8
 #define PLL_N 192

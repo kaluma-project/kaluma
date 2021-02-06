@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -113,17 +113,17 @@ static void adc1_deinit() {
 /**
  * Initialize all ADC channels when system started
  */
-void adc_init() {
+void km_adc_init() {
 }
 
 /**
  * Cleanup all ADC channels when system cleanup
  */
-void adc_cleanup() {
+void km_adc_cleanup() {
   uint32_t n = sizeof(adc_config) / sizeof(struct __adc_config);
   for (int k=0; k<n; k++) {
     if (adc_configured[k])
-      adc_close(adc_config[k].pin_number);
+      km_adc_close(adc_config[k].pin_number);
   }
 }
 
@@ -133,7 +133,7 @@ void adc_cleanup() {
  * @param {uint8_t} adcIndex
  * @return {double}
  */
-double adc_read(uint8_t adcIndex) {
+double km_adc_read(uint8_t adcIndex) {
   HAL_ADC_Start(&hadc1);
 
   for (int k=0; k<ADC_NUM; k++) {
@@ -152,7 +152,7 @@ double adc_read(uint8_t adcIndex) {
   return (double)adc_buf[adcIndex] / (1 << ADC_RESOLUTION_BIT);
 }
 
-int adc_setup(uint8_t pin) {
+int km_adc_setup(uint8_t pin) {
 
   int n = get_adc_index(pin);
   if (n == ADCPORT_ERRROR)
@@ -179,7 +179,7 @@ int adc_setup(uint8_t pin) {
   return n;
 }
 
-int adc_close(uint8_t pin) {
+int km_adc_close(uint8_t pin) {
   int n = get_adc_index(pin);
   if (n == ADCPORT_ERRROR)
     return ADCPORT_ERRROR;

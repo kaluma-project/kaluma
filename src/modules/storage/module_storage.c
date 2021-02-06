@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@ JERRYXX_FUN(storage_set_item_fn) {
   JERRYXX_CHECK_ARG_STRING(1, "value")
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
   JERRYXX_GET_ARG_STRING_AS_CHAR(1, value)
-  int res = storage_set_item(key, value);
+  int res = km_storage_set_item(key, value);
   return jerry_create_number(res);
 }
 
@@ -44,7 +44,7 @@ JERRYXX_FUN(storage_get_item_fn) {
   JERRYXX_CHECK_ARG_STRING(0, "key")
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
   char buf[256];
-  int res = storage_get_item(key, buf);
+  int res = km_storage_get_item(key, buf);
   if (res > -1) {
     return jerry_create_string((const jerry_char_t *) buf);
   } else { // key not found
@@ -58,7 +58,7 @@ JERRYXX_FUN(storage_get_item_fn) {
 JERRYXX_FUN(storage_remove_item_fn) {
   JERRYXX_CHECK_ARG_STRING(0, "key")
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
-  int res = storage_remove_item(key);
+  int res = km_storage_remove_item(key);
   if (res > -1) {
     return jerry_create_undefined();
   } else { // failure
@@ -70,7 +70,7 @@ JERRYXX_FUN(storage_remove_item_fn) {
  * exports.clear function
  */
 JERRYXX_FUN(storage_clear_fn) {
-  int res = storage_clear();
+  int res = km_storage_clear();
   if (res > -1) {
     return jerry_create_undefined();
   } else { // failure
@@ -82,7 +82,7 @@ JERRYXX_FUN(storage_clear_fn) {
  * exports.length function
  */
 JERRYXX_FUN(storage_length_fn) {
-  int len = storage_length();
+  int len = km_storage_length();
   if (len > -1) {
     return jerry_create_number(len);
   } else { // failure
@@ -97,7 +97,7 @@ JERRYXX_FUN(storage_key_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "index")
   int index = (int) JERRYXX_GET_ARG_NUMBER(0);
   char buf[256];
-  int res = storage_key(index, buf);
+  int res = km_storage_key(index, buf);
   if (res > -1) {
     return jerry_create_string((const jerry_char_t *) buf);
   } else { // failure

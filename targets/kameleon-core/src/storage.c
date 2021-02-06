@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -235,7 +235,7 @@ static int storage_erase(void) {
  * Erase all items in the storage
  * @return Return 0 on success or -1 on failture
  */
-int storage_clear(void) {
+int km_storage_clear(void) {
   return storage_erase();
 }
 
@@ -243,7 +243,7 @@ int storage_clear(void) {
  * Return the number of items in the storage
  * @return The number of items, or -1 on failture
  */
-int storage_length() {
+int km_storage_length() {
   return get_number_of_storage(STORAGE_ACTIVE);
 }
 
@@ -253,7 +253,7 @@ int storage_length() {
  * @param buf The pointer to the buffer to store value
  * @return Returns the length of value or -1 on failure (key not found)
  */
-int storage_get_item(const char *key, char *buf) {
+int km_storage_get_item(const char *key, char *buf) {
   int slot = get_slot_from_key(key);
   if (slot < 0)
     return slot;
@@ -272,7 +272,7 @@ int storage_get_item(const char *key, char *buf) {
  * @param buf The pointer to the buffer to store value
  * @return Returns 0 on success or -1 on failure or -2 on sweep required or -3 on full storage or -4 on over length.
  */
-int storage_set_item(const char *key, char *buf) {
+int km_storage_set_item(const char *key, char *buf) {
   int status = STORAGE_OK;
   if (get_number_of_storage(STORAGE_EMPTY) == 0) {
     return get_status_of_full_storage();
@@ -288,7 +288,7 @@ int storage_set_item(const char *key, char *buf) {
       int i;
       for (i = 0; i < size; i++) {
         if (buf[i] != storage_data->data[storage_data->key_length + i]) {
-          if (storage_remove_item(key) < 0)
+          if (km_storage_remove_item(key) < 0)
             status = STORAGE_ERROR;
           break;
         }
@@ -296,7 +296,7 @@ int storage_set_item(const char *key, char *buf) {
       if (i == size)
         return STORAGE_OK; /*The same data, no need to re-write */
     } else {
-      if (storage_remove_item(key) < 0)
+      if (km_storage_remove_item(key) < 0)
         status = STORAGE_ERROR;
     }
   }
@@ -332,7 +332,7 @@ int storage_set_item(const char *key, char *buf) {
  * @param key The point to key string
  * @return Returns 0 on success or -1 on failure.
  */
-int storage_remove_item(const char *key) {
+int km_storage_remove_item(const char *key) {
   int status;
   int slot = get_slot_from_key(key);
   if (slot >= 0) {
@@ -355,7 +355,7 @@ int storage_remove_item(const char *key) {
  * @param buf The pointer to the buffer to store key string
  * @return Returns 0 on success or -1 on failure.
  */
-int storage_key(const int index, char *buf) {
+int km_storage_key(const int index, char *buf) {
   int slot = get_slot_from_index(index);
   if (slot < 0)
     return slot;

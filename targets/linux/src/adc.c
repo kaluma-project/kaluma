@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,13 +42,13 @@ static int get_adc_index(uint8_t pin) {
 /**
  * Initialize all ADC channels when system started
  */
-void adc_init() {
+void km_adc_init() {
 }
 
 /**
  * Cleanup all ADC channels when system cleanup
  */
-void adc_cleanup() {
+void km_adc_cleanup() {
 }
 
 /**
@@ -57,15 +57,15 @@ void adc_cleanup() {
  * @param {uint8_t} adcIndex
  * @return {double}
  */
-double adc_read(uint8_t adcIndex) {
+double km_adc_read(uint8_t adcIndex) {
   return 0.0d;
 }
 
-int adc_setup(uint8_t pin) {
+int km_adc_setup(uint8_t pin) {
   return 0;
 }
 
-int adc_close(uint8_t pin) {
+int km_adc_close(uint8_t pin) {
   return 0;
 }
 

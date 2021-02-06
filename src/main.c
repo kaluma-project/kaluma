@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kameleon
+/* Copyright (c) 2017 Kalamu
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,11 +28,11 @@
 
 int main(void) {
   bool load = false;
-  system_init();
-  load = running_script_check();
-  tty_init();
+  km_system_init();
+  load = km_running_script_check();
+  km_tty_init();
   io_init();
-  repl_init();
-  runtime_init(load, true);
+  km_repl_init();
+  km_runtime_init(load, true);
   io_run();
 }

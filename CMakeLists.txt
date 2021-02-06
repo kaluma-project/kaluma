@@ -10,4 +10,4 @@ if(NOT TARGET)
   set(TARGET kameleon-core)
 endif()
 
-include(${KM_CMAKE_DIR}/kameleon.cmake)
+include(${KM_CMAKE_DIR}/kalamu.cmake)
