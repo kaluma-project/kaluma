@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kalamu
+/* Copyright (c) 2017 Kaluma
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@
 #include "repl.h"
 #include "system.h"
 #include "runtime.h"
-#include "kalamu_magic_strings.h"
+#include "kaluma_magic_strings.h"
 #include "jerryxx.h"
 
 

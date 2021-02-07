@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kalamu
+/* Copyright (c) 2017 Kaluma
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,14 +19,14 @@
  * SOFTWARE.
  */
 
-#ifndef __KALAMU_CORE_H
-#define __KALAMU_CORE_H
+#ifndef __KALUMA_CORE_H
+#define __KALUMA_CORE_H
 
 #include "stm32f4xx.h"
 
-#define KALAMU_MANUFACTURER_STRING "Kalamu (kalamu.io)"
-#define KALAMU_PRODUCT_STRING "Kameleon Core"
-#define KALAMU_SERIALNUMBER_STRING "00000000001A"
+#define KALUMA_MANUFACTURER_STRING "Kaluma (kaluma.io)"
+#define KALUMA_PRODUCT_STRING "Kameleon Core"
+#define KALUMA_SERIALNUMBER_STRING "00000000001A"
 
 #define PLL_M 8
 #define PLL_N 192
@@ -69,4 +69,4 @@ uint32_t tty_get_tx_data_length();
 
 uint32_t tty_fill_rx_bytes(uint8_t * buf, uint32_t nToWrite);
 
-#endif /* __KALAMU_CORE_H */
+#endif /* __KALUMA_CORE_H */

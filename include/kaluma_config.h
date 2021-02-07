@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kalamu
+/* Copyright (c) 2017 Kaluma
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,20 +19,9 @@
  * SOFTWARE.
  */
 
-#include <stdint.h>
-#include "jerryscript.h"
-#include "kalamu_magic_strings.h"
+#ifndef __KALUMA_CONFIG_H
+#define __KALUMA_CONFIG_H
 
-const uint32_t num_magic_string_items = {{magicStrings.length}};
+#define KALUMA_VERSION "1.0.0"
 
-const jerry_char_t *magic_string_items[] = {
-  {{#magicStrings}}
-  (const jerry_char_t *) "{{id}}"{{^last}},{{/last}}
-  {{/magicStrings}}
-};
-
-const jerry_length_t magic_string_lengths[] = {
-  {{#magicStrings}}
-  {{len}}{{^last}},{{/last}}
-  {{/magicStrings}}
-};
+#endif /* __KALUMA_CONFIG_H */

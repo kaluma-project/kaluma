@@ -44,30 +44,30 @@ set(JERRY_ARGS
   --cpointer-32bit=ON)
 
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
-set(KALAMU_GENERATED_C
-  ${SRC_DIR}/gen/kalamu_modules.c
-  ${SRC_DIR}/gen/kalamu_magic_strings.c)
-set(KALAMU_GENERATED_H
-  ${SRC_DIR}/gen/kalamu_modules.h
-  ${SRC_DIR}/gen/kalamu_magic_strings.h)
+set(KALUMA_GENERATED_C
+  ${SRC_DIR}/gen/kaluma_modules.c
+  ${SRC_DIR}/gen/kaluma_magic_strings.c)
+set(KALUMA_GENERATED_H
+  ${SRC_DIR}/gen/kaluma_modules.h
+  ${SRC_DIR}/gen/kaluma_magic_strings.h)
 
-set(KALAMU_GENERATED ${KALAMU_GENERATED_C} ${KALAMU_GENERATED_H})
+set(KALUMA_GENERATED ${KALUMA_GENERATED_C} ${KALUMA_GENERATED_H})
 
-string (REPLACE ";" " " KALAMU_MODULE_LIST "${KALAMU_MODULES}")
+string (REPLACE ";" " " KALUMA_MODULE_LIST "${KALUMA_MODULES}")
 
 set(JERRY_LIBS
   ${JERRY_ROOT}/build/lib/libjerry-core.a
   ${JERRY_ROOT}/build/lib/libjerry-ext.a)
 
 add_custom_command(OUTPUT ${JERRY_LIBS}
-  DEPENDS ${KALAMU_GENERATED_C}
+  DEPENDS ${KALUMA_GENERATED_C}
   WORKING_DIRECTORY ${JERRY_ROOT}
   COMMAND python tools/build.py --clean ${JERRY_ARGS})
 
-add_custom_command(OUTPUT ${KALAMU_GENERATED_C}
+add_custom_command(OUTPUT ${KALUMA_GENERATED_C}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   COMMAND python ${JERRY_ROOT}/tools/build.py --clean --jerry-cmdline-snapshot=ON --snapshot-save=ON --snapshot-exec=ON --profile=es2015-subset
-  COMMAND node tools/js2c.js --modules=${KALAMU_MODULE_LIST} --target=${TARGET}
+  COMMAND node tools/js2c.js --modules=${KALUMA_MODULE_LIST} --target=${TARGET}
   COMMAND rm -rf deps/jerryscript/build)
 
 # Delete generaged file to generate it every time.
@@ -75,8 +75,8 @@ add_custom_command(OUTPUT clean_gen
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   COMMAND rm -f src/gen/*)
 #=============================================================
-set(KALAMU_INC ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/port ${SRC_DIR}/gen ${SRC_DIR}/modules)
-include_directories(${KALAMU_INC} ${JERRY_INC})
+set(KALUMA_INC ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/port ${SRC_DIR}/gen ${SRC_DIR}/modules)
+include_directories(${KALUMA_INC} ${JERRY_INC})
 
 list(APPEND SOURCES
   ${SRC_DIR}/main.c
@@ -89,29 +89,29 @@ list(APPEND SOURCES
   ${SRC_DIR}/jerryxx.c
   ${SRC_DIR}/global.c
   ${SRC_DIR}/ymodem.c
-  ${KALAMU_GENERATED_C})
+  ${KALUMA_GENERATED_C})
 
-if(KALAMU_MODULE_PWM)
+if(KALUMA_MODULE_PWM)
   list(APPEND SOURCES ${SRC_DIR}/modules/pwm/module_pwm.c)
   include_directories(${SRC_DIR}/modules/pwm)
 endif()
-if(KALAMU_MODULE_I2C)
+if(KALUMA_MODULE_I2C)
   list(APPEND SOURCES ${SRC_DIR}/modules/i2c/module_i2c.c)
   include_directories(${SRC_DIR}/modules/i2c)
 endif()
-if(KALAMU_MODULE_SPI)
+if(KALUMA_MODULE_SPI)
   list(APPEND SOURCES ${SRC_DIR}/modules/spi/module_spi.c)
   include_directories(${SRC_DIR}/modules/spi)
 endif()
-if(KALAMU_MODULE_STORAGE)
+if(KALUMA_MODULE_STORAGE)
   list(APPEND SOURCES ${SRC_DIR}/modules/storage/module_storage.c)
   include_directories(${SRC_DIR}/modules/storage)  
 endif()
-if(KALAMU_MODULE_UART)
+if(KALUMA_MODULE_UART)
   list(APPEND SOURCES ${SRC_DIR}/modules/uart/module_uart.c)
   include_directories(${SRC_DIR}/modules/uart)  
 endif()
-if(KALAMU_MODULE_GRAPHICS)
+if(KALUMA_MODULE_GRAPHICS)
   list(APPEND SOURCES
     ${SRC_DIR}/modules/graphics/gc_cb_prims.c
     ${SRC_DIR}/modules/graphics/gc_1bit_prims.c
@@ -135,5 +135,5 @@ else()
     COMMAND ${CMAKE_OBJCOPY} -O binary -S ${TARGET}.elf ${TARGET}.bin
     DEPENDS ${TARGET}.elf)
 
-  add_custom_target(kalamu ALL DEPENDS ${TARGET}.hex ${TARGET}.bin)
+  add_custom_target(kaluma ALL DEPENDS ${TARGET}.hex ${TARGET}.bin)
 endif()

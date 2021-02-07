@@ -15,12 +15,12 @@ Kaluma is a tiny and efficient JavaScript runtime for microcontrollers. The main
 Resources
 =========
 
-* [Documentation](https://docs.kalamu.io/)
+* [Documentation](https://docs.kaluma.io/)
 * [CLI (Command Line Interface)](https://github.com/kaluma-project/kaluma-cli)
 
 Supported Targets
 =================
 
 * Raspberry Pi Pico (working)
-* [Kameleon Core](https://docs.kalamu.io/boards/kameleon-core)
+* [Kameleon Core](https://docs.kaluma.io/boards/kameleon-core)
 * Contributions are welcome for other boards

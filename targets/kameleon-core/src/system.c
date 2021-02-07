@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kalamu
+/* Copyright (c) 2017 Kaluma
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -234,7 +234,7 @@ void km_request_firmup() {
 }
 
 /**
- * Kalamu Hardware System Initializations
+ * Kaluma Hardware System Initializations
  */
 void km_system_init() {
   HAL_Init();
