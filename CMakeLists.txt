@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
-project(KM_CMAKE NONE)
+if("${TARGET}" STREQUAL "rpi-pico")
+else()
+  project(KM_CMAKE NONE)
+endif()
 set(KM_CMAKE_DIR ${CMAKE_SOURCE_DIR}/tools)
 # Available targets : kameleon-core linux
 

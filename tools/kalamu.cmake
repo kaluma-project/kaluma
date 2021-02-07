@@ -122,12 +122,18 @@ if(KALAMU_MODULE_GRAPHICS)
   include_directories(${SRC_DIR}/modules/graphics)
 endif()
 
-add_executable(${TARGET}.elf ${SOURCES} ${JERRY_LIBS} clean_gen)
-target_link_libraries(${TARGET}.elf ${JERRY_LIBS} ${TARGET_LIBS})
+if("${TARGET}" STREQUAL "rpi-pico")
+  add_executable(${TARGET} ${SOURCES} ${JERRY_LIBS} clean_gen)
+  target_link_libraries(${TARGET} ${JERRY_LIBS} ${TARGET_LIBS})
+  pico_add_extra_outputs(${TARGET})
+else()
+  add_executable(${TARGET}.elf ${SOURCES} ${JERRY_LIBS} clean_gen)
+  target_link_libraries(${TARGET}.elf ${JERRY_LIBS} ${TARGET_LIBS})
 
-add_custom_command(OUTPUT ${TARGET}.hex ${TARGET}.bin
-  COMMAND ${CMAKE_OBJCOPY} -O ihex ${TARGET}.elf ${TARGET}.hex
-  COMMAND ${CMAKE_OBJCOPY} -O binary -S ${TARGET}.elf ${TARGET}.bin
-  DEPENDS ${TARGET}.elf)
+  add_custom_command(OUTPUT ${TARGET}.hex ${TARGET}.bin
+    COMMAND ${CMAKE_OBJCOPY} -O ihex ${TARGET}.elf ${TARGET}.hex
+    COMMAND ${CMAKE_OBJCOPY} -O binary -S ${TARGET}.elf ${TARGET}.bin
+    DEPENDS ${TARGET}.elf)
 
-add_custom_target(kalamu ALL DEPENDS ${TARGET}.hex ${TARGET}.bin)
+  add_custom_target(kalamu ALL DEPENDS ${TARGET}.hex ${TARGET}.bin)
+endif()
