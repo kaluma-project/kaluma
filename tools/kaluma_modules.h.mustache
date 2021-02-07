@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kalamu
+/* Copyright (c) 2017 Kaluma
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,29 +19,28 @@
  * SOFTWARE.
  */
 
-#include <stdio.h>
+#ifndef KALUMA_MODULES_H
+#define KALUMA_MODULES_H
+
 #include <stdint.h>
-#include "kalamu_modules.h"
-{{#modules}}
-{{#native}}#include "module_{{name}}.h"{{/native}}
-{{/modules}}
+#include "jerryscript.h"
+
+typedef jerry_value_t (* initialize_fn)();
 
 {{#modules}}
-#define MODULE_{{nameUC}}_SIZE {{size}}
-const char module_{{name}}_name[] = "{{name}}";
-const size_t module_{{name}}_size = MODULE_{{nameUC}}_SIZE;
-const uint8_t module_{{name}}_code[] = {
-{{#segments}}
-  {{#bytes}}0x{{value}}{{^last}}, {{/last}}{{/bytes}}
-{{/segments}}
-};
+extern const char module_{{name}}_name[];
+extern const uint8_t module_{{name}}_code[];
+extern const size_t module_{{name}}_size;
 
 {{/modules}}
-/* builtin modules */
-#define BUILTIN_MODULES_SIZE {{builtinModules.length}}
-const size_t builtin_modules_length = BUILTIN_MODULES_SIZE;
-const kalamu_builtin_module builtin_modules[] = {
-{{#builtinModules}}
-  { module_{{name}}_name, module_{{name}}_code, MODULE_{{nameUC}}_SIZE, {{#native}}module_{{name}}_init{{/native}}{{^native}}NULL{{/native}} }{{^lastModule}}, {{/lastModule}}
-{{/builtinModules}}
-};
+typedef struct {
+  const char* name;
+  const void* code;
+  const size_t size;
+  initialize_fn fn;
+} kaluma_builtin_module;
+
+extern const size_t builtin_modules_length;
+extern const kaluma_builtin_module builtin_modules[];
+
+#endif

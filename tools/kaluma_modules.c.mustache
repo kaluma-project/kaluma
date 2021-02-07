@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kalamu
+/* Copyright (c) 2017 Kaluma
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,14 +19,29 @@
  * SOFTWARE.
  */
 
-#ifndef KALAMU_MAGIC_STRINGS_H
-#define KALAMU_MAGIC_STRINGS_H
-
+#include <stdio.h>
 #include <stdint.h>
-#include "jerryscript.h"
+#include "kaluma_modules.h"
+{{#modules}}
+{{#native}}#include "module_{{name}}.h"{{/native}}
+{{/modules}}
 
-extern const uint32_t num_magic_string_items;
-extern const jerry_char_t *magic_string_items[];
-extern const jerry_length_t magic_string_lengths[];
+{{#modules}}
+#define MODULE_{{nameUC}}_SIZE {{size}}
+const char module_{{name}}_name[] = "{{name}}";
+const size_t module_{{name}}_size = MODULE_{{nameUC}}_SIZE;
+const uint8_t module_{{name}}_code[] = {
+{{#segments}}
+  {{#bytes}}0x{{value}}{{^last}}, {{/last}}{{/bytes}}
+{{/segments}}
+};
 
-#endif
+{{/modules}}
+/* builtin modules */
+#define BUILTIN_MODULES_SIZE {{builtinModules.length}}
+const size_t builtin_modules_length = BUILTIN_MODULES_SIZE;
+const kaluma_builtin_module builtin_modules[] = {
+{{#builtinModules}}
+  { module_{{name}}_name, module_{{name}}_code, MODULE_{{nameUC}}_SIZE, {{#native}}module_{{name}}_init{{/native}}{{^native}}NULL{{/native}} }{{^lastModule}}, {{/lastModule}}
+{{/builtinModules}}
+};

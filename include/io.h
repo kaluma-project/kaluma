@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kalamu
+/* Copyright (c) 2017 Kaluma
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,12 +27,12 @@
 #include "utils.h"
 
 #include "jerryscript.h"
-#ifdef KALAMU_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_IEEE80211
 #include "ieee80211.h"
-#endif//KALAMU_MODULE_IEEE80211
-#ifdef KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_TCP
 #include "tcp.h"
-#endif//KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_TCP
 
 typedef struct km_io_loop_s km_io_loop_t;
 typedef struct km_io_handle_s km_io_handle_t;
@@ -41,12 +41,12 @@ typedef struct km_io_timer_handle_s km_io_timer_handle_t;
 typedef struct km_io_tty_handle_s km_io_tty_handle_t;
 typedef struct km_io_watch_handle_s km_io_watch_handle_t;
 typedef struct km_io_uart_handle_s km_io_uart_handle_t;
-#ifdef KALAMU_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_IEEE80211
 typedef struct km_io_ieee80211_handle_s km_io_ieee80211_handle_t;
-#endif//KALAMU_MODULE_IEEE80211
-#ifdef KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_TCP
 typedef struct km_io_tcp_handle_s km_io_tcp_handle_t;
-#endif//KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_TCP
 typedef struct km_io_idle_handle_s km_io_idle_handle_t;
 
 /* handle flags */
@@ -65,12 +65,12 @@ typedef enum km_io_type {
   KM_IO_TTY,
   KM_IO_WATCH,
   KM_IO_UART,
-#ifdef KALAMU_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_IEEE80211
   KM_IO_IEEE80211,
-#endif//KALAMU_MODULE_IEEE80211
-#ifdef KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_TCP
   KM_IO_TCP,
-#endif//KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_TCP
   KM_IO_IDLE
 } km_io_type_t;
 
@@ -152,7 +152,7 @@ struct km_io_uart_handle_s {
 };
 
 /* IEEE80211 handle type */
-#ifdef KALAMU_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_IEEE80211
 typedef void (* km_io_ieee80211_connect_cb)(km_io_ieee80211_handle_t *);
 typedef void (* km_io_ieee80211_assoc_cb)(km_io_ieee80211_handle_t *);
 typedef void (* km_io_ieee80211_disconnect_cb)(km_io_ieee80211_handle_t *);
@@ -168,9 +168,9 @@ struct km_io_ieee80211_handle_s {
   jerry_value_t this_val;
   jerry_value_t scan_js_cb;
 };
-#endif//KALAMU_MODULE_IEEE80211
+#endif//KALUMA_MODULE_IEEE80211
 
-#ifdef KALAMU_MODULE_TCP
+#ifdef KALUMA_MODULE_TCP
 typedef void (* km_io_tcp_connect_cb)(km_io_tcp_handle_t *);
 typedef void (* km_io_tcp_disconnect_cb)(km_io_tcp_handle_t *);
 typedef void (* km_io_tcp_read_cb)(km_io_tcp_handle_t *, const char*, int);
@@ -183,7 +183,7 @@ struct km_io_tcp_handle_s {
   jerry_value_t this_val;
   int fd;
 };
-#endif//KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_TCP
 
 /* idle handle types */
 
@@ -203,12 +203,12 @@ struct km_io_loop_s {
   km_list_t tty_handles;
   km_list_t watch_handles;
   km_list_t uart_handles;
-#ifdef KALAMU_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_IEEE80211
   km_list_t ieee80211_handles;
-#endif//KALAMU_MODULE_IEEE80211
-#ifdef KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_TCP
   km_list_t tcp_handles;
-#endif//KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_TCP
   km_list_t idle_handles;
   km_list_t closing_handles;
 };
@@ -256,7 +256,7 @@ km_io_uart_handle_t *km_io_uart_get_by_id(uint32_t id);
 void km_io_uart_cleanup();
 
 /* IEEE80211 function */
-#ifdef KALAMU_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_IEEE80211
 void km_io_ieee80211_init(km_io_ieee80211_handle_t *ieee80211);
 void km_io_ieee80211_start(km_io_ieee80211_handle_t *ieee80211, km_io_ieee80211_scan_cb scan_cb, km_io_ieee80211_assoc_cb assoc_cb, km_io_ieee80211_connect_cb connect_cb, km_io_ieee80211_disconnect_cb disconnect_cb);
 void km_io_ieee80211_stop(km_io_ieee80211_handle_t *ieee80211);
@@ -265,8 +265,8 @@ void km_io_ieee80211_connect(km_io_ieee80211_handle_t *ieee80211, km_io_ieee8021
 void km_io_ieee80211_disconnect(km_io_ieee80211_handle_t *ieee80211, km_io_ieee80211_disconnect_cb disconnect_cb);
 km_io_ieee80211_handle_t *km_io_ieee80211_get_by_id(uint32_t id);
 void km_io_ieee80211_cleanup();
-#endif//KALAMU_MODULE_IEEE80211
-#ifdef KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_TCP
 void km_io_tcp_init(km_io_tcp_handle_t *tcp);
 void km_io_tcp_start(km_io_tcp_handle_t *tcp, km_io_tcp_connect_cb connect_cb, km_io_tcp_disconnect_cb disconnect_cb, km_io_tcp_read_cb read_cb);
 void km_io_tcp_stop(km_io_tcp_handle_t *tcp);
@@ -275,7 +275,7 @@ void km_io_tcp_cleanup();
 int km_io_tcp_connect(km_io_tcp_handle_t *tcp, const char* address, int port);
 int km_io_tcp_send(km_io_tcp_handle_t* tcp, const char* message, int len);
 int km_io_tcp_close(km_io_tcp_handle_t* tcp);
-#endif//KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_TCP
 /* idle function */
 
 void km_io_idle_init(km_io_idle_handle_t *idle);

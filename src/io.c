@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kalamu
+/* Copyright (c) 2017 Kaluma
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,12 +28,12 @@
 #include "tty.h"
 #include "gpio.h"
 #include "uart.h"
-#ifdef KALAMU_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_IEEE80211
 #include "ieee80211.h"
-#endif//KALAMU_MODULE_IEEE80211
-#ifdef KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_TCP
 #include "tcp.h"
-#endif//KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_TCP
 
 km_io_loop_t loop;
 
@@ -44,12 +44,12 @@ static void km_io_tty_run();
 static void km_io_watch_run();
 static void km_io_uart_run();
 static void km_io_idle_run();
-#ifdef KALAMU_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_IEEE80211
 static void km_io_ieee80211_run();
-#endif//KALAMU_MODULE_IEEE80211
-#ifdef KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_TCP
 static void km_io_tcp_run();
-#endif//KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_TCP
 
 static void km_io_idle_run();
 
@@ -103,12 +103,12 @@ void io_init() {
   km_list_init(&loop.timer_handles);
   km_list_init(&loop.watch_handles);
   km_list_init(&loop.uart_handles);
-#ifdef KALAMU_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_IEEE80211
   km_list_init(&loop.ieee80211_handles);
-#endif//KALAMU_MODULE_IEEE80211
-#ifdef KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_TCP
     km_list_init(&loop.tcp_handles);
-#endif//KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_TCP
     km_list_init(&loop.closing_handles);
 }
 
@@ -119,12 +119,12 @@ void io_run() {
     km_io_tty_run();
     km_io_watch_run();
     km_io_uart_run();
-#ifdef KALAMU_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_IEEE80211
     km_io_ieee80211_run();
-#endif//KALAMU_MODULE_IEEE80211
-#ifdef KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_TCP
     km_io_tcp_run();
-#endif//KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_TCP
     km_io_idle_run();
     km_io_handle_closing();
   }
@@ -360,7 +360,7 @@ static void km_io_uart_run() {
 }
 
 /* IEEE80211 functions */
-#ifdef KALAMU_MODULE_IEEE80211
+#ifdef KALUMA_MODULE_IEEE80211
 void km_io_ieee80211_init(km_io_ieee80211_handle_t *ieee80211) {
   km_io_handle_init((km_io_handle_t *) ieee80211, KM_IO_IEEE80211);
 }
@@ -440,9 +440,9 @@ static void km_io_ieee80211_run() {
     handle = (km_io_ieee80211_handle_t *) ((km_list_node_t *) handle)->next;
   }
 }
-#endif//KALAMU_MODULE_IEEE80211
+#endif//KALUMA_MODULE_IEEE80211
 
-#ifdef KALAMU_MODULE_TCP
+#ifdef KALUMA_MODULE_TCP
 #include <esp_log.h>
 
 void km_io_tcp_init(km_io_tcp_handle_t *tcp) {
@@ -545,7 +545,7 @@ static void km_io_tcp_run() {
     }
 }
 
-#endif//KALAMU_MODULE_TCP
+#endif//KALUMA_MODULE_TCP
 
 /* idle functions */
 

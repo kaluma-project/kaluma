@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kalamu
+/* Copyright (c) 2017 Kaluma
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@
 #include "system.h"
 #include "jerryscript.h"
 #include "utils.h"
-#include "kalamu_config.h"
+#include "kaluma_config.h"
 #include "ymodem.h"
 
 // --------------------------------------------------------------------------
@@ -576,9 +576,9 @@ static void cmd_hi(km_repl_state_t *state) {
   km_repl_printf("|                       ****|\r\n");
   km_repl_printf("\\---------------------------/\r\n");
   km_repl_printf("\r\n");
-  km_repl_printf("Welcome to Kalamu!\r\n");
-  km_repl_printf("%s %s\r\n", "Version:", KALAMU_VERSION);
-  km_repl_printf("For more info: https://kalamu.io\r\n");
+  km_repl_printf("Welcome to Kaluma!\r\n");
+  km_repl_printf("%s %s\r\n", "Version:", KALUMA_VERSION);
+  km_repl_printf("For more info: https://kaluma.io\r\n");
   km_repl_println();
 }
 
