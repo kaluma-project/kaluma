@@ -1,11 +1,17 @@
+######################################
+# building variables
+######################################
+# debug build?
+set(DEBUG 1)
+# optimization
+set(OPT -Og)
 # with bootloader
-project(kaluma-project C ASM)
-
 set(BOOTLOADER 1)
 
+project(kaluma-project C ASM)
+
 add_definitions(-DUSE_HAL_DRIVER
-  -DSTM32F411xE
-  -DUSE_FULL_ASSERT)
+  -DSTM32F411xE)
 
 set(TARGET_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 set(TARGET_SHARED_DIR ${CMAKE_SOURCE_DIR}/lib)
@@ -99,4 +105,4 @@ set(CMAKE_OBJCOPY ${PREFIX}objcopy)
 set(CMAKE_ASM_FLAGS "-x assembler-with-cpp")
 
 set(TARGET_LIBS c nosys m)
-set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -T${TARGET_LDSCRIPT} -Wl,-Map=${TARGET}.map,--cref -Wl,--gc-sections")
+set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -T${TARGET_LDSCRIPT} -Wl,-Map=${TARGET}.map,--cref -Wl,--gc-sections -flto")

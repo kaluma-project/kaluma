@@ -1,11 +1,3 @@
-######################################
-# building variables
-######################################
-# debug build?
-set(DEBUG 1)
-# optimization
-set(OPT -Og)
-
 include(${CMAKE_SOURCE_DIR}/targets/${TARGET}/target.cmake)
 
 set(JERRY_ROOT ${CMAKE_SOURCE_DIR}/deps/jerryscript)
@@ -31,7 +23,7 @@ set(JERRY_INC
 
 set(JERRY_ARGS
   --toolchain=cmake/${JERRY_TOOLCHAIN}
-  --lto=OFF
+  --lto=ON
   --error-messages=ON
   --js-parser=ON
   --mem-heap=${TARGET_HEAPSIZE}
@@ -66,7 +58,7 @@ add_custom_command(OUTPUT ${JERRY_LIBS}
 
 add_custom_command(OUTPUT ${KALUMA_GENERATED_C}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  COMMAND python ${JERRY_ROOT}/tools/build.py --clean --jerry-cmdline-snapshot=ON --snapshot-save=ON --snapshot-exec=ON --profile=es2015-subset
+  COMMAND python ${JERRY_ROOT}/tools/build.py --clean --jerry-cmdline-snapshot=ON --snapshot-save=ON --snapshot-exec=ON --profile=es2015-subset --lto=ON
   COMMAND node tools/js2c.js --modules=${KALUMA_MODULE_LIST} --target=${TARGET}
   COMMAND rm -rf deps/jerryscript/build)
 
