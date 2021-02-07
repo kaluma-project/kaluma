@@ -1,3 +1,11 @@
+######################################
+# building variables
+######################################
+# debug build?
+set(DEBUG 1)
+# optimization
+set(OPT -Og)
+
 project(kaluma-project C)
 set(TARGET_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 set(TARGET_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/include)

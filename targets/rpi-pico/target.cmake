@@ -1,3 +1,11 @@
+######################################
+# building variables
+######################################
+# debug build?
+set(DEBUG 1)
+# optimization
+set(OPT -Og)
+
 set(PICO_SDK_PATH ${CMAKE_SOURCE_DIR}/lib/pico-sdk)
 include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
 
@@ -25,7 +33,7 @@ set(SOURCES
 include_directories(${TARGET_INC_DIR} )
 
 set(TARGET_HEAPSIZE 96)
-set(JERRY_TOOLCHAIN toolchain_mcu_cortexm0plue.cmake)
+set(JERRY_TOOLCHAIN toolchain_mcu_cortexm0plus.cmake)
 
 set(KALUMA_MODULES events gpio led button pwm adc i2c spi uart graphics at storage stream http url startup)
 
