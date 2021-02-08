@@ -27,6 +27,7 @@
 #include "i2c.h"
 #include "spi.h"
 #include "uart.h"
+#include "pico/stdlib.h"
 
 const char km_system_arch[] = "i686";
 const char km_system_platform[] = "linux";
@@ -43,6 +44,7 @@ void km_inc_tick() {
 /**
 */
 void km_delay(uint64_t msec) {
+  sleep_ms(msec);
 }
 
 /**

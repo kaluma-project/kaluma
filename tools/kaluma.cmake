@@ -117,6 +117,10 @@ endif()
 if("${TARGET}" STREQUAL "rpi-pico")
   add_executable(${TARGET} ${SOURCES} ${JERRY_LIBS} clean_gen)
   target_link_libraries(${TARGET} ${JERRY_LIBS} ${TARGET_LIBS})
+  # Enable USB output, disable UART output
+  pico_enable_stdio_usb(${TARGET} 1)
+  pico_enable_stdio_uart(${TARGET} 0)
+
   pico_add_extra_outputs(${TARGET})
 else()
   add_executable(${TARGET}.elf ${SOURCES} ${JERRY_LIBS} clean_gen)
