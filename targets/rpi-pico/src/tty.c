@@ -29,15 +29,37 @@
 #include "tty.h"
 #include "system.h"
 #include "ringbuffer.h"
+#include "pico/stdlib.h"
+
+#define KM_TTY_RX_BUFFER_SIZE   32
+struct km_tty_rx_s {
+  char buffer[KM_TTY_RX_BUFFER_SIZE];
+  int length;
+} km_tty_rx;
 
 void km_tty_init() {
+  stdio_init_all();
+  km_tty_rx.length = 0;
+  memset(km_tty_rx.buffer, 0, KM_TTY_RX_BUFFER_SIZE);
 }
 
 uint32_t km_tty_available() {
-  return 0;
+  int ch = getchar_timeout_us(0);
+  while(ch > 0)
+  {
+    km_tty_rx.buffer[km_tty_rx.length++] = (char)ch;
+    ch = getchar_timeout_us(0);
+  }
+  return km_tty_rx.length;
 }
 
 uint32_t km_tty_read(uint8_t *buf, size_t len) {
+  if (km_tty_rx.length >= len)
+  {
+    memcpy(buf, km_tty_rx.buffer, len);
+    km_tty_rx.length -= len;
+    return len;
+  }
   return 0;
 }
 
@@ -47,11 +69,11 @@ uint32_t km_tty_read_sync(uint8_t *buf, size_t len, uint32_t timeout) {
 
 
 uint8_t km_tty_getc() {
-  return 0;
+  return getchar_timeout_us(0);
 }
 
 void km_tty_putc(char ch) {
-  putchar(ch);
+  printf("%c", ch);
 }
 
 /**
