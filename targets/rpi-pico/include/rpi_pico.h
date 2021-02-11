@@ -19,52 +19,16 @@
  * SOFTWARE.
  */
 
-#ifndef __LINUX_H
-#define __LINUX_H
+#ifndef __RPI_PICO_H
+#define __RPI_PICO_H
 
-#define KALUMA_MANUFACTURER_STRING "Kaluma (kaluma.io)"
-#define KALUMA_PRODUCT_STRING "Kameleon Core"
-#define KALUMA_SERIALNUMBER_STRING "00000000001A"
+// #define GPIO_NUM  22
+// #define ADC_NUM 6
+// #define PWM_NUM 6
+// #define I2C_NUM 2
+// #define SPI_NUM 2
+// #define UART_NUM 2
+// #define LED_NUM 1
+// #define BUTTON_NUM 1
 
-#define PLL_M 8
-#define PLL_N 192
-#define PLL_Q 4
-
-#define FLASH_SIZE (512 * 1024)
-#define FLASH_BASE_ADDR (0x08000000)
-
-#define SRAM_SIZE (128 * 1024)
-#define SRAM_BASE_ADDR (0x20000000)
-
-#define GPIO_NUM  22
-#define ADC_NUM 6
-#define PWM_NUM 6
-#define I2C_NUM 2
-#define SPI_NUM 2
-#define UART_NUM 2
-#define LED_NUM 1
-#define BUTTON_NUM 1
-
-#define APB1    0
-#define APB2    1
-
-#define ADC_RESOLUTION_BIT 12
-/**
- * Error handler for the system driver error.
- */
-void _Error_Handler(char * file, uint32_t line);
-
-/**
- * this function is called in the pendable interrupt service routine which has
- * lowest priority to allow other interrupts service.
- */
-void tty_transmit_data();
-
-/**
- * return tx data length
- */
-uint32_t tty_get_tx_data_length();
-
-uint32_t tty_fill_rx_bytes(uint8_t * buf, uint32_t nToWrite);
-
-#endif /* __LINUX_H */
+#endif /* __RPI_PICO_H */

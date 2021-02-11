@@ -31,42 +31,27 @@
 const char km_system_arch[] = "i686";
 const char km_system_platform[] = "linux";
 
-static uint64_t tick_count;
-static uint32_t microseconds_cycle;
-
-/** increment system timer tick every 1msec
-*/
-void km_inc_tick() {
-  tick_count++;
-}
-
 /**
 */
-void km_delay(uint64_t msec) {
+void km_delay(uint32_t msec) {
 }
 
 /**
 */
 uint64_t km_gettime() {
-  return tick_count;
-}
-
-/**
-*/
-void km_settime(uint64_t time) {
-  tick_count = time;
+  return 0;
 }
 
 /**
  * Return MAX of the micro seconde counter 44739242
 */
-uint32_t km_micro_maxtime() {
+uint64_t km_micro_maxtime() {
   return 0;
 }
 /**
  * Return micro seconde counter
 */
- uint32_t km_micro_gettime() {
+uint64_t km_micro_gettime() {
   return 0;
 }
 
@@ -78,7 +63,8 @@ void km_micro_delay(uint32_t usec) {
 
 /**
 */
-void km_request_firmup() {
+int km_request_firmup() {
+  return -1;
 }
 
 /**

@@ -35,7 +35,6 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_it.h"
 #include "kameleon_core.h"
-#include "system.h"
 
 /* USER CODE BEGIN 0 */
 void uart_fill_ringbuffer(uint8_t bus, uint8_t ch);
@@ -182,7 +181,7 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
-  km_inc_tick();
+  __inc_tick();
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();

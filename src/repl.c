@@ -556,7 +556,10 @@ static void cmd_gc(km_repl_state_t *state) {
  * .firmup command
  */
 static void cmd_firmup(km_repl_state_t *state) {
-  km_request_firmup();
+  if (km_request_firmup() < 0)
+  {
+    km_repl_printf("Firmware download is not supported for this board.\r\n");
+  }
 }
 
 /**

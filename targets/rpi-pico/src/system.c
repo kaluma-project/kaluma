@@ -29,58 +29,45 @@
 #include "uart.h"
 #include "pico/stdlib.h"
 
-const char km_system_arch[] = "i686";
-const char km_system_platform[] = "linux";
-
-static uint64_t tick_count;
-static uint32_t microseconds_cycle;
-
-/** increment system timer tick every 1msec
-*/
-void km_inc_tick() {
-  tick_count++;
-}
+const char km_system_arch[] = "cortex-m0-plus";
+const char km_system_platform[] = "unknown";
 
 /**
 */
-void km_delay(uint64_t msec) {
+void km_delay(uint32_t msec) {
   sleep_ms(msec);
 }
 
 /**
 */
 uint64_t km_gettime() {
-  return tick_count;
-}
-
-/**
-*/
-void km_settime(uint64_t time) {
-  tick_count = time;
+  return to_ms_since_boot(get_absolute_time());
 }
 
 /**
  * Return MAX of the micro seconde counter 44739242
 */
-uint32_t km_micro_maxtime() {
-  return 0;
+uint64_t km_micro_maxtime() {
+  return 0xFFFFFFFFFFFFFFFF; // Max of the uint64()
 }
 /**
  * Return micro seconde counter
 */
- uint32_t km_micro_gettime() {
-  return 0;
+uint64_t km_micro_gettime() {
+  return get_absolute_time();
 }
 
 /**
  * micro secoded delay
 */
 void km_micro_delay(uint32_t usec) {
+  sleep_us(usec);
 }
 
 /**
 */
-void km_request_firmup() {
+int km_request_firmup() {
+  return -1;
 }
 
 /**

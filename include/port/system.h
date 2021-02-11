@@ -38,16 +38,11 @@ void km_system_init();
 void km_system_cleanup();
 
 /**
- * Increment tick count
- */
-void km_inc_tick();
-
-/**
  * Delay in milliseconds
  *
- * @param {uint64_t} msec
+ * @param {uint32_t} msec
  */
-void km_delay(uint64_t msec);
+void km_delay(uint32_t msec);
 
 /**
  * Return current time (UNIX timestamp in milliseconds)
@@ -55,22 +50,15 @@ void km_delay(uint64_t msec);
 uint64_t km_gettime();
 
 /**
- * Set current time (UNIX timestamp in milliseconds)
- *
- * @param {uint64_t} msec
- */
-void km_settime(uint64_t time);
-
-/**
  * Return MAX of the micro seconde counter
  * Use this value to detect counter overflow
 */
-uint32_t km_micro_maxtime(void);
+uint64_t km_micro_maxtime(void);
 
 /**
  * Return micro seconde counter
 */
-uint32_t km_micro_gettime(void);
+uint64_t km_micro_gettime(void);
 
 /**
  * micro secoded delay
@@ -79,8 +67,9 @@ void km_micro_delay(uint32_t usec);
 
 /**
  * Firmware update request
+ * @return -1 if firmware download is not supported in the REPL
  */
-void km_request_firmup();
+int km_request_firmup();
 
 /**
  * check script running mode - skipping or running user script

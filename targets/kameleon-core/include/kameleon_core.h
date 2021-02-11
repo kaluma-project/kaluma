@@ -57,6 +57,11 @@
 void _Error_Handler(char * file, uint32_t line);
 
 /**
+ * Increment tick count
+ */
+void __inc_tick();
+
+/**
  * this function is called in the pendable interrupt service routine which has
  * lowest priority to allow other interrupts service.
  */
