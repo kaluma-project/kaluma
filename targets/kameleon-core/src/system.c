@@ -174,13 +174,13 @@ void assert_failed(uint8_t* file, uint32_t line) {
 
 /** increment system timer tick every 1msec
 */
-void km_inc_tick() {
+void __inc_tick() {
   tick_count++;
 }
 
 /**
 */
-void km_delay(uint64_t msec) {
+void km_delay(uint32_t msec) {
   HAL_Delay(msec);
 }
 
@@ -191,23 +191,15 @@ uint64_t km_gettime() {
 }
 
 /**
-*/
-void km_settime(uint64_t time) {
-  __set_PRIMASK(1);
- tick_count = time;
-  __set_PRIMASK(0);
-}
-
-/**
  * Return MAX of the micro seconde counter 44739242
 */
-uint32_t km_micro_maxtime() {
+uint64_t km_micro_maxtime() {
   return (0xFFFFFFFFU / microseconds_cycle);
 }
 /**
  * Return micro seconde counter
 */
- uint32_t km_micro_gettime() {
+uint64_t km_micro_gettime() {
   return (DWT->CYCCNT / microseconds_cycle);
 }
 
@@ -228,9 +220,10 @@ void km_micro_delay(uint32_t usec) {
 
 /**
 */
-void km_request_firmup() {
+int km_request_firmup() {
   *(uint32_t *)(*(uint32_t *)0x08000000) = 0x12345678;
   NVIC_SystemReset();
+  return 0;
 }
 
 /**

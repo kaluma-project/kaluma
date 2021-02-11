@@ -1,17 +1,17 @@
 global.board = {
-  name: 'kameleon-core',
-  NUM_GPIO: 22,
+  name: 'rpi-pico',
+  NUM_GPIO: 26,
   NUM_LED: 1,
-  NUM_BUTTON: 1,
-  NUM_PWM: 5,
-  NUM_ADC: 6,
+  NUM_BUTTON: 0,
+  NUM_PWM: 16,
+  NUM_ADC: 3,
   NUM_I2C: 2,
   NUM_SPI: 2,
   NUM_UART: 2,
-  led_pins: [20],
-  button_pins: [21],
-  pwm_pins: [1, 2, 14, 15, 16],
-  adc_pins: [3, 4, 5, 10, 11, 12],
+  led_pins: [25],
+  button_pins: [],
+  pwm_pins: [1, 2, 14, 15, 16], // @todo need to update
+  adc_pins: [26, 27, 28],
   gpio: function (pin, mode) {
     var GPIO = global.require('gpio').GPIO;
     return new GPIO(pin, mode);

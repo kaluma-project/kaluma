@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kaluma
+/* Copyright (c) 2017 Kamula
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -472,7 +472,7 @@ JERRYXX_FUN(clear_timer_fn) {
 
 JERRYXX_FUN(delay_fn) {
   JERRYXX_CHECK_ARG_NUMBER_OPT(0, "id");
-  uint64_t delay_val = (uint64_t) JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
+  uint32_t delay_val = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
   km_delay(delay_val);
   return jerry_create_undefined();
 }

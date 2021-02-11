@@ -21,7 +21,6 @@
 
 #include <stdint.h>
 #include "adc.h"
-#include "linux.h"
 
 /**
  * Get ADC index
