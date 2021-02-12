@@ -22,13 +22,13 @@
 #ifndef __RPI_PICO_H
 #define __RPI_PICO_H
 
-// #define GPIO_NUM  22
-// #define ADC_NUM 6
+// #define GPIO_NUM 26
+// #define ADC_NUM 3
 // #define PWM_NUM 6
 // #define I2C_NUM 2
 // #define SPI_NUM 2
 // #define UART_NUM 2
 // #define LED_NUM 1
-// #define BUTTON_NUM 1
+// #define BUTTON_NUM 0
 
 #endif /* __RPI_PICO_H */

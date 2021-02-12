@@ -105,4 +105,4 @@ set(CMAKE_OBJCOPY ${PREFIX}objcopy)
 set(CMAKE_ASM_FLAGS "-x assembler-with-cpp")
 
 set(TARGET_LIBS c nosys m)
-set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -T${TARGET_LDSCRIPT} -Wl,-Map=${TARGET}.map,--cref -Wl,--gc-sections -flto")
+set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -T${TARGET_LDSCRIPT} -Wl,-Map=${TARGET}.map,--cref -Wl,--gc-sections")
