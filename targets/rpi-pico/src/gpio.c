@@ -21,25 +21,62 @@
 
 #include <stdint.h>
 #include "gpio.h"
+#include "pico/stdlib.h"
+
+static int __check_gpio(uint8_t pin)
+{
+  if ((pin <= 28) && !((pin == 23) || (pin == 24))) {
+    return 0;
+  } else {
+    return KM_GPIOPORT_ERROR; // Not a GPIO pins
+  }
+}
 
 void km_gpio_init() {
+  gpio_init_mask(0xFFFFFFFF); // init all the GPIOs
 }
 
 void km_gpio_cleanup() {
+  km_gpio_init();
 }
 
 int km_gpio_set_io_mode(uint8_t pin, km_gpio_io_mode_t mode) {
+  if (__check_gpio(pin) < 0) {
+    return KM_GPIOPORT_ERROR;
+  }
+  if (mode == KM_GPIO_IO_MODE_OUTPUT) {
+    gpio_set_dir(pin, true); // Set OUTPUT
+  } else {
+    gpio_set_input_enabled(pin, true); // Set INPUT
+    if (mode == KM_GPIO_IO_MODE_INPUT_PULLUP) {
+      gpio_pull_up(pin);
+    } else if (mode == KM_GPIO_IO_MODE_INPUT_PULLUP) {
+      gpio_pull_down(pin);
+    }
+  }
   return 0;
 }
 
 int km_gpio_write(uint8_t pin, uint8_t value) {
+  if (__check_gpio(pin) < 0) {
+    return KM_GPIOPORT_ERROR;
+  }
+  gpio_put(pin, value);
   return 0;
 }
 
 int km_gpio_read(uint8_t pin) {
-  return 0;
+  if (__check_gpio(pin) < 0) {
+    return KM_GPIOPORT_ERROR;
+  }
+  return gpio_get(pin);
 }
 
 int km_gpio_toggle(uint8_t pin) {
+  if (__check_gpio(pin) < 0) {
+    return KM_GPIOPORT_ERROR;
+  }
+  bool out = gpio_get(pin);
+  gpio_put(pin, !out);
   return 0;
 }

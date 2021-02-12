@@ -22,7 +22,7 @@
 #ifndef __LINUX_H
 #define __LINUX_H
 
-// #define GPIO_NUM  22
+// #define GPIO_NUM 22
 // #define ADC_NUM 6
 // #define PWM_NUM 6
 // #define I2C_NUM 2
