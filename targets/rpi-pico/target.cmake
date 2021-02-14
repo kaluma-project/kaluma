@@ -9,7 +9,7 @@ set(OPT -Og)
 set(PICO_SDK_PATH ${CMAKE_SOURCE_DIR}/lib/pico-sdk)
 include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
 
-project(kameleon-project C CXX ASM)
+project(kaluma-project C CXX ASM)
 # initialize the Pico SDK
 pico_sdk_init()
 
