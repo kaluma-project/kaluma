@@ -6,7 +6,7 @@ Target: Linux
 ```sh
 # assume at /kaluma
 $ mkdir build # if not exist
-$ cd build 
+$ cd build
 $ cmake .. -DTARGET=linux
 $ make
 ```

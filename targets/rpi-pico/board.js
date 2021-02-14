@@ -20,9 +20,9 @@ global.board = {
     var LED = global.require('led').LED;
     return new LED(pin);
   },
-  button: function (pin, pull, debounce) {
+  button: function (pin, event, debounce, int_pull) {
     var Button = global.require('button').Button;
-    return new Button(pin, pull, debounce);
+    return new Button(pin, event, debounce, int_pull);
   },
   pwm: function (pin, frequency, duty) {
     if (this.pwm_pins.indexOf(pin) < 0) {
