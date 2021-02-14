@@ -31,4 +31,5 @@
 // #define LED_NUM 1
 // #define BUTTON_NUM 0
 
+#define ADC_RESOLUTION_BIT 12
 #endif /* __RPI_PICO_H */

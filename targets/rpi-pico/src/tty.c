@@ -28,7 +28,6 @@
 
 #include "tty.h"
 #include "system.h"
-#include "ringbuffer.h"
 #include "pico/stdlib.h"
 
 #define KM_TTY_RX_BUFFER_SIZE   32
