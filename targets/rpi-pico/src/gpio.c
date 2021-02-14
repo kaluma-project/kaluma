@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include "gpio.h"
 #include "pico/stdlib.h"
+#include "hardware/gpio.h"
 
 static int __check_gpio(uint8_t pin)
 {

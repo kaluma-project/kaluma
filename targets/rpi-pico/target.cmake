@@ -58,5 +58,5 @@ set(CMAKE_CXX_COMPILER ${PREFIX}g++)
 set(CMAKE_LINKER ${PREFIX}ld)
 set(CMAKE_OBJCOPY ${PREFIX}objcopy)
 
-set(TARGET_LIBS c nosys m pico_stdlib)
+set(TARGET_LIBS c nosys m pico_stdlib hardware_adc)
 set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -Wl,-Map=${TARGET}.map,--cref,--gc-sections")

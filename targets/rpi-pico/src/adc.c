@@ -21,6 +21,10 @@
 
 #include <stdint.h>
 #include "adc.h"
+#include "rpi_pico.h"
+#include "pico/stdlib.h"
+#include "hardware/gpio.h"
+#include "hardware/adc.h"
 
 /**
  * Get ADC index
@@ -31,23 +35,27 @@
 
 /**
  * input : pinNumber
- * output : pinIndex or ADC_PORTERRROR (-1)
- *          0xFF means the pin is not assigned for ADC
+ * output : adc channel or -1 if the pin does not support ADC
 */
 static int get_adc_index(uint8_t pin) {
-  return 0;
+  if ((pin >= 26) && (pin <= 28)) {
+    return pin - 26; //GPIO 26 is channel 0
+  }
+  return -1; // Error
 }
 
 /**
  * Initialize all ADC channels when system started
  */
 void km_adc_init() {
+  adc_init();
 }
 
 /**
  * Cleanup all ADC channels when system cleanup
  */
 void km_adc_cleanup() {
+  // adc pins will be reset at the GPIO cleanup function.
 }
 
 /**
@@ -57,14 +65,23 @@ void km_adc_cleanup() {
  * @return {double}
  */
 double km_adc_read(uint8_t adcIndex) {
-  return 0.0d;
+  return (double)adc_read() / (1 << ADC_RESOLUTION_BIT);
 }
 
 int km_adc_setup(uint8_t pin) {
+  int ch = get_adc_index(pin);
+  if (ch < 0) {
+    return -1; // Error
+  }
+  adc_gpio_init(pin);
+  adc_select_input(ch);
   return 0;
 }
 
 int km_adc_close(uint8_t pin) {
+  if (get_adc_index(pin) < 0) {
+    return -1; // Error
+  }
   return 0;
 }
 
