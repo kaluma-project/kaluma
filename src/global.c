@@ -315,7 +315,7 @@ JERRYXX_FUN(analog_read_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   int adcIndex = km_adc_setup(pin);
-  if (adcIndex == ADCPORT_ERRROR) {
+  if (adcIndex == KM_ADCPORT_ERRROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for ADC channel", pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) errmsg);

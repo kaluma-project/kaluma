@@ -24,12 +24,13 @@
 
 // #define GPIO_NUM 26
 // #define ADC_NUM 3
-// #define PWM_NUM 6
+#define PWM_NUM 8
 // #define I2C_NUM 2
 // #define SPI_NUM 2
 // #define UART_NUM 2
 // #define LED_NUM 1
 // #define BUTTON_NUM 0
 
-#define ADC_RESOLUTION_BIT 12
+#define ADC_RESOLUTION_BIT      12
+#define PWM_CLK_REF             1250
 #endif /* __RPI_PICO_H */
