@@ -3,14 +3,14 @@ global.board = {
   NUM_GPIO: 26,
   NUM_LED: 1,
   NUM_BUTTON: 0,
-  NUM_PWM: 16,
+  NUM_PWM: 8,
   NUM_ADC: 3,
   NUM_I2C: 2,
   NUM_SPI: 2,
   NUM_UART: 2,
   led_pins: [25],
   button_pins: [],
-  pwm_pins: [1, 2, 14, 15, 16], // @todo need to update
+  pwm_pins: [16, 18, 20, 22, 8, 10, 12, 14],
   adc_pins: [26, 27, 28],
   gpio: function (pin, mode) {
     var GPIO = global.require('gpio').GPIO;
