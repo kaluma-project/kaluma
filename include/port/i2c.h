@@ -29,6 +29,7 @@
 typedef enum {
   KM_I2C_MASTER,
   KM_I2C_SLAVE,
+  KM_I2C_NONE,
 } km_i2c_mode_t;
 
 #define KM_I2CPORT_ERROR -1

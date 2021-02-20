@@ -25,7 +25,7 @@
 // #define GPIO_NUM 26
 // #define ADC_NUM 3
 #define PWM_NUM 8
-// #define I2C_NUM 2
+#define I2C_NUM 2
 // #define SPI_NUM 2
 // #define UART_NUM 2
 // #define LED_NUM 1
@@ -33,4 +33,5 @@
 
 #define ADC_RESOLUTION_BIT      12
 #define PWM_CLK_REF             1250
+#define I2C_MAX_CLOCK           1000000
 #endif /* __RPI_PICO_H */
