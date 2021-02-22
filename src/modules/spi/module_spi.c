@@ -195,7 +195,7 @@ JERRYXX_FUN(spi_recv_fn) {
   // check this.bus number
   jerry_value_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
   if (!jerry_value_is_number(bus_value)) {
-    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "I2C bus is not initialized.");
+    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "SPI bus is not initialized.");
   }
   uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
   jerry_release_value(bus_value);
