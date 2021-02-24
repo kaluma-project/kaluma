@@ -1,5 +1,5 @@
-[submodule "deps/jerryscript"]
-  path = deps/jerryscript
+[submodule "lib/jerryscript"]
+	path = lib/jerryscript
   url = https://github.com/kaluma-project/jerryscript.git
 [submodule "lib/pico-sdk"]
 	path = lib/pico-sdk

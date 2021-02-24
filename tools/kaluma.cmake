@@ -1,6 +1,6 @@
 include(${CMAKE_SOURCE_DIR}/targets/${TARGET}/target.cmake)
 
-set(JERRY_ROOT ${CMAKE_SOURCE_DIR}/deps/jerryscript)
+set(JERRY_ROOT ${CMAKE_SOURCE_DIR}/lib/jerryscript)
 set(JERRY_INC
   ${JERRY_ROOT}/jerry-core
   ${JERRY_ROOT}/jerry-core/api
@@ -60,7 +60,7 @@ add_custom_command(OUTPUT ${KALUMA_GENERATED_C}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   COMMAND python ${JERRY_ROOT}/tools/build.py --clean --jerry-cmdline-snapshot=ON --snapshot-save=ON --snapshot-exec=ON --profile=es2015-subset
   COMMAND node tools/js2c.js --modules=${KALUMA_MODULE_LIST} --target=${TARGET}
-  COMMAND rm -rf deps/jerryscript/build)
+  COMMAND rm -rf lib/jerryscript/build)
 
 # Delete generaged file to generate it every time.
 add_custom_command(OUTPUT clean_gen
