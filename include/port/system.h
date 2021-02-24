@@ -66,12 +66,6 @@ uint64_t km_micro_gettime(void);
 void km_micro_delay(uint32_t usec);
 
 /**
- * Firmware update request
- * @return -1 if firmware download is not supported in the REPL
- */
-int km_request_firmup();
-
-/**
  * check script running mode - skipping or running user script
  */
 uint8_t km_running_script_check();
