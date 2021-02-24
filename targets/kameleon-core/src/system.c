@@ -219,14 +219,6 @@ void km_micro_delay(uint32_t usec) {
 }
 
 /**
-*/
-int km_request_firmup() {
-  *(uint32_t *)(*(uint32_t *)0x08000000) = 0x12345678;
-  NVIC_SystemReset();
-  return 0;
-}
-
-/**
  * Kaluma Hardware System Initializations
  */
 void km_system_init() {

@@ -43,7 +43,6 @@ static void cmd_flash(km_repl_state_t *state, char *arg);
 static void cmd_load(km_repl_state_t *state);
 static void cmd_mem(km_repl_state_t *state);
 static void cmd_gc(km_repl_state_t *state);
-static void cmd_firmup(km_repl_state_t *state);
 static void cmd_hi(km_repl_state_t *state);
 static void cmd_help(km_repl_state_t *state);
 
@@ -138,8 +137,6 @@ static void run_command() {
       cmd_mem(&state);
     } else if (strcmp(tokenv[0], ".gc") == 0) {
       cmd_gc(&state);
-    } else if (strcmp(tokenv[0], ".firmup") == 0) {
-      cmd_firmup(&state);
     } else if (strcmp(tokenv[0], ".hi") == 0) {
       cmd_hi(&state);
     } else if (strcmp(tokenv[0], ".help") == 0) {
@@ -553,16 +550,6 @@ static void cmd_gc(km_repl_state_t *state) {
 }
 
 /**
- * .firmup command
- */
-static void cmd_firmup(km_repl_state_t *state) {
-  if (km_request_firmup() < 0)
-  {
-    km_repl_printf("Firmware download is not supported for this board.\r\n");
-  }
-}
-
-/**
  * .hi command
  */
 static void cmd_hi(km_repl_state_t *state) {
@@ -594,7 +581,6 @@ static void cmd_help(km_repl_state_t *state) {
   km_repl_printf(".flash\tCommands for the internal flash.\r\n");
   km_repl_printf(".load\tLoad user code from the internal flash.\r\n");
   km_repl_printf(".mem\tHeap memory status.\r\n");
-  km_repl_printf(".firmup\tFirmware update mode.\r\n");
   km_repl_printf(".gc\tPerform garbage collection.\r\n");
   km_repl_printf(".hi\tPrint welcome message.\r\n");
   km_repl_printf(".help\tPrint this help message.\r\n");

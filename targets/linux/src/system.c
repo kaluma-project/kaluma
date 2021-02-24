@@ -62,12 +62,6 @@ void km_micro_delay(uint32_t usec) {
 }
 
 /**
-*/
-int km_request_firmup() {
-  return -1;
-}
-
-/**
  * Kaluma Hardware System Initializations
  */
 void km_system_init() {
