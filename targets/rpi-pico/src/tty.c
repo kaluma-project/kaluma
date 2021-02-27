@@ -31,32 +31,32 @@
 #include "pico/stdlib.h"
 
 #define KM_TTY_RX_BUFFER_SIZE   32
-struct km_tty_rx_s {
+static struct __tty_rx_s {
   char buffer[KM_TTY_RX_BUFFER_SIZE];
   int length;
-} km_tty_rx;
+} __tty_rx;
 
 void km_tty_init() {
   stdio_init_all();
-  km_tty_rx.length = 0;
-  memset(km_tty_rx.buffer, 0, KM_TTY_RX_BUFFER_SIZE);
+  __tty_rx.length = 0;
+  memset(__tty_rx.buffer, 0, KM_TTY_RX_BUFFER_SIZE);
 }
 
 uint32_t km_tty_available() {
   int ch = getchar_timeout_us(0);
   while(ch > 0)
   {
-    km_tty_rx.buffer[km_tty_rx.length++] = (char)ch;
+    __tty_rx.buffer[__tty_rx.length++] = (char)ch;
     ch = getchar_timeout_us(0);
   }
-  return km_tty_rx.length;
+  return __tty_rx.length;
 }
 
 uint32_t km_tty_read(uint8_t *buf, size_t len) {
-  if (km_tty_rx.length >= len)
+  if (__tty_rx.length >= len)
   {
-    memcpy(buf, km_tty_rx.buffer, len);
-    km_tty_rx.length -= len;
+    memcpy(buf, __tty_rx.buffer, len);
+    __tty_rx.length -= len;
     return len;
   }
   return 0;
