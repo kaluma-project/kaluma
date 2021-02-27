@@ -25,7 +25,7 @@
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 
-struct __i2c_status_s {
+static struct __i2c_status_s {
   km_i2c_mode_t mode;
 } __i2c_status[I2C_NUM];
 
@@ -48,7 +48,7 @@ void km_i2c_cleanup() {
   km_i2c_init();
 }
 
-i2c_inst_t *__get_i2c_no(uint8_t bus) {
+static i2c_inst_t *__get_i2c_no(uint8_t bus) {
   if (bus == 0) {
     return i2c0;
   } else if (bus == 1) {
