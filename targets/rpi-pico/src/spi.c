@@ -28,7 +28,7 @@ struct __spi_status_s {
   bool enabled;
 } __spi_status[SPI_NUM];
 
-spi_inst_t *__get_spi_no(uint8_t bus) {
+static spi_inst_t *__get_spi_no(uint8_t bus) {
   if (bus == 0) {
     return spi0;
   } else if (bus == 1) {

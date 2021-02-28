@@ -26,7 +26,7 @@
 #include "hardware/pwm.h"
 #include "hardware/clocks.h"
 
-struct __pwm_config_s {
+static struct __pwm_config_s {
   double freq;
   double duty;
   uint16_t period;
