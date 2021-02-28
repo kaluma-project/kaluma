@@ -5,7 +5,7 @@ Overview
 
 Kaluma is a tiny and efficient JavaScript runtime for microcontrollers. The main features are:
 
-* Small footprint (Run on 300KB ROM, 64KB RAM)
+* Small footprint (Run minimally on 300KB ROM, 64KB RAM)
 * ECMAScript 5.1/2015(subset) standard compliant (Powered by [JerryScript](http://jerryscript.net/))
 * Non-blocking I/O
 * REPL mode support
@@ -21,6 +21,5 @@ Resources
 Supported Targets
 =================
 
-* Raspberry Pi Pico (working)
-* [Kameleon Core](https://docs.kaluma.io/boards/kameleon-core)
+* __Raspberry Pi Pico (working)__
 * Contributions are welcome for other boards
