@@ -1,14 +1,17 @@
-Target: Kameleon Core
-=====================
+# Target: Kameleon Core
 
 ## Build
 
 ```sh
-# assume at /kaluma
-$ mkdir build # if not exist
-$ cd build
-$ cmake .. -DTARGET=kameleon-core
-$ make
+$ node build --target=kameleon-core
 ```
 
-The `kameleon-core.hex`, `kameleon-core.bin` will be created in the build folder.
+The `kameleon-core.bin` will be created in the `/build` folder.
+
+## Flash
+
+Install [ST-Link](https://github.com/texane/stlink) tool first. Then execute `st-flash` tool as below:
+
+```sh
+$ st-flash write build/kameleon-core.bin 0x8000000
+```
