@@ -63,9 +63,9 @@ add_custom_command(OUTPUT ${KALUMA_GENERATED_C}
   COMMAND rm -rf lib/jerryscript/build)
 
 # Delete generaged file to generate it every time.
-add_custom_command(OUTPUT clean_gen
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  COMMAND rm -f src/gen/*)
+# add_custom_command(OUTPUT clean_gen
+#   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+#   COMMAND rm -f src/gen/*)
 #=============================================================
 set(KALUMA_INC ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/port ${SRC_DIR}/gen ${SRC_DIR}/modules)
 include_directories(${KALUMA_INC} ${JERRY_INC})
@@ -87,22 +87,27 @@ if(KALUMA_MODULE_PWM)
   list(APPEND SOURCES ${SRC_DIR}/modules/pwm/module_pwm.c)
   include_directories(${SRC_DIR}/modules/pwm)
 endif()
+
 if(KALUMA_MODULE_I2C)
   list(APPEND SOURCES ${SRC_DIR}/modules/i2c/module_i2c.c)
   include_directories(${SRC_DIR}/modules/i2c)
 endif()
+
 if(KALUMA_MODULE_SPI)
   list(APPEND SOURCES ${SRC_DIR}/modules/spi/module_spi.c)
   include_directories(${SRC_DIR}/modules/spi)
 endif()
+
 if(KALUMA_MODULE_STORAGE)
   list(APPEND SOURCES ${SRC_DIR}/modules/storage/module_storage.c)
   include_directories(${SRC_DIR}/modules/storage)
 endif()
+
 if(KALUMA_MODULE_UART)
   list(APPEND SOURCES ${SRC_DIR}/modules/uart/module_uart.c)
   include_directories(${SRC_DIR}/modules/uart)
 endif()
+
 if(KALUMA_MODULE_GRAPHICS)
   list(APPEND SOURCES
     ${SRC_DIR}/modules/graphics/gc_cb_prims.c
@@ -115,7 +120,7 @@ if(KALUMA_MODULE_GRAPHICS)
 endif()
 
 if("${TARGET}" STREQUAL "rpi-pico")
-  add_executable(${TARGET} ${SOURCES} ${JERRY_LIBS} clean_gen)
+  add_executable(${TARGET} ${SOURCES} ${JERRY_LIBS})
   target_link_libraries(${TARGET} ${JERRY_LIBS} ${TARGET_LIBS})
   # Enable USB output, disable UART output
   pico_enable_stdio_usb(${TARGET} 1)
@@ -123,7 +128,7 @@ if("${TARGET}" STREQUAL "rpi-pico")
 
   pico_add_extra_outputs(${TARGET})
 else()
-  add_executable(${TARGET}.elf ${SOURCES} ${JERRY_LIBS} clean_gen)
+  add_executable(${TARGET}.elf ${SOURCES} ${JERRY_LIBS})
   target_link_libraries(${TARGET}.elf ${JERRY_LIBS} ${TARGET_LIBS})
 
   add_custom_command(OUTPUT ${TARGET}.hex ${TARGET}.bin
