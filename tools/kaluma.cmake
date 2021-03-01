@@ -62,11 +62,6 @@ add_custom_command(OUTPUT ${KALUMA_GENERATED_C}
   COMMAND node tools/js2c.js --modules=${KALUMA_MODULE_LIST} --target=${TARGET}
   COMMAND rm -rf lib/jerryscript/build)
 
-# Delete generaged file to generate it every time.
-# add_custom_command(OUTPUT clean_gen
-#   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-#   COMMAND rm -f src/gen/*)
-#=============================================================
 set(KALUMA_INC ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/port ${SRC_DIR}/gen ${SRC_DIR}/modules)
 include_directories(${KALUMA_INC} ${JERRY_INC})
 

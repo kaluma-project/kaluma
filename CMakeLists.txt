@@ -1,16 +1,13 @@
 cmake_minimum_required(VERSION 3.5)
+
 if("${TARGET}" STREQUAL "rpi-pico")
 else()
   project(KM_CMAKE NONE)
 endif()
-set(KM_CMAKE_DIR ${CMAKE_SOURCE_DIR}/tools)
-# Available targets : kameleon-core linux
 
+# Available targets are in /targets
 if(NOT TARGET)
-  # Use parameter input to set the TARGET
-  # cd build
-  # cmake .. -DTARGET=linux
-  set(TARGET kameleon-core)
+  set(TARGET rpi-pico) # default: rpi-pico
 endif()
 
-include(${KM_CMAKE_DIR}/kaluma.cmake)
+include(${CMAKE_SOURCE_DIR}/tools/kaluma.cmake)
