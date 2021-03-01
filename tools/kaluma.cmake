@@ -83,32 +83,34 @@ list(APPEND SOURCES
   ${SRC_DIR}/ymodem.c
   ${KALUMA_GENERATED_C})
 
-if(KALUMA_MODULE_PWM)
+# KALUMA MODULES -------------------------------------------------------------
+
+if("pwm" IN_LIST KALUMA_MODULES)
   list(APPEND SOURCES ${SRC_DIR}/modules/pwm/module_pwm.c)
   include_directories(${SRC_DIR}/modules/pwm)
 endif()
 
-if(KALUMA_MODULE_I2C)
+if("i2c" IN_LIST KALUMA_MODULES)
   list(APPEND SOURCES ${SRC_DIR}/modules/i2c/module_i2c.c)
   include_directories(${SRC_DIR}/modules/i2c)
 endif()
 
-if(KALUMA_MODULE_SPI)
+if("spi" IN_LIST KALUMA_MODULES)
   list(APPEND SOURCES ${SRC_DIR}/modules/spi/module_spi.c)
   include_directories(${SRC_DIR}/modules/spi)
 endif()
 
-if(KALUMA_MODULE_STORAGE)
+if("storage" IN_LIST KALUMA_MODULES)
   list(APPEND SOURCES ${SRC_DIR}/modules/storage/module_storage.c)
   include_directories(${SRC_DIR}/modules/storage)
 endif()
 
-if(KALUMA_MODULE_UART)
+if("uart" IN_LIST KALUMA_MODULES)
   list(APPEND SOURCES ${SRC_DIR}/modules/uart/module_uart.c)
   include_directories(${SRC_DIR}/modules/uart)
 endif()
 
-if(KALUMA_MODULE_GRAPHICS)
+if("graphics" IN_LIST KALUMA_MODULES)
   list(APPEND SOURCES
     ${SRC_DIR}/modules/graphics/gc_cb_prims.c
     ${SRC_DIR}/modules/graphics/gc_1bit_prims.c
@@ -118,6 +120,8 @@ if(KALUMA_MODULE_GRAPHICS)
     ${SRC_DIR}/modules/graphics/module_graphics.c)
   include_directories(${SRC_DIR}/modules/graphics)
 endif()
+
+# -----------------------------------------------------------------------------
 
 if("${TARGET}" STREQUAL "rpi-pico")
   add_executable(${TARGET} ${SOURCES} ${JERRY_LIBS})

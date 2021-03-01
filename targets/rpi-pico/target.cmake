@@ -37,13 +37,6 @@ set(JERRY_TOOLCHAIN toolchain_mcu_cortexm0plus.cmake)
 
 set(KALUMA_MODULES events gpio led button pwm adc i2c spi uart graphics at storage stream http url startup)
 
-set(KALUMA_MODULE_PWM 1)
-set(KALUMA_MODULE_I2C 1)
-set(KALUMA_MODULE_SPI 1)
-set(KALUMA_MODULE_STORAGE 1)
-set(KALUMA_MODULE_UART 1)
-set(KALUMA_MODULE_GRAPHICS 1)
-
 set(CMAKE_SYSTEM_PROCESSOR cortex-m0plus)
 set(CMAKE_C_FLAGS "-march=armv6-m -mcpu=cortex-m0plus -mthumb ${OPT} -Wall -fdata-sections -ffunction-sections")
 if(DEBUG EQUAL 1)

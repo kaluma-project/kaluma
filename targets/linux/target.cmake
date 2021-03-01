@@ -31,13 +31,6 @@ set(JERRY_TOOLCHAIN toolchain_linux_i686.cmake)
 
 set(KALUMA_MODULES events gpio led button pwm adc i2c spi uart graphics at storage stream http url startup)
 
-set(KALUMA_MODULE_PWM 1)
-set(KALUMA_MODULE_I2C 1)
-set(KALUMA_MODULE_SPI 1)
-set(KALUMA_MODULE_STORAGE 1)
-set(KALUMA_MODULE_UART 1)
-set(KALUMA_MODULE_GRAPHICS 1)
-
 set(CMAKE_SYSTEM_PROCESSOR amd64)
 set(CMAKE_C_FLAGS "${OPT} -Wall -fdata-sections -ffunction-sections")
 if(DEBUG EQUAL 1)
