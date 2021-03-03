@@ -1,0 +1,19 @@
+{
+  "name": "raspberrypi-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --forceExit --detectOpenHandles --maxWorkers=10 --json --outputFile=test-result.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "onoff": "^6.0.0",
+    "serialport": "^9.0.1"
+  },
+  "devDependencies": {
+    "jest": "^26.4.2"
+  }
+}
