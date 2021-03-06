@@ -65,11 +65,6 @@ void km_flash_program_begin();
 km_flash_status_t km_flash_program(uint8_t * buf, uint32_t size);
 
 /**
- * Program data to the flash
- */
-km_flash_status_t km_flash_program_byte(uint8_t val);
-
-/**
  * Finish to write data to the flash
  */
 void km_flash_program_end();

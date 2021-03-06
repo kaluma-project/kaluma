@@ -49,11 +49,6 @@ km_flash_status_t km_flash_program(uint8_t * buf, uint32_t size) {
   return status;
 }
 
-km_flash_status_t km_flash_program_byte(uint8_t val) {
-  km_flash_status_t status = KM_FLASH_SUCCESS;
-  return status;
-}
-
 void km_flash_program_end() {
 }
 
