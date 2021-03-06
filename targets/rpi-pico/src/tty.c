@@ -77,7 +77,7 @@ uint8_t km_tty_getc() {
 }
 
 void km_tty_putc(char ch) {
-  printf("%c", ch);
+  putchar(ch);
 }
 
 /**
