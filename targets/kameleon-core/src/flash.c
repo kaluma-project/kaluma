@@ -172,33 +172,6 @@ km_flash_status_t km_flash_program(uint8_t * buf, uint32_t size) {
 
 /**
 */
-km_flash_status_t km_flash_program_byte(uint8_t val) {
-  km_flash_status_t status = KM_FLASH_SUCCESS;
-  uint32_t address;
-
-  address = ADDR_FLASH_USER_CODE + code_offset;
-
-  /* Unlock the Flash to enable the flash control register access */
-  HAL_FLASH_Unlock();
-  flush_cache();
-
-  /* Program byte on the user Flash area */
-  if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, address, val) == HAL_OK) {
-    code_offset = code_offset + 1;
-  } else {
-    /* Error occurred while writing data in Flash memory. User can add here some code to deal with this error */
-    /* FLASH_ErrorTypeDef errorcode = HAL_FLASH_GetError(); */
-    _Error_Handler(__FILE__, __LINE__);
-    status = KM_FLASH_FAIL;
-  }
-
-  /* Lock the Flash to disable the flash control register access (recommended to protect the FLASH memory against possible unwanted operation) */
-  HAL_FLASH_Lock();
-  return status;
-}
-
-/**
-*/
 void km_flash_program_end() {
   uint32_t checksum;
 

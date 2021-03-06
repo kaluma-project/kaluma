@@ -18,57 +18,62 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <stdint.h>
-#include <stdbool.h>
 #include <stdarg.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
 
 #include "tty.h"
 #include "system.h"
 #include "pico/stdlib.h"
+#include "hardware/timer.h"
+#include "ringbuffer.h"
 
-#define KM_TTY_RX_BUFFER_SIZE   32
-static struct __tty_rx_s {
-  char buffer[KM_TTY_RX_BUFFER_SIZE];
-  int length;
-} __tty_rx;
+#define TTY_RX_RINGBUFFER_SIZE 2048
+static unsigned char __tty_rx_buffer[TTY_RX_RINGBUFFER_SIZE];
+static ringbuffer_t __tty_rx_ringbuffer;
 
 void km_tty_init() {
   stdio_init_all();
-  __tty_rx.length = 0;
-  memset(__tty_rx.buffer, 0, KM_TTY_RX_BUFFER_SIZE);
+  ringbuffer_init(&__tty_rx_ringbuffer, __tty_rx_buffer, sizeof(__tty_rx_buffer));
 }
 
 uint32_t km_tty_available() {
   int ch = getchar_timeout_us(0);
   while(ch > 0)
   {
-    __tty_rx.buffer[__tty_rx.length++] = (char)ch;
+    ringbuffer_write(&__tty_rx_ringbuffer, (uint8_t *)&ch, 1);
     ch = getchar_timeout_us(0);
   }
-  return __tty_rx.length;
+  return ringbuffer_length(&__tty_rx_ringbuffer);
 }
 
 uint32_t km_tty_read(uint8_t *buf, size_t len) {
-  if (__tty_rx.length >= len)
-  {
-    memcpy(buf, __tty_rx.buffer, len);
-    __tty_rx.length -= len;
+  if (km_tty_available() >= len) {
+    ringbuffer_read(&__tty_rx_ringbuffer, buf, len);
     return len;
+  } else {
+    return 0;
   }
-  return 0;
 }
 
 uint32_t km_tty_read_sync(uint8_t *buf, size_t len, uint32_t timeout) {
-  return 0;
+  uint32_t sz;
+  absolute_time_t timeout_ms = delayed_by_ms(get_absolute_time(), timeout);
+  do {
+    sz = km_tty_available();
+  } while (get_absolute_time() < timeout_ms && sz < len);
+  if (sz >= len) {
+    ringbuffer_read(&__tty_rx_ringbuffer, buf, len);
+    return len;
+  } else {
+    return 0;
+  }
 }
 
-
 uint8_t km_tty_getc() {
-  return getchar_timeout_us(0);
+  uint8_t c = 0;
+  if (km_tty_available()) {
+    ringbuffer_read(&__tty_rx_ringbuffer, &c, 1);
+  }
+  return c;
 }
 
 void km_tty_putc(char ch) {
