@@ -43,11 +43,14 @@ JERRYXX_FUN(storage_set_item_fn) {
 JERRYXX_FUN(storage_get_item_fn) {
   JERRYXX_CHECK_ARG_STRING(0, "key")
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
-  char buf[256];
+  char *buf = (char *)malloc(256);
   int res = km_storage_get_item(key, buf);
-  if (res > -1) {
-    return jerry_create_string((const jerry_char_t *) buf);
+  if (res >= KM_STORAGE_OK) {
+    jerry_value_t ret = jerry_create_string((const jerry_char_t *) buf);
+    free(buf);
+    return ret;
   } else { // key not found
+    free(buf);
     return jerry_create_null();
   }
 }
@@ -96,12 +99,15 @@ JERRYXX_FUN(storage_length_fn) {
 JERRYXX_FUN(storage_key_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "index")
   int index = (int) JERRYXX_GET_ARG_NUMBER(0);
-  char buf[256];
+  char *buf = (char *)malloc(256);
   int res = km_storage_key(index, buf);
-  if (res > -1) {
-    return jerry_create_string((const jerry_char_t *) buf);
-  } else { // failure
-    return jerry_create_undefined();
+  if (res >= KM_STORAGE_OK) {
+    jerry_value_t ret = jerry_create_string((const jerry_char_t *) buf);
+    free(buf);
+    return ret;
+  } else { // key not found
+    free(buf);
+    return jerry_create_null();
   }
 }
 
