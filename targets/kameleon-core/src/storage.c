@@ -30,13 +30,6 @@
 #define STORAGE_SLOT_MAX   64
 #define STORAGE_DATA_MAX    253
 
-#define STORAGE_OK          0
-#define STORAGE_ERROR       -1
-#define STORAGE_SWEEPREQ    -2
-#define STORAGE_FULL        -3
-#define STORAGE_OVERLENGTH  -4
-#define STORAGE_FATAL       -10 /* internal use */
-
 #define STORAGE_EMPTY       0
 #define STORAGE_ACTIVE      1
 #define STORAGE_INACTIVE    -1
@@ -78,46 +71,46 @@ static storage_data_t* get_storage_data(uint8_t slot) {
 }
 
 static int flash_byte_write(uint32_t addr, uint8_t data) {
-  int status = STORAGE_OK;
+  int status = KM_STORAGE_OK;
   /* Program byte on the user Flash area */
   if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, addr, data) == HAL_OK) {
   } else {
     /* Error occurred while writing data in Flash memory. User can add here some code to deal with this error */
     /* FLASH_ErrorTypeDef errorcode = HAL_FLASH_GetError(); */
     _Error_Handler(__FILE__, __LINE__);
-    status = STORAGE_ERROR;
+    status = KM_STORAGE_ERROR;
   }
   return status;
 }
 
 static int storage_write(uint8_t slot, storage_data_t data) {
-  int status = STORAGE_OK;
+  int status = KM_STORAGE_OK;
   uint32_t address;
   address = ADDR_FLASH_STORAGE_AREA + (slot * 256);
   /* Unlock the Flash to enable the flash control register access */
   HAL_FLASH_Unlock();
   flush_cache();
   if (data.status == STORAGE_STATUS_USE) {
-    if (flash_byte_write(address, data.status) == STORAGE_ERROR)
-      status = STORAGE_ERROR;
-    if ((status == STORAGE_OK) && (flash_byte_write(address + 1, data.key_length) != STORAGE_OK))
-      status = STORAGE_FATAL;
-    if ((status == STORAGE_OK) && (flash_byte_write(address + 2, data.data_length) != STORAGE_OK))
-      status = STORAGE_FATAL;
+    if (flash_byte_write(address, data.status) == KM_STORAGE_ERROR)
+      status = KM_STORAGE_ERROR;
+    if ((status == KM_STORAGE_OK) && (flash_byte_write(address + 1, data.key_length) != KM_STORAGE_OK))
+      status = KM_STORAGE_FATAL;
+    if ((status == KM_STORAGE_OK) && (flash_byte_write(address + 2, data.data_length) != KM_STORAGE_OK))
+      status = KM_STORAGE_FATAL;
     for (int i = 0; i < (data.key_length); i++) {
-      if ((status == STORAGE_OK) && (flash_byte_write(address + 3 + i, data.data[i]) != STORAGE_OK))
-        status = STORAGE_FATAL;
+      if ((status == KM_STORAGE_OK) && (flash_byte_write(address + 3 + i, data.data[i]) != KM_STORAGE_OK))
+        status = KM_STORAGE_FATAL;
     }
     for (int i = 0; i < (data.data_length); i++) {
-      if ((status == STORAGE_OK) && (flash_byte_write(address + 3 + data.key_length + i, data.data[data.key_length + i]) != STORAGE_OK))
-        status = STORAGE_FATAL;
+      if ((status == KM_STORAGE_OK) && (flash_byte_write(address + 3 + data.key_length + i, data.data[data.key_length + i]) != KM_STORAGE_OK))
+        status = KM_STORAGE_FATAL;
     }
-    if (status == STORAGE_FATAL) {
+    if (status == KM_STORAGE_FATAL) {
       flash_byte_write(address, STORAGE_STATUS_REMOVED);
-      status = STORAGE_ERROR;
+      status = KM_STORAGE_ERROR;
     }
   } else {
-    status = STORAGE_ERROR;
+    status = KM_STORAGE_ERROR;
   }
 
   /* Lock the Flash to disable the flash control register access (recommended to protect the FLASH memory against possible unwanted operation) */
@@ -146,9 +139,9 @@ static int get_number_of_storage(int status) {
 
 static int get_status_of_full_storage() {
   if (get_number_of_storage(STORAGE_INACTIVE) == 0)
-    return STORAGE_FULL;
+    return KM_STORAGE_FULL;
   else
-    return STORAGE_SWEEPREQ;
+    return KM_STORAGE_SWEEPREQ;
 }
 
 static int get_empty_storage_slot() {
@@ -161,7 +154,7 @@ static int get_empty_storage_slot() {
 }
 
 static int get_slot_from_key(const char *key) {
-  int slot = STORAGE_ERROR;
+  int slot = KM_STORAGE_ERROR;
   int input_key_length = 0;
   while (key[input_key_length] != '\0') {
     input_key_length++;
@@ -185,7 +178,7 @@ static int get_slot_from_key(const char *key) {
 }
 
 static int get_slot_from_index (int index) {
-  int slot = STORAGE_ERROR;
+  int slot = KM_STORAGE_ERROR;
   for (int i = 0; i < STORAGE_SLOT_MAX; i++) {
     if (get_storage_state(i) == STORAGE_ACTIVE) {
       if (index == 0) {
@@ -200,7 +193,7 @@ static int get_slot_from_index (int index) {
 }
 
 static int storage_erase(void) {
-  int status = STORAGE_OK;
+  int status = KM_STORAGE_OK;
   FLASH_EraseInitTypeDef EraseInitStruct;
   uint32_t SectorError = 0;
 
@@ -223,7 +216,7 @@ static int storage_erase(void) {
       FLASH_ErrorTypeDef errorcode = HAL_FLASH_GetError();
     */
     _Error_Handler(__FILE__, __LINE__);
-    status = STORAGE_ERROR; //Failure code.
+    status = KM_STORAGE_ERROR; //Failure code.
   }
 
   /* Lock the Flash to disable the flash control register access (recommended to protect the FLASH memory against possible unwanted operation) *********/
@@ -273,7 +266,7 @@ int km_storage_get_item(const char *key, char *buf) {
  * @return Returns 0 on success or -1 on failure or -2 on sweep required or -3 on full storage or -4 on over length.
  */
 int km_storage_set_item(const char *key, char *buf) {
-  int status = STORAGE_OK;
+  int status = KM_STORAGE_OK;
   if (get_number_of_storage(STORAGE_EMPTY) == 0) {
     return get_status_of_full_storage();
   }
@@ -289,18 +282,18 @@ int km_storage_set_item(const char *key, char *buf) {
       for (i = 0; i < size; i++) {
         if (buf[i] != storage_data->data[storage_data->key_length + i]) {
           if (km_storage_remove_item(key) < 0)
-            status = STORAGE_ERROR;
+            status = KM_STORAGE_ERROR;
           break;
         }
       }
       if (i == size)
-        return STORAGE_OK; /*The same data, no need to re-write */
+        return KM_STORAGE_OK; /*The same data, no need to re-write */
     } else {
       if (km_storage_remove_item(key) < 0)
-        status = STORAGE_ERROR;
+        status = KM_STORAGE_ERROR;
     }
   }
-  if (status == STORAGE_OK) {
+  if (status == KM_STORAGE_OK) {
     storage_data_t storage_data;
     slot = get_empty_storage_slot();
     if (slot >= 0) {
@@ -311,7 +304,7 @@ int km_storage_set_item(const char *key, char *buf) {
         key_length++;
       }
       if ((key_length + size) > STORAGE_DATA_MAX) {
-        status = STORAGE_OVERLENGTH;
+        status = KM_STORAGE_OVERLENGTH;
       } else {
         storage_data.key_length = key_length;
         storage_data.data_length = size;
@@ -364,5 +357,5 @@ int km_storage_key(const int index, char *buf) {
     buf[i] = storage_data->data[i];
   }
   buf[storage_data->key_length] = '\0';
-  return STORAGE_OK;
+  return KM_STORAGE_OK;
 }

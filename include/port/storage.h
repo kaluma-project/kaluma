@@ -24,6 +24,13 @@
 
 #include <stdint.h>
 
+#define KM_STORAGE_OK           0
+#define KM_STORAGE_ERROR        -1
+#define KM_STORAGE_SWEEPREQ     -2
+#define KM_STORAGE_FULL         -3
+#define KM_STORAGE_OVERLENGTH  -4
+#define KM_STORAGE_FATAL       -10 /* internal use */
+
 /**
  * Erase all items in the storage
  * @return Return 0 on success or -1 on failture
