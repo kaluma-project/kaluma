@@ -37,7 +37,7 @@ void km_tty_init() {
 
 uint32_t km_tty_available() {
   int ch = getchar_timeout_us(0);
-  while(ch > 0)
+  while(ch >= 0)
   {
     ringbuffer_write(&__tty_rx_ringbuffer, (uint8_t *)&ch, 1);
     ch = getchar_timeout_us(0);

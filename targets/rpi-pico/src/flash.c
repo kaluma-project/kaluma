@@ -108,6 +108,7 @@ void km_flash_program_end() {
   uint32_t saved_irq = save_and_disable_interrupts();
   if (__remaining_data_size) {
     flash_range_program(CODE_FLASH_OFFSET + __code_offset, (uint8_t *)__buff, FLASH_PAGE_SIZE);
+    __code_offset += __remaining_data_size;
   }
   free(__buff);
   uint32_t *buff = (uint32_t *)calloc(HEADER_FLASH_SIZE / 4, sizeof(uint32_t)); //256 byte
