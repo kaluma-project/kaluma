@@ -32,7 +32,7 @@ set(SOURCES
 
 include_directories(${TARGET_INC_DIR} )
 
-set(TARGET_HEAPSIZE 96)
+set(TARGET_HEAPSIZE 192)
 set(JERRY_TOOLCHAIN toolchain_mcu_cortexm0plus.cmake)
 
 set(KALUMA_MODULES events gpio led button pwm adc i2c spi uart graphics at storage stream http url startup)
