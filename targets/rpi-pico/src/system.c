@@ -86,5 +86,5 @@ void km_system_cleanup() {
 }
 
 uint8_t km_running_script_check() {
-  return false;
+  return true;
 }
