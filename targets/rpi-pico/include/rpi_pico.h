@@ -24,7 +24,7 @@
 
 // #define GPIO_NUM 26
 // #define ADC_NUM 3
-#define PWM_NUM 8
+#define PWM_NUM 27
 #define I2C_NUM 2
 #define SPI_NUM 2
 #define UART_NUM 2
