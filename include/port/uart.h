@@ -38,6 +38,18 @@ typedef enum {
   KM_UART_FLOW_RTS_CTS
 } km_uart_flow_control_t;
 
+typedef struct {
+  int8_t pin_tx;
+  int8_t pin_rx;
+  int8_t pin_cts;
+  int8_t pin_rts;
+} km_uart_pins_t;
+
+/**
+ * Return default UART pins. -1 means there is no default value on that pin.
+ */
+km_uart_pins_t km_uart_get_default_pins(uint8_t port);
+
 /**
  * Initialize all UART when system started
  */
@@ -58,11 +70,12 @@ void km_uart_cleanup();
  * @param stop stopbits 1 or 2
  * @param flow
  * @param buffer_size The size of read buffer
+ * @param pins pin numbers for the Tx/Rx/CTS/RTS
  * @return Positive number if successfully setup, negative otherwise.
  */
 int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
   km_uart_parity_type_t parity, uint8_t stop, km_uart_flow_control_t flow,
-  size_t buffer_size);
+  size_t buffer_size, km_uart_pins_t pins);
 
 /**
  * Write a given buffer to the port.

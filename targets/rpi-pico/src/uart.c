@@ -26,13 +26,6 @@
 #include "hardware/uart.h"
 #include "hardware/irq.h"
 
-#define UART0_TX_PIN    0
-#define UART0_RX_PIN    1
-
-#define UART1_TX_PIN    8
-#define UART1_RX_PIN    9
-#define UART1_CTS_PIN   6
-#define UART1_RTS_PIN   7
 static ringbuffer_t __uart_rx_ringbuffer[UART_NUM];
 static uint8_t * __read_buffer[UART_NUM];
 static struct __uart_status_s {
@@ -68,6 +61,61 @@ void __uart_irq_handler_1(void) {
   __uart_fill_ringbuffer(uart1, 1);
 }
 
+bool __check_uart_pins(uint8_t port, km_uart_pins_t pins) {
+  if ((pins.pin_tx < 0) && (pins.pin_rx < 0)) {
+    return false;
+  }
+  if (port == 0) {
+    if ((pins.pin_tx >= 0) && (pins.pin_tx != 0) && (pins.pin_tx != 12) && (pins.pin_tx != 16)) {
+      return false;
+    }
+    if ((pins.pin_rx >= 0) && (pins.pin_rx != 1) && (pins.pin_rx != 13) && (pins.pin_rx != 17)) {
+      return false;
+    }
+    if ((pins.pin_cts >= 0) && (pins.pin_cts != 2) && (pins.pin_cts != 14) && (pins.pin_cts != 18)) {
+      return false;
+    }
+    if ((pins.pin_rts >= 0) && (pins.pin_rts != 3) && (pins.pin_rts != 15) && (pins.pin_rts != 19)) {
+      return false;
+    }
+  } else if (port == 1) {
+    if ((pins.pin_tx >= 0) && (pins.pin_tx != 4) && (pins.pin_tx != 8) && (pins.pin_tx != 20)) {
+      return false;
+    }
+    if ((pins.pin_rx >= 0) && (pins.pin_rx != 5) && (pins.pin_rx != 9) && (pins.pin_rx != 21)) {
+      return false;
+    }
+    if ((pins.pin_cts >= 0) && (pins.pin_cts != 6) && (pins.pin_cts != 10) && (pins.pin_cts != 26)) {
+      return false;
+    }
+    if ((pins.pin_rts >= 0) && (pins.pin_rts != 7) && (pins.pin_rts != 11) && (pins.pin_rts != 27)) {
+      return false;
+    }
+  } else {
+    return false;
+  }
+  return true;
+}
+/**
+ * Return default UART pins. -1 means there is no default value on that pin.
+ */
+km_uart_pins_t km_uart_get_default_pins(uint8_t port) {
+  km_uart_pins_t pins = {
+    .pin_tx = -1,
+    .pin_rx = -1,
+    .pin_cts = -1,
+    .pin_rts = -1,
+  };
+  if (port == 0) {
+    pins.pin_tx = 0;
+    pins.pin_rx = 1;
+  } else if (port == 1) {
+    pins.pin_tx = 4;
+    pins.pin_rx = 5;
+  }
+  return pins;
+}
+
 /**
  * Initialize all UART when system started
  */
@@ -92,24 +140,22 @@ void km_uart_cleanup() {
 
 int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
     km_uart_parity_type_t parity, uint8_t stop, km_uart_flow_control_t flow,
-    size_t buffer_size) {
+    size_t buffer_size, km_uart_pins_t pins) {
   bool cts_en = false;
   bool rts_en = false;
   uart_parity_t pt = UART_PARITY_NONE;
   uart_inst_t *uart = __get_uart_no(port);
-  if ((uart == NULL) || (__uart_status[port].enabled) || (bits < 5) || (bits > 8)) { // Can't support 9 bit
+  if ((uart == NULL) || (__uart_status[port].enabled) || (bits < 5) || (bits > 8) || (__check_uart_pins(port, pins) == false)) { // Can't support 9 bit
     return KM_UARTPORT_ERROR;
   }
   uart_init(uart, baudrate);
-  if (port == 1) {
-    if (flow & KM_UART_FLOW_RTS) {
-      rts_en = true;
-      gpio_set_function(UART1_RTS_PIN, GPIO_FUNC_UART);
-    }
-    if (flow & KM_UART_FLOW_CTS) {
-      cts_en = true;
-      gpio_set_function(UART1_CTS_PIN, GPIO_FUNC_UART);
-    }
+  if ((flow & KM_UART_FLOW_RTS) && (pins.pin_rts >=0)) {
+    rts_en = true;
+    gpio_set_function(pins.pin_rts, GPIO_FUNC_UART);
+  }
+  if ((flow & KM_UART_FLOW_CTS) && (pins.pin_cts >=0)) {
+    cts_en = true;
+    gpio_set_function(pins.pin_cts, GPIO_FUNC_UART);
   }
   uart_set_hw_flow(uart, cts_en, rts_en);
   if (parity == KM_UART_PARITY_TYPE_EVEN) {
@@ -125,14 +171,16 @@ int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
     ringbuffer_init(&__uart_rx_ringbuffer[port], __read_buffer[port], buffer_size);
   }
   uart_set_fifo_enabled(uart, false);
+  if (pins.pin_tx >= 0) {
+    gpio_set_function(pins.pin_tx, GPIO_FUNC_UART);
+  }
+  if (pins.pin_rx >= 0) {
+    gpio_set_function(pins.pin_rx, GPIO_FUNC_UART);
+  }
   if (port == 0) {
-    gpio_set_function(UART0_TX_PIN, GPIO_FUNC_UART);
-    gpio_set_function(UART0_RX_PIN, GPIO_FUNC_UART);
     irq_set_exclusive_handler(UART0_IRQ , __uart_irq_handler_0);
     irq_set_enabled(UART0_IRQ, true);
   } else {
-    gpio_set_function(UART1_TX_PIN, GPIO_FUNC_UART);
-    gpio_set_function(UART1_RX_PIN, GPIO_FUNC_UART);
     irq_set_exclusive_handler(UART1_IRQ , __uart_irq_handler_1);
     irq_set_enabled(UART1_IRQ, true);
   }

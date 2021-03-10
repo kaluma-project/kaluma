@@ -94,16 +94,22 @@ JERRYXX_FUN(uart_ctor_fn) {
   uint8_t port = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   jerry_value_t options = JERRYXX_GET_ARG(1);
   jerry_value_t callback = JERRYXX_GET_ARG(2);
-  uint32_t baudrate = (uint32_t) jerryxx_get_property_number(options,  MSTR_UART_BAUDRATE, UART_DEFAULT_BAUDRATE);
-  uint32_t bits = (uint32_t) jerryxx_get_property_number(options,  MSTR_UART_BITS, UART_DEFAULT_BITS);
-  uint32_t parity = (uint32_t) jerryxx_get_property_number(options,  MSTR_UART_PARITY, UART_DEFAULT_PARITY);
-  uint32_t stop = (uint32_t) jerryxx_get_property_number(options,  MSTR_UART_STOP, UART_DEFAULT_STOP);
-  uint32_t flow = (uint32_t) jerryxx_get_property_number(options,  MSTR_UART_FLOW, UART_DEFAULT_FLOW);
-  uint32_t buffer_size = (uint32_t) jerryxx_get_property_number(options,  MSTR_UART_BUFFERSIZE, UART_DEFAULT_BUFFERSIZE);
+  uint32_t baudrate = (uint32_t) jerryxx_get_property_number(options, MSTR_UART_BAUDRATE, UART_DEFAULT_BAUDRATE);
+  uint32_t bits = (uint32_t) jerryxx_get_property_number(options, MSTR_UART_BITS, UART_DEFAULT_BITS);
+  uint32_t parity = (uint32_t) jerryxx_get_property_number(options, MSTR_UART_PARITY, UART_DEFAULT_PARITY);
+  uint32_t stop = (uint32_t) jerryxx_get_property_number(options, MSTR_UART_STOP, UART_DEFAULT_STOP);
+  uint32_t flow = (uint32_t) jerryxx_get_property_number(options, MSTR_UART_FLOW, UART_DEFAULT_FLOW);
+  uint32_t buffer_size = (uint32_t) jerryxx_get_property_number(options, MSTR_UART_BUFFERSIZE, UART_DEFAULT_BUFFERSIZE);
   jerry_value_t data_event = jerryxx_get_property(options, MSTR_UART_DATAEVENT);
+  km_uart_pins_t def_pins = km_uart_get_default_pins(port);
+  km_uart_pins_t pins;
+  pins.pin_tx = (int8_t) jerryxx_get_property_number(options, MSTR_UART_PIN_TX, def_pins.pin_tx);
+  pins.pin_rx = (int8_t) jerryxx_get_property_number(options, MSTR_UART_PIN_RX, def_pins.pin_rx);
+  pins.pin_cts = (int8_t) jerryxx_get_property_number(options, MSTR_UART_PIN_CTS, def_pins.pin_cts);
+  pins.pin_rts = (int8_t) jerryxx_get_property_number(options, MSTR_UART_PIN_RTS, def_pins.pin_rts);
 
   // initialize the port
-  int ret = km_uart_setup(port, baudrate, bits, parity, stop, flow, buffer_size);
+  int ret = km_uart_setup(port, baudrate, bits, parity, stop, flow, buffer_size, pins);
   if (ret == KM_UARTPORT_ERROR) {
     return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "UART port setup error.");
   }
@@ -116,6 +122,10 @@ JERRYXX_FUN(uart_ctor_fn) {
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_FLOW, flow);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_BUFFERSIZE, buffer_size);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_DATAEVENT, data_event);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PIN_TX, pins.pin_tx);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PIN_RX, pins.pin_rx);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PIN_CTS, pins.pin_cts);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PIN_RTS, pins.pin_rts);
   jerryxx_set_property(JERRYXX_GET_THIS, "callback", callback);
 
   // setup io handle
