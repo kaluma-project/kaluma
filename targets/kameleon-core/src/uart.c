@@ -34,6 +34,25 @@ static const uint32_t uart_hw_control[] = { UART_HWCONTROL_NONE, UART_HWCONTROL_
 static ringbuffer_t uart_rx_ringbuffer[UART_NUM];
 static uint8_t * read_buffer[] = {NULL, NULL};
 
+/**
+ * Return default UART pins. -1 means there is no default value on that pin.
+ */
+km_uart_pins_t km_uart_get_default_pins(uint8_t port) {
+  km_uart_pins_t pins = {
+    .pin_tx = -1,
+    .pin_rx = -1,
+    .pin_cts = -1,
+    .pin_rts = -1,
+  };
+  if (port == 0) {
+    pins.pin_tx = 6;
+    pins.pin_rx = 7;
+  } else if (port == 1) {
+    pins.pin_tx = 4;
+    pins.pin_rx = 5;
+  }
+  return pins;
+}
 
 /**
  * This function called by IRQ Handler
@@ -60,7 +79,7 @@ void km_uart_cleanup() {
 
 int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
     km_uart_parity_type_t parity, uint8_t stop, km_uart_flow_control_t flow,
-    size_t buffer_size) {
+    size_t buffer_size, km_uart_pins_t pins) {
   if ((port != 0) && (port != 1))
     return KM_UARTPORT_ERROR;
   UART_HandleTypeDef * puart = uart_handle[port];

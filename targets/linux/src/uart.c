@@ -23,6 +23,19 @@
 #include "ringbuffer.h"
 
 /**
+ * Return default UART pins. -1 means there is no default value on that pin.
+ */
+km_uart_pins_t km_uart_get_default_pins(uint8_t port) {
+  km_uart_pins_t pins = {
+    .pin_tx = -1,
+    .pin_rx = -1,
+    .pin_cts = -1,
+    .pin_rts = -1,
+  };
+  return pins;
+}
+
+/**
  * Initialize all UART when system started
  */
 void km_uart_init() {
@@ -36,7 +49,7 @@ void km_uart_cleanup() {
 
 int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
     km_uart_parity_type_t parity, uint8_t stop, km_uart_flow_control_t flow,
-    size_t buffer_size) {
+    size_t buffer_size, km_uart_pins_t pins) {
   return 0;
 }
 
