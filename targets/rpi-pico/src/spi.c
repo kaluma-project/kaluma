@@ -28,6 +28,57 @@ struct __spi_status_s {
   bool enabled;
 } __spi_status[SPI_NUM];
 
+static bool __check_spi_pins(uint8_t bus, km_spi_pins_t pins) {
+  if ((pins.clk < 0) || (pins.miso < 0) || (pins.mosi < 0)) {
+    return false;
+  }
+  if (bus == 0) {
+    if ((pins.miso != 0) && (pins.miso != 4) && (pins.miso != 16)) {
+      return false;
+    }
+    if ((pins.mosi != 3) && (pins.mosi != 7) && (pins.mosi != 19)) {
+      return false;
+    }
+    if ((pins.clk != 2) && (pins.clk != 6) && (pins.clk != 18)) {
+      return false;
+    }
+  } else if (bus == 1) {
+    if ((pins.miso != 8) && (pins.miso != 12)) {
+      return false;
+    }
+    if ((pins.mosi != 11) && (pins.mosi != 15)) {
+      return false;
+    }
+    if ((pins.clk != 10) && (pins.clk != 14)) {
+      return false;
+    }
+  } else {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Return default SPI pins. -1 means there is no default value on that pin.
+ */
+km_spi_pins_t km_spi_get_default_pins(uint8_t bus) {
+  km_spi_pins_t pins;
+  if (bus == 0) {
+    pins.miso = 4;
+    pins.mosi = 3;
+    pins.clk = 2;
+  } else if (bus == 1) {
+    pins.miso = 12;
+    pins.mosi = 11;
+    pins.clk = 10;
+  } else {
+    pins.miso = -1;
+    pins.mosi = -1;
+    pins.clk = -1;
+  }
+  return pins;
+}
+
 static spi_inst_t *__get_spi_no(uint8_t bus) {
   if (bus == 0) {
     return spi0;
@@ -59,9 +110,9 @@ void km_spi_cleanup() {
 
 /** SPI Setup
 */
-int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate, km_spi_bitorder_t bitorder) {
+int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate, km_spi_bitorder_t bitorder, km_spi_pins_t pins) {
   spi_inst_t *spi = __get_spi_no(bus);
-  if ((spi == NULL) || (__spi_status[bus].enabled )) {
+  if ((spi == NULL) || (__spi_status[bus].enabled ) || (__check_spi_pins(bus, pins) == false)) {
     return KM_SPIPORT_ERROR;
   }
   spi_cpol_t pol = SPI_CPOL_0;
@@ -91,17 +142,11 @@ int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate, km_spi_bito
   } else {
     order = SPI_LSB_FIRST;
   }
-  spi_set_format(spi, 8, pol, pha, order);
   spi_init(spi, baudrate);
-  if (bus == 0) {
-    gpio_set_function(2, GPIO_FUNC_SPI);
-    gpio_set_function(3, GPIO_FUNC_SPI);
-    gpio_set_function(4, GPIO_FUNC_SPI);
-  } else {
-    gpio_set_function(10, GPIO_FUNC_SPI);
-    gpio_set_function(11, GPIO_FUNC_SPI);
-    gpio_set_function(12, GPIO_FUNC_SPI);
-  }
+  spi_set_format(spi, 8, pol, pha, order);
+  gpio_set_function(pins.miso, GPIO_FUNC_SPI);
+  gpio_set_function(pins.mosi, GPIO_FUNC_SPI);
+  gpio_set_function(pins.clk, GPIO_FUNC_SPI);
   __spi_status[bus].enabled = true;
   return 0;
 }

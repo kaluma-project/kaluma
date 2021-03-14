@@ -40,7 +40,16 @@ typedef enum {
   KM_SPI_BITORDER_LSB
 } km_spi_bitorder_t;
 
+typedef struct {
+  int8_t miso;
+  int8_t mosi;
+  int8_t clk;
+} km_spi_pins_t;
 
+/**
+ * Return default UART pins. -1 means there is no default value on that pin.
+ */
+km_spi_pins_t km_spi_get_default_pins(uint8_t bus);
 /**
  * Initialize all SPI when system started
  */
@@ -59,9 +68,10 @@ void km_spi_cleanup();
  * @param baudrate Baud rate.
  * @param bit_order Bit order (MSB or LSB).
  * @param bits Number of bits in each transferred word.
+ * @param pins pin numbers for the CLK/MISO/MOSI
  * @return Returns 0 on success or -1 on failure.
  */
-int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate, km_spi_bitorder_t bitorder);
+int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate, km_spi_bitorder_t bitorder, km_spi_pins_t pins);
 
 
 /**

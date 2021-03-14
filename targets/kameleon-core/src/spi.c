@@ -63,6 +63,27 @@ static uint32_t get_prescaler_factor(uint8_t bus, uint32_t baudrate) {
 }
 
 /**
+ * Return default SPI pins. -1 means there is no default value on that pin.
+ */
+km_spi_pins_t km_spi_get_default_pins(uint8_t bus) {
+  km_spi_pins_t pins;
+  if (bus == 0) {
+    pins.miso = 11;
+    pins.mosi = 12;
+    pins.clk = 10;
+  } else if (bus == 1) {
+    pins.miso = 13;
+    pins.mosi = 14;
+    pins.clk = 18;
+  } else {
+    pins.miso = -1;
+    pins.mosi = -1;
+    pins.clk = -1;
+  }
+  return pins;
+}
+
+/**
  * Initialize all SPI when system started
  */
 void km_spi_init() {
@@ -80,7 +101,7 @@ void km_spi_cleanup() {
 
 /** SPI Setup
 */
-int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate, km_spi_bitorder_t bitorder) {
+int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate, km_spi_bitorder_t bitorder, km_spi_pins_t pins) {
   if ((bus != 0) && (bus != 1))
     return KM_SPIPORT_ERROR;
 

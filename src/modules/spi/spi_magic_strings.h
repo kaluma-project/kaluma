@@ -38,4 +38,7 @@
 #define MSTR_SPI_MODE3 "MODE_3"
 #define MSTR_SPI_MSB "MSB"
 #define MSTR_SPI_LSB "LSB"
+#define MSTR_SPI_PIN_MISO "pinMiso"
+#define MSTR_SPI_PIN_MOSI "pinMosi"
+#define MSTR_SPI_PIN_CLK "pinClk"
 #endif /* __SPI_MAGIC_STRINGS_H */
