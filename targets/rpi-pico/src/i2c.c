@@ -29,6 +29,48 @@ static struct __i2c_status_s {
   km_i2c_mode_t mode;
 } __i2c_status[I2C_NUM];
 
+static bool __check_i2c_pins(uint8_t bus, km_i2c_pins_t pins) {
+  if ((pins.sda < 0) || (pins.sda > 27) || (pins.scl < 0) || (pins.scl > 27)) {
+    return false;
+  }
+  if (bus == 0) {
+    if (((pins.sda % 4) != 0) || (pins.sda > 21)) {
+      return false;
+    }
+    if (((pins.scl % 4) != 1) || (pins.scl > 21)) {
+      return false;
+    }
+  } else if (bus == 1) {
+    if (((pins.sda % 4) != 2) || ((pins.sda > 21) && (pins.sda < 26))) {
+      return false;
+    }
+    if (((pins.scl % 4) != 3) || ((pins.scl > 21) && (pins.scl < 26))) {
+      return false;
+    }
+  } else {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Return default I2C pins. -1 means there is no default value on that pin.
+ */
+km_i2c_pins_t km_i2c_get_default_pins(uint8_t bus) {
+  km_i2c_pins_t pins;
+  if (bus == 0) {
+    pins.sda = 20;
+    pins.scl = 21;
+  } else if (bus == 1) {
+    pins.sda = 18;
+    pins.scl = 19;
+  } else {
+    pins.sda = -1;
+    pins.scl = -1;
+  }
+  return pins;
+}
+
 /**
  * Initialize all I2C when system started
  */
@@ -58,33 +100,26 @@ static i2c_inst_t *__get_i2c_no(uint8_t bus) {
   }
 }
 
-int km_i2c_setup_master(uint8_t bus, uint32_t speed) {
+int km_i2c_setup_master(uint8_t bus, uint32_t speed, km_i2c_pins_t pins) {
   i2c_inst_t *i2c = __get_i2c_no(bus);
-  if ((i2c == NULL) || (__i2c_status[bus].mode != KM_I2C_NONE)) {
+  if ((i2c == NULL) || (__i2c_status[bus].mode != KM_I2C_NONE) || (__check_i2c_pins(bus, pins) == false)) {
     return KM_I2CPORT_ERROR;
   }
   __i2c_status[bus].mode = KM_I2C_MASTER;
   if (speed > I2C_MAX_CLOCK) {
     speed = I2C_MAX_CLOCK;
   }
-  if (bus == 0) {
-    gpio_set_function(20, GPIO_FUNC_I2C);
-    gpio_set_function(21, GPIO_FUNC_I2C);
-    gpio_pull_up(20);
-    gpio_pull_up(21);
-  } else { // bus 1
-    gpio_set_function(18, GPIO_FUNC_I2C);
-    gpio_set_function(19, GPIO_FUNC_I2C);
-    gpio_pull_up(18);
-    gpio_pull_up(19);
-  }
+  gpio_set_function(pins.sda, GPIO_FUNC_I2C);
+  gpio_set_function(pins.scl, GPIO_FUNC_I2C);
+  gpio_pull_up(pins.sda);
+  gpio_pull_up(pins.scl);
   i2c_init(i2c, speed);
   return 0;
 }
 
-int km_i2c_setup_slave(uint8_t bus, uint8_t address) {
+int km_i2c_setup_slave(uint8_t bus, uint8_t address, km_i2c_pins_t pins) {
   i2c_inst_t *i2c = __get_i2c_no(bus);
-  if ((i2c == NULL) || (__i2c_status[bus].mode != KM_I2C_NONE)) {
+  if ((i2c == NULL) || (__i2c_status[bus].mode != KM_I2C_NONE) || (__check_i2c_pins(bus, pins) == false)) {
     return KM_I2CPORT_ERROR;
   }
   __i2c_status[bus].mode = KM_I2C_SLAVE;

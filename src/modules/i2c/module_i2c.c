@@ -40,42 +40,38 @@ JERRYXX_FUN(i2c_ctor_fn) {
   JERRYXX_CHECK_ARG_OBJECT_OPT(1, "options");
 
   uint8_t bus = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  km_i2c_mode_t mode = KM_I2C_MASTER;
-  uint32_t baudrate = I2C_DEFAULT_BAUDRATE;
-  uint8_t address = 0;
 
-  if (JERRYXX_HAS_ARG(1)) {
-    jerry_value_t options = JERRYXX_GET_ARG(1);
-    if (jerry_value_is_object(options)) {
-      mode = jerryxx_get_property_number(options, MSTR_I2C_MODE, I2C_DEFAULT_MODE);
-      baudrate = (uint32_t) jerryxx_get_property_number(options, MSTR_I2C_BAUDRATE, I2C_DEFAULT_BAUDRATE);
-      address = (uint32_t) jerryxx_get_property_number(options, MSTR_I2C_ADDRESS, 0);
-    }
-  }
-  
+  jerry_value_t options = JERRYXX_GET_ARG(1);
+  km_i2c_mode_t mode = jerryxx_get_property_number(options, MSTR_I2C_MODE, I2C_DEFAULT_MODE);
+  uint32_t baudrate = (uint32_t) jerryxx_get_property_number(options, MSTR_I2C_BAUDRATE, I2C_DEFAULT_BAUDRATE);
+  uint8_t address = (uint32_t) jerryxx_get_property_number(options, MSTR_I2C_ADDRESS, 0);
+  km_i2c_pins_t def_pins = km_i2c_get_default_pins(bus);
+  km_i2c_pins_t pins;
+  pins.sda = (int8_t) jerryxx_get_property_number(options, MSTR_I2C_PIN_SDA, def_pins.sda);
+  pins.scl = (int8_t) jerryxx_get_property_number(options, MSTR_I2C_PIN_SCL, def_pins.scl); 
   // master mode support only
   if (mode != KM_I2C_MASTER)
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) "Unsupported I2C mode.");
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_MODE, mode);
-
-  // check this.bus number
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_BUS, bus);
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_MODE, mode);
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_BAUDRATE, baudrate);
-
   // initialize the bus
   if (mode == KM_I2C_SLAVE) { /* slave mode */
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_ADDRESS, address);
-    int ret = km_i2c_setup_slave(bus, address);
+    int ret = km_i2c_setup_slave(bus, address, pins);
     if (ret < 0) {
       return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to initialize I2C bus.");
     }
   } else { /* master mode */
-    int ret = km_i2c_setup_master(bus, baudrate);
+    int ret = km_i2c_setup_master(bus, baudrate, pins);
     if (ret == KM_I2CPORT_ERROR) {
-      jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to initialize I2C bus.");
+      return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to initialize I2C bus.");
     }
   }
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_MODE, mode);
+  // check this.bus number
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_BUS, bus);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_MODE, mode);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_BAUDRATE, baudrate);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_PIN_SDA, pins.sda);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_PIN_SCL, pins.scl);
   return jerry_create_undefined();
 }
 

@@ -24,6 +24,16 @@
 #include "tty.h"
 
 /**
+ * Return default I2C pins. -1 means there is no default value on that pin.
+ */
+km_i2c_pins_t km_i2c_get_default_pins(uint8_t bus) {
+  km_i2c_pins_t pins;
+    pins.sda = 0;
+    pins.scl = 1;
+  return pins;
+}
+
+/**
  * Initialize all I2C when system started
  */
 void km_i2c_init() {
@@ -35,11 +45,11 @@ void km_i2c_init() {
 void km_i2c_cleanup() {
 }
 
-int km_i2c_setup_master(uint8_t bus, uint32_t speed) {
+int km_i2c_setup_master(uint8_t bus, uint32_t speed, km_i2c_pins_t pins) {
   return 0;
 }
 
-int km_i2c_setup_slave(uint8_t bus, uint8_t address) {
+int km_i2c_setup_slave(uint8_t bus, uint8_t address, km_i2c_pins_t pins) {
   return 0;
 }
 
