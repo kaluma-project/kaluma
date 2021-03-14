@@ -31,7 +31,7 @@
 #define UART_DEFAULT_PARITY KM_UART_PARITY_TYPE_NONE
 #define UART_DEFAULT_STOP 1
 #define UART_DEFAULT_FLOW KM_UART_FLOW_NONE
-#define UART_DEFAULT_BUFFERSIZE 1024
+#define UART_DEFAULT_BUFFERSIZE 2048
 
 static int uart_available_cb(km_io_uart_handle_t *handle) {
   uint8_t port = handle->port;
