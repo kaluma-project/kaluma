@@ -61,7 +61,7 @@ void __uart_irq_handler_1(void) {
   __uart_fill_ringbuffer(uart1, 1);
 }
 
-bool __check_uart_pins(uint8_t port, km_uart_pins_t pins) {
+static bool __check_uart_pins(uint8_t port, km_uart_pins_t pins) {
   if ((pins.tx < 0) && (pins.rx < 0)) {
     return false;
   }
@@ -79,16 +79,16 @@ bool __check_uart_pins(uint8_t port, km_uart_pins_t pins) {
       return false;
     }
   } else if (port == 1) {
-    if ((pins.tx >= 0) && (pins.tx != 4) && (pins.tx != 8) && (pins.tx != 20)) {
+    if ((pins.tx >= 0) && (pins.tx != 4) && (pins.tx != 8)) {
       return false;
     }
-    if ((pins.rx >= 0) && (pins.rx != 5) && (pins.rx != 9) && (pins.rx != 21)) {
+    if ((pins.rx >= 0) && (pins.rx != 5) && (pins.rx != 9)) {
       return false;
     }
-    if ((pins.cts >= 0) && (pins.cts != 6) && (pins.cts != 10) && (pins.cts != 26)) {
+    if ((pins.cts >= 0) && (pins.cts != 6) && (pins.cts != 10)) {
       return false;
     }
-    if ((pins.rts >= 0) && (pins.rts != 7) && (pins.rts != 11) && (pins.rts != 27)) {
+    if ((pins.rts >= 0) && (pins.rts != 7) && (pins.rts != 11)) {
       return false;
     }
   } else {
@@ -110,8 +110,8 @@ km_uart_pins_t km_uart_get_default_pins(uint8_t port) {
     pins.tx = 0;
     pins.rx = 1;
   } else if (port == 1) {
-    pins.tx = 4;
-    pins.rx = 5;
+    pins.tx = 8;
+    pins.rx = 9;
   }
   return pins;
 }
