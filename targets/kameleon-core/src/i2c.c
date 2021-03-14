@@ -31,6 +31,24 @@ static I2C_HandleTypeDef * handle[] = {&hi2c1, &hi2c2};
 static I2C_TypeDef * instance[] = {I2C1, I2C2};
 
 /**
+ * Return default I2C pins. -1 means there is no default value on that pin.
+ */
+km_i2c_pins_t km_i2c_get_default_pins(uint8_t bus) {
+  km_i2c_pins_t pins;
+  if (bus == 0) {
+    pins.sda = 9;
+    pins.scl = 8;
+  } else if (bus == 1) {
+    pins.sda = 16;
+    pins.scl = 15;
+  } else {
+    pins.sda = -1;
+    pins.scl = -1;
+  }
+  return pins;
+}
+
+/**
  * Initialize all I2C when system started
  */
 void km_i2c_init() {
@@ -46,7 +64,7 @@ void km_i2c_cleanup() {
   }
 }
 
-int km_i2c_setup_master(uint8_t bus, uint32_t speed) {
+int km_i2c_setup_master(uint8_t bus, uint32_t speed, km_i2c_pins_t pins) {
   if ((bus != 0) && (bus != 1))
     return KM_I2CPORT_ERROR;
   if (speed >= I2C_MAXSPEED)
@@ -68,7 +86,7 @@ int km_i2c_setup_master(uint8_t bus, uint32_t speed) {
   return KM_I2CPORT_ERROR;
 }
 
-int km_i2c_setup_slave(uint8_t bus, uint8_t address) {
+int km_i2c_setup_slave(uint8_t bus, uint8_t address, km_i2c_pins_t pins) {
   if ((bus != 0) && (bus != 1))
     return KM_I2CPORT_ERROR;
 

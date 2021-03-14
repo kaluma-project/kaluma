@@ -103,10 +103,10 @@ JERRYXX_FUN(uart_ctor_fn) {
   jerry_value_t data_event = jerryxx_get_property(options, MSTR_UART_DATAEVENT);
   km_uart_pins_t def_pins = km_uart_get_default_pins(port);
   km_uart_pins_t pins;
-  pins.pin_tx = (int8_t) jerryxx_get_property_number(options, MSTR_UART_PIN_TX, def_pins.pin_tx);
-  pins.pin_rx = (int8_t) jerryxx_get_property_number(options, MSTR_UART_PIN_RX, def_pins.pin_rx);
-  pins.pin_cts = (int8_t) jerryxx_get_property_number(options, MSTR_UART_PIN_CTS, def_pins.pin_cts);
-  pins.pin_rts = (int8_t) jerryxx_get_property_number(options, MSTR_UART_PIN_RTS, def_pins.pin_rts);
+  pins.tx = (int8_t) jerryxx_get_property_number(options, MSTR_UART_PIN_TX, def_pins.tx);
+  pins.rx = (int8_t) jerryxx_get_property_number(options, MSTR_UART_PIN_RX, def_pins.rx);
+  pins.cts = (int8_t) jerryxx_get_property_number(options, MSTR_UART_PIN_CTS, def_pins.cts);
+  pins.rts = (int8_t) jerryxx_get_property_number(options, MSTR_UART_PIN_RTS, def_pins.rts);
 
   // initialize the port
   int ret = km_uart_setup(port, baudrate, bits, parity, stop, flow, buffer_size, pins);
@@ -122,10 +122,10 @@ JERRYXX_FUN(uart_ctor_fn) {
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_FLOW, flow);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_BUFFERSIZE, buffer_size);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_DATAEVENT, data_event);
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PIN_TX, pins.pin_tx);
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PIN_RX, pins.pin_rx);
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PIN_CTS, pins.pin_cts);
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PIN_RTS, pins.pin_rts);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PIN_TX, pins.tx);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PIN_RX, pins.rx);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PIN_CTS, pins.cts);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PIN_RTS, pins.rts);
   jerryxx_set_property(JERRYXX_GET_THIS, "callback", callback);
 
   // setup io handle

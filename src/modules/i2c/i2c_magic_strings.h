@@ -35,5 +35,6 @@
 #define MSTR_I2C_MEM_WRITE "memWrite"
 #define MSTR_I2C_MEM_READ "memRead"
 #define MSTR_I2C_CLOSE "close"
-
+#define MSTR_I2C_PIN_SDA "pinSda"
+#define MSTR_I2C_PIN_SCL "pinScl"
 #endif /* __I2C_MAGIC_STRINGS_H */

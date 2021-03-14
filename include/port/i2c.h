@@ -34,6 +34,16 @@ typedef enum {
 
 #define KM_I2CPORT_ERROR -1
 
+typedef struct {
+  int8_t sda;
+  int8_t scl;
+} km_i2c_pins_t;
+
+/**
+ * Return default I2C pins. -1 means there is no default value on that pin.
+ */
+km_i2c_pins_t km_i2c_get_default_pins(uint8_t bus);
+
 /**
  * Initialize all I2C when system started
  */
@@ -49,18 +59,20 @@ void km_i2c_cleanup();
  *
  * @param bus The bus number.
  * @param speed i2c speed
+ * @param pins pin numbers for the SDA/SCL
  * @return Returns 0 on success or -1 on failure.
  */
-int km_i2c_setup_master(uint8_t bus, uint32_t speed);
+int km_i2c_setup_master(uint8_t bus, uint32_t speed, km_i2c_pins_t pins);
 
 /**
  * Setup a I2C bus as slave.
  *
  * @param bus The bus number.
  * @param address Address of the slave.
+ * @param pins pin numbers for the SDA/SCL
  * @return Returns 0 on success or -1 on failure.
  */
-int km_i2c_setup_slave(uint8_t bus, uint8_t address);
+int km_i2c_setup_slave(uint8_t bus, uint8_t address, km_i2c_pins_t pins);
 
 /**
  * Memory Write a given buffer to the bus (in master mode).

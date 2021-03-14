@@ -22,7 +22,16 @@
 #include "spi.h"
 #include "gpio.h"
 
-
+/**
+ * Return default SPI pins. -1 means there is no default value on that pin.
+ */
+km_spi_pins_t km_spi_get_default_pins(uint8_t bus) {
+  km_spi_pins_t pins;
+  pins.miso = 0;
+  pins.mosi = 1;
+  pins.clk = 2;
+  return pins;
+}
 /**
  * Initialize all SPI when system started
  */
@@ -37,7 +46,7 @@ void km_spi_cleanup() {
 
 /** SPI Setup
 */
-int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate, km_spi_bitorder_t bitorder) {
+int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate, km_spi_bitorder_t bitorder, km_spi_pins_t pins) {
   return 0;
 }
 

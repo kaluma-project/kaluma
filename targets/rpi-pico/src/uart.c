@@ -61,34 +61,34 @@ void __uart_irq_handler_1(void) {
   __uart_fill_ringbuffer(uart1, 1);
 }
 
-bool __check_uart_pins(uint8_t port, km_uart_pins_t pins) {
-  if ((pins.pin_tx < 0) && (pins.pin_rx < 0)) {
+static bool __check_uart_pins(uint8_t port, km_uart_pins_t pins) {
+  if ((pins.tx < 0) && (pins.rx < 0)) {
     return false;
   }
   if (port == 0) {
-    if ((pins.pin_tx >= 0) && (pins.pin_tx != 0) && (pins.pin_tx != 12) && (pins.pin_tx != 16)) {
+    if ((pins.tx >= 0) && (pins.tx != 0) && (pins.tx != 12) && (pins.tx != 16)) {
       return false;
     }
-    if ((pins.pin_rx >= 0) && (pins.pin_rx != 1) && (pins.pin_rx != 13) && (pins.pin_rx != 17)) {
+    if ((pins.rx >= 0) && (pins.rx != 1) && (pins.rx != 13) && (pins.rx != 17)) {
       return false;
     }
-    if ((pins.pin_cts >= 0) && (pins.pin_cts != 2) && (pins.pin_cts != 14) && (pins.pin_cts != 18)) {
+    if ((pins.cts >= 0) && (pins.cts != 2) && (pins.cts != 14) && (pins.cts != 18)) {
       return false;
     }
-    if ((pins.pin_rts >= 0) && (pins.pin_rts != 3) && (pins.pin_rts != 15) && (pins.pin_rts != 19)) {
+    if ((pins.rts >= 0) && (pins.rts != 3) && (pins.rts != 15) && (pins.rts != 19)) {
       return false;
     }
   } else if (port == 1) {
-    if ((pins.pin_tx >= 0) && (pins.pin_tx != 4) && (pins.pin_tx != 8) && (pins.pin_tx != 20)) {
+    if ((pins.tx >= 0) && (pins.tx != 4) && (pins.tx != 8)) {
       return false;
     }
-    if ((pins.pin_rx >= 0) && (pins.pin_rx != 5) && (pins.pin_rx != 9) && (pins.pin_rx != 21)) {
+    if ((pins.rx >= 0) && (pins.rx != 5) && (pins.rx != 9)) {
       return false;
     }
-    if ((pins.pin_cts >= 0) && (pins.pin_cts != 6) && (pins.pin_cts != 10) && (pins.pin_cts != 26)) {
+    if ((pins.cts >= 0) && (pins.cts != 6) && (pins.cts != 10)) {
       return false;
     }
-    if ((pins.pin_rts >= 0) && (pins.pin_rts != 7) && (pins.pin_rts != 11) && (pins.pin_rts != 27)) {
+    if ((pins.rts >= 0) && (pins.rts != 7) && (pins.rts != 11)) {
       return false;
     }
   } else {
@@ -101,17 +101,17 @@ bool __check_uart_pins(uint8_t port, km_uart_pins_t pins) {
  */
 km_uart_pins_t km_uart_get_default_pins(uint8_t port) {
   km_uart_pins_t pins = {
-    .pin_tx = -1,
-    .pin_rx = -1,
-    .pin_cts = -1,
-    .pin_rts = -1,
+    .tx = -1,
+    .rx = -1,
+    .cts = -1,
+    .rts = -1,
   };
   if (port == 0) {
-    pins.pin_tx = 0;
-    pins.pin_rx = 1;
+    pins.tx = 0;
+    pins.rx = 1;
   } else if (port == 1) {
-    pins.pin_tx = 4;
-    pins.pin_rx = 5;
+    pins.tx = 8;
+    pins.rx = 9;
   }
   return pins;
 }
@@ -149,13 +149,13 @@ int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
     return KM_UARTPORT_ERROR;
   }
   uart_init(uart, baudrate);
-  if ((flow & KM_UART_FLOW_RTS) && (pins.pin_rts >=0)) {
+  if ((flow & KM_UART_FLOW_RTS) && (pins.rts >=0)) {
     rts_en = true;
-    gpio_set_function(pins.pin_rts, GPIO_FUNC_UART);
+    gpio_set_function(pins.rts, GPIO_FUNC_UART);
   }
-  if ((flow & KM_UART_FLOW_CTS) && (pins.pin_cts >=0)) {
+  if ((flow & KM_UART_FLOW_CTS) && (pins.cts >=0)) {
     cts_en = true;
-    gpio_set_function(pins.pin_cts, GPIO_FUNC_UART);
+    gpio_set_function(pins.cts, GPIO_FUNC_UART);
   }
   uart_set_hw_flow(uart, cts_en, rts_en);
   if (parity == KM_UART_PARITY_TYPE_EVEN) {
@@ -171,11 +171,11 @@ int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
     ringbuffer_init(&__uart_rx_ringbuffer[port], __read_buffer[port], buffer_size);
   }
   uart_set_fifo_enabled(uart, false);
-  if (pins.pin_tx >= 0) {
-    gpio_set_function(pins.pin_tx, GPIO_FUNC_UART);
+  if (pins.tx >= 0) {
+    gpio_set_function(pins.tx, GPIO_FUNC_UART);
   }
-  if (pins.pin_rx >= 0) {
-    gpio_set_function(pins.pin_rx, GPIO_FUNC_UART);
+  if (pins.rx >= 0) {
+    gpio_set_function(pins.rx, GPIO_FUNC_UART);
   }
   if (port == 0) {
     irq_set_exclusive_handler(UART0_IRQ , __uart_irq_handler_0);
