@@ -39,17 +39,17 @@ static uint8_t * read_buffer[] = {NULL, NULL};
  */
 km_uart_pins_t km_uart_get_default_pins(uint8_t port) {
   km_uart_pins_t pins = {
-    .pin_tx = -1,
-    .pin_rx = -1,
-    .pin_cts = -1,
-    .pin_rts = -1,
+    .tx = -1,
+    .rx = -1,
+    .cts = -1,
+    .rts = -1,
   };
   if (port == 0) {
-    pins.pin_tx = 6;
-    pins.pin_rx = 7;
+    pins.tx = 6;
+    pins.rx = 7;
   } else if (port == 1) {
-    pins.pin_tx = 4;
-    pins.pin_rx = 5;
+    pins.tx = 4;
+    pins.rx = 5;
   }
   return pins;
 }

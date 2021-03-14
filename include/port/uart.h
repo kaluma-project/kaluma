@@ -39,10 +39,10 @@ typedef enum {
 } km_uart_flow_control_t;
 
 typedef struct {
-  int8_t pin_tx;
-  int8_t pin_rx;
-  int8_t pin_cts;
-  int8_t pin_rts;
+  int8_t tx;
+  int8_t rx;
+  int8_t cts;
+  int8_t rts;
 } km_uart_pins_t;
 
 /**

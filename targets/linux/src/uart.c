@@ -27,10 +27,10 @@
  */
 km_uart_pins_t km_uart_get_default_pins(uint8_t port) {
   km_uart_pins_t pins = {
-    .pin_tx = -1,
-    .pin_rx = -1,
-    .pin_cts = -1,
-    .pin_rts = -1,
+    .tx = -1,
+    .rx = -1,
+    .cts = -1,
+    .rts = -1,
   };
   return pins;
 }
