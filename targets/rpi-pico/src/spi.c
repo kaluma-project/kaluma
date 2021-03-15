@@ -64,9 +64,9 @@ static bool __check_spi_pins(uint8_t bus, km_spi_pins_t pins) {
 km_spi_pins_t km_spi_get_default_pins(uint8_t bus) {
   km_spi_pins_t pins;
   if (bus == 0) {
-    pins.miso = 4;
-    pins.mosi = 3;
-    pins.clk = 2;
+    pins.miso = 16;
+    pins.mosi = 19;
+    pins.clk = 18;
   } else if (bus == 1) {
     pins.miso = 12;
     pins.mosi = 11;

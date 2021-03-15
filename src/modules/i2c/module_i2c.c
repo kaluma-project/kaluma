@@ -47,8 +47,8 @@ JERRYXX_FUN(i2c_ctor_fn) {
   uint8_t address = (uint32_t) jerryxx_get_property_number(options, MSTR_I2C_ADDRESS, 0);
   km_i2c_pins_t def_pins = km_i2c_get_default_pins(bus);
   km_i2c_pins_t pins;
-  pins.sda = (int8_t) jerryxx_get_property_number(options, MSTR_I2C_PIN_SDA, def_pins.sda);
-  pins.scl = (int8_t) jerryxx_get_property_number(options, MSTR_I2C_PIN_SCL, def_pins.scl); 
+  pins.sda = (int8_t) jerryxx_get_property_number(options, MSTR_I2C_SDA, def_pins.sda);
+  pins.scl = (int8_t) jerryxx_get_property_number(options, MSTR_I2C_SCL, def_pins.scl); 
   // master mode support only
   if (mode != KM_I2C_MASTER)
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) "Unsupported I2C mode.");
@@ -70,8 +70,8 @@ JERRYXX_FUN(i2c_ctor_fn) {
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_BUS, bus);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_MODE, mode);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_BAUDRATE, baudrate);
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_PIN_SDA, pins.sda);
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_PIN_SCL, pins.scl);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_SDA, pins.sda);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_SCL, pins.scl);
   return jerry_create_undefined();
 }
 
