@@ -59,11 +59,11 @@ static bool __check_i2c_pins(uint8_t bus, km_i2c_pins_t pins) {
 km_i2c_pins_t km_i2c_get_default_pins(uint8_t bus) {
   km_i2c_pins_t pins;
   if (bus == 0) {
-    pins.sda = 5;
-    pins.scl = 4;
+    pins.sda = 4;
+    pins.scl = 5;
   } else if (bus == 1) {
-    pins.sda = 3;
-    pins.scl = 2;
+    pins.sda = 2;
+    pins.scl = 3;
   } else {
     pins.sda = -1;
     pins.scl = -1;
