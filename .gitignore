@@ -10,6 +10,7 @@ src/gen
 
 # Temp
 .vscode/ipch
+.DS_Store
 
 *~
 \#*

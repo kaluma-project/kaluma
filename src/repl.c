@@ -692,7 +692,7 @@ static void cmd_hi(km_repl_state_t *state)
   km_repl_printf("  /        __>  https://kaluma.io\r\n");
   km_repl_printf(" |/\\________/\r\n");
   km_repl_printf("  \\__@  v  v    Type '.help' for more info.\r\n");
-  km_repl_printf("--------------------------------------------\r\n");
+  km_repl_printf("-----------------------------------------------\r\n");
   km_repl_println();
 }
 
