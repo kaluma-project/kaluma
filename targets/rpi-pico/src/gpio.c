@@ -34,7 +34,10 @@ static int __check_gpio(uint8_t pin)
 }
 
 void km_gpio_init() {
-  gpio_init_mask(0xFFFFFFFF); // init all the GPIOs
+  for(uint i = 0; i < 30; i++) {
+    gpio_init(i);
+    gpio_set_pulls(i, false, false);
+  }
 }
 
 void km_gpio_cleanup() {
