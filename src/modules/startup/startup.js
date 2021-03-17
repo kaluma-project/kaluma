@@ -48,21 +48,3 @@ if (process.builtin_modules.indexOf('storage') > -1) {
   var Storage = Module.require('storage').Storage;
   global.storage = new Storage();
 }
-
-/**
- * Board object
- */
-
-if (process.builtin_modules.indexOf('gpio') > -1) {
-  board.gpio = function (pin, mode) {
-    var GPIO = Module.require('gpio');
-    return new GPIO(pin, mode);
-  }
-}
-
-if (process.builtin_modules.indexOf('led') > -1) {
-  board.led = function (pin) {
-    var LED = Module.require('led');
-    return new LED(pin);
-  }
-}
