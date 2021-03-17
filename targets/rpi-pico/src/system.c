@@ -28,6 +28,8 @@
 #include "spi.h"
 #include "uart.h"
 #include "pico/stdlib.h"
+#include "hardware/gpio.h"
+#include "rpi_pico.h"
 
 const char km_system_arch[] = "cortex-m0-plus";
 const char km_system_platform[] = "unknown";
@@ -86,5 +88,9 @@ void km_system_cleanup() {
 }
 
 uint8_t km_running_script_check() {
-  return true;
+  gpio_set_pulls(SCR_LOAD_GPIO, true, false);
+  sleep_us(100);
+  bool load_state = gpio_get(SCR_LOAD_GPIO);
+  gpio_set_pulls(SCR_LOAD_GPIO, false, false);
+  return load_state;
 }

@@ -215,8 +215,8 @@ struct km_io_loop_s {
 
 /* loop functions */
 
-void io_init();
-void io_run();
+void km_io_init();
+void km_io_run();
 
 /* general handle functions */
 

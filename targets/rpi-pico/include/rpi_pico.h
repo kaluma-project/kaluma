@@ -34,4 +34,5 @@
 #define ADC_RESOLUTION_BIT      12
 #define PWM_CLK_REF             1250
 #define I2C_MAX_CLOCK           1000000
+#define SCR_LOAD_GPIO           22 // GPIO 22
 #endif /* __RPI_PICO_H */

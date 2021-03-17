@@ -97,7 +97,7 @@ static void km_io_handle_closing() {
 
 /* loop functions */
 
-void io_init() {
+void km_io_init() {
   loop.stop_flag = false;
   km_list_init(&loop.tty_handles);
   km_list_init(&loop.timer_handles);
@@ -112,7 +112,7 @@ void io_init() {
     km_list_init(&loop.closing_handles);
 }
 
-void io_run() {
+void km_io_run() {
   while (loop.stop_flag == false) {
     io_update_time();
     km_io_timer_run();

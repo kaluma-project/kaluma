@@ -31,8 +31,8 @@ int main(void) {
   km_system_init();
   load = km_running_script_check();
   km_tty_init();
-  io_init();
+  km_io_init();
   km_repl_init();
   km_runtime_init(load, true);
-  io_run();
+  km_io_run();
 }
