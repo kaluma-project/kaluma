@@ -22,6 +22,6 @@
 #ifndef __KALUMA_CONFIG_H
 #define __KALUMA_CONFIG_H
 
-#define KALUMA_VERSION "1.0.0-beta.1"
+#define KALUMA_VERSION "@VER@"
 
 #endif /* __KALUMA_CONFIG_H */

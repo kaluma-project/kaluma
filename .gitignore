@@ -2,6 +2,9 @@
 build
 .dep
 
+# kaluma_config.h because it's automatically generated.
+include/kaluma_config.h
+
 # Node.js modules
 node_modules
 

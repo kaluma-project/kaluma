@@ -1,5 +1,3 @@
-include(${CMAKE_SOURCE_DIR}/targets/${TARGET}/target.cmake)
-
 set(JERRY_ROOT ${CMAKE_SOURCE_DIR}/lib/jerryscript)
 set(JERRY_INC
   ${JERRY_ROOT}/jerry-core
@@ -42,7 +40,7 @@ set(KALUMA_GENERATED_C
 set(KALUMA_GENERATED_H
   ${SRC_DIR}/gen/kaluma_modules.h
   ${SRC_DIR}/gen/kaluma_magic_strings.h)
-
+file(GLOB_RECURSE KALUMA_MODULE_SRC ${SRC_DIR}/modules/*)
 set(KALUMA_GENERATED ${KALUMA_GENERATED_C} ${KALUMA_GENERATED_H})
 
 string (REPLACE ";" " " KALUMA_MODULE_LIST "${KALUMA_MODULES}")
@@ -52,7 +50,7 @@ set(JERRY_LIBS
   ${JERRY_ROOT}/build/lib/libjerry-ext.a)
 
 add_custom_command(OUTPUT ${JERRY_LIBS}
-  DEPENDS ${KALUMA_GENERATED_C}
+  DEPENDS ${KALUMA_GENERATED_C} ${KALUMA_MODULE_SRC}
   WORKING_DIRECTORY ${JERRY_ROOT}
   COMMAND python tools/build.py --clean ${JERRY_ARGS})
 
@@ -114,26 +112,4 @@ if("graphics" IN_LIST KALUMA_MODULES)
     ${SRC_DIR}/modules/graphics/font_default.c
     ${SRC_DIR}/modules/graphics/module_graphics.c)
   include_directories(${SRC_DIR}/modules/graphics)
-endif()
-
-# -----------------------------------------------------------------------------
-
-if("${TARGET}" STREQUAL "rpi-pico")
-  add_executable(${TARGET} ${SOURCES} ${JERRY_LIBS})
-  target_link_libraries(${TARGET} ${JERRY_LIBS} ${TARGET_LIBS})
-  # Enable USB output, disable UART output
-  pico_enable_stdio_usb(${TARGET} 1)
-  pico_enable_stdio_uart(${TARGET} 0)
-
-  pico_add_extra_outputs(${TARGET})
-else()
-  add_executable(${TARGET}.elf ${SOURCES} ${JERRY_LIBS})
-  target_link_libraries(${TARGET}.elf ${JERRY_LIBS} ${TARGET_LIBS})
-
-  add_custom_command(OUTPUT ${TARGET}.hex ${TARGET}.bin
-    COMMAND ${CMAKE_OBJCOPY} -O ihex ${TARGET}.elf ${TARGET}.hex
-    COMMAND ${CMAKE_OBJCOPY} -O binary -S ${TARGET}.elf ${TARGET}.bin
-    DEPENDS ${TARGET}.elf)
-
-  add_custom_target(kaluma ALL DEPENDS ${TARGET}.hex ${TARGET}.bin)
 endif()
