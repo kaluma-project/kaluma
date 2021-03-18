@@ -7,6 +7,7 @@ set(DEBUG 1)
 set(OPT -Og)
 
 project(kaluma-project C)
+set(OUTPUT_TARGET kaluma-${TARGET}-${VER})
 set(TARGET_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 set(TARGET_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 
@@ -45,4 +46,16 @@ set(CMAKE_LINKER ${PREFIX}ld)
 set(CMAKE_OBJCOPY ${PREFIX}objcopy)
 
 set(TARGET_LIBS c m)
-set(CMAKE_EXE_LINKER_FLAGS "-u _printf_float -Wl,-Map=linux.map,--cref -Wl,--gc-sections")
+set(CMAKE_EXE_LINKER_FLAGS "-u _printf_float -Wl,-Map=${OUTPUT_TARGET}.map,--cref -Wl,--gc-sections")
+
+include(${CMAKE_SOURCE_DIR}/tools/kaluma.cmake)
+
+add_executable(${OUTPUT_TARGET}.elf ${SOURCES} ${JERRY_LIBS})
+target_link_libraries(${OUTPUT_TARGET}.elf ${JERRY_LIBS} ${TARGET_LIBS})
+
+add_custom_command(OUTPUT ${OUTPUT_TARGET}.hex ${OUTPUT_TARGET}.bin
+  COMMAND ${CMAKE_OBJCOPY} -O ihex ${OUTPUT_TARGET}.elf ${OUTPUT_TARGET}.hex
+  COMMAND ${CMAKE_OBJCOPY} -O binary -S ${OUTPUT_TARGET}.elf ${OUTPUT_TARGET}.bin
+  DEPENDS ${OUTPUT_TARGET}.elf)
+
+add_custom_target(kaluma ALL DEPENDS ${OUTPUT_TARGET}.hex ${OUTPUT_TARGET}.bin)

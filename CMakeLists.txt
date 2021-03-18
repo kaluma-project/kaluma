@@ -1,13 +1,15 @@
 cmake_minimum_required(VERSION 3.5)
+# Available targets are in /targets
+if(NOT TARGET)
+  set(TARGET "rpi-pico") # default: rpi-pico
+endif()
 
-if("${TARGET}" STREQUAL "rpi-pico")
-else()
+if(NOT "${TARGET}" STREQUAL "rpi-pico")
   project(KM_CMAKE NONE)
 endif()
 
-# Available targets are in /targets
-if(NOT TARGET)
-  set(TARGET rpi-pico) # default: rpi-pico
+if(NOT VER)
+  set(VER "1.0.0-beta.1")
 endif()
-
-include(${CMAKE_SOURCE_DIR}/tools/kaluma.cmake)
+configure_file(${CMAKE_SOURCE_DIR}/tools/kaluma_config.h.in ${CMAKE_SOURCE_DIR}/include/kaluma_config.h)
+include(${CMAKE_SOURCE_DIR}/targets/${TARGET}/target.cmake)

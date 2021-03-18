@@ -9,7 +9,7 @@ set(OPT -Og)
 set(BOOTLOADER 1)
 
 project(kaluma-project C ASM)
-
+set(OUTPUT_TARGET kaluma-${TARGET}-${VER})
 add_definitions(-DUSE_HAL_DRIVER
   -DSTM32F411xE)
 
@@ -98,4 +98,16 @@ set(CMAKE_OBJCOPY ${PREFIX}objcopy)
 set(CMAKE_ASM_FLAGS "-x assembler-with-cpp")
 
 set(TARGET_LIBS c nosys m)
-set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -T${TARGET_LDSCRIPT} -Wl,-Map=${TARGET}.map,--cref -Wl,--gc-sections")
+set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -T${TARGET_LDSCRIPT} -Wl,-Map=${OUTPUT_TARGET}.map,--cref -Wl,--gc-sections")
+
+include(${CMAKE_SOURCE_DIR}/tools/kaluma.cmake)
+
+add_executable(${OUTPUT_TARGET}.elf ${SOURCES} ${JERRY_LIBS})
+target_link_libraries(${OUTPUT_TARGET}.elf ${JERRY_LIBS} ${TARGET_LIBS})
+
+add_custom_command(OUTPUT ${OUTPUT_TARGET}.hex ${OUTPUT_TARGET}.bin
+  COMMAND ${CMAKE_OBJCOPY} -O ihex ${OUTPUT_TARGET}.elf ${OUTPUT_TARGET}.hex
+  COMMAND ${CMAKE_OBJCOPY} -O binary -S ${OUTPUT_TARGET}.elf ${OUTPUT_TARGET}.bin
+  DEPENDS ${OUTPUT_TARGET}.elf)
+
+add_custom_target(kaluma ALL DEPENDS ${OUTPUT_TARGET}.hex ${OUTPUT_TARGET}.bin)

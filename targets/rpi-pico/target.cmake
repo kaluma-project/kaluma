@@ -12,7 +12,7 @@ include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
 project(kaluma-project C CXX ASM)
 # initialize the Pico SDK
 pico_sdk_init()
-
+set(OUTPUT_TARGET kaluma-${TARGET}-${VER})
 set(TARGET_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 set(TARGET_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 
@@ -60,4 +60,13 @@ set(TARGET_LIBS c nosys m
   hardware_uart
   hardware_flash
   hardware_sync)
-set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -Wl,-Map=${TARGET}.map,--cref,--gc-sections")
+set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -Wl,-Map=${OUTPUT_TARGET}.map,--cref,--gc-sections")
+
+include(${CMAKE_SOURCE_DIR}/tools/kaluma.cmake)
+add_executable(${OUTPUT_TARGET} ${SOURCES} ${JERRY_LIBS})
+target_link_libraries(${OUTPUT_TARGET} ${JERRY_LIBS} ${TARGET_LIBS})
+# Enable USB output, disable UART output
+pico_enable_stdio_usb(${OUTPUT_TARGET} 1)
+pico_enable_stdio_uart(${OUTPUT_TARGET} 0)
+
+pico_add_extra_outputs(${OUTPUT_TARGET})
