@@ -17,5 +17,6 @@ Kaluma is a tiny and efficient JavaScript runtime for microcontrollers. The main
 
 # Resources
 
+- [Getting Started](https://docs.kaluma.io/getting_started)
 - [Documentation](https://docs.kaluma.io/)
 - [CLI (Command Line Interface)](https://github.com/kaluma-project/kaluma-cli)
