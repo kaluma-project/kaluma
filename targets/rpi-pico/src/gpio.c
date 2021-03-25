@@ -51,12 +51,12 @@ int km_gpio_set_io_mode(uint8_t pin, km_gpio_io_mode_t mode) {
   if (mode == KM_GPIO_IO_MODE_OUTPUT) {
     gpio_set_dir(pin, true); // Set OUTPUT
   } else {
-    gpio_set_input_enabled(pin, true); // Set INPUT
     if (mode == KM_GPIO_IO_MODE_INPUT_PULLUP) {
       gpio_pull_up(pin);
-    } else {
+    } else if (mode == KM_GPIO_IO_MODE_INPUT_PULLDOWN) {
       gpio_pull_down(pin);
     }
+    gpio_set_input_enabled(pin, true); // Set INPUT
   }
   return 0;
 }
