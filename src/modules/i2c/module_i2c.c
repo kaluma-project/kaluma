@@ -38,17 +38,29 @@ static void buffer_free_cb(void *native_p) {
 JERRYXX_FUN(i2c_ctor_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "bus");
   JERRYXX_CHECK_ARG_OBJECT_OPT(1, "options");
-
   uint8_t bus = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
 
-  jerry_value_t options = JERRYXX_GET_ARG(1);
-  km_i2c_mode_t mode = jerryxx_get_property_number(options, MSTR_I2C_MODE, I2C_DEFAULT_MODE);
-  uint32_t baudrate = (uint32_t) jerryxx_get_property_number(options, MSTR_I2C_BAUDRATE, I2C_DEFAULT_BAUDRATE);
-  uint8_t address = (uint32_t) jerryxx_get_property_number(options, MSTR_I2C_ADDRESS, 0);
   km_i2c_pins_t def_pins = km_i2c_get_default_pins(bus);
   km_i2c_pins_t pins;
-  pins.sda = (int8_t) jerryxx_get_property_number(options, MSTR_I2C_SDA, def_pins.sda);
-  pins.scl = (int8_t) jerryxx_get_property_number(options, MSTR_I2C_SCL, def_pins.scl); 
+  km_i2c_mode_t mode;
+  uint32_t baudrate;
+  uint8_t address;
+
+  if (JERRYXX_HAS_ARG(1)) {
+    jerry_value_t options = JERRYXX_GET_ARG(1);
+    mode = jerryxx_get_property_number(options, MSTR_I2C_MODE, I2C_DEFAULT_MODE);
+    baudrate = (uint32_t) jerryxx_get_property_number(options, MSTR_I2C_BAUDRATE, I2C_DEFAULT_BAUDRATE);
+    address = (uint32_t) jerryxx_get_property_number(options, MSTR_I2C_ADDRESS, 0);
+    pins.sda = (int8_t) jerryxx_get_property_number(options, MSTR_I2C_SDA, def_pins.sda);
+    pins.scl = (int8_t) jerryxx_get_property_number(options, MSTR_I2C_SCL, def_pins.scl);
+  } else {
+    mode = I2C_DEFAULT_MODE;
+    baudrate = I2C_DEFAULT_BAUDRATE;
+    address = 0;
+    pins.sda = def_pins.sda;
+    pins.scl = def_pins.scl;
+  }
+
   // master mode support only
   if (mode != KM_I2C_MASTER)
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) "Unsupported I2C mode.");
@@ -111,7 +123,7 @@ JERRYXX_FUN(i2c_write_fn) {
 
   // write data to the bus
   int ret = KM_I2CPORT_ERROR;
-  if (jerry_value_is_typedarray(data) && 
+  if (jerry_value_is_typedarray(data) &&
       jerry_get_typedarray_type(data) == JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
     jerry_length_t byteLength = 0;
     jerry_length_t byteOffset = 0;
