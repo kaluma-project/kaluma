@@ -120,13 +120,13 @@ uint8_t check_timeout(uint32_t start, uint32_t timeout) {
 /**
  * Read pulse signal on the GPIO pin.
 */
-int pulse_read(uint8_t pin, uint8_t state, uint16_t *arr, uint8_t length, uint32_t timeout) {
-  uint8_t cnt = 0;
+int pulse_read(uint8_t pin, uint8_t state, uint32_t *arr, size_t length, uint32_t timeout) {
+  size_t cnt = 0;
   uint32_t start, last, now;
   int pin_state;
   int pre_pin_state = km_gpio_read(pin);
   start = km_micro_gettime();
-  while ((state < 2) && (pre_pin_state != state)) {
+  while ((state < 255) && (pre_pin_state != state)) {
     if (check_timeout(start, timeout))
       return 0;
     pre_pin_state = km_gpio_read(pin);
@@ -151,25 +151,82 @@ int pulse_read(uint8_t pin, uint8_t state, uint16_t *arr, uint8_t length, uint32
   return cnt;
 }
 
+/**
+ * make pulse on the GPIO pin.
+*/
+int pulse_write(uint8_t pin, uint8_t state, uint32_t *arr, size_t length) {
+  uint32_t delay;
+  int pin_state = (state == KM_GPIO_LOW) ? KM_GPIO_LOW : KM_GPIO_HIGH;
+  km_gpio_write(pin, pin_state);
+  for (int i = 0; i < length; i++) {
+    delay = arr[i];
+    km_micro_delay(delay);
+    km_gpio_toggle(pin);
+  }
+  return 0;
+}
+
 JERRYXX_FUN(pulse_read_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   JERRYXX_CHECK_ARG_NUMBER(1, "count");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(2, "timeout");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(3, "startState");
+  JERRYXX_CHECK_ARG_OBJECT_OPT(2, "options");
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  uint8_t count;
-  if (JERRYXX_GET_ARG_NUMBER(1) > 128)
-    count = 128; /* MAX is 128 */
-  else
-    count = (uint8_t) JERRYXX_GET_ARG_NUMBER(1);
-  uint32_t timeout = JERRYXX_GET_ARG_NUMBER_OPT(2, 5000000U); /* Default is 5s */
-  if (timeout > 40000000U) { /* MAX 40s */
-    timeout = 40000000U;
-  }
-  uint8_t state = (uint8_t) JERRYXX_GET_ARG_NUMBER_OPT(3, 2); /* 2 means undefined. */
-  uint16_t *buf = malloc(256); /* MAX is 128 */
+  uint8_t count = (uint8_t) JERRYXX_GET_ARG_NUMBER(1);
+  uint32_t timeout = 1000000U; // default is 1s
+  uint8_t state = 255; // 255 means undefined.
+  uint8_t mode = 255; // 255 means undefined.
+  uint8_t trigger_pin = 255;
+  uint8_t trigger_start_state = 0; // default is LOW
+  size_t trigger_len = 0;
+  uint32_t *trigger_buf = NULL;
+  uint32_t *buf = malloc(count * 4);
 
+  // read options
+  if (JERRYXX_HAS_ARG(2)) {
+    jerry_value_t options = JERRYXX_GET_ARG(2);
+    timeout = jerryxx_get_property_number(options, MSTR_TIMEOUT, 1000000U);
+    state = jerryxx_get_property_number(options, MSTR_START_STATE, 255);
+    mode = jerryxx_get_property_number(options, MSTR_MODE, 255);
+    jerry_value_t trigger = jerryxx_get_property(options, MSTR_TRIGGER);
+    if (jerry_value_is_object(trigger)) {
+      trigger_pin = jerryxx_get_property_number(trigger, MSTR_PIN, pin);
+      trigger_start_state = jerryxx_get_property_number(trigger, MSTR_START_STATE, 0);
+      jerry_value_t trigger_interval = jerryxx_get_property(trigger, MSTR_INTERVAL);
+      if (jerry_value_is_array(trigger_interval)) {
+        trigger_len = jerry_get_array_length(trigger_interval);
+        if (trigger_len > 0) {
+          trigger_buf = malloc(trigger_len * 4);
+          for (int i = 0; i < trigger_len; i++) {
+            jerry_value_t item = jerry_get_property_by_index(trigger_interval, i);
+            if (jerry_value_is_number(item)) {
+              trigger_buf[i] = (uint32_t) jerry_get_number_value(item);
+            } else {
+              trigger_buf[i] = 0;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // triggering
+  if (trigger_pin < 255) {
+    km_gpio_set_io_mode(trigger_pin, KM_GPIO_IO_MODE_OUTPUT);
+    pulse_write(trigger_pin, trigger_start_state, trigger_buf, trigger_len);
+  }
+
+  // set initial mode
+  if (mode < 255) km_gpio_set_io_mode(pin, mode);
+
+  // read pulse
   count = pulse_read(pin, state, buf, count, timeout);
+
+  // free trigger buffer
+  if (trigger_len > 0) {
+    free(trigger_buf);
+  }
+
+  // return pulse data
   if (count) {
     jerry_value_t output_array = jerry_create_array(count);
     for (int i = 0; i < count; i++) {
@@ -184,22 +241,6 @@ JERRYXX_FUN(pulse_read_fn) {
   return jerry_create_null();
 }
 
-/**
- * make pulse on the GPIO pin.
-*/
-int pulse_write(uint8_t pin, uint8_t state, uint16_t *arr, uint8_t length) {
-  uint8_t cnt;
-  uint16_t delay;
-  int pin_state = (state == KM_GPIO_LOW) ? KM_GPIO_LOW : KM_GPIO_HIGH;
-  km_gpio_write(pin, pin_state);
-  for (cnt = 0; cnt < length; cnt++) {
-    delay = arr[cnt];
-    km_micro_delay(delay);
-    km_gpio_toggle(pin);
-  }
-  return 0;
-}
-
 JERRYXX_FUN(pulse_write_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   JERRYXX_CHECK_ARG_NUMBER(1, "value");
@@ -207,17 +248,17 @@ JERRYXX_FUN(pulse_write_fn) {
   uint8_t pin = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
   size_t length = 0;
   uint8_t value = (uint8_t) JERRYXX_GET_ARG_NUMBER(1);
-  jerry_value_t intervalArr = JERRYXX_GET_ARG(2);
-  if (jerry_value_is_array(intervalArr)) { /* for Array<number> */
-    length = jerry_get_array_length(intervalArr);
-    uint16_t buf[length];
+  jerry_value_t interval_arr = JERRYXX_GET_ARG(2);
+  if (jerry_value_is_array(interval_arr)) { /* for Array<number> */
+    length = jerry_get_array_length(interval_arr);
+    uint32_t buf[length];
     for (int i = 0; i < length; i++) {
-      jerry_value_t item = jerry_get_property_by_index(intervalArr, i);
+      jerry_value_t item = jerry_get_property_by_index(interval_arr, i);
       if (jerry_value_is_number(item)) {
         if (jerry_get_number_value(item) > 0xFFFFU)
           buf[i] = 0xFFFF;
         else
-          buf[i] = (uint16_t) jerry_get_number_value(item);
+          buf[i] = (uint32_t) jerry_get_number_value(item);
       } else {
         buf[i] = 0; // write 0 for non-number item.
       }
