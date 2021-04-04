@@ -42,15 +42,24 @@ JERRYXX_FUN(spi_ctor_fn) {
 
   // read parameters
   uint8_t bus = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
-  jerry_value_t options = JERRYXX_GET_ARG(1);
-  uint8_t mode = (uint8_t) jerryxx_get_property_number(options, MSTR_SPI_MODE, SPI_DEFAULT_MODE);
-  uint32_t baudrate = (uint32_t) jerryxx_get_property_number(options, MSTR_SPI_BAUDRATE, SPI_DEFAULT_BAUDRATE);
-  uint8_t bitorder = (uint8_t) jerryxx_get_property_number(options, MSTR_SPI_BITORDER, SPI_DEFAULT_BITORDER);
+  uint8_t mode = SPI_DEFAULT_MODE;
+  uint32_t baudrate = SPI_DEFAULT_BAUDRATE;
+  uint8_t bitorder = SPI_DEFAULT_BITORDER;
   km_spi_pins_t def_pins = km_spi_get_default_pins(bus);
-  km_spi_pins_t pins;
-  pins.miso = (int8_t) jerryxx_get_property_number(options, MSTR_SPI_MISO, def_pins.miso);
-  pins.mosi = (int8_t) jerryxx_get_property_number(options, MSTR_SPI_MOSI, def_pins.mosi);
-  pins.clk = (int8_t) jerryxx_get_property_number(options, MSTR_SPI_CLK, def_pins.clk);
+  km_spi_pins_t pins = {
+    .miso = def_pins.miso,
+    .mosi = def_pins.mosi,
+    .clk = def_pins.clk,
+  };
+  if (JERRYXX_HAS_ARG(1)) {
+    jerry_value_t options = JERRYXX_GET_ARG(1);
+    mode = (uint8_t) jerryxx_get_property_number(options, MSTR_SPI_MODE, SPI_DEFAULT_MODE);
+    baudrate = (uint32_t) jerryxx_get_property_number(options, MSTR_SPI_BAUDRATE, SPI_DEFAULT_BAUDRATE);
+    bitorder = (uint8_t) jerryxx_get_property_number(options, MSTR_SPI_BITORDER, SPI_DEFAULT_BITORDER);
+    pins.miso = (int8_t) jerryxx_get_property_number(options, MSTR_SPI_MISO, def_pins.miso);
+    pins.mosi = (int8_t) jerryxx_get_property_number(options, MSTR_SPI_MOSI, def_pins.mosi);
+    pins.clk = (int8_t) jerryxx_get_property_number(options, MSTR_SPI_CLK, def_pins.clk);
+  }
 
   if (bitorder != KM_SPI_BITORDER_LSB)
     bitorder = KM_SPI_BITORDER_MSB;

@@ -41,10 +41,13 @@ JERRYXX_FUN(i2c_ctor_fn) {
   uint8_t bus = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
 
   km_i2c_pins_t def_pins = km_i2c_get_default_pins(bus);
-  km_i2c_pins_t pins;
-  km_i2c_mode_t mode;
-  uint32_t baudrate;
-  uint8_t address;
+  km_i2c_pins_t pins = {
+    .sda = def_pins.sda,
+    .scl = def_pins.scl,
+  };
+  km_i2c_mode_t mode = I2C_DEFAULT_MODE;
+  uint32_t baudrate = I2C_DEFAULT_BAUDRATE;
+  uint8_t address = 0;
 
   if (JERRYXX_HAS_ARG(1)) {
     jerry_value_t options = JERRYXX_GET_ARG(1);
@@ -53,12 +56,6 @@ JERRYXX_FUN(i2c_ctor_fn) {
     address = (uint32_t) jerryxx_get_property_number(options, MSTR_I2C_ADDRESS, 0);
     pins.sda = (int8_t) jerryxx_get_property_number(options, MSTR_I2C_SDA, def_pins.sda);
     pins.scl = (int8_t) jerryxx_get_property_number(options, MSTR_I2C_SCL, def_pins.scl);
-  } else {
-    mode = I2C_DEFAULT_MODE;
-    baudrate = I2C_DEFAULT_BAUDRATE;
-    address = 0;
-    pins.sda = def_pins.sda;
-    pins.scl = def_pins.scl;
   }
 
   // master mode support only
