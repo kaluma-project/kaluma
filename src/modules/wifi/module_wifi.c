@@ -111,7 +111,7 @@ JERRYXX_FUN(wifi_scan_fn) {
     JERRYXX_CHECK_ARG_FUNCTION(0, "cb");
     jerry_value_t callback = JERRYXX_GET_ARG(0);
 
-    int handle_id = jerryxx_get_property_number(this_val, "handle_id", 0);
+    int handle_id = jerryxx_get_property_number(JERRYXX_GET_THIS, "handle_id", 0);
     km_io_ieee80211_handle_t* handle = km_io_ieee80211_get_by_id(handle_id);
     jerry_release_value(handle->scan_js_cb);
     handle->scan_js_cb = jerry_acquire_value(callback);
