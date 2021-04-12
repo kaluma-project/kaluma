@@ -5,6 +5,9 @@
  */
 class URL {
   constructor (input) {
+    if (typeof input !== 'string') {
+      throw TypeError("Invalid URL");
+    }
     this.protocol = '';
     this.username = '';
     this.password = '';
