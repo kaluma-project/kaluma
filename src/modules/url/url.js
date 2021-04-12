@@ -10,7 +10,7 @@ class URL {
     this.password = '';
     this.hostname = '';
     this.port = '';
-    this.pathname = '';
+    this.pathname = '/';
     this.search = '';
     this.hash = '';
     this.searchParams = null;
