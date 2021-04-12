@@ -29,10 +29,10 @@
 #include "jerryscript.h"
 #ifdef KALUMA_MODULE_IEEE80211
 #include "ieee80211.h"
-#endif//KALUMA_MODULE_IEEE80211
+#endif //KALUMA_MODULE_IEEE80211
 #ifdef KALUMA_MODULE_TCP
 #include "tcp.h"
-#endif//KALUMA_MODULE_TCP
+#endif //KALUMA_MODULE_TCP
 
 typedef struct km_io_loop_s km_io_loop_t;
 typedef struct km_io_handle_s km_io_handle_t;
@@ -43,10 +43,10 @@ typedef struct km_io_watch_handle_s km_io_watch_handle_t;
 typedef struct km_io_uart_handle_s km_io_uart_handle_t;
 #ifdef KALUMA_MODULE_IEEE80211
 typedef struct km_io_ieee80211_handle_s km_io_ieee80211_handle_t;
-#endif//KALUMA_MODULE_IEEE80211
+#endif //KALUMA_MODULE_IEEE80211
 #ifdef KALUMA_MODULE_TCP
 typedef struct km_io_tcp_handle_s km_io_tcp_handle_t;
-#endif//KALUMA_MODULE_TCP
+#endif //KALUMA_MODULE_TCP
 typedef struct km_io_idle_handle_s km_io_idle_handle_t;
 
 /* handle flags */
@@ -60,23 +60,25 @@ typedef struct km_io_idle_handle_s km_io_idle_handle_t;
 
 /* general handle types */
 
-typedef enum km_io_type {
+typedef enum km_io_type
+{
   KM_IO_TIMER,
   KM_IO_TTY,
   KM_IO_WATCH,
   KM_IO_UART,
 #ifdef KALUMA_MODULE_IEEE80211
   KM_IO_IEEE80211,
-#endif//KALUMA_MODULE_IEEE80211
+#endif //KALUMA_MODULE_IEEE80211
 #ifdef KALUMA_MODULE_TCP
   KM_IO_TCP,
-#endif//KALUMA_MODULE_TCP
+#endif //KALUMA_MODULE_TCP
   KM_IO_IDLE
 } km_io_type_t;
 
-typedef void (* km_io_close_cb)(km_io_handle_t *);
+typedef void (*km_io_close_cb)(km_io_handle_t *);
 
-struct km_io_handle_s {
+struct km_io_handle_s
+{
   km_list_node_t base;
   uint32_t id;
   km_io_type_t type;
@@ -86,9 +88,10 @@ struct km_io_handle_s {
 
 /* timer handle types */
 
-typedef void (* km_io_timer_cb)(km_io_timer_handle_t *);
+typedef void (*km_io_timer_cb)(km_io_timer_handle_t *);
 
-struct km_io_timer_handle_s {
+struct km_io_timer_handle_s
+{
   km_io_handle_t base;
   km_io_timer_cb timer_cb;
   jerry_value_t timer_js_cb;
@@ -100,32 +103,27 @@ struct km_io_timer_handle_s {
 
 /* TTY handle types */
 
-typedef void (* km_io_tty_read_cb)(uint8_t *, size_t);
+typedef void (*km_io_tty_read_cb)(uint8_t *, size_t);
 
-struct km_io_tty_handle_s {
+struct km_io_tty_handle_s
+{
   km_io_handle_t base;
   km_io_tty_read_cb read_cb;
 };
 
 /* GPIO watch handle types */
 
-typedef enum {
+typedef enum
+{
   KM_IO_WATCH_MODE_FALLING,
   KM_IO_WATCH_MODE_RISING,
   KM_IO_WATCH_MODE_CHANGE,
 } km_io_watch_mode_t;
 
-/* GPIO watch handle types */
+typedef void (*km_io_watch_cb)(km_io_watch_handle_t *);
 
-typedef enum {
-  KM_IO_PULL_NO,
-  KM_IO_PULL_UP,
-  KM_IO_PULL_DOWN,
-} km_io_pull_t;
-
-typedef void (* km_io_watch_cb)(km_io_watch_handle_t *);
-
-struct km_io_watch_handle_s {
+struct km_io_watch_handle_s
+{
   km_io_handle_t base;
   km_io_watch_mode_t mode;
   uint8_t pin;
@@ -139,10 +137,11 @@ struct km_io_watch_handle_s {
 
 /* UART handle type */
 
-typedef int (* km_io_uart_available_cb)(km_io_uart_handle_t *);
-typedef void (* km_io_uart_read_cb)(km_io_uart_handle_t *, uint8_t *, size_t);
+typedef int (*km_io_uart_available_cb)(km_io_uart_handle_t *);
+typedef void (*km_io_uart_read_cb)(km_io_uart_handle_t *, uint8_t *, size_t);
 
-struct km_io_uart_handle_s {
+struct km_io_uart_handle_s
+{
   km_io_handle_t base;
   uint8_t port;
   km_io_uart_available_cb available_cb;
@@ -153,12 +152,13 @@ struct km_io_uart_handle_s {
 
 /* IEEE80211 handle type */
 #ifdef KALUMA_MODULE_IEEE80211
-typedef void (* km_io_ieee80211_connect_cb)(km_io_ieee80211_handle_t *);
-typedef void (* km_io_ieee80211_assoc_cb)(km_io_ieee80211_handle_t *);
-typedef void (* km_io_ieee80211_disconnect_cb)(km_io_ieee80211_handle_t *);
-typedef void (* km_io_ieee80211_scan_cb)(km_io_ieee80211_handle_t *, int, km_ieee80211_scan_info_t*);
+typedef void (*km_io_ieee80211_connect_cb)(km_io_ieee80211_handle_t *);
+typedef void (*km_io_ieee80211_assoc_cb)(km_io_ieee80211_handle_t *);
+typedef void (*km_io_ieee80211_disconnect_cb)(km_io_ieee80211_handle_t *);
+typedef void (*km_io_ieee80211_scan_cb)(km_io_ieee80211_handle_t *, int, km_ieee80211_scan_info_t *);
 
-struct km_io_ieee80211_handle_s {
+struct km_io_ieee80211_handle_s
+{
   km_io_handle_t base;
   uint8_t port;
   km_io_ieee80211_scan_cb scan_cb;
@@ -168,14 +168,15 @@ struct km_io_ieee80211_handle_s {
   jerry_value_t this_val;
   jerry_value_t scan_js_cb;
 };
-#endif//KALUMA_MODULE_IEEE80211
+#endif //KALUMA_MODULE_IEEE80211
 
 #ifdef KALUMA_MODULE_TCP
-typedef void (* km_io_tcp_connect_cb)(km_io_tcp_handle_t *);
-typedef void (* km_io_tcp_disconnect_cb)(km_io_tcp_handle_t *);
-typedef void (* km_io_tcp_read_cb)(km_io_tcp_handle_t *, const char*, int);
+typedef void (*km_io_tcp_connect_cb)(km_io_tcp_handle_t *);
+typedef void (*km_io_tcp_disconnect_cb)(km_io_tcp_handle_t *);
+typedef void (*km_io_tcp_read_cb)(km_io_tcp_handle_t *, const char *, int);
 
-struct km_io_tcp_handle_s {
+struct km_io_tcp_handle_s
+{
   km_io_handle_t base;
   km_io_tcp_connect_cb connect_cb;
   km_io_tcp_disconnect_cb disconnect_cb;
@@ -183,20 +184,22 @@ struct km_io_tcp_handle_s {
   jerry_value_t this_val;
   int fd;
 };
-#endif//KALUMA_MODULE_TCP
+#endif //KALUMA_MODULE_TCP
 
 /* idle handle types */
 
-typedef void (* km_io_idle_cb)(km_io_idle_handle_t *);
+typedef void (*km_io_idle_cb)(km_io_idle_handle_t *);
 
-struct km_io_idle_handle_s {
+struct km_io_idle_handle_s
+{
   km_io_handle_t base;
   km_io_idle_cb idle_cb;
 };
 
 /* loop type */
 
-struct km_io_loop_s {
+struct km_io_loop_s
+{
   bool stop_flag;
   uint64_t time;
   km_list_t timer_handles;
@@ -205,10 +208,10 @@ struct km_io_loop_s {
   km_list_t uart_handles;
 #ifdef KALUMA_MODULE_IEEE80211
   km_list_t ieee80211_handles;
-#endif//KALUMA_MODULE_IEEE80211
+#endif //KALUMA_MODULE_IEEE80211
 #ifdef KALUMA_MODULE_TCP
   km_list_t tcp_handles;
-#endif//KALUMA_MODULE_TCP
+#endif //KALUMA_MODULE_TCP
   km_list_t idle_handles;
   km_list_t closing_handles;
 };
@@ -265,17 +268,17 @@ void km_io_ieee80211_connect(km_io_ieee80211_handle_t *ieee80211, km_io_ieee8021
 void km_io_ieee80211_disconnect(km_io_ieee80211_handle_t *ieee80211, km_io_ieee80211_disconnect_cb disconnect_cb);
 km_io_ieee80211_handle_t *km_io_ieee80211_get_by_id(uint32_t id);
 void km_io_ieee80211_cleanup();
-#endif//KALUMA_MODULE_IEEE80211
+#endif //KALUMA_MODULE_IEEE80211
 #ifdef KALUMA_MODULE_TCP
 void km_io_tcp_init(km_io_tcp_handle_t *tcp);
 void km_io_tcp_start(km_io_tcp_handle_t *tcp, km_io_tcp_connect_cb connect_cb, km_io_tcp_disconnect_cb disconnect_cb, km_io_tcp_read_cb read_cb);
 void km_io_tcp_stop(km_io_tcp_handle_t *tcp);
 km_io_tcp_handle_t *km_io_tcp_get_by_fd(int fd);
 void km_io_tcp_cleanup();
-int km_io_tcp_connect(km_io_tcp_handle_t *tcp, const char* address, int port);
-int km_io_tcp_send(km_io_tcp_handle_t* tcp, const char* message, int len);
-int km_io_tcp_close(km_io_tcp_handle_t* tcp);
-#endif//KALUMA_MODULE_TCP
+int km_io_tcp_connect(km_io_tcp_handle_t *tcp, const char *address, int port);
+int km_io_tcp_send(km_io_tcp_handle_t *tcp, const char *message, int len);
+int km_io_tcp_close(km_io_tcp_handle_t *tcp);
+#endif //KALUMA_MODULE_TCP
 /* idle function */
 
 void km_io_idle_init(km_io_idle_handle_t *idle);
