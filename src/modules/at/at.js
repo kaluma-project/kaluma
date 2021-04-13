@@ -151,7 +151,9 @@ class ATCommand extends EventEmitter {
       for (var match in this.lineHandlers) {
         if (line.startsWith(match)) {
           var fn = this.lineHandlers[match]
-          fn(match, line);
+          setTimeout(() => {
+            fn(match, line);
+          }, 0);
           return true;
         }
       }
