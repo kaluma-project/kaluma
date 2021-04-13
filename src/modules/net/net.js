@@ -1,6 +1,9 @@
 var EventEmitter = require('events').EventEmitter;
 var stream = require('stream');
-global.__netdev = process.binding(process.binding.net)
+
+if (!global.__netdev) {
+  throw new Error('Network device not found');
+}
 
 /**
  * Socket class

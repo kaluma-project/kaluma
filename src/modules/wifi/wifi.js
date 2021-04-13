@@ -1,5 +1,9 @@
 var EventEmitter = require('events').EventEmitter;
 
+if (!global.__ieee80211dev) {
+  throw new Error('IEEE 802.11 device not found');
+}
+
 class WiFi extends EventEmitter {
   constructor () {
     super();
