@@ -160,7 +160,9 @@ class Writable extends Stream {
     }
     this.writableEnded = true;
     if (this._wbuf.length > 0) {
-      this.flush();
+      this.flush(() => {
+        this.finish();
+      });
     } else {
       this.finish();
     }
@@ -170,8 +172,9 @@ class Writable extends Stream {
   /**
    * @protected
    * Flush data in internal buffer
+   * @param {Function} cb
    */  
-  flush () {
+  flush (cb) {
     if (!this.writableFinished) {
       if (this._wbuf.length > 0) {
         this._write(this._wbuf, (err) => {
@@ -180,15 +183,19 @@ class Writable extends Stream {
             this.emit('error', err);
           } else {
             if (this._wbuf.length > 0) {
-              setTimeout(() => this.flush(), 0);
+              setTimeout(() => this.flush(cb), 0);
             } else {
               this.emit('drain');
-              this.finish();
+              if (cb) cb();
             }
           }
         })
         this._wbuf = '';
+      } else {
+        if (cb) cb();
       }
+    } else {
+      if (cb) cb();
     }
   }
   
