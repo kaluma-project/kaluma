@@ -170,7 +170,7 @@ int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
   } else {
     ringbuffer_init(&__uart_rx_ringbuffer[port], __read_buffer[port], buffer_size);
   }
-  uart_set_fifo_enabled(uart, false);
+  uart_set_fifo_enabled(uart, true);
   if (pins.tx >= 0) {
     gpio_set_function(pins.tx, GPIO_FUNC_UART);
   }
