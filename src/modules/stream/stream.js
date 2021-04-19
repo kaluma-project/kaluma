@@ -131,7 +131,7 @@ class Writable extends Stream {
           this._wbuf += chunk;
         }
       }
-      setTimeout(() => this.flush(), 0);
+      setTimeout(() => { this.flush(); }, 0);
       if (cb) cb();
     }
     return this._wbuf.length === 0;
@@ -183,7 +183,7 @@ class Writable extends Stream {
             this.emit('error', err);
           } else {
             if (this._wbuf.length > 0) {
-              setTimeout(() => this.flush(cb), 0);
+              setTimeout(() => { this.flush(cb); }, 0);
             } else {
               this.emit('drain');
               if (cb) cb();
