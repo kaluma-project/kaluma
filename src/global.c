@@ -399,9 +399,11 @@ static void register_global_digital_io()
   jerryxx_set_property_number(global, MSTR_OUTPUT, (double)KM_GPIO_IO_MODE_OUTPUT);
   jerryxx_set_property_number(global, MSTR_INPUT_PULLUP, (double)KM_GPIO_IO_MODE_INPUT_PULLUP);
   jerryxx_set_property_number(global, MSTR_INPUT_PULLDOWN, (double)KM_GPIO_IO_MODE_INPUT_PULLDOWN);
-  jerryxx_set_property_number(global, MSTR_CHANGE, (double)KM_IO_WATCH_MODE_CHANGE);
+  jerryxx_set_property_number(global, MSTR_LOW_LEVEL, (double)KM_IO_WATCH_MODE_LOW_LEVEL);
+  jerryxx_set_property_number(global, MSTR_HIGH_LEVEL, (double)KM_IO_WATCH_MODE_HIGH_LEVEL);
   jerryxx_set_property_number(global, MSTR_RISING, (double)KM_IO_WATCH_MODE_RISING);
   jerryxx_set_property_number(global, MSTR_FALLING, (double)KM_IO_WATCH_MODE_FALLING);
+  jerryxx_set_property_number(global, MSTR_CHANGE, (double)KM_IO_WATCH_MODE_CHANGE);
   jerryxx_set_property_function(global, MSTR_PIN_MODE, pin_mode_fn);
   jerryxx_set_property_function(global, MSTR_DIGITAL_READ, digital_read_fn);
   jerryxx_set_property_function(global, MSTR_DIGITAL_WRITE, digital_write_fn);
