@@ -128,7 +128,6 @@ struct km_io_uart_handle_s
   km_io_uart_available_cb available_cb;
   km_io_uart_read_cb read_cb;
   jerry_value_t read_js_cb;
-  int temp;
 };
 
 /* idle handle types */

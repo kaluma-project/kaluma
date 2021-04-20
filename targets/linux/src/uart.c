@@ -61,13 +61,6 @@ uint32_t km_uart_available(uint8_t port) {
   return 0;
 }
 
-uint8_t km_uart_available_at(uint8_t port, uint32_t offset) {
-  return 0;
-}
-
-uint32_t km_uart_buffer_size(uint8_t port) {
-  return 0;
-}
 
 uint32_t km_uart_read(uint8_t port, uint8_t *buf, size_t len) {
   return 0;

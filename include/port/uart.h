@@ -95,22 +95,6 @@ int km_uart_write(uint8_t port, uint8_t *buf, size_t len);
  */
 uint32_t km_uart_available(uint8_t port);
 
-/**
- * Look a character at the offset in read buffer.
- *
- * @param port
- * @param offset
- * @return a character at the offset in read buffer.
- */
-uint8_t km_uart_available_at(uint8_t port, uint32_t offset);
-
-/**
- * Get the size of read buffer.
- *
- * @param port
- * @return size of read buffer.
- */
-uint32_t km_uart_buffer_size(uint8_t port);
 
 /**
  * Read bytes from the port and store them into a given buffer.

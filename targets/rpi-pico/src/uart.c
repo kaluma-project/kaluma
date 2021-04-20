@@ -203,23 +203,8 @@ uint32_t km_uart_available(uint8_t port) {
   if ((uart == NULL) || (__uart_status[port].enabled == false)) {
     return KM_UARTPORT_ERROR;
   }
+  __uart_fill_ringbuffer(uart, port);
   return ringbuffer_length(&__uart_rx_ringbuffer[port]);
-}
-
-uint8_t km_uart_available_at(uint8_t port, uint32_t offset) {
-  uart_inst_t *uart = __get_uart_no(port);
-  if ((uart == NULL) || (__uart_status[port].enabled == false)) {
-    return KM_UARTPORT_ERROR;
-  }
-  return ringbuffer_look_at(&__uart_rx_ringbuffer[port], offset);
-}
-
-uint32_t km_uart_buffer_size(uint8_t port) {
-  uart_inst_t *uart = __get_uart_no(port);
-  if ((uart == NULL) || (__uart_status[port].enabled == false)) {
-    return KM_UARTPORT_ERROR;
-  }
-  return ringbuffer_size(&__uart_rx_ringbuffer[port]);
 }
 
 uint32_t km_uart_read(uint8_t port, uint8_t *buf, size_t len) {
