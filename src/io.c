@@ -28,12 +28,6 @@
 #include "tty.h"
 #include "gpio.h"
 #include "uart.h"
-#ifdef KALUMA_MODULE_IEEE80211
-#include "ieee80211.h"
-#endif//KALUMA_MODULE_IEEE80211
-#ifdef KALUMA_MODULE_TCP
-#include "tcp.h"
-#endif//KALUMA_MODULE_TCP
 
 km_io_loop_t loop;
 
@@ -44,13 +38,6 @@ static void km_io_tty_run();
 static void km_io_watch_run();
 static void km_io_uart_run();
 static void km_io_idle_run();
-#ifdef KALUMA_MODULE_IEEE80211
-static void km_io_ieee80211_run();
-#endif//KALUMA_MODULE_IEEE80211
-#ifdef KALUMA_MODULE_TCP
-static void km_io_tcp_run();
-#endif//KALUMA_MODULE_TCP
-
 static void km_io_idle_run();
 
 /* general handle functions */
@@ -103,13 +90,7 @@ void km_io_init() {
   km_list_init(&loop.timer_handles);
   km_list_init(&loop.watch_handles);
   km_list_init(&loop.uart_handles);
-#ifdef KALUMA_MODULE_IEEE80211
-  km_list_init(&loop.ieee80211_handles);
-#endif//KALUMA_MODULE_IEEE80211
-#ifdef KALUMA_MODULE_TCP
-    km_list_init(&loop.tcp_handles);
-#endif//KALUMA_MODULE_TCP
-    km_list_init(&loop.closing_handles);
+  km_list_init(&loop.closing_handles);
 }
 
 void km_io_run() {
@@ -119,12 +100,6 @@ void km_io_run() {
     km_io_tty_run();
     km_io_watch_run();
     km_io_uart_run();
-#ifdef KALUMA_MODULE_IEEE80211
-    km_io_ieee80211_run();
-#endif//KALUMA_MODULE_IEEE80211
-#ifdef KALUMA_MODULE_TCP
-    km_io_tcp_run();
-#endif//KALUMA_MODULE_TCP
     km_io_idle_run();
     km_io_handle_closing();
   }
@@ -358,194 +333,6 @@ static void km_io_uart_run() {
     handle = (km_io_uart_handle_t *) ((km_list_node_t *) handle)->next;
   }
 }
-
-/* IEEE80211 functions */
-#ifdef KALUMA_MODULE_IEEE80211
-void km_io_ieee80211_init(km_io_ieee80211_handle_t *ieee80211) {
-  km_io_handle_init((km_io_handle_t *) ieee80211, KM_IO_IEEE80211);
-}
-
-km_io_ieee80211_handle_t *km_io_ieee80211_get_by_id(uint32_t id) {
-  return (km_io_ieee80211_handle_t *) km_io_handle_get_by_id(id, &loop.ieee80211_handles);
-}
-
-void km_io_ieee80211_cleanup() {
-  km_io_ieee80211_handle_t *handle = (km_io_ieee80211_handle_t *) loop.ieee80211_handles.head;
-  while (handle != NULL) {
-    km_io_ieee80211_handle_t *next = (km_io_ieee80211_handle_t *) ((km_list_node_t *) handle)->next;
-    free(handle);
-    handle = next;
-  }
-  km_list_init(&loop.ieee80211_handles);
-}
-
-void km_io_ieee80211_start(km_io_ieee80211_handle_t *ieee80211, km_io_ieee80211_scan_cb scan_cb, km_io_ieee80211_assoc_cb assoc_cb, km_io_ieee80211_connect_cb connect_cb, km_io_ieee80211_disconnect_cb disconnect_cb)
-{
-  KM_IO_SET_FLAG_ON(ieee80211->base.flags, KM_IO_FLAG_ACTIVE);
-  ieee80211->scan_cb = scan_cb;
-  ieee80211->assoc_cb = assoc_cb;
-  ieee80211->connect_cb = connect_cb;
-  ieee80211->disconnect_cb = disconnect_cb;
-
-  km_list_append(&loop.ieee80211_handles, (km_list_node_t *) ieee80211);
-}
-
-void km_io_ieee80211_stop(km_io_ieee80211_handle_t *ieee80211)
-{
-  KM_IO_SET_FLAG_OFF(ieee80211->base.flags, KM_IO_FLAG_ACTIVE);
-  km_list_remove(&loop.ieee80211_handles, (km_list_node_t *) ieee80211);
-}
-
-
-static void km_io_ieee80211_run() {
-  km_io_ieee80211_handle_t *handle = (km_io_ieee80211_handle_t *) loop.ieee80211_handles.head;
-
-  km_ieee80211_event_t message;
-
-  while (handle != NULL) {
-    if (KM_IO_HAS_FLAG(handle->base.flags, KM_IO_FLAG_ACTIVE)) {
-      if (km_ieee80211_get_event(&message)==0)
-      {
-        switch(message.code)
-        {
-          case KM_IEEE80211_EVENT_SCAN:
-            if ( handle->scan_cb != NULL )
-            {
-              handle->scan_cb(handle, message.scan.count, message.scan.records);
-            }
-            free(message.scan.records);
-            break;
-          case KM_IEEE80211_EVENT_ASSOC:
-            if ( handle->assoc_cb != NULL )
-            {
-              handle->assoc_cb(handle);
-            }
-            break;
-          case KM_IEEE80211_EVENT_CONNECT:
-            if ( handle->connect_cb != NULL )
-            {
-              handle->connect_cb(handle);
-            }
-            break;
-          case KM_IEEE80211_EVENT_DISCONNECT:
-            if ( handle->disconnect_cb != NULL )
-            {
-              handle->disconnect_cb(handle);
-            }
-            break;
-        }
-      }
-
-    }
-    handle = (km_io_ieee80211_handle_t *) ((km_list_node_t *) handle)->next;
-  }
-}
-#endif//KALUMA_MODULE_IEEE80211
-
-#ifdef KALUMA_MODULE_TCP
-#include <esp_log.h>
-
-void km_io_tcp_init(km_io_tcp_handle_t *tcp) {
-    ESP_LOGI("io", "km_io_tcp_init");
-    km_io_handle_init((km_io_handle_t *) tcp, KM_IO_TCP);
-}
-
-km_io_tcp_handle_t *km_io_tcp_get_by_fd(int fd) {
-    km_io_tcp_handle_t *handle = (km_io_tcp_handle_t *) loop.tcp_handles.head;
-    while (handle != NULL) {
-        if (handle->fd == fd) {
-            return handle;
-        }
-        handle = (km_io_tcp_handle_t *) ((km_list_node_t *) handle)->next;
-    }
-    return NULL;
-}
-
-void km_io_tcp_cleanup() {
-    ESP_LOGI("io", "km_io_tcp_cleanup");
-
-    km_io_tcp_handle_t *handle = (km_io_tcp_handle_t *) loop.tcp_handles.head;
-    while (handle != NULL) {
-        km_io_tcp_handle_t *next = (km_io_tcp_handle_t *) ((km_list_node_t *) handle)->next;
-        free(handle);
-        handle = next;
-    }
-    km_list_init(&loop.tcp_handles);
-}
-
-int km_io_tcp_connect(km_io_tcp_handle_t *tcp, const char *address, int port) {
-    int sock = tcp->fd;
-    ESP_LOGI("io", "km_io_tcp_connect sock:%d", sock);
-    return km_tcp_connect(sock, address, port);
-}
-
-int km_io_tcp_send(km_io_tcp_handle_t *tcp, const char *message, int len) {
-    int sock = tcp->fd;
-    ESP_LOGI("io", "km_io_tcp_send sock:%d", sock);
-    return km_tcp_send(sock, message, len);
-}
-
-int km_io_tcp_close(km_io_tcp_handle_t *tcp) {
-    int sock = tcp->fd;
-    ESP_LOGI("io", "km_io_tcp_close sock:%d", sock);
-    return km_tcp_close(sock);
-}
-
-
-void km_io_tcp_start(km_io_tcp_handle_t *tcp, km_io_tcp_connect_cb connect_cb, km_io_tcp_disconnect_cb disconnect_cb,
-                  km_io_tcp_read_cb read_cb) {
-    ESP_LOGI("io", "km_io_tcp_start");
-    KM_IO_SET_FLAG_ON(tcp->base.flags, KM_IO_FLAG_ACTIVE);
-    tcp->connect_cb = connect_cb;
-    tcp->disconnect_cb = disconnect_cb;
-    tcp->read_cb = read_cb;
-
-    km_list_append(&loop.tcp_handles, (km_list_node_t *) tcp);
-}
-
-void km_io_tcp_stop(km_io_tcp_handle_t *net) {
-    ESP_LOGI("io", "km_io_tcp_stop");
-    KM_IO_SET_FLAG_OFF(net->base.flags, KM_IO_FLAG_ACTIVE);
-    km_list_remove(&loop.tcp_handles, (km_list_node_t *) net);
-}
-
-static void km_io_tcp_run() {
-    km_io_tcp_handle_t *handle = (km_io_tcp_handle_t *) loop.tcp_handles.head;
-
-    km_tcp_event_t message;
-
-    while (handle != NULL) {
-        if (KM_IO_HAS_FLAG(handle->base.flags, KM_IO_FLAG_ACTIVE)) {
-            if (km_tcp_get_event(&message) == 0) {
-                switch (message.code) {
-                    case KM_TCP_EVENT_CONNECT:
-                        ESP_LOGI("io", "km_io_tcp_run KM_TCP_EVENT_CONNECT");
-                        if (handle->connect_cb != NULL) {
-                            handle->connect_cb(handle);
-                        }
-                        break;
-                    case KM_TCP_EVENT_DISCONNECT:
-                        ESP_LOGI("io", "km_io_tcp_run KM_TCP_EVENT_DISCONNECT");
-                        if (handle->disconnect_cb != NULL) {
-                            handle->disconnect_cb(handle);
-                        }
-                        break;
-                    case KM_TCP_EVENT_READ:
-                        ESP_LOGI("io", "km_io_tcp_run KM_TCP_EVENT_READ");
-                        if (handle->read_cb != NULL) {
-                            handle->read_cb(handle, message.read.message, message.read.len);
-                            free(message.read.message);
-                        }
-                        break;
-                }
-            }
-
-        }
-        handle = (km_io_tcp_handle_t *) ((km_list_node_t *) handle)->next;
-    }
-}
-
-#endif//KALUMA_MODULE_TCP
 
 /* idle functions */
 
