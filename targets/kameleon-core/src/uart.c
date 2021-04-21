@@ -128,20 +128,6 @@ uint32_t km_uart_available(uint8_t port) {
 }
 
 
-uint8_t km_uart_available_at(uint8_t port, uint32_t offset) {
-  if ((port != 0) && (port != 1))
-    return 0;
-  return ringbuffer_look_at(&uart_rx_ringbuffer[port], offset);
-}
-
-
-uint32_t km_uart_buffer_size(uint8_t port) {
-  if ((port != 0) && (port != 1))
-    return 0;
-  uint32_t size = ringbuffer_size(&uart_rx_ringbuffer[port]);
-  return size;
-}
-
 
 uint32_t km_uart_read(uint8_t port, uint8_t *buf, size_t len) {
   if ((port != 0) && (port != 1))

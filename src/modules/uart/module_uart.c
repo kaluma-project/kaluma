@@ -35,24 +35,8 @@
 
 static int uart_available_cb(km_io_uart_handle_t *handle) {
   uint8_t port = handle->port;
-  int condition = handle->temp;
   int len = km_uart_available(port);
-  if (condition == 0) {
-    return len;
-  } else if (condition > 0) {
-    if (len >= condition) {
-      return condition;
-    }
-  } else { /* condition < 0 */
-    uint8_t endchar = (condition * -1);
-    for (int i = 0; i < len; i++) {
-      uint8_t ch = km_uart_available_at(port, i);
-      if (ch == endchar) {
-        return (i + 1);
-      }
-    }
-  }
-  return 0;
+  return len;
 }
 
 static void uart_read_cb(km_io_uart_handle_t *handle, uint8_t *buf, size_t len) {
@@ -100,7 +84,6 @@ JERRYXX_FUN(uart_ctor_fn) {
   uint32_t stop = (uint32_t) jerryxx_get_property_number(options, MSTR_UART_STOP, UART_DEFAULT_STOP);
   uint32_t flow = (uint32_t) jerryxx_get_property_number(options, MSTR_UART_FLOW, UART_DEFAULT_FLOW);
   uint32_t buffer_size = (uint32_t) jerryxx_get_property_number(options, MSTR_UART_BUFFERSIZE, UART_DEFAULT_BUFFERSIZE);
-  jerry_value_t data_event = jerryxx_get_property(options, MSTR_UART_DATAEVENT);
   km_uart_pins_t def_pins = km_uart_get_default_pins(port);
   km_uart_pins_t pins;
   pins.tx = (int8_t) jerryxx_get_property_number(options, MSTR_UART_TX, def_pins.tx);
@@ -121,7 +104,6 @@ JERRYXX_FUN(uart_ctor_fn) {
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_STOP, stop);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_FLOW, flow);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_BUFFERSIZE, buffer_size);
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_DATAEVENT, data_event);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_TX, pins.tx);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_RX, pins.rx);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_CTS, pins.cts);
@@ -132,19 +114,6 @@ JERRYXX_FUN(uart_ctor_fn) {
   km_io_uart_handle_t *handle = malloc(sizeof(km_io_uart_handle_t));
   km_io_uart_init(handle);
   handle->read_js_cb = jerry_acquire_value(callback);
-  int condition = 0;
-  if (jerry_value_is_number(data_event)) {
-    condition = (int) jerry_get_number_value(data_event);
-  } else if (jerry_value_is_string(data_event)) {
-    jerry_size_t sz = jerry_get_string_size(data_event);
-    uint8_t sbuf[sz];
-    jerry_string_to_char_buffer(data_event, sbuf, sz);
-    if (sz > 0) {
-      uint8_t endchar = sbuf[0];
-      condition = (endchar * -1);
-    }
-  }
-  handle->temp = condition;
   jerryxx_set_property_number(JERRYXX_GET_THIS, "handle_id", handle->base.id);
   km_io_uart_read_start(handle, port, uart_available_cb, uart_read_cb);
 
