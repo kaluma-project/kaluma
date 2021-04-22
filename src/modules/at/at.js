@@ -1,7 +1,5 @@
 var EventEmitter = require('events').EventEmitter;
 
-// TODO: How to skip all handlers if all response not arrived of "+IPD:" message.
-
 /**
  * ATCommand class.
  * This class allows to handle AT command and the responses very easier.
@@ -13,54 +11,23 @@ var EventEmitter = require('events').EventEmitter;
  *   .debug {boolean}
  */
 class ATCommand extends EventEmitter {
-  constructor (serial, options) {
+  constructor (serial, options = {}) {
     super();
     this.job = null;
     this.queue = [];
     this.serial = serial;
     this.buffer = '';
-    this.lineHandlers = {};
-    this.responseHandlers = [];
-    this.paused = false;
-    if (options) {
-      this.debug = options.debug;
-    }
+    this.handlers = {};
+    this.debug = options.debug;
     this.handler = (data) => {
       var s = String.fromCharCode.apply(null, data);
       if (this.debug) {
         print(s);
       }
       this.buffer += s;
-      if (!this.paused) {
-        this.processResponseHandlers();
-        this.processLineHandlers();
-      }
-      this.processJobs();
-    }
+      setTimeout(() => { this.process(); }, 0);
+    };
     this.serial.on('data', this.handler);
-  }
-
-  /**
-   * Efficiently iterate every lines with handler
-   */
-  iterateLines (handler) {
-    var sp = 0;
-    var ep = 0;
-    while (ep < this.buffer.length) {
-      if (this.buffer[ep] === '\n') {
-        var l = this.buffer.substr(sp, ep - sp + 1).trim();
-        var handled = handler(l);
-        if (handled) {
-          this.buffer = this.buffer.substr(0, sp) + this.buffer.substr(ep + 1);
-          ep = sp;
-        } else {
-          sp = ep + 1;
-          ep = sp;
-        }
-      } else {
-        ep++;
-      }
-    }    
   }
 
   /**
@@ -78,221 +45,187 @@ class ATCommand extends EventEmitter {
     }
     return 0;
   }
-
-  /**
-   * Pause to run process handlers
-   */
-  pause () {
-    this.paused = true;
-  }
   
   /**
-   * Resume to run process handlers
-   */
-  resume () {
-    this.paused = false;
-    this.processResponseHandlers();
-    this.processLineHandlers();
-    this.buffer = '';
-  }
-  
-  /**
-   * Add a line handler
+   * Add a handler
    * @param {string} match
-   * @param {function(line:string)} handler
+   * @param {function(line:string, buffer:string)} handler
    */
-  addLineHandler(match, handler) {
-    this.lineHandlers[match] = handler
+  addHandler(match, handler) {
+    this.handlers[match] = handler;
   }
   
   /**
-   * Remove a line handler
+   * Remove a handler
    * @param {string} match
    */
-  removeLineHandler(match) {
-    delete this.lineHandlers[match];
+  removeHandler(match) {
+    delete this.handlers[match];
   }
 
   /**
-   * Add a response handler. A Reponse handler should return the rest of 
-   *     response buffer after elimination of handled data.
-   * @param {function(buffer:string)} handler
+   * Pop the first line in the buffer
    */
-  addResponseHandler(handler) {
-    this.responseHandlers.push(handler)
-  }
-  
-  /**
-   * Remove a response handler
-   * @param {function} handler
-   */
-  removeResponseHandler(handler) {
-    var idx = this.responseHandlers.indexOf(handler)
+  pop() {
+    var idx = this.buffer.indexOf('\n');
     if (idx > -1) {
-      this.responseHandlers.splice(idx, 1);
+      var l = this.buffer.substr(0, idx + 1);
+      this.buffer = this.buffer.substr(idx + 1);
+      return l;
+    } else {
+      return null;
     }
   }
-
+  
   /**
-   * Process response handlers sequentially
+   * Unpop a line
    */
-  processResponseHandlers() {
-    this.responseHandlers.forEach(fn => {
-      this.buffer = fn(this.buffer);
-    })
-  }
-
-  /**
-   * Process line handlers for a given line
-   * @param {string} line
-   */
-  processLineHandlers () {
-    this.iterateLines(line => {
-      for (var match in this.lineHandlers) {
-        if (line.startsWith(match)) {
-          var fn = this.lineHandlers[match]
-          setTimeout(() => {
-            fn(match, line);
-          }, 0);
-          return true;
-        }
-      }
-      return false;      
-    });
+  unpop(line) {
+    this.buffer = line + this.buffer;
   }
 
   /**
    * Create a job to send AT command or data
    * @param {string|Uint8Array} cmd  AT command or data
-   * @param {function(result:string, response:string)} cb  Response callback
-   * @param {Array<string>|function|number} match
+   * @param {function(result:string)} cb  Response callback
+   * @param {number|Array<string>} waitFor
    * @param {object} options
-   *   - timeout {number} Set timeout. Default: 20000. (20s).
+   *   - timeout {number} Set timeout. Default: 10000. (10s).
    *   - prepend {boolean} Add the job to first. Default: false.
-   *   - clean {boolean} Clean the response data before sending AT command.
    *   - sendAsData {boolean} Send cmd argument as data (without appending '\r\n')
    */
-  send(cmd, cb, match, options) {
-    if (!options) options = {};
+  send(cmd, cb, waitFor, options = {}) {
     var job = {
       cmd: cmd,
       cb: cb,
-      match: match || ['OK', 'ERROR', 'FAIL'],
-      running: false,
-      timeout: options.timeout || 20000,
+      result: null, // null | 1 = WAITEND | 2 = TIMEOUT | 3 = COMPLETE | "one of waitFor string"
+      waitFor: waitFor || ['OK', 'ERROR', 'FAIL'],
+      timeout: options.timeout || 10000,
       prepend: options.prepend ? true : false,
-      clean: options.clean ? true : false,
       sendAsData: options.sendAsData ? true : false
-    }
+    };
     if (job.prepend) {
       this.queue.unshift(job);
     } else {
       this.queue.push(job);
     }
-    this.processJobs();
+    setTimeout(() => { this.process(); }, 0);
   }
-  
+
   /**
-   * Process current job and wait for response
+   * Pop a line and process handles. Repeat until meet the `until` param or no more lines.
+   * @param {string} until
+   * Process handlers 
    */
-  processJobs () {
-    // start a job
-    if (!this.job) {
-      this.job = this.queue.shift();
-      if (this.job) {
-        if (this.job.clean) {
-          this.buffer = ''
-        }
-        var cmd = this.job.cmd;
-        if (typeof cmd === 'string' && !this.job.sendAsData) cmd += '\r\n';
-        this.serial.write(cmd);
-        this.job.running = true;
-        this.job.timer = setTimeout(() => {
-          if (this.job && this.job.running) {
-            if (this.job.cb) this.job.cb('TIMEOUT');
-            this.next();
+  processHandlers (until) {
+    var line = this.pop();
+    while (typeof line === 'string') {
+      if (line.trim() === until) {
+        return;
+      } else {
+        for (var match in this.handlers) {
+          if (line.startsWith(match)) {
+            var fn = this.handlers[match];
+            var r = fn(line, this.buffer);
+            if (r === false) {
+              this.unpop(line);
+              return;
+            } else if (typeof r === 'string') {
+              this.buffer = r;
+              // if this buffer is modified,
+              // that means more data is required to process
+              // so immediately finish processing
+              return;
+            }
           }
-        }, this.job.timeout);
+        }
+      }
+      line = this.pop();
+    }
+  }
+
+  /**
+   * Process current job
+   */
+  processJob () {
+    var waitFor = this.job.waitFor;
+    if (!this.job.cb) {
+      this.job.result = 1; // WAITEND
+    }
+    if (Array.isArray(waitFor)) {
+      for (var i = 0; i < waitFor.length; i++) {
+        if (this.hasLine(waitFor[i])) {
+          this.job.result = waitFor[i];
+          break;
+        }
       }
     }
+  }
 
-    // check whether job is complete or not
+  /**
+   * process jobs and handlers
+   */
+  process() {
+    if (!this.job) {
+      this.startJob();
+    }
     if (this.job) {
-      if (this.job.match) {
-        var match = this.job.match;
-        var res = null;
-        if (Array.isArray(match)) {
-          var result = null;
-          for (var i = 0; i < match.length; i++) {
-            var idx = this.hasLine(match[i]);
-            if (idx) {
-              res = this.buffer.substr(0, idx);
-              result = match[i];
-              if (!this.paused) {
-                this.buffer = this.buffer.substr(idx);
-              }
-              break;
-            }
+      this.processJob();
+      if (this.job.result) {
+        this.completeJob(this.job.result);
+      }
+    } else {
+      this.processHandlers();
+    }
+  }
+
+  /**
+   * Start a job from the queue
+   */
+  startJob () {
+    this.job = this.queue.shift();
+    if (this.job) {
+      var cmd = this.job.cmd;
+      if (typeof cmd === 'string' && !this.job.sendAsData) cmd += '\r\n';
+      this.serial.write(cmd);
+      // set waiting timer
+      if (typeof this.job.waitFor === 'number') {
+        setTimeout(() => {
+          if (this.job && !this.job.result) {
+            this.job.result = 1; // WAITEND
+            setTimeout(() => { this.process(); }, 0);
           }
-          if (result) {
-            this.completeJob(this.job, result, res);
-            this.next();
+        }, this.job.waitFor);
+      }
+      // set timeout timer
+      if (this.job.timeout > 0) {
+        setTimeout(() => {
+          if (this.job && !this.job.result) {
+            this.job.result = 2; // TIMEOUT
+            setTimeout(() => { this.process(); }, 0);
           }
-        } else if (typeof match === 'number') {
-          if (!this.job.waiting && match > 0) {
-            if (this.job.timer) {
-              clearTimeout(this.job.timer);
-            }
-            this.job.waiting = setTimeout(() => {
-              var res = this.buffer;
-              if (!this.paused) {
-                this.buffer = '';
-              }
-              this.completeJob(this.job, null, res);
-              this.next();
-            }, match);
-          }
-        } else if (typeof match === 'function') {
-          idx = match(this.buffer);
-          if (idx > 0) {
-            res = this.buffer.substr(0, idx);
-            if (!this.paused) {
-              this.buffer = this.buffer.substr(idx);
-            }
-            this.completeJob(this.job, null, res);
-            this.next();
-          }
-        }
-      } else { // if no matches, just go next job.
-        this.next();
+        }, this.job.timeout);
       }
     }
   }
 
   /**
    * Complete the job
-   *
-   * @param {object} job
    * @param {string} result
-   * @param {string} response
    */
-  completeJob (job, result, response) {
-    if (job.timer) {
-      clearTimeout(job.timer);
+  completeJob (result) {
+    this.processHandlers(result); // process handlers until result
+    if (result === 1) { // WAITEND
+      if (this.job.cb) this.job.cb();
+    } else if (result === 2) { // TIMEOUT
+      if (this.job.cb) this.job.cb('TIMEOUT');
+    } else if (typeof result === 'string' & result.length > 0) { // string match
+      if (this.job.cb) this.job.cb(result);
     }
-    if (job.cb) job.cb(result, response);
-    job.running = false;
-  }
-  
-  /**
-   * Process next job
-   */
-  next() {
+    this.job.result = 3;
     this.job = null;
-    setTimeout(() => {
-      this.processJobs()
-    }, 10)
-  }  
+    setTimeout(() => { this.process(); }, 0);
+  }
 }
 
 exports.ATCommand = ATCommand;
