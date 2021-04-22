@@ -82,6 +82,10 @@ class WiFi extends EventEmitter {
       }
       if (!connectInfo.ssid) {
         connectInfo.ssid = storage ? storage.getItem('WIFI_SSID') : null
+        if (!connectInfo.ssid) {
+          if (cb) cb(new Error('WIFI SSID is required'));
+          return;
+        }
       }
       if (!connectInfo.password) {
         connectInfo.password = storage ? storage.getItem('WIFI_PASSWORD') : null
