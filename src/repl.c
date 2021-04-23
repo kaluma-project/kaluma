@@ -1068,16 +1068,36 @@ void km_repl_pretty_print(uint8_t indent, uint8_t depth, jerry_value_t value)
     }
     else if (jerry_value_is_object(value))
     {
-      struct km_repl_pretty_print_object_foreach_data foreach_data = {indent, depth};
-      jerry_foreach_object_property(value, km_repl_pretty_print_object_foreach_count, &foreach_data);
-      km_tty_printf("{");
-      if (foreach_data.count > 0)
+      // Check value is instanceof Error
+      jerry_value_t global = jerry_get_global_object();
+      jerry_value_t error_ctr = jerryxx_get_property(global, "Error");
+      jerry_value_t result = jerry_binary_operation(JERRY_BIN_OP_INSTANCEOF, value, error_ctr);
+      if (jerry_get_boolean_value(result))
       {
-        km_tty_printf("\r\n");
-        jerry_foreach_object_property(value, km_repl_pretty_print_object_foreach, &foreach_data);
-        km_repl_pretty_print_indent(indent);
+        km_tty_printf("\33[31m"); // red
+        jerry_value_t tostr_fun = jerryxx_get_property(value, "toString");
+        jerry_value_t ret_val = jerry_call_function(tostr_fun, value, NULL, 0);
+        km_repl_print_value(ret_val);
+        jerry_release_value(ret_val);
+        jerry_release_value(tostr_fun);
+        km_tty_printf("\33[0m");
       }
-      km_tty_printf("}");
+      else
+      {
+        struct km_repl_pretty_print_object_foreach_data foreach_data = {indent, depth};
+        jerry_foreach_object_property(value, km_repl_pretty_print_object_foreach_count, &foreach_data);
+        km_tty_printf("{");
+        if (foreach_data.count > 0)
+        {
+          km_tty_printf("\r\n");
+          jerry_foreach_object_property(value, km_repl_pretty_print_object_foreach, &foreach_data);
+          km_repl_pretty_print_indent(indent);
+        }
+        km_tty_printf("}");
+      }
+      jerry_release_value(result);
+      jerry_release_value(error_ctr);
+      jerry_release_value(global);
     }
     else if (jerry_value_is_string(value))
     {
