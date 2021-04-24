@@ -22,12 +22,18 @@ class ATCommand extends EventEmitter {
     this.handler = (data) => {
       var s = String.fromCharCode.apply(null, data);
       if (this.debug) {
-        print(s);
+        print(`\x1b[37m${s}\x1b[0m`); // gray color
       }
       this.buffer += s;
       setTimeout(() => { this.process(); }, 0);
     };
     this.serial.on('data', this.handler);
+  }
+
+  log(msg) {
+    if (this.debug) {
+      console.log(`\x1b[37m[AT] ${msg}\x1b[0m`);
+    }
   }
 
   /**
@@ -188,20 +194,23 @@ class ATCommand extends EventEmitter {
       var cmd = this.job.cmd;
       if (typeof cmd === 'string' && !this.job.sendAsData) cmd += '\r\n';
       this.serial.write(cmd);
+      this.log(`job started [cmd="${cmd}"]`);
       // set waiting timer
       if (typeof this.job.waitFor === 'number') {
+        var _job = this.job;
         setTimeout(() => {
-          if (this.job && !this.job.result) {
-            this.job.result = 1; // WAITEND
+          if (_job && !_job.result) {
+            _job.result = 1; // WAITEND
             setTimeout(() => { this.process(); }, 0);
           }
         }, this.job.waitFor);
       }
       // set timeout timer
       if (this.job.timeout > 0) {
+        var _job = this.job;
         setTimeout(() => {
-          if (this.job && !this.job.result) {
-            this.job.result = 2; // TIMEOUT
+          if (_job && !_job.result) {
+            _job.result = 2; // TIMEOUT
             setTimeout(() => { this.process(); }, 0);
           }
         }, this.job.timeout);
@@ -222,6 +231,7 @@ class ATCommand extends EventEmitter {
     } else if (typeof result === 'string' & result.length > 0) { // string match
       if (this.job.cb) this.job.cb(result);
     }
+    this.log(`job complete [cmd="${this.job.cmd}", result=${this.job.result}]`);
     this.job.result = 3;
     this.job = null;
     setTimeout(() => { this.process(); }, 0);
