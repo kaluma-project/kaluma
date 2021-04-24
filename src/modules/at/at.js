@@ -32,7 +32,7 @@ class ATCommand extends EventEmitter {
 
   log(msg) {
     if (this.debug) {
-      console.log(`\x1b[37m[AT] ${msg}\x1b[0m`);
+      console.log(`\x1b[33m[AT] ${msg}\x1b[0m`); // brown color
     }
   }
 
@@ -143,6 +143,7 @@ class ATCommand extends EventEmitter {
               // so immediately finish processing
               return;
             }
+            this.log(`handler processed [match="${match}"]`);
           }
         }
       }
