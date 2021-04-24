@@ -225,12 +225,16 @@ class ATCommand extends EventEmitter {
    */
   completeJob (result) {
     this.processHandlers(result); // process handlers until result
-    if (result === 1) { // WAITEND
-      if (this.job.cb) this.job.cb();
-    } else if (result === 2) { // TIMEOUT
-      if (this.job.cb) this.job.cb('TIMEOUT');
-    } else if (typeof result === 'string' & result.length > 0) { // string match
-      if (this.job.cb) this.job.cb(result);
+    try {
+      if (result === 1) { // WAITEND
+        if (this.job.cb) this.job.cb();
+      } else if (result === 2) { // TIMEOUT
+        if (this.job.cb) this.job.cb('TIMEOUT');
+      } else if (typeof result === 'string' & result.length > 0) { // string match
+        if (this.job.cb) this.job.cb(result);
+      }
+    } catch (err) {
+      console.error(err);
     }
     this.log(`job complete [cmd="${this.job.cmd}", result=${this.job.result}]`);
     this.job.result = 3;

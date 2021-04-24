@@ -16,17 +16,10 @@ class Socket extends stream.Duplex {
     this.remoteAddress = null;
     this.remotePort = null;
     this._fd = -1;
-    this._bindDev();
-  }
-
-  _bindDev () {
-    if (!this._dev && global.__netdev) {
-      this._dev = global.__netdev;
-    }
+    this._dev = global.__netdev;
   }
   
   _socket (fd) {
-    this._bindDev();
     if (this._dev) {
       this._fd = fd;
       var sck = this._dev.get(this._fd);
@@ -61,7 +54,6 @@ class Socket extends stream.Duplex {
    * @return {Socket}
    */
   connect (options, connectListener) {
-    this._bindDev();
     if (this._dev) {
       var fd = this._dev.socket(null, 'STREAM');    
       if (connectListener) {
@@ -90,7 +82,6 @@ class Socket extends stream.Duplex {
    * @param {function} cb
    */
   _destroy(cb) {
-    this._bindDev();
     if (this._dev) {
       this._dev.close(this._fd, (err) => {
         if (err) {
@@ -111,7 +102,6 @@ class Socket extends stream.Duplex {
    * @param {function} cb
    */
   _write (chunk, cb) {
-    this._bindDev();
     if (this._dev) {
       this._dev.write(this._fd, chunk, (err) => {
         if (err) {
@@ -131,7 +121,6 @@ class Socket extends stream.Duplex {
    * @param {function} cb
    */
   _final (cb) {
-    this._bindDev();
     if (this._dev) {
       this._dev.shutdown(this._fd, 1, (err) => {
         if (err) {
@@ -160,13 +149,7 @@ class Server extends EventEmitter {
       this.on('connection', connectionListener);
     }    
     this._fd = -1;
-    this._bindDev();
-  }
-
-  _bindDev () {
-    if (!this._dev && global.__netdev) {
-      this._dev = global.__netdev;
-    }
+    this._dev = global.__netdev;
   }
 
   /**
@@ -176,7 +159,6 @@ class Server extends EventEmitter {
    * @return {this}
    */
   listen (port, cb) {
-    this._bindDev();
     if (this._dev) {
       this._fd = this._dev.socket(null, 'STREAM');
       if (this._fd < 0) {
@@ -216,7 +198,6 @@ class Server extends EventEmitter {
    * @return {this}
    */
   close (cb) {
-    this._bindDev();
     if (this._dev) {
       this._dev.close(this._fd, (err) => {
         if (err) {

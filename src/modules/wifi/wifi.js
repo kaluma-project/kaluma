@@ -7,22 +7,16 @@ if (!global.__ieee80211dev) {
 class WiFi extends EventEmitter {
   constructor () {
     super();
-    this._bindDev();
-  }
-
-  _bindDev() {
-    if (!this._dev && global.__ieee80211dev) {
-      this._dev = global.__ieee80211dev;
-      this._dev.assoc_cb = () => {
-        this.emit('associated');
-      };
-      this._dev.connect_cb = () => {
-        this.emit('connected');
-      };
-      this._dev.disconnect_cb = () => {
-        this.emit('disconnected');
-      };
-    }
+    this._dev = global.__ieee80211dev;
+    this._dev.assoc_cb = () => {
+      this.emit('associated');
+    };
+    this._dev.connect_cb = () => {
+      this.emit('connected');
+    };
+    this._dev.disconnect_cb = () => {
+      this.emit('disconnected');
+    };
   }
 
   /**
@@ -30,7 +24,6 @@ class WiFi extends EventEmitter {
    * @param {Function} cb
    */
   reset (cb) {
-    this._bindDev();
     if (this._dev) {
       this._dev.reset((err) => {
         if (err) {
@@ -49,7 +42,6 @@ class WiFi extends EventEmitter {
    * @param {Function} cb
    */
   scan (cb) {
-    this._bindDev();
     if (this._dev) {
       this._dev.scan((err, scanResults) => {
         if (err) {
@@ -71,7 +63,6 @@ class WiFi extends EventEmitter {
    * @param {function} cb
    */
   connect (connectInfo, cb) {
-    this._bindDev();
     if (this._dev) {
       if (typeof connectInfo === 'function') {
         cb = connectInfo
@@ -127,7 +118,6 @@ class WiFi extends EventEmitter {
    * @param {function} cb
    */
   disconnect (cb) {
-    this._bindDev();
     if (this._dev) {
       this._dev.disconnect(err => {
         if (err) {
@@ -147,7 +137,6 @@ class WiFi extends EventEmitter {
    *   connectionInfo = null, if has no connection
    */
   getConnection (cb) {
-    this._bindDev();
     if (this._dev) {
       this._dev.get_connection((err, connectionInfo) => {
         if (err) {
