@@ -1,16 +1,15 @@
 var EventEmitter = require('events').EventEmitter;
 var stream = require('stream');
 
-if (!global.__netdev) {
-  throw new Error('Network device not found');
-}
-
 /**
  * Socket class
  */
 class Socket extends stream.Duplex {
   constructor () {
     super();
+    if (!global.__netdev) {
+      throw new Error('Network device not found');
+    }    
     this.localAddress = null;
     this.localPort = null;
     this.remoteAddress = null;
@@ -141,13 +140,16 @@ class Socket extends stream.Duplex {
 class Server extends EventEmitter {
   constructor (options, connectionListener) {
     super();
+    if (!global.__netdev) {
+      throw new Error('Network device not found');
+    }    
     if (typeof options === 'function') {
       connectionListener = options;
       options = undefined;
     }
     if (connectionListener) {
       this.on('connection', connectionListener);
-    }    
+    }
     this._fd = -1;
     this._dev = global.__netdev;
   }

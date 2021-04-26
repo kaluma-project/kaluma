@@ -1,12 +1,11 @@
 var EventEmitter = require('events').EventEmitter;
 
-if (!global.__ieee80211dev) {
-  throw new Error('IEEE 802.11 device not found');
-}
-
 class WiFi extends EventEmitter {
   constructor () {
     super();
+    if (!global.__ieee80211dev) {
+      throw new Error('IEEE 802.11 device not found');
+    }    
     this._dev = global.__ieee80211dev;
     this._dev.assoc_cb = () => {
       this.emit('associated');
@@ -151,5 +150,6 @@ class WiFi extends EventEmitter {
   }
 }
 
-var wifi = new WiFi();
-module.exports = wifi;
+// var wifi = new WiFi();
+// module.exports = wifi;
+exports.WiFi = WiFi;
