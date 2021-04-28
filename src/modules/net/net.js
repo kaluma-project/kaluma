@@ -33,7 +33,6 @@ class Socket extends stream.Duplex {
           this.remoteAddress = sck.raddr;
           this.remotePort = sck.rport;
           this.emit('connect');
-          this.emit('ready');        
         }
         sck.close_cb = () => { this._afterDestroy() }
         sck.read_cb = (data) => { this.push(data) }
@@ -63,9 +62,8 @@ class Socket extends stream.Duplex {
         this._dev.connect(this._fd, options.host, options.port, (err) => {
           if (err) {
             this.emit('error', new SystemError(this._dev.errno));
-          }
-          else {
-            this.emit('connect');
+          } else {
+            this.emit('ready');
           }
         });
       }
