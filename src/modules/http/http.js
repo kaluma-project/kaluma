@@ -51,11 +51,11 @@ class HTTPParser {
   parseHead (head) {
     var ls = head.split('\n');
     var lt = ls[0].split(' ');
-    if (lt[0].trim().startsWith('HTTP/')) { // status line
+    if (lt[0].trim().startsWith('HTTP/')) { // http response
       this.incoming.httpVersion = lt[0].trim().split('/')[1];
       this.incoming.statusCode = parseInt(lt[1].trim());
       this.incoming.statusMessage = lt[2].trim();      
-    } else { // request line
+    } else { // http request
       this.incoming.method = lt[0].trim();
       this.incoming.url =  lt[1].trim();
       this.incoming.httpVersion = lt[2].trim().split('/')[1];
