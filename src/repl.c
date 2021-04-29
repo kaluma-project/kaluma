@@ -279,6 +279,10 @@ static void handle_normal(char ch)
     state.position = 0;
     set_cursor_to_position();
     break;
+  case 0x04: /* Ctrl + D */
+    cmd_reset(&state);
+    km_repl_print_prompt();
+    break;
   case 0x05: /* Ctrl + E */
     state.position = state.buffer_length;
     set_cursor_to_position();
@@ -525,6 +529,7 @@ static void cmd_reset(km_repl_state_t *state)
 {
   km_runtime_cleanup();
   km_runtime_init(false, false);
+  km_repl_printf("soft reset\r\n");
 }
 
 static size_t bytes_remained = 0;
@@ -619,19 +624,19 @@ static void cmd_flash(km_repl_state_t *state, char *arg)
     switch (result)
     {
     case KM_YMODEM_OK:
-      km_tty_printf("\r\nDone.\r\n");
+      km_tty_printf("\r\nDone\r\n");
       break;
     case KM_YMODEM_LIMIT:
-      km_tty_printf("\r\nThe file size is too large.\r\n");
+      km_tty_printf("\r\nThe file size is too large\r\n");
       break;
     case KM_YMODEM_DATA:
-      km_tty_printf("\r\nVerification failed.\r\n");
+      km_tty_printf("\r\nVerification failed\r\n");
       break;
     case KM_YMODEM_ABORT:
-      km_tty_printf("\r\nAborted.\r\n");
+      km_tty_printf("\r\nAborted\r\n");
       break;
     default:
-      km_tty_printf("\r\nFailed to receive.\r\n");
+      km_tty_printf("\r\nFailed to receive\r\n");
       break;
     }
     state->ymodem_state = 0; // stopped
@@ -640,11 +645,11 @@ static void cmd_flash(km_repl_state_t *state, char *arg)
   else
   {
     km_repl_printf(".flash command options:\r\n");
-    km_repl_printf("-w\tWrite code to flash via YMODEM.\r\n");
-    km_repl_printf("-e\tErase the code in flash.\r\n");
-    km_repl_printf("-t\tPrint total size of flash for code.\r\n");
-    km_repl_printf("-s\tPrint the size of the code in flash.\r\n");
-    km_repl_printf("-r\tPrint the code in flash.\r\n");
+    km_repl_printf("-w\tWrite code to flash via YMODEM\r\n");
+    km_repl_printf("-e\tErase the code in flash\r\n");
+    km_repl_printf("-t\tPrint total size of flash for code\r\n");
+    km_repl_printf("-s\tPrint the size of the code in flash\r\n");
+    km_repl_printf("-r\tPrint the code in flash\r\n");
   }
 }
 
@@ -670,7 +675,7 @@ static void cmd_mem(km_repl_state_t *state)
   }
   else
   {
-    km_repl_printf("Mem stat feature is not enabled.\r\n");
+    km_repl_printf("Mem stat feature is not enabled\r\n");
   }
 }
 
@@ -701,15 +706,17 @@ static void cmd_hi(km_repl_state_t *state)
  */
 static void cmd_help(km_repl_state_t *state)
 {
-  km_repl_printf(".echo\tEcho on/off.\r\n");
-  km_repl_printf(".reset\tReset JavaScript runtime context.\r\n");
-  km_repl_printf(".flash\tCommands for the internal flash.\r\n");
-  km_repl_printf(".load\tLoad code from the internal flash.\r\n");
-  km_repl_printf(".mem\tHeap memory status.\r\n");
-  km_repl_printf(".gc\tPerform garbage collection.\r\n");
-  km_repl_printf(".hi\tPrint welcome message.\r\n");
-  km_repl_printf(".help\tPrint this help message.\r\n");
-  km_repl_printf("ctrl+c\tBreak the code execution.\r\n");
+  km_repl_printf(".echo\tEcho on/off\r\n");
+  km_repl_printf(".reset\tSoft reset\r\n");
+  km_repl_printf(".flash\tCommands for the internal flash\r\n");
+  km_repl_printf(".load\tLoad code from the internal flash\r\n");
+  km_repl_printf(".mem\tHeap memory status\r\n");
+  km_repl_printf(".gc\tPerform garbage collection\r\n");
+  km_repl_printf(".hi\tPrint welcome message\r\n");
+  km_repl_printf(".help\tPrint this help message\r\n");
+  km_repl_printf("\r\n");
+  km_repl_printf("CTRL+C\tAbort running code\r\n");
+  km_repl_printf("CTRL+D\tSoft reset\r\n");
 }
 
 // --------------------------------------------------------------------------

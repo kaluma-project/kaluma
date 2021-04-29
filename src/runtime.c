@@ -64,7 +64,7 @@ static km_io_idle_handle_t idler;
 static jerry_value_t vm_exec_stop_callback (void *user_p) {
   if (km_runtime_vm_stop > 0) {
     km_runtime_vm_stop = 0;
-    return jerry_create_string ((const jerry_char_t *) "Abort script"); 
+    return jerry_create_string ((const jerry_char_t *) "Aborted");
   }
   return jerry_create_undefined ();
 }
