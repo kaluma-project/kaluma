@@ -9,10 +9,10 @@ class HTTPParser {
   constructor (incoming) {
     this._buf = '';
     this.incoming = incoming;
-    this.incoming.socket.on('data', (chunk) => this.push(chunk));
-    this.incoming.socket.on('end', () => this.end());
-    this.incoming.socket.on('close', () => this.end());
-    this.body = '';    
+    this.incoming.socket.on('data', (chunk) => { this.push(chunk) });
+    this.incoming.socket.on('end', () => { this.end() });
+    this.incoming.socket.on('close', () => { this.end() });
+    this.body = '';
     this.headersComplete = false;
     this.onHeadersComplete = null;
     this.onComplete = null;
@@ -121,7 +121,6 @@ class HTTPParser {
         this._buf = '';  
       }
       this.incoming.complete = true;
-      // this.incoming.emit('end');
       this.incoming._afterEnd();
       if (this.onComplete) this.onComplete();
     }
