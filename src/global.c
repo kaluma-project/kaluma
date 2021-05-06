@@ -85,15 +85,37 @@ JERRYXX_FUN(digital_read_fn)
 
 JERRYXX_FUN(digital_write_fn)
 {
-  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
+  JERRYXX_CHECK_ARG(0, "pin");
   JERRYXX_CHECK_ARG_NUMBER_OPT(1, "value");
-  uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  uint8_t value = (uint8_t)JERRYXX_GET_ARG_NUMBER_OPT(1, KM_GPIO_LOW);
-  if (km_gpio_write(pin, value) == KM_GPIOPORT_ERROR)
-  {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  jerry_value_t pin = JERRYXX_GET_ARG(0);
+  uint32_t value = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(1, KM_GPIO_LOW);
+  if (jerry_value_is_number(pin)) {
+    uint8_t pin_num = jerry_get_number_value(pin);
+    if (km_gpio_write(pin_num, value) == KM_GPIOPORT_ERROR)
+    {
+      char errmsg[255];
+      sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin_num);
+      return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+    }
+  } else if (jerry_value_is_array(pin)) {
+    int pin_len = jerry_get_array_length(pin);
+    for (int i = 0; i < pin_len; i++) {
+      jerry_value_t item = jerry_get_property_by_index(pin, pin_len - i - 1);
+      if (jerry_value_is_number(item)) {
+        uint8_t p = jerry_get_number_value(item);
+        uint32_t v = ((value >> i) & 0x01);
+        if (km_gpio_write(p, v) == KM_GPIOPORT_ERROR)
+        {
+          char errmsg[255];
+          sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", p);
+          return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+        }
+      } else {
+        return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "\"pin\" argument must be a number or number[]");
+      }
+    }
+  } else {
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "\"pin\" argument must be a number or number[]");
   }
   return jerry_create_undefined();
 }
