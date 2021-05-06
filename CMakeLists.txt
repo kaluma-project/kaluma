@@ -9,7 +9,7 @@ if(NOT "${TARGET}" STREQUAL "rpi-pico")
 endif()
 
 if(NOT VER)
-  set(VER "1.0.0-beta.3")
+  set(VER "1.0.0-beta.4")
 endif()
 configure_file(${CMAKE_SOURCE_DIR}/tools/kaluma_config.h.in ${CMAKE_SOURCE_DIR}/src/gen/kaluma_config.h)
 include(${CMAKE_SOURCE_DIR}/targets/${TARGET}/target.cmake)
