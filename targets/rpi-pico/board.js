@@ -1,36 +1,36 @@
 global.board = {
   name: 'rpi-pico',
   LED: 25,
-  gpio: function (pin, mode) {
+  gpio: function (...args) {
     var GPIO = global.require('gpio').GPIO;
-    return new GPIO(pin, mode);
+    return new GPIO(...args);
   },
-  led: function (pin) {
+  led: function (...args) {
     var LED = global.require('led').LED;
-    return new LED(pin);
+    return new LED(...args);
   },
-  button: function (pin, options) {
+  button: function (...args) {
     var Button = global.require('button').Button;
-    return new Button(pin, options);
+    return new Button(...args);
   },
-  pwm: function (pin, frequency, duty) {
+  pwm: function (...args) {
     var PWM = global.require('pwm').PWM;
-    return new PWM(pin, frequency, duty);
+    return new PWM(...args);
   },
-  adc: function (pin) {
+  adc: function (...args) {
     var ADC = global.require('adc').ADC;
-    return new ADC(pin);
+    return new ADC(...args);
   },
-  i2c: function (bus, options) {
+  i2c: function (...args) {
     var I2C = global.require('i2c').I2C;
-    return new I2C(bus, options);
+    return new I2C(...args);
   },
-  spi: function (bus, options) {
+  spi: function (...args) {
     var SPI = global.require('spi').SPI;
-    return new SPI(bus, options);
+    return new SPI(...args);
   },
-  uart: function (port, options) {
+  uart: function (...args) {
     var UART = global.require('uart').UART;
-    return new UART(port, options);
+    return new UART(...args);
   }
 }
