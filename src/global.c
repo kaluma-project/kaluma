@@ -56,15 +56,46 @@ static void register_global_objects()
 
 JERRYXX_FUN(pin_mode_fn)
 {
-  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
+  JERRYXX_CHECK_ARG(0, "pin");
   JERRYXX_CHECK_ARG_NUMBER_OPT(1, "mode");
-  uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  jerry_value_t pin = JERRYXX_GET_ARG(0);
   km_gpio_io_mode_t mode = (km_gpio_io_mode_t)JERRYXX_GET_ARG_NUMBER_OPT(1, KM_GPIO_IO_MODE_INPUT);
-  if (km_gpio_set_io_mode(pin, mode) == KM_GPIOPORT_ERROR)
+  if (jerry_value_is_number(pin))
   {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+    uint8_t pin_num = jerry_get_number_value(pin);
+    if (km_gpio_set_io_mode(pin_num, mode) == KM_GPIOPORT_ERROR)
+    {
+      char errmsg[255];
+      sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
+      return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+    }
+  }
+  else if (jerry_value_is_array(pin))
+  {
+    int pin_len = jerry_get_array_length(pin);
+    for (int i = 0; i < pin_len; i++)
+    {
+      jerry_value_t item = jerry_get_property_by_index(pin, i);
+      if (jerry_value_is_number(item))
+      {
+        uint8_t p = jerry_get_number_value(item);
+        if (km_gpio_set_io_mode(p, mode) == KM_GPIOPORT_ERROR)
+        {
+          char errmsg[255];
+          sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
+          return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+        }
+      }
+      else
+      {
+        return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *)"\"pin\" argument must be a number or number[]");
+      }
+      jerry_release_value(item);
+    }
+  }
+  else
+  {
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *)"\"pin\" argument must be a number or number[]");
   }
   return jerry_create_undefined();
 }
@@ -88,8 +119,9 @@ JERRYXX_FUN(digital_write_fn)
   JERRYXX_CHECK_ARG(0, "pin");
   JERRYXX_CHECK_ARG_NUMBER_OPT(1, "value");
   jerry_value_t pin = JERRYXX_GET_ARG(0);
-  uint32_t value = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(1, KM_GPIO_LOW);
-  if (jerry_value_is_number(pin)) {
+  uint32_t value = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(1, KM_GPIO_LOW);
+  if (jerry_value_is_number(pin))
+  {
     uint8_t pin_num = jerry_get_number_value(pin);
     if (km_gpio_write(pin_num, value) == KM_GPIOPORT_ERROR)
     {
@@ -97,11 +129,15 @@ JERRYXX_FUN(digital_write_fn)
       sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin_num);
       return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
     }
-  } else if (jerry_value_is_array(pin)) {
+  }
+  else if (jerry_value_is_array(pin))
+  {
     int pin_len = jerry_get_array_length(pin);
-    for (int i = 0; i < pin_len; i++) {
+    for (int i = 0; i < pin_len; i++)
+    {
       jerry_value_t item = jerry_get_property_by_index(pin, pin_len - i - 1);
-      if (jerry_value_is_number(item)) {
+      if (jerry_value_is_number(item))
+      {
         uint8_t p = jerry_get_number_value(item);
         uint32_t v = ((value >> i) & 0x01);
         if (km_gpio_write(p, v) == KM_GPIOPORT_ERROR)
@@ -110,12 +146,17 @@ JERRYXX_FUN(digital_write_fn)
           sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", p);
           return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
         }
-      } else {
-        return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "\"pin\" argument must be a number or number[]");
       }
+      else
+      {
+        return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *)"\"pin\" argument must be a number or number[]");
+      }
+      jerry_release_value(item);
     }
-  } else {
-    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "\"pin\" argument must be a number or number[]");
+  }
+  else
+  {
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *)"\"pin\" argument must be a number or number[]");
   }
   return jerry_create_undefined();
 }
