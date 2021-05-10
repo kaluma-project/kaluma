@@ -30,4 +30,11 @@ GPIO.prototype.setMode = function (mode) {
   pinMode(this.pin, this.mode);
 }
 
+GPIO.prototype.irq = function (callback, events) {
+  if (typeof callback !== 'function') {
+    throw new TypeError('callback must be a function');
+  }
+  this.events = typeof events === 'number' ? events : CHANGE
+  attachInterrupt(this.pin, callback, events);
+}
 exports.GPIO = GPIO;

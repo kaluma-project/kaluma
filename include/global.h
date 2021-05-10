@@ -24,6 +24,16 @@
 
 #include "jerryscript.h"
 
+typedef struct {
+  uint16_t pin;
+  uint16_t event;
+  jerry_value_t call_back;
+} km_gpio_intr_t;
+
+typedef struct km_gpio_intr_handle_s {
+  km_gpio_intr_t gpio_int;
+  struct km_gpio_intr_handle_s *next;
+} km_gpio_intr_handle_t;
 void km_global_init();
 
 #endif /* __KM_GLOBAL_H */
