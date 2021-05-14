@@ -17,5 +17,7 @@
   },
   "cpplint.filters" : [
     "-build/include_subdir", "-build/header_guard"
-  ]
+  ],
+  "C_Cpp.clang_format_fallbackStyle": "Google",
+  "editor.formatOnSave": true
 }
