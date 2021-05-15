@@ -475,6 +475,11 @@ JERRYXX_FUN(attach_interrupt_fn)
   uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
   jerry_value_t callback = JERRYXX_GET_ARG(1);
   km_io_watch_mode_t events = JERRYXX_GET_ARG_NUMBER_OPT(2, KM_IO_WATCH_MODE_CHANGE);
+  if ((events & KM_IO_WATCH_MODE_CHANGE) == 0) {
+    char errmsg[255];
+    sprintf(errmsg, "Only RISING, FALLING and CHANGE can be set for interrupt event.");
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  }
   if (km_gpio_handle_head == NULL) {
     km_gpio_intr_en(true, km_gpio_irq);
   }

@@ -116,3 +116,10 @@ int km_gpio_toggle(uint8_t pin) {
   HAL_GPIO_TogglePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
   return 0;
 }
+
+void km_gpio_intr_en(bool en, km_gpio_callback_t call_back) {
+}
+
+int km_gpio_set_interrupt(bool en, uint8_t pin, uint8_t events) {
+  return KM_GPIOPORT_ERROR;
+}

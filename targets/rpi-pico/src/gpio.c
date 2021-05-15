@@ -100,8 +100,7 @@ static void __gpio_irq_handler(uint gpio, uint32_t events)
   }
 }
 
-void km_gpio_intr_en(bool en, km_gpio_callback_t call_back)
-{
+void km_gpio_intr_en(bool en, km_gpio_callback_t call_back) {
   if (en) {
     __gpio_callback = call_back;
   }
