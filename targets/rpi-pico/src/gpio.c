@@ -20,10 +20,13 @@
  */
 
 #include <stdint.h>
+#include <stdlib.h>
 #include "gpio.h"
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
+#include "hardware/irq.h"
 
+static km_gpio_callback_t __gpio_callback = NULL;
 static int __check_gpio(uint8_t pin)
 {
   if ((pin <= 28) && !((pin == 23) || (pin == 24))) {
@@ -82,5 +85,40 @@ int km_gpio_toggle(uint8_t pin) {
   }
   bool out = gpio_get(pin);
   gpio_put(pin, !out);
+  return 0;
+}
+
+static void __gpio_irq_handler(uint gpio, uint32_t events)
+{
+  if (__gpio_callback){
+    if (events == 4) { // BIT2 is Falling edge in Pico
+      events = 8; // BIT3 is Falling edge in Kaluma
+    } else if (events == 8) {// BIT3 is Rising edge in Pico
+      events = 4; // BIT2 is Rising Rising in Kaluma
+    }
+    __gpio_callback(gpio, events);
+  }
+}
+
+void km_gpio_intr_en(bool en, km_gpio_callback_t call_back) {
+  if (en) {
+    __gpio_callback = call_back;
+  }
+  for (uint gpio = 0; gpio < NUM_BANK0_GPIOS; gpio++) {
+      gpio_acknowledge_irq(gpio, 0xF);
+  }
+  irq_set_enabled(IO_IRQ_BANK0, en);
+}
+
+int km_gpio_set_interrupt(bool en, uint8_t pin, uint8_t events) {
+  if (__check_gpio(pin) < 0) {
+    return KM_GPIOPORT_ERROR;
+  }
+  if (events == 4) { // BIT2 is Rising edge in Kaluma
+    events = 8; // BIT3 is Rising edge in Pico
+  } else if (events == 8) {// BIT3 is Falling edge in Kaluma
+    events = 4; // BIT2 is Rising Falling in Pico
+  }
+  gpio_set_irq_enabled_with_callback(pin, (uint32_t)events, en, __gpio_irq_handler);
   return 0;
 }

@@ -274,6 +274,8 @@ static void km_io_watch_run() {
                 handle->watch_cb(handle);
               }
               break;
+            default:
+              break;
           }
         }
         handle->debounce_time = 0;

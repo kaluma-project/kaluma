@@ -23,6 +23,7 @@
 #define __KM_GPIO_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef enum {
   KM_GPIO_IO_MODE_INPUT,
@@ -39,6 +40,8 @@ typedef enum {
 
 #define KM_GPIOPORT_ERROR -1
 
+typedef void (*km_gpio_callback_t)(uint8_t, uint8_t);
+
 /**
  * Initialize all GPIO when system started
  */
@@ -53,5 +56,7 @@ int km_gpio_set_io_mode(uint8_t pin, km_gpio_io_mode_t mode);
 int km_gpio_write(uint8_t pin, uint8_t value);
 int km_gpio_toggle(uint8_t pin);
 int km_gpio_read(uint8_t pin);
+void km_gpio_intr_en(bool en, km_gpio_callback_t call_back);
+int km_gpio_set_interrupt(bool en, uint8_t pin, uint8_t events);
 
 #endif /* __KM_GPIO_H */

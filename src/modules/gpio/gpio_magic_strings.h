@@ -29,5 +29,6 @@
 #define MSTR_GPIO_WRITE "write"
 #define MSTR_GPIO_TOGGLE "toggle"
 #define MSTR_GPIO_SET_MODE "setMode"
+#define MSTR_GPIO_IRQ "irq"
 
 #endif /* __GPIO_MAGIC_STRINGS_H */
