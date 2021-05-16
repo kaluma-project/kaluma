@@ -255,7 +255,12 @@ static void km_io_watch_run() {
       }
       /* debounce delay elapsed */
       uint32_t elapsed_time = km_gettime() - handle->debounce_time;
-      if (handle->debounce_time > 0 && elapsed_time >= handle->debounce_delay) {
+      if ((handle->watch_cb) &&
+          (((handle->mode == KM_IO_WATCH_MODE_LOW_LEVEL) && (reading == 0)) ||
+           ((handle->mode == KM_IO_WATCH_MODE_HIGH_LEVEL) && (reading == 1))))
+      {
+        handle->watch_cb(handle);
+      } else if (handle->debounce_time > 0 && elapsed_time >= handle->debounce_delay) {
         if (reading != handle->val) {
           handle->val = reading;
           switch (handle->mode) {
