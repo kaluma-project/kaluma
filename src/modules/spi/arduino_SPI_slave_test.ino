@@ -15,8 +15,7 @@ void setup() {
   Serial.print("ready...\n");
 }
 
-ISR (SPI_STC_vect)
-{
+ISR(SPI_STC_vect) {
   byte c = SPDR;
   if (pos < sizeof(buf)) {
     buf[pos++] = c;

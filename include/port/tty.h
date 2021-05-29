@@ -22,10 +22,9 @@
 #ifndef __KM_TTY_H
 #define __KM_TTY_H
 
-#include <stdio.h>
-#include <stdint.h>
 #include <stdbool.h>
-
+#include <stdint.h>
+#include <stdio.h>
 
 /**
  * Initialize TTY

@@ -20,6 +20,7 @@
  */
 
 #include "spi.h"
+
 #include "gpio.h"
 
 /**
@@ -35,22 +36,22 @@ km_spi_pins_t km_spi_get_default_pins(uint8_t bus) {
 /**
  * Initialize all SPI when system started
  */
-void km_spi_init() {
-}
+void km_spi_init() {}
 
 /**
  * Cleanup all SPI when system cleanup
  */
-void km_spi_cleanup() {
-}
+void km_spi_cleanup() {}
 
 /** SPI Setup
-*/
-int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate, km_spi_bitorder_t bitorder, km_spi_pins_t pins) {
+ */
+int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
+                 km_spi_bitorder_t bitorder, km_spi_pins_t pins) {
   return 0;
 }
 
-int km_spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint32_t timeout) {
+int km_spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len,
+                    uint32_t timeout) {
   return 0;
 }
 
@@ -62,6 +63,4 @@ int km_spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   return 0;
 }
 
-int km_spi_close(uint8_t bus) {
-  return 0;
-}
+int km_spi_close(uint8_t bus) { return 0; }

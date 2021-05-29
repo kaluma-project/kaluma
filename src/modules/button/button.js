@@ -5,7 +5,7 @@ var EventEmitter = require('events').EventEmitter;
  * @param {string} input
  */
 class Button extends EventEmitter {
-  constructor (pin, options) {
+  constructor(pin, options) {
     super();
     options = options || {};
     this.watchId = -1;
@@ -19,11 +19,11 @@ class Button extends EventEmitter {
     }, this.pin, this.event, this.debounce);
   }
 
-  read () {
-    return digitalRead(this.pin);  
+  read() {
+    return digitalRead(this.pin);
   }
 
-  close () {
+  close() {
     clearWatch(this.watchId);
   }
 }

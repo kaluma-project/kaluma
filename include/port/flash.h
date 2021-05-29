@@ -25,9 +25,9 @@
 #include <stdint.h>
 
 typedef enum {
-  KM_FLASH_SUCCESS   = 0x00U,
-  KM_FLASH_FAIL      = 0x01U,
-  KM_FLASH_TIMEOUT   = 0x02U,
+  KM_FLASH_SUCCESS = 0x00U,
+  KM_FLASH_FAIL = 0x01U,
+  KM_FLASH_TIMEOUT = 0x02U,
 } km_flash_status_t;
 
 /**
@@ -62,7 +62,7 @@ void km_flash_program_begin();
 /**
  * Program data to the flash
  */
-km_flash_status_t km_flash_program(uint8_t * buf, uint32_t size);
+km_flash_status_t km_flash_program(uint8_t *buf, uint32_t size);
 
 /**
  * Finish to write data to the flash

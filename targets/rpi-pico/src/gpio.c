@@ -19,47 +19,46 @@
  * SOFTWARE.
  */
 
+#include "gpio.h"
+
 #include <stdint.h>
 #include <stdlib.h>
-#include "gpio.h"
-#include "pico/stdlib.h"
+
 #include "hardware/gpio.h"
 #include "hardware/irq.h"
+#include "pico/stdlib.h"
 
 static km_gpio_callback_t __gpio_callback = NULL;
-static int __check_gpio(uint8_t pin)
-{
+static int __check_gpio(uint8_t pin) {
   if ((pin <= 28) && !((pin == 23) || (pin == 24))) {
     return 0;
   } else {
-    return KM_GPIOPORT_ERROR; // Not a GPIO pins
+    return KM_GPIOPORT_ERROR;  // Not a GPIO pins
   }
 }
 
 void km_gpio_init() {
-  for(uint i = 0; i < 30; i++) {
+  for (uint i = 0; i < 30; i++) {
     gpio_init(i);
     gpio_set_pulls(i, false, false);
   }
 }
 
-void km_gpio_cleanup() {
-  km_gpio_init();
-}
+void km_gpio_cleanup() { km_gpio_init(); }
 
 int km_gpio_set_io_mode(uint8_t pin, km_gpio_io_mode_t mode) {
   if (__check_gpio(pin) < 0) {
     return KM_GPIOPORT_ERROR;
   }
   if (mode == KM_GPIO_IO_MODE_OUTPUT) {
-    gpio_set_dir(pin, true); // Set OUTPUT
+    gpio_set_dir(pin, true);  // Set OUTPUT
   } else {
     if (mode == KM_GPIO_IO_MODE_INPUT_PULLUP) {
       gpio_pull_up(pin);
     } else if (mode == KM_GPIO_IO_MODE_INPUT_PULLDOWN) {
       gpio_pull_down(pin);
     }
-    gpio_set_input_enabled(pin, true); // Set INPUT
+    gpio_set_input_enabled(pin, true);  // Set INPUT
   }
   return 0;
 }
@@ -88,13 +87,12 @@ int km_gpio_toggle(uint8_t pin) {
   return 0;
 }
 
-static void __gpio_irq_handler(uint gpio, uint32_t events)
-{
-  if (__gpio_callback){
-    if (events == 4) { // BIT2 is Falling edge in Pico
-      events = 8; // BIT3 is Falling edge in Kaluma
-    } else if (events == 8) {// BIT3 is Rising edge in Pico
-      events = 4; // BIT2 is Rising Rising in Kaluma
+static void __gpio_irq_handler(uint gpio, uint32_t events) {
+  if (__gpio_callback) {
+    if (events == 4) {         // BIT2 is Falling edge in Pico
+      events = 8;              // BIT3 is Falling edge in Kaluma
+    } else if (events == 8) {  // BIT3 is Rising edge in Pico
+      events = 4;              // BIT2 is Rising Rising in Kaluma
     }
     __gpio_callback(gpio, events);
   }
@@ -105,7 +103,7 @@ void km_gpio_intr_en(bool en, km_gpio_callback_t call_back) {
     __gpio_callback = call_back;
   }
   for (uint gpio = 0; gpio < NUM_BANK0_GPIOS; gpio++) {
-      gpio_acknowledge_irq(gpio, 0xF);
+    gpio_acknowledge_irq(gpio, 0xF);
   }
   irq_set_enabled(IO_IRQ_BANK0, en);
 }
@@ -114,11 +112,12 @@ int km_gpio_set_interrupt(bool en, uint8_t pin, uint8_t events) {
   if (__check_gpio(pin) < 0) {
     return KM_GPIOPORT_ERROR;
   }
-  if (events == 4) { // BIT2 is Rising edge in Kaluma
-    events = 8; // BIT3 is Rising edge in Pico
-  } else if (events == 8) {// BIT3 is Falling edge in Kaluma
-    events = 4; // BIT2 is Rising Falling in Pico
+  if (events == 4) {         // BIT2 is Rising edge in Kaluma
+    events = 8;              // BIT3 is Rising edge in Pico
+  } else if (events == 8) {  // BIT3 is Falling edge in Kaluma
+    events = 4;              // BIT2 is Rising Falling in Pico
   }
-  gpio_set_irq_enabled_with_callback(pin, (uint32_t)events, en, __gpio_irq_handler);
+  gpio_set_irq_enabled_with_callback(pin, (uint32_t)events, en,
+                                     __gpio_irq_handler);
   return 0;
 }

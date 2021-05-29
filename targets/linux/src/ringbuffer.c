@@ -49,7 +49,6 @@ void ringbuffer_write(ringbuffer_t *ringbuffer, uint8_t *buf, uint32_t len) {
   ringbuffer->w_ptr = w_ptr;
 }
 
-
 uint8_t ringbuffer_look_at(ringbuffer_t *ringbuffer, uint32_t offset) {
   uint32_t r_ptr;
   r_ptr = ringbuffer->r_ptr;
@@ -57,7 +56,8 @@ uint8_t ringbuffer_look_at(ringbuffer_t *ringbuffer, uint32_t offset) {
   return ringbuffer->buf[r_ptr];
 }
 
-void ringbuffer_look(ringbuffer_t *ringbuffer, uint8_t *buf, uint32_t len, uint32_t offset) {
+void ringbuffer_look(ringbuffer_t *ringbuffer, uint8_t *buf, uint32_t len,
+                     uint32_t offset) {
   uint32_t k;
   uint32_t r_ptr;
   r_ptr = ringbuffer->r_ptr;

@@ -20,18 +20,19 @@
  */
 
 #include "system.h"
-#include "tty.h"
-#include "stm32f4xx.h"
-#include "kameleon_core.h"
-#include "usbd_cdc_if.h"
-#include "usb_device.h"
-#include "usbd_desc.h"
-#include "gpio.h"
+
 #include "adc.h"
-#include "pwm.h"
+#include "gpio.h"
 #include "i2c.h"
+#include "kameleon_core.h"
+#include "pwm.h"
 #include "spi.h"
+#include "stm32f4xx.h"
+#include "tty.h"
 #include "uart.h"
+#include "usb_device.h"
+#include "usbd_cdc_if.h"
+#include "usbd_desc.h"
 
 const char km_system_arch[] = "cortex-m4";
 const char km_system_platform[] = "unknown";
@@ -40,29 +41,28 @@ static uint64_t tick_count;
 static uint32_t microseconds_cycle;
 
 /** GPIO Clock Enable
-*/
+ */
 void GpioClock_Config() {
- /* GPIO Ports Clock Enable */
- __HAL_RCC_GPIOC_CLK_ENABLE();
- __HAL_RCC_GPIOA_CLK_ENABLE();
- __HAL_RCC_GPIOB_CLK_ENABLE();
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 }
 
 /** System Clock ConfiguratiGpioClock_Configon
-*/
+ */
 void SystemClock_Config() {
-
   RCC_OscInitTypeDef RCC_OscInitStruct;
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
 
   /**Configure the main internal regulator output voltage
-  */
+   */
   __HAL_RCC_PWR_CLK_ENABLE();
 
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
   /**Initializes the CPU, AHB and APB busses clocks
-  */
+   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
@@ -76,8 +76,9 @@ void SystemClock_Config() {
   }
 
   /**Initializes the CPU, AHB and APB busses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK|RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+   */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK |
+                                RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
@@ -88,18 +89,18 @@ void SystemClock_Config() {
   }
 
   /**Configure the Systick interrupt time
-  */
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+   */
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
 
   /**Configure the Systick
-  */
+   */
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 
   /** micro seconds timer init.
-  */
+   */
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
   DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
   DWT->CYCCNT = 0;
@@ -107,7 +108,7 @@ void SystemClock_Config() {
 }
 
 /** USB Device Configuation
-*/
+ */
 void UsbDevice_Config() {
   USBD_Init(&hUsbDeviceFS, &FS_Desc, DEVICE_FS);
   USBD_RegisterClass(&hUsbDeviceFS, &USBD_CDC);
@@ -116,7 +117,7 @@ void UsbDevice_Config() {
 }
 
 /** LED Configuation
-*/
+ */
 void Led_Config() {
   GPIO_InitTypeDef GPIO_InitStruct;
 
@@ -132,7 +133,7 @@ void Led_Config() {
 }
 
 /** BUTTON Configuation
-*/
+ */
 void Button_Config() {
   GPIO_InitTypeDef GPIO_InitStruct;
 
@@ -149,63 +150,54 @@ void Button_Config() {
  * @param  None
  * @retval None
  */
-void _Error_Handler(char * file, uint32_t line) {
+void _Error_Handler(char* file, uint32_t line) {
   /* User can add his own implementation to report the HAL error return state */
-  while(1) {
+  while (1) {
     km_tty_printf("_Error_Handler : file[%s], line[%d] \r\n", file, line);
-    while(1);
+    while (1)
+      ;
   }
 }
 
 #ifdef USE_FULL_ASSERT
 
 /**
-   * @brief Reports the name of the source file and the source line number
-   * where the assert_param error has occurred.
-   * @param file: pointer to the source file name
-   * @param line: assert_param error line source number
-   * @retval None
-   */
+ * @brief Reports the name of the source file and the source line number
+ * where the assert_param error has occurred.
+ * @param file: pointer to the source file name
+ * @param line: assert_param error line source number
+ * @retval None
+ */
 void assert_failed(uint8_t* file, uint32_t line) {
-  _Error_Handler((char *)file, line);
+  _Error_Handler((char*)file, line);
 }
 
 #endif
 
 /** increment system timer tick every 1msec
-*/
-void __inc_tick() {
-  tick_count++;
-}
+ */
+void __inc_tick() { tick_count++; }
 
 /**
-*/
-void km_delay(uint32_t msec) {
-  HAL_Delay(msec);
-}
+ */
+void km_delay(uint32_t msec) { HAL_Delay(msec); }
 
 /**
-*/
-uint64_t km_gettime() {
-  return tick_count;
-}
+ */
+uint64_t km_gettime() { return tick_count; }
 
 /**
  * Return MAX of the micro seconde counter 44739242
-*/
-uint64_t km_micro_maxtime() {
-  return (0xFFFFFFFFU / microseconds_cycle);
-}
+ */
+uint64_t km_micro_maxtime() { return (0xFFFFFFFFU / microseconds_cycle); }
 /**
  * Return micro seconde counter
-*/
-uint64_t km_micro_gettime() {
-  return (DWT->CYCCNT / microseconds_cycle);
-}
+ */
+uint64_t km_micro_gettime() { return (DWT->CYCCNT / microseconds_cycle); }
 
 /**
  * micro secoded delay
-*/
+ */
 void km_micro_delay(uint32_t usec) {
   uint32_t time_diff;
   uint32_t start = DWT->CYCCNT;
@@ -225,7 +217,7 @@ void km_system_init() {
   HAL_Init();
   SystemClock_Config();
   GpioClock_Config();
-  km_gpio_init(); //Should be called before LED and Button configuration
+  km_gpio_init();  // Should be called before LED and Button configuration
   Led_Config();
   Button_Config();
   UsbDevice_Config();
@@ -246,9 +238,10 @@ void km_system_cleanup() {
 }
 
 uint8_t km_running_script_check() {
-  GPIO_PinState pin_state = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4); //Check status of the button
-  if (pin_state == GPIO_PIN_RESET) //Button is pressed.
-    return false; //Skip loading the user script
+  GPIO_PinState pin_state =
+      HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4);  // Check status of the button
+  if (pin_state == GPIO_PIN_RESET)          // Button is pressed.
+    return false;                           // Skip loading the user script
   else
     return true;
 }

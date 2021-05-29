@@ -7,11 +7,11 @@
  */
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 static const unsigned char base64_table[65] =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /**
  * km_base64_encode - Base64 encode
@@ -25,21 +25,19 @@ static const unsigned char base64_table[65] =
  * nul terminated to make it easier to use as a C string. The nul terminator is
  * not included in out_len.
  */
-unsigned char * km_base64_encode(const unsigned char *src, size_t len,
-    size_t *out_len) {
+unsigned char *km_base64_encode(const unsigned char *src, size_t len,
+                                size_t *out_len) {
   unsigned char *out, *pos;
   const unsigned char *end, *in;
   size_t olen;
   int line_len;
 
-  olen = len * 4 / 3 + 4; /* 3-byte blocks to 4-byte */
-  olen += olen / 72; /* line feeds */
-  olen++; /* nul termination */
-  if (olen < len)
-    return NULL; /* integer overflow */
+  olen = len * 4 / 3 + 4;      /* 3-byte blocks to 4-byte */
+  olen += olen / 72;           /* line feeds */
+  olen++;                      /* nul termination */
+  if (olen < len) return NULL; /* integer overflow */
   out = malloc(olen);
-  if (out == NULL)
-    return NULL;
+  if (out == NULL) return NULL;
 
   end = src + len;
   in = src;
@@ -64,23 +62,19 @@ unsigned char * km_base64_encode(const unsigned char *src, size_t len,
       *pos++ = base64_table[(in[0] & 0x03) << 4];
       *pos++ = '=';
     } else {
-      *pos++ = base64_table[((in[0] & 0x03) << 4) |
-                (in[1] >> 4)];
+      *pos++ = base64_table[((in[0] & 0x03) << 4) | (in[1] >> 4)];
       *pos++ = base64_table[(in[1] & 0x0f) << 2];
     }
     *pos++ = '=';
     line_len += 4;
   }
 
-  if (line_len)
-    *pos++ = '\n';
+  if (line_len) *pos++ = '\n';
 
   *pos = '\0';
-  if (out_len)
-    *out_len = pos - out;
+  if (out_len) *out_len = pos - out;
   return out;
 }
-
 
 /**
  * km_base64_decode - Base64 decode
@@ -92,39 +86,34 @@ unsigned char * km_base64_encode(const unsigned char *src, size_t len,
  *
  * Caller is responsible for freeing the returned buffer.
  */
-unsigned char * km_base64_decode(const unsigned char *src, size_t len,
-    size_t *out_len) {
+unsigned char *km_base64_decode(const unsigned char *src, size_t len,
+                                size_t *out_len) {
   unsigned char dtable[256], *out, *pos, block[4], tmp;
   size_t i, count, olen;
   int pad = 0;
 
   memset(dtable, 0x80, 256);
   for (i = 0; i < sizeof(base64_table) - 1; i++)
-    dtable[base64_table[i]] = (unsigned char) i;
+    dtable[base64_table[i]] = (unsigned char)i;
   dtable['='] = 0;
 
   count = 0;
   for (i = 0; i < len; i++) {
-    if (dtable[src[i]] != 0x80)
-      count++;
+    if (dtable[src[i]] != 0x80) count++;
   }
 
-  if (count == 0 || count % 4)
-    return NULL;
+  if (count == 0 || count % 4) return NULL;
 
   olen = count / 4 * 3;
   pos = out = malloc(olen);
-  if (out == NULL)
-    return NULL;
+  if (out == NULL) return NULL;
 
   count = 0;
   for (i = 0; i < len; i++) {
     tmp = dtable[src[i]];
-    if (tmp == 0x80)
-      continue;
+    if (tmp == 0x80) continue;
 
-    if (src[i] == '=')
-      pad++;
+    if (src[i] == '=') pad++;
     block[count] = tmp;
     count++;
     if (count == 4) {

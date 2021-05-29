@@ -19,12 +19,14 @@
  * SOFTWARE.
  */
 
-#include <stdint.h>
 #include "adc.h"
-#include "rpi_pico.h"
-#include "pico/stdlib.h"
-#include "hardware/gpio.h"
+
+#include <stdint.h>
+
 #include "hardware/adc.h"
+#include "hardware/gpio.h"
+#include "pico/stdlib.h"
+#include "rpi_pico.h"
 
 /**
  * Get ADC index
@@ -34,17 +36,15 @@
  */
 static int __get_adc_index(uint8_t pin) {
   if ((pin >= 26) && (pin <= 28)) {
-    return pin - 26; //GPIO 26 is channel 0
+    return pin - 26;  // GPIO 26 is channel 0
   }
-  return KM_ADCPORT_ERRROR; // Error
+  return KM_ADCPORT_ERRROR;  // Error
 }
 
 /**
  * Initialize all ADC channels when system started
  */
-void km_adc_init() {
-  adc_init();
-}
+void km_adc_init() { adc_init(); }
 
 /**
  * Cleanup all ADC channels when system cleanup
@@ -79,4 +79,3 @@ int km_adc_close(uint8_t pin) {
   }
   return 0;
 }
-

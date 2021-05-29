@@ -23,7 +23,7 @@
 #define __KM_ADC_H
 
 #include <stdint.h>
-#define KM_ADCPORT_ERRROR  -1
+#define KM_ADCPORT_ERRROR -1
 
 /**
  * Initialize all ADC channels when system started

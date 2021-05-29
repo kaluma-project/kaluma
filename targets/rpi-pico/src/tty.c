@@ -18,43 +18,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "tty.h"
+
 #include <stdarg.h>
 
-#include "tty.h"
-#include "system.h"
-#include "pico/stdlib.h"
-#include "tusb.h"
 #include "hardware/timer.h"
+#include "pico/stdlib.h"
+#include "repl.h"
 #include "ringbuffer.h"
 #include "runtime.h"
-#include "repl.h"
+#include "system.h"
+#include "tusb.h"
 
 #define TTY_RX_RINGBUFFER_SIZE 2048
-#define ETX                    0x03 // Ctrl + C, SIGINT
+#define ETX 0x03  // Ctrl + C, SIGINT
 static unsigned char __tty_rx_buffer[TTY_RX_RINGBUFFER_SIZE];
 static ringbuffer_t __tty_rx_ringbuffer;
 
 void km_tty_init() {
   stdio_init_all();
-  ringbuffer_init(&__tty_rx_ringbuffer, __tty_rx_buffer, sizeof(__tty_rx_buffer));
-  tud_cdc_set_wanted_char(ETX); // Crtl + C
+  ringbuffer_init(&__tty_rx_ringbuffer, __tty_rx_buffer,
+                  sizeof(__tty_rx_buffer));
+  tud_cdc_set_wanted_char(ETX);  // Crtl + C
 }
 
-TU_ATTR_WEAK void tud_cdc_rx_wanted_cb(uint8_t itf, char wanted_char)
-{
+TU_ATTR_WEAK void tud_cdc_rx_wanted_cb(uint8_t itf, char wanted_char) {
   if (wanted_char == ETX) {
     km_repl_state_t *state = km_get_repl_state();
     if (state->ymodem_state == 0) {
       km_runtime_set_vm_stop(1);
-      tud_cdc_read_flush();    // flush read fifo
+      tud_cdc_read_flush();  // flush read fifo
     }
   }
 }
 
 uint32_t km_tty_available() {
   int ch = getchar_timeout_us(0);
-  while(ch >= 0)
-  {
+  while (ch >= 0) {
     ringbuffer_write(&__tty_rx_ringbuffer, (uint8_t *)&ch, 1);
     ch = getchar_timeout_us(0);
     km_runtime_set_vm_stop(0);
@@ -93,16 +93,14 @@ uint8_t km_tty_getc() {
   return c;
 }
 
-void km_tty_putc(char ch) {
-  putchar(ch);
-}
+void km_tty_putc(char ch) { putchar(ch); }
 
 /**
  * Print formatted string to TTY
  */
 void km_tty_printf(const char *fmt, ...) {
   va_list ap;
-  va_start(ap,fmt);
+  va_start(ap, fmt);
   vprintf(fmt, ap);
   va_end(ap);
 }

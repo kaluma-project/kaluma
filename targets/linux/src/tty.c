@@ -18,48 +18,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
-
 #include "tty.h"
-#include "system.h"
+
+#include <ctype.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "ringbuffer.h"
+#include "system.h"
 
-void km_tty_init() {
-}
+void km_tty_init() {}
 
-uint32_t km_tty_available() {
-  return 0;
-}
+uint32_t km_tty_available() { return 0; }
 
-uint32_t km_tty_read(uint8_t *buf, size_t len) {
-  return 0;
-}
+uint32_t km_tty_read(uint8_t *buf, size_t len) { return 0; }
 
 uint32_t km_tty_read_sync(uint8_t *buf, size_t len, uint32_t timeout) {
   return 0;
 }
 
+uint8_t km_tty_getc() { return 0; }
 
-uint8_t km_tty_getc() {
-  return 0;
-}
-
-void km_tty_putc(char ch) {
-  putchar(ch);
-}
+void km_tty_putc(char ch) { putchar(ch); }
 
 /**
  * Print formatted string to TTY
  */
 void km_tty_printf(const char *fmt, ...) {
   va_list ap;
-  va_start(ap,fmt);
+  va_start(ap, fmt);
   vprintf(fmt, ap);
   va_end(ap);
 }

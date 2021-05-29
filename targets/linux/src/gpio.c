@@ -19,33 +19,23 @@
  * SOFTWARE.
  */
 
-#include <stdint.h>
 #include "gpio.h"
 
-void km_gpio_init() {
-}
+#include <stdint.h>
 
-void km_gpio_cleanup() {
-}
+void km_gpio_init() {}
 
-int km_gpio_set_io_mode(uint8_t pin, km_gpio_io_mode_t mode) {
-  return 0;
-}
+void km_gpio_cleanup() {}
 
-int km_gpio_write(uint8_t pin, uint8_t value) {
-  return 0;
-}
+int km_gpio_set_io_mode(uint8_t pin, km_gpio_io_mode_t mode) { return 0; }
 
-int km_gpio_read(uint8_t pin) {
-  return 0;
-}
+int km_gpio_write(uint8_t pin, uint8_t value) { return 0; }
 
-int km_gpio_toggle(uint8_t pin) {
-  return 0;
-}
+int km_gpio_read(uint8_t pin) { return 0; }
 
-void km_gpio_intr_en(bool en, km_gpio_callback_t call_back) {
-}
+int km_gpio_toggle(uint8_t pin) { return 0; }
+
+void km_gpio_intr_en(bool en, km_gpio_callback_t call_back) {}
 
 int km_gpio_set_interrupt(bool en, uint8_t pin, uint8_t events) {
   return KM_GPIOPORT_ERROR;

@@ -23,11 +23,11 @@
 #define __KM_PWM_H
 
 #include <stdint.h>
-#define KM_PWMPORT_ERROR  -1
+#define KM_PWMPORT_ERROR -1
 #define KM_PWM_DEFAULT_FREQUENCY 490
 #define KM_PWM_DEFAULT_DUTY 1.0
-#define KM_PWM_DUTY_MIN  0
-#define KM_PWM_DUTY_MAX  1.0
+#define KM_PWM_DUTY_MIN 0
+#define KM_PWM_DUTY_MAX 1.0
 
 /**
  * Initialize all PWM when system started
@@ -101,4 +101,3 @@ int km_pwm_set_duty(uint8_t pin, double duty);
 int km_pwm_close(uint8_t pin);
 
 #endif /* __KM_PWM_H */
-

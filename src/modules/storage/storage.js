@@ -1,7 +1,7 @@
 var storage_native = process.binding(process.binding.storage);
 
 class Storage {
-  setItem (key, value) {
+  setItem(key, value) {
     var res = storage_native.setItem(key, value.toString());
     if (res === -2) { // sweep required
       var cache = {}
@@ -16,7 +16,7 @@ class Storage {
         var k2 = keys[j]
         storage_native.setItem(k2, cache[k2]);
       }
-      res = storage_native.setItem(key, value.toString());  
+      res = storage_native.setItem(key, value.toString());
     } else if (res === -3) { // storage full
       throw new Error("Storage full");
     } else if (res === -4) { // over length
@@ -25,23 +25,23 @@ class Storage {
     return undefined;
   }
 
-  getItem (key) {
+  getItem(key) {
     return storage_native.getItem(key);
   }
 
-  removeItem (key) {
+  removeItem(key) {
     return storage_native.removeItem(key);
   }
 
-  clear () {
+  clear() {
     storage_native.clear();
   }
 
-  get length () {
+  get length() {
     return storage_native.length();
   }
 
-  key (index) {
+  key(index) {
     return storage_native.key(index);
   }
 }

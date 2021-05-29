@@ -20,9 +20,10 @@
  */
 
 #include "spi.h"
-#include "rpi_pico.h"
-#include "pico/stdlib.h"
+
 #include "hardware/spi.h"
+#include "pico/stdlib.h"
+#include "rpi_pico.h"
 
 struct __spi_status_s {
   bool enabled;
@@ -93,8 +94,7 @@ static spi_inst_t *__get_spi_no(uint8_t bus) {
  * Initialize all SPI when system started
  */
 void km_spi_init() {
-  for (int i = 0; i < SPI_NUM; i++)
-  {
+  for (int i = 0; i < SPI_NUM; i++) {
     __spi_status[i].enabled = false;
   }
 }
@@ -109,17 +109,18 @@ void km_spi_cleanup() {
 }
 
 /** SPI Setup
-*/
-int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate, km_spi_bitorder_t bitorder, km_spi_pins_t pins) {
+ */
+int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
+                 km_spi_bitorder_t bitorder, km_spi_pins_t pins) {
   spi_inst_t *spi = __get_spi_no(bus);
-  if ((spi == NULL) || (__spi_status[bus].enabled ) || (__check_spi_pins(bus, pins) == false)) {
+  if ((spi == NULL) || (__spi_status[bus].enabled) ||
+      (__check_spi_pins(bus, pins) == false)) {
     return KM_SPIPORT_ERROR;
   }
   spi_cpol_t pol = SPI_CPOL_0;
   spi_cpha_t pha = SPI_CPHA_0;
   spi_order_t order;
-  switch (mode)
-  {
+  switch (mode) {
     case KM_SPI_MODE_0:
       pol = SPI_CPOL_0;
       pha = SPI_CPHA_0;
@@ -151,12 +152,13 @@ int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate, km_spi_bito
   return 0;
 }
 
-int km_spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint32_t timeout) {
+int km_spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len,
+                    uint32_t timeout) {
   spi_inst_t *spi = __get_spi_no(bus);
-  if ((spi == NULL) || (__spi_status[bus].enabled == false)) { 
+  if ((spi == NULL) || (__spi_status[bus].enabled == false)) {
     return KM_SPIPORT_ERROR;
   }
-  (void)timeout; // timeout is not supported.
+  (void)timeout;  // timeout is not supported.
   return spi_write_read_blocking(spi, tx_buf, rx_buf, len);
 }
 
@@ -165,7 +167,7 @@ int km_spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   if ((spi == NULL) || (__spi_status[bus].enabled == false)) {
     return KM_SPIPORT_ERROR;
   }
-  (void)timeout; // timeout is not supported.
+  (void)timeout;  // timeout is not supported.
   return spi_write_blocking(spi, buf, len);
 }
 
@@ -174,7 +176,7 @@ int km_spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   if ((spi == NULL) || (__spi_status[bus].enabled == false)) {
     return KM_SPIPORT_ERROR;
   }
-  (void)timeout; // timeout is not supported.
+  (void)timeout;  // timeout is not supported.
   return spi_read_blocking(spi, 0, buf, len);
 }
 

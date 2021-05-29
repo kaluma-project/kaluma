@@ -18,19 +18,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
-
 #include "tty.h"
+
+#include <ctype.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "ringbuffer.h"
 #include "stm32f4xx_it.h"
 #include "system.h"
 #include "usbd_cdc_if.h"
-#include "ringbuffer.h"
 
 #define TTY_TX_RINGBUFFER_SIZE 1024
 #define TTY_RX_RINGBUFFER_SIZE 2048
@@ -41,13 +42,13 @@ static unsigned char tty_rx_buffer[TTY_RX_RINGBUFFER_SIZE];
 static ringbuffer_t tty_tx_ringbuffer;
 static ringbuffer_t tty_rx_ringbuffer;
 
-
 /**
  * this function is called in the pendable interrupt service routine which has
  * lowest priority to allow other interrupts service.
  */
 void tty_transmit_data() {
-  /* if the previous data is under transmitting, just return to avoid blocking */
+  /* if the previous data is under transmitting, just return to avoid blocking
+   */
   if (CDC_Transmit_IsReady()) {
     uint32_t len = ringbuffer_length(&tty_tx_ringbuffer);
     if (len) {
@@ -58,13 +59,11 @@ void tty_transmit_data() {
   }
 }
 
-
 uint32_t tty_get_tx_data_length() {
   return ringbuffer_length(&tty_tx_ringbuffer);
 }
 
-
-uint32_t tty_get_bytes(uint8_t * buf, uint32_t nToRead) {
+uint32_t tty_get_bytes(uint8_t *buf, uint32_t nToRead) {
   __set_PRIMASK(1);
 
   uint32_t len = ringbuffer_length(&tty_rx_ringbuffer);
@@ -77,7 +76,7 @@ uint32_t tty_get_bytes(uint8_t * buf, uint32_t nToRead) {
   return nToRead;
 }
 
-uint32_t tty_fill_rx_bytes(uint8_t * buf, uint32_t nToWrite) {
+uint32_t tty_fill_rx_bytes(uint8_t *buf, uint32_t nToWrite) {
   __set_PRIMASK(1);
   uint32_t space = ringbuffer_freespace(&tty_rx_ringbuffer);
   if (space < nToWrite) {
@@ -89,8 +88,7 @@ uint32_t tty_fill_rx_bytes(uint8_t * buf, uint32_t nToWrite) {
   return nToWrite;
 }
 
-
-uint32_t tty_put_bytes(uint8_t * buf, uint32_t nToWrite) {
+uint32_t tty_put_bytes(uint8_t *buf, uint32_t nToWrite) {
   __set_PRIMASK(1);
   uint32_t space = ringbuffer_freespace(&tty_tx_ringbuffer);
   if (space < nToWrite) {
@@ -107,9 +105,7 @@ void km_tty_init() {
   ringbuffer_init(&tty_rx_ringbuffer, tty_rx_buffer, sizeof(tty_rx_buffer));
 }
 
-uint32_t km_tty_available() {
-  return ringbuffer_length(&tty_rx_ringbuffer);
-}
+uint32_t km_tty_available() { return ringbuffer_length(&tty_rx_ringbuffer); }
 
 uint32_t km_tty_read(uint8_t *buf, size_t len) {
   if (km_tty_available() >= len) {
@@ -136,7 +132,6 @@ uint32_t km_tty_read_sync(uint8_t *buf, size_t len, uint32_t timeout) {
   }
 }
 
-
 uint8_t km_tty_getc() {
   uint8_t c = 0;
   if (km_tty_available()) {
@@ -161,7 +156,7 @@ void km_tty_printf(const char *fmt, ...) {
   va_list ap;
   char string[TTY_MAX_STRING_BUFFER_SIZE];
 
-  va_start(ap,fmt);
+  va_start(ap, fmt);
   vsprintf(string, fmt, ap);
   va_end(ap);
 

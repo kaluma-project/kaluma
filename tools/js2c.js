@@ -84,7 +84,7 @@ function createWrapper(src, dest) {
 }
 
 function createSnapshot(src, dest) {
-  childProcess.spawnSync('lib/jerryscript/build/bin/jerry-snapshot', [ 'generate', src, '-o', dest ], { stdio: 'inherit' })
+  childProcess.spawnSync('lib/jerryscript/build/bin/jerry-snapshot', ['generate', src, '-o', dest], { stdio: 'inherit' })
 }
 
 function removeWrappers() {

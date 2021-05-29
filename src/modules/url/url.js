@@ -4,7 +4,7 @@
  * @param {string} input
  */
 class URL {
-  constructor (input) {
+  constructor(input) {
     if (typeof input !== 'string') {
       throw TypeError("Invalid URL");
     }
@@ -81,20 +81,20 @@ class URL {
     }
   }
 
-  get href () {
+  get href() {
     return this.toString()
   }
 
-  get host () {
+  get host() {
     return this.port ? this.hostname + ':' + this.port : this.hostname;
   }
 
-  get origin () {
+  get origin() {
     var auth = this.username + (this.password ? ':' + this.password : '');
     return this.protocol + '//' + (auth ? auth + '@' : '') + this.host;
   }
 
-  toString () {
+  toString() {
     var path = this.pathname;
     if (this.search) path += this.search;
     if (this.hash) path += '#' + this.hash;
@@ -102,7 +102,7 @@ class URL {
     return href;
   }
 
-  toJSON () {
+  toJSON() {
     return this.toString();
   }
 }
@@ -111,7 +111,7 @@ class URL {
  * URLSearchParams class
  */
 class URLSearchParams {
-  constructor (input) {
+  constructor(input) {
     this.pairs = [];
     if (input) {
       if (input.startsWith('?')) {
@@ -128,19 +128,19 @@ class URLSearchParams {
     }
   }
 
-  append (name, value) {
+  append(name, value) {
     this.pairs.push([name, value.toString()]);
   }
 
-  delete (name) {
+  delete(name) {
     this.pairs = this.pairs.filter(p => p[0] !== name);
   }
 
-  entries () {
+  entries() {
     return this.pairs;
   }
 
-  get (name) {
+  get(name) {
     var pair = this.pairs.find(p => p[0] === name);
     if (pair) {
       return pair[1];
@@ -148,7 +148,7 @@ class URLSearchParams {
     return null;
   }
 
-  getAll (name) {
+  getAll(name) {
     var values = []
     this.pairs.forEach(p => {
       if (p[0] === name) {
@@ -158,11 +158,11 @@ class URLSearchParams {
     return values;
   }
 
-  has (name) {
+  has(name) {
     return this.pairs.find(p => p[0] === name) !== undefined;
   }
 
-  set (name, value) {
+  set(name, value) {
     var pair = this.pairs.find(p => p[0] === name);
     if (pair) {
       pair[1] = value;
@@ -172,15 +172,15 @@ class URLSearchParams {
     }
   }
 
-  keys () {
+  keys() {
     return this.pairs.map(p => p[0]);
   }
 
-  values () {
+  values() {
     return this.pairs.map(p => p[1]);
   }
 
-  toString () {
+  toString() {
     var encoded = this.pairs.map(p => `${encodeURIComponent(p[0])}=${encodeURIComponent(p[1])}`);
     return encoded.join('&');
   }

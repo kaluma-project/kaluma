@@ -20,11 +20,12 @@
  */
 
 #include <stdlib.h>
+
+#include "io.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
-#include "uart_magic_strings.h"
 #include "uart.h"
-#include "io.h"
+#include "uart_magic_strings.h"
 
 #define UART_DEFAULT_BAUDRATE 115200
 #define UART_DEFAULT_BITS 8
@@ -39,16 +40,18 @@ static int uart_available_cb(km_io_uart_handle_t *handle) {
   return len;
 }
 
-static void uart_read_cb(km_io_uart_handle_t *handle, uint8_t *buf, size_t len) {
+static void uart_read_cb(km_io_uart_handle_t *handle, uint8_t *buf,
+                         size_t len) {
   if (jerry_value_is_function(handle->read_js_cb)) {
     jerry_value_t array_buffer = jerry_create_arraybuffer(len);
     jerry_arraybuffer_write(array_buffer, 0, buf, len);
     jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
-      JERRY_TYPEDARRAY_UINT8, array_buffer);
+        JERRY_TYPEDARRAY_UINT8, array_buffer);
     jerry_release_value(array_buffer);
     jerry_value_t this_val = jerry_create_undefined();
-    jerry_value_t args_p[1] = { array };
-    jerry_value_t ret_val = jerry_call_function(handle->read_js_cb, this_val, args_p, 1);
+    jerry_value_t args_p[1] = {array};
+    jerry_value_t ret_val =
+        jerry_call_function(handle->read_js_cb, this_val, args_p, 1);
     if (jerry_value_is_error(ret_val)) {
       jerryxx_print_error(ret_val, true);
     }
@@ -58,9 +61,7 @@ static void uart_read_cb(km_io_uart_handle_t *handle, uint8_t *buf, size_t len) 
   }
 }
 
-static void uart_close_cb(km_io_handle_t *handle) {
-  free(handle);
-}
+static void uart_close_cb(km_io_handle_t *handle) { free(handle); }
 
 /**
  * uart_native constructor
@@ -75,26 +76,38 @@ JERRYXX_FUN(uart_ctor_fn) {
   JERRYXX_CHECK_ARG_FUNCTION(2, "callback");
 
   // read parameters
-  uint8_t port = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
+  uint8_t port = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
   jerry_value_t options = JERRYXX_GET_ARG(1);
   jerry_value_t callback = JERRYXX_GET_ARG(2);
-  uint32_t baudrate = (uint32_t) jerryxx_get_property_number(options, MSTR_UART_BAUDRATE, UART_DEFAULT_BAUDRATE);
-  uint32_t bits = (uint32_t) jerryxx_get_property_number(options, MSTR_UART_BITS, UART_DEFAULT_BITS);
-  uint32_t parity = (uint32_t) jerryxx_get_property_number(options, MSTR_UART_PARITY, UART_DEFAULT_PARITY);
-  uint32_t stop = (uint32_t) jerryxx_get_property_number(options, MSTR_UART_STOP, UART_DEFAULT_STOP);
-  uint32_t flow = (uint32_t) jerryxx_get_property_number(options, MSTR_UART_FLOW, UART_DEFAULT_FLOW);
-  uint32_t buffer_size = (uint32_t) jerryxx_get_property_number(options, MSTR_UART_BUFFERSIZE, UART_DEFAULT_BUFFERSIZE);
+  uint32_t baudrate = (uint32_t)jerryxx_get_property_number(
+      options, MSTR_UART_BAUDRATE, UART_DEFAULT_BAUDRATE);
+  uint32_t bits = (uint32_t)jerryxx_get_property_number(options, MSTR_UART_BITS,
+                                                        UART_DEFAULT_BITS);
+  uint32_t parity = (uint32_t)jerryxx_get_property_number(
+      options, MSTR_UART_PARITY, UART_DEFAULT_PARITY);
+  uint32_t stop = (uint32_t)jerryxx_get_property_number(options, MSTR_UART_STOP,
+                                                        UART_DEFAULT_STOP);
+  uint32_t flow = (uint32_t)jerryxx_get_property_number(options, MSTR_UART_FLOW,
+                                                        UART_DEFAULT_FLOW);
+  uint32_t buffer_size = (uint32_t)jerryxx_get_property_number(
+      options, MSTR_UART_BUFFERSIZE, UART_DEFAULT_BUFFERSIZE);
   km_uart_pins_t def_pins = km_uart_get_default_pins(port);
   km_uart_pins_t pins;
-  pins.tx = (int8_t) jerryxx_get_property_number(options, MSTR_UART_TX, def_pins.tx);
-  pins.rx = (int8_t) jerryxx_get_property_number(options, MSTR_UART_RX, def_pins.rx);
-  pins.cts = (int8_t) jerryxx_get_property_number(options, MSTR_UART_CTS, def_pins.cts);
-  pins.rts = (int8_t) jerryxx_get_property_number(options, MSTR_UART_RTS, def_pins.rts);
+  pins.tx =
+      (int8_t)jerryxx_get_property_number(options, MSTR_UART_TX, def_pins.tx);
+  pins.rx =
+      (int8_t)jerryxx_get_property_number(options, MSTR_UART_RX, def_pins.rx);
+  pins.cts =
+      (int8_t)jerryxx_get_property_number(options, MSTR_UART_CTS, def_pins.cts);
+  pins.rts =
+      (int8_t)jerryxx_get_property_number(options, MSTR_UART_RTS, def_pins.rts);
 
   // initialize the port
-  int ret = km_uart_setup(port, baudrate, bits, parity, stop, flow, buffer_size, pins);
+  int ret = km_uart_setup(port, baudrate, bits, parity, stop, flow, buffer_size,
+                          pins);
   if (ret == KM_UARTPORT_ERROR) {
-    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "UART port setup error.");
+    return jerry_create_error(JERRY_ERROR_REFERENCE,
+                              (const jerry_char_t *)"UART port setup error.");
   }
 
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PORT, port);
@@ -103,7 +116,8 @@ JERRYXX_FUN(uart_ctor_fn) {
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PARITY, parity);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_STOP, stop);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_FLOW, flow);
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_BUFFERSIZE, buffer_size);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_BUFFERSIZE,
+                              buffer_size);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_TX, pins.tx);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_RX, pins.rx);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_CTS, pins.cts);
@@ -125,23 +139,28 @@ JERRYXX_FUN(uart_write_fn) {
   JERRYXX_CHECK_ARG_NUMBER_OPT(1, "count");
 
   jerry_value_t data = JERRYXX_GET_ARG(0);
-  uint32_t count = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 1);
+  uint32_t count = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(1, 1);
 
   // check this.port
-  jerry_value_t port_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
+  jerry_value_t port_value =
+      jerryxx_get_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
   if (!jerry_value_is_number(port_value)) {
-    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "UART port is not initialized.");
+    return jerry_create_error(
+        JERRY_ERROR_REFERENCE,
+        (const jerry_char_t *)"UART port is not initialized.");
   }
-  uint8_t port = (uint8_t) jerry_get_number_value(port_value);
+  uint8_t port = (uint8_t)jerry_get_number_value(port_value);
   jerry_release_value(port_value);
 
   // write data to the port
   int ret = KM_UARTPORT_ERROR;
-  if (jerry_value_is_typedarray(data) && 
-      jerry_get_typedarray_type(data) == JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
+  if (jerry_value_is_typedarray(data) &&
+      jerry_get_typedarray_type(data) ==
+          JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
     jerry_length_t byteLength = 0;
     jerry_length_t byteOffset = 0;
-    jerry_value_t array_buffer = jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
+    jerry_value_t array_buffer =
+        jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
     size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
     uint8_t *buf = jerry_get_arraybuffer_pointer(array_buffer);
     for (int c = 0; c < count; c++) {
@@ -158,43 +177,53 @@ JERRYXX_FUN(uart_write_fn) {
       if (ret < 0) break;
     }
   } else {
-    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "The data argument must be Uint8Array or string.");
+    return jerry_create_error(
+        JERRY_ERROR_TYPE,
+        (const jerry_char_t
+             *)"The data argument must be Uint8Array or string.");
   }
   if (ret == KM_UARTPORT_ERROR)
-    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to write data to UART port.");
+    return jerry_create_error(
+        JERRY_ERROR_REFERENCE,
+        (const jerry_char_t *)"Failed to write data to UART port.");
   else
     return jerry_create_number(ret);
 }
-
 
 /**
  * UART.prototype.close() function
  */
 JERRYXX_FUN(uart_close_fn) {
   // check this.port
-  jerry_value_t port_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
+  jerry_value_t port_value =
+      jerryxx_get_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
   if (!jerry_value_is_number(port_value)) {
-    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "UART port is not initialized.");
+    return jerry_create_error(
+        JERRY_ERROR_REFERENCE,
+        (const jerry_char_t *)"UART port is not initialized.");
   }
-  uint8_t port = (uint8_t) jerry_get_number_value(port_value);
+  uint8_t port = (uint8_t)jerry_get_number_value(port_value);
   jerry_release_value(port_value);
 
   // close the port
   int ret = km_uart_close(port);
   if (ret == KM_UARTPORT_ERROR) {
-    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to close UART port.");
+    return jerry_create_error(
+        JERRY_ERROR_REFERENCE,
+        (const jerry_char_t *)"Failed to close UART port.");
   }
 
   // delete this.port
   jerryxx_delete_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
 
   // close io handle
-  uint32_t handle_id = jerryxx_get_property_number(JERRYXX_GET_THIS, "handle_id", 0);
+  uint32_t handle_id =
+      jerryxx_get_property_number(JERRYXX_GET_THIS, "handle_id", 0);
   km_io_uart_handle_t *handle = km_io_uart_get_by_id(handle_id);
   if (handle != NULL) {
     jerry_release_value(handle->read_js_cb);
     km_io_uart_read_stop(handle);
-    km_io_handle_close((km_io_handle_t *) handle, uart_close_cb);
+    km_io_handle_close((km_io_handle_t *)handle, uart_close_cb);
   }
   jerryxx_delete_property(JERRYXX_GET_THIS, "handle_id");
 
@@ -211,19 +240,23 @@ jerry_value_t module_uart_init() {
   jerryxx_set_property(uart_ctor, "prototype", uart_prototype);
   jerryxx_set_property_function(uart_prototype, MSTR_UART_WRITE, uart_write_fn);
   jerryxx_set_property_function(uart_prototype, MSTR_UART_CLOSE, uart_close_fn);
-  jerry_release_value (uart_prototype);
+  jerry_release_value(uart_prototype);
 
   /* uart module exports */
   jerry_value_t exports = jerry_create_object();
   jerryxx_set_property(exports, MSTR_UART_UART, uart_ctor);
-  jerryxx_set_property_number(exports, MSTR_UART_PARITY_NONE, KM_UART_PARITY_TYPE_NONE);
-  jerryxx_set_property_number(exports, MSTR_UART_PARITY_ODD, KM_UART_PARITY_TYPE_ODD);
-  jerryxx_set_property_number(exports, MSTR_UART_PARITY_EVEN, KM_UART_PARITY_TYPE_EVEN);
+  jerryxx_set_property_number(exports, MSTR_UART_PARITY_NONE,
+                              KM_UART_PARITY_TYPE_NONE);
+  jerryxx_set_property_number(exports, MSTR_UART_PARITY_ODD,
+                              KM_UART_PARITY_TYPE_ODD);
+  jerryxx_set_property_number(exports, MSTR_UART_PARITY_EVEN,
+                              KM_UART_PARITY_TYPE_EVEN);
   jerryxx_set_property_number(exports, MSTR_UART_FLOW_NONE, KM_UART_FLOW_NONE);
   jerryxx_set_property_number(exports, MSTR_UART_FLOW_RTS, KM_UART_FLOW_RTS);
   jerryxx_set_property_number(exports, MSTR_UART_FLOW_CTS, KM_UART_FLOW_CTS);
-  jerryxx_set_property_number(exports, MSTR_UART_FLOW_RTS_CTS, KM_UART_FLOW_RTS_CTS);
-  jerry_release_value (uart_ctor);
+  jerryxx_set_property_number(exports, MSTR_UART_FLOW_RTS_CTS,
+                              KM_UART_FLOW_RTS_CTS);
+  jerry_release_value(uart_ctor);
 
   return exports;
 }

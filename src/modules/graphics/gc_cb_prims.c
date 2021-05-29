@@ -17,95 +17,104 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- * 
+ *
  *
  */
 
+#include "gc_cb_prims.h"
+
 #include <stdlib.h>
 #include <string.h>
-#include "jerryscript.h"
+
 #include "font.h"
 #include "gc.h"
-#include "gc_cb_prims.h"
+#include "jerryscript.h"
 
 /**
  * Graphic primitive functions for callback javascript functions
  */
 
-void gc_prim_cb_set_pixel(gc_handle_t *handle, int16_t x, int16_t y, uint16_t color) {
-  if((x >= 0) && (x < handle->width) && (y >= 0) && (y < handle->height)) {
+void gc_prim_cb_set_pixel(gc_handle_t *handle, int16_t x, int16_t y,
+                          uint16_t color) {
+  if ((x >= 0) && (x < handle->width) && (y >= 0) && (y < handle->height)) {
     switch (handle->rotation) {
       case 1:
-      SWAP_INT16(x, y)
-      x = handle->device_width - x - 1;
-      break;
+        SWAP_INT16(x, y)
+        x = handle->device_width - x - 1;
+        break;
       case 2:
-      x = handle->device_width  - x - 1;
-      y = handle->device_height - y - 1;
-      break;
+        x = handle->device_width - x - 1;
+        y = handle->device_height - y - 1;
+        break;
       case 3:
-      SWAP_INT16(x, y)
-      y = handle->device_height - y - 1;
-      break;
+        SWAP_INT16(x, y)
+        y = handle->device_height - y - 1;
+        break;
     }
     if (jerry_value_is_function(handle->set_pixel_js_cb)) {
-      jerry_value_t this_val = jerry_create_undefined ();
+      jerry_value_t this_val = jerry_create_undefined();
       jerry_value_t arg_x = jerry_create_number(x);
       jerry_value_t arg_y = jerry_create_number(y);
       jerry_value_t arg_color = jerry_create_number(color);
-      jerry_value_t args[] = { arg_x, arg_y, arg_color };
-      jerry_value_t ret_val = jerry_call_function (handle->set_pixel_js_cb, this_val, args, 3);
-      jerry_release_value (ret_val);
-      jerry_release_value (arg_x);
-      jerry_release_value (arg_y);
-      jerry_release_value (arg_color);
-      jerry_release_value (this_val);
+      jerry_value_t args[] = {arg_x, arg_y, arg_color};
+      jerry_value_t ret_val =
+          jerry_call_function(handle->set_pixel_js_cb, this_val, args, 3);
+      jerry_release_value(ret_val);
+      jerry_release_value(arg_x);
+      jerry_release_value(arg_y);
+      jerry_release_value(arg_color);
+      jerry_release_value(this_val);
     }
   }
 }
 
-void gc_prim_cb_get_pixel(gc_handle_t *handle, int16_t x, int16_t y, uint16_t *color) {
-  if((x >= 0) && (x < handle->width) && (y >= 0) && (y < handle->height)) {
+void gc_prim_cb_get_pixel(gc_handle_t *handle, int16_t x, int16_t y,
+                          uint16_t *color) {
+  if ((x >= 0) && (x < handle->width) && (y >= 0) && (y < handle->height)) {
     switch (handle->rotation) {
       case 1:
-      SWAP_INT16(x, y)
-      x = handle->device_width - x - 1;
-      break;
+        SWAP_INT16(x, y)
+        x = handle->device_width - x - 1;
+        break;
       case 2:
-      x = handle->device_width  - x - 1;
-      y = handle->device_height - y - 1;
-      break;
+        x = handle->device_width - x - 1;
+        y = handle->device_height - y - 1;
+        break;
       case 3:
-      SWAP_INT16(x, y)
-      y = handle->device_height - y - 1;
-      break;
+        SWAP_INT16(x, y)
+        y = handle->device_height - y - 1;
+        break;
     }
     if (jerry_value_is_function(handle->get_pixel_js_cb)) {
-      jerry_value_t this_val = jerry_create_undefined ();
+      jerry_value_t this_val = jerry_create_undefined();
       jerry_value_t arg_x = jerry_create_number(x);
       jerry_value_t arg_y = jerry_create_number(y);
-      jerry_value_t args[] = { arg_x, arg_y };
-      jerry_value_t ret_val = jerry_call_function (handle->get_pixel_js_cb, this_val, args, 2);
+      jerry_value_t args[] = {arg_x, arg_y};
+      jerry_value_t ret_val =
+          jerry_call_function(handle->get_pixel_js_cb, this_val, args, 2);
       if (jerry_value_is_number(ret_val)) {
-        *color = (uint16_t) jerry_get_number_value(ret_val);
+        *color = (uint16_t)jerry_get_number_value(ret_val);
       }
-      jerry_release_value (ret_val);
-      jerry_release_value (arg_x);
-      jerry_release_value (arg_y);
-      jerry_release_value (this_val);
+      jerry_release_value(ret_val);
+      jerry_release_value(arg_x);
+      jerry_release_value(arg_y);
+      jerry_release_value(this_val);
     }
   }
 }
 
-void gc_prim_cb_draw_vline(gc_handle_t *handle, int16_t x, int16_t y, int16_t h, uint16_t color) {
+void gc_prim_cb_draw_vline(gc_handle_t *handle, int16_t x, int16_t y, int16_t h,
+                           uint16_t color) {
   gc_prim_cb_fill_rect(handle, x, y, 1, h, color);
 }
 
-void gc_prim_cb_draw_hline(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, uint16_t color) {
+void gc_prim_cb_draw_hline(gc_handle_t *handle, int16_t x, int16_t y, int16_t w,
+                           uint16_t color) {
   gc_prim_cb_fill_rect(handle, x, y, w, 1, color);
 }
 
-void gc_prim_cb_fill_rect(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
+void gc_prim_cb_fill_rect(gc_handle_t *handle, int16_t x, int16_t y, int16_t w,
+                          int16_t h, uint16_t color) {
   int16_t x1 = x;
   int16_t y1 = y;
   int16_t x2 = x + w - 1;
@@ -113,23 +122,23 @@ void gc_prim_cb_fill_rect(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, 
   // rotate
   switch (handle->rotation) {
     case 1:
-    SWAP_INT16(x1, y1)
-    SWAP_INT16(x2, y2)
-    x1 = handle->device_width - x1 - 1;
-    x2 = handle->device_width - x2 - 1;
-    break;
+      SWAP_INT16(x1, y1)
+      SWAP_INT16(x2, y2)
+      x1 = handle->device_width - x1 - 1;
+      x2 = handle->device_width - x2 - 1;
+      break;
     case 2:
-    x1 = handle->device_width  - x1 - 1;
-    y1 = handle->device_height - y1 - 1;
-    x2 = handle->device_width  - x2 - 1;
-    y2 = handle->device_height - y2 - 1;
-    break;
+      x1 = handle->device_width - x1 - 1;
+      y1 = handle->device_height - y1 - 1;
+      x2 = handle->device_width - x2 - 1;
+      y2 = handle->device_height - y2 - 1;
+      break;
     case 3:
-    SWAP_INT16(x1, y1)
-    SWAP_INT16(x2, y2)
-    y1 = handle->device_height - y1 - 1;
-    y2 = handle->device_height - y2 - 1;
-    break;
+      SWAP_INT16(x1, y1)
+      SWAP_INT16(x2, y2)
+      y1 = handle->device_height - y1 - 1;
+      y2 = handle->device_height - y2 - 1;
+      break;
   }
   if (x1 > x2) {
     SWAP_INT16(x1, x2)
@@ -148,24 +157,26 @@ void gc_prim_cb_fill_rect(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, 
   if (y2 >= handle->device_height) y2 = handle->device_height - 1;
   // draw
   if (jerry_value_is_function(handle->fill_rect_js_cb)) {
-    jerry_value_t this_val = jerry_create_undefined ();
+    jerry_value_t this_val = jerry_create_undefined();
     jerry_value_t arg_x = jerry_create_number(x1);
     jerry_value_t arg_y = jerry_create_number(y1);
     jerry_value_t arg_w = jerry_create_number(x2 - x1 + 1);
     jerry_value_t arg_h = jerry_create_number(y2 - y1 + 1);
     jerry_value_t arg_color = jerry_create_number(color);
-    jerry_value_t args[] = { arg_x, arg_y, arg_w, arg_h, arg_color };
-    jerry_value_t ret_val = jerry_call_function (handle->fill_rect_js_cb, this_val, args, 5);
-    jerry_release_value (ret_val);
-    jerry_release_value (arg_x);
-    jerry_release_value (arg_y);
-    jerry_release_value (arg_w);
-    jerry_release_value (arg_h);
-    jerry_release_value (arg_color);
-    jerry_release_value (this_val);
+    jerry_value_t args[] = {arg_x, arg_y, arg_w, arg_h, arg_color};
+    jerry_value_t ret_val =
+        jerry_call_function(handle->fill_rect_js_cb, this_val, args, 5);
+    jerry_release_value(ret_val);
+    jerry_release_value(arg_x);
+    jerry_release_value(arg_y);
+    jerry_release_value(arg_w);
+    jerry_release_value(arg_h);
+    jerry_release_value(arg_color);
+    jerry_release_value(this_val);
   }
 }
 
-void gc_prim_cb_fill_screen (gc_handle_t *handle, uint16_t color) {
-  gc_prim_cb_fill_rect(handle, 0, 0, handle->device_width, handle->device_height, color);
+void gc_prim_cb_fill_screen(gc_handle_t *handle, uint16_t color) {
+  gc_prim_cb_fill_rect(handle, 0, 0, handle->device_width,
+                       handle->device_height, color);
 }

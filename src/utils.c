@@ -19,9 +19,10 @@
  * SOFTWARE.
  */
 
+#include "utils.h"
+
 #include <stdio.h>
 #include <stdlib.h>
-#include "utils.h"
 
 void km_list_init(km_list_t *list) {
   list->head = NULL;

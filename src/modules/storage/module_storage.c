@@ -20,10 +20,11 @@
  */
 
 #include <stdlib.h>
+
 #include "jerryscript.h"
 #include "jerryxx.h"
-#include "storage_magic_strings.h"
 #include "storage.h"
+#include "storage_magic_strings.h"
 
 /**
  * exports.setItem function
@@ -46,10 +47,10 @@ JERRYXX_FUN(storage_get_item_fn) {
   char *buf = (char *)malloc(256);
   int res = km_storage_get_item(key, buf);
   if (res >= KM_STORAGE_OK) {
-    jerry_value_t ret = jerry_create_string((const jerry_char_t *) buf);
+    jerry_value_t ret = jerry_create_string((const jerry_char_t *)buf);
     free(buf);
     return ret;
-  } else { // key not found
+  } else {  // key not found
     free(buf);
     return jerry_create_null();
   }
@@ -64,7 +65,7 @@ JERRYXX_FUN(storage_remove_item_fn) {
   int res = km_storage_remove_item(key);
   if (res > -1) {
     return jerry_create_undefined();
-  } else { // failure
+  } else {  // failure
     return jerry_create_undefined();
   }
 }
@@ -76,7 +77,7 @@ JERRYXX_FUN(storage_clear_fn) {
   int res = km_storage_clear();
   if (res > -1) {
     return jerry_create_undefined();
-  } else { // failure
+  } else {  // failure
     return jerry_create_undefined();
   }
 }
@@ -88,7 +89,7 @@ JERRYXX_FUN(storage_length_fn) {
   int len = km_storage_length();
   if (len > -1) {
     return jerry_create_number(len);
-  } else { // failure
+  } else {  // failure
     return jerry_create_undefined();
   }
 }
@@ -98,14 +99,14 @@ JERRYXX_FUN(storage_length_fn) {
  */
 JERRYXX_FUN(storage_key_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "index")
-  int index = (int) JERRYXX_GET_ARG_NUMBER(0);
+  int index = (int)JERRYXX_GET_ARG_NUMBER(0);
   char *buf = (char *)malloc(256);
   int res = km_storage_key(index, buf);
   if (res >= KM_STORAGE_OK) {
-    jerry_value_t ret = jerry_create_string((const jerry_char_t *) buf);
+    jerry_value_t ret = jerry_create_string((const jerry_char_t *)buf);
     free(buf);
     return ret;
-  } else { // key not found
+  } else {  // key not found
     free(buf);
     return jerry_create_null();
   }
@@ -117,11 +118,15 @@ JERRYXX_FUN(storage_key_fn) {
 jerry_value_t module_storage_init() {
   /* storage module exports */
   jerry_value_t exports = jerry_create_object();
-  jerryxx_set_property_function(exports, MSTR_STORAGE_SET_ITEM, storage_set_item_fn);
-  jerryxx_set_property_function(exports, MSTR_STORAGE_GET_ITEM, storage_get_item_fn);
-  jerryxx_set_property_function(exports, MSTR_STORAGE_REMOVE_ITEM, storage_remove_item_fn);
+  jerryxx_set_property_function(exports, MSTR_STORAGE_SET_ITEM,
+                                storage_set_item_fn);
+  jerryxx_set_property_function(exports, MSTR_STORAGE_GET_ITEM,
+                                storage_get_item_fn);
+  jerryxx_set_property_function(exports, MSTR_STORAGE_REMOVE_ITEM,
+                                storage_remove_item_fn);
   jerryxx_set_property_function(exports, MSTR_STORAGE_CLEAR, storage_clear_fn);
-  jerryxx_set_property_function(exports, MSTR_STORAGE_LENGTH, storage_length_fn);
+  jerryxx_set_property_function(exports, MSTR_STORAGE_LENGTH,
+                                storage_length_fn);
   jerryxx_set_property_function(exports, MSTR_STORAGE_KEY, storage_key_fn);
   return exports;
 }

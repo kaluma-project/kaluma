@@ -1,7 +1,7 @@
 const SerialPort = require('serialport')
 
 class UART {
-  constructor (path, options) {
+  constructor(path, options) {
     const serialOptions = Object.assign({
       autoOpen: false,
       baudRate: 9600
@@ -14,7 +14,7 @@ class UART {
     })
   }
 
-  open () {
+  open() {
     return new Promise((resolve, reject) => {
       this.serial.open(err => {
         if (err) {
@@ -27,7 +27,7 @@ class UART {
     })
   }
 
-  close () {
+  close() {
     return new Promise((resolve, reject) => {
       this.serial.close(err => {
         if (err) {
@@ -40,7 +40,7 @@ class UART {
     })
   }
 
-  write (data) {
+  write(data) {
     return new Promise((resolve, reject) => {
       this.serial.write(data, err => {
         if (err) {
@@ -52,11 +52,11 @@ class UART {
     })
   }
 
-  clear () {
+  clear() {
     this.buffer = ''
   }
 
-  read (msec = 10) {
+  read(msec = 10) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         const result = this.buffer

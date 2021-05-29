@@ -1,4 +1,4 @@
-function GPIO (pin, mode) {
+function GPIO(pin, mode) {
   this.pin = pin;
   if ((mode < INPUT) || (mode > INPUT_PULLDOWN))
     mode = INPUT;
