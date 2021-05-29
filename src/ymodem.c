@@ -1,16 +1,18 @@
-#include <stdlib.h>
-#include "tty.h"
 #include "ymodem.h"
 
-#define PACKET_HEADER_SIZE      ((uint32_t)3)
-#define PACKET_DATA_INDEX       ((uint32_t)4)
-#define PACKET_START_INDEX      ((uint32_t)1)
-#define PACKET_NUMBER_INDEX     ((uint32_t)2)
-#define PACKET_CNUMBER_INDEX    ((uint32_t)3)
-#define PACKET_TRAILER_SIZE     ((uint32_t)2)
-#define PACKET_OVERHEAD_SIZE    (PACKET_HEADER_SIZE + PACKET_TRAILER_SIZE - 1)
-#define PACKET_SIZE             ((uint32_t)128)
-#define PACKET_1K_SIZE          ((uint32_t)1024)
+#include <stdlib.h>
+
+#include "tty.h"
+
+#define PACKET_HEADER_SIZE ((uint32_t)3)
+#define PACKET_DATA_INDEX ((uint32_t)4)
+#define PACKET_START_INDEX ((uint32_t)1)
+#define PACKET_NUMBER_INDEX ((uint32_t)2)
+#define PACKET_CNUMBER_INDEX ((uint32_t)3)
+#define PACKET_TRAILER_SIZE ((uint32_t)2)
+#define PACKET_OVERHEAD_SIZE (PACKET_HEADER_SIZE + PACKET_TRAILER_SIZE - 1)
+#define PACKET_SIZE ((uint32_t)128)
+#define PACKET_1K_SIZE ((uint32_t)1024)
 
 /* /-------- Packet in IAP memory ------------------------------------------\
  * | 0      |  1    |  2     |  3   |  4      | ... | n+4     | n+5  | n+6  |
@@ -19,31 +21,32 @@
  * \------------------------------------------------------------------------/
  * the first byte is left unused for memory alignment reasons                 */
 
-#define FILE_NAME_LENGTH        ((uint32_t)64)
-#define FILE_SIZE_LENGTH        ((uint32_t)16)
+#define FILE_NAME_LENGTH ((uint32_t)64)
+#define FILE_SIZE_LENGTH ((uint32_t)16)
 
-#define SOH                     ((uint8_t)0x01)  /* start of 128-byte data packet */
-#define STX                     ((uint8_t)0x02)  /* start of 1024-byte data packet */
-#define EOT                     ((uint8_t)0x04)  /* end of transmission */
-#define ACK                     ((uint8_t)0x06)  /* acknowledge */
-#define NAK                     ((uint8_t)0x15)  /* negative acknowledge */
-#define CA                      ((uint32_t)0x18) /* two of these in succession aborts transfer */
-#define CRC16                   ((uint8_t)0x43)  /* 'C' == 0x43, request 16-bit CRC */
-#define NEGATIVE_BYTE           ((uint8_t)0xFF)
+#define SOH ((uint8_t)0x01)   /* start of 128-byte data packet */
+#define STX ((uint8_t)0x02)   /* start of 1024-byte data packet */
+#define EOT ((uint8_t)0x04)   /* end of transmission */
+#define ACK ((uint8_t)0x06)   /* acknowledge */
+#define NAK ((uint8_t)0x15)   /* negative acknowledge */
+#define CA ((uint32_t)0x18)   /* two of these in succession aborts transfer */
+#define CRC16 ((uint8_t)0x43) /* 'C' == 0x43, request 16-bit CRC */
+#define NEGATIVE_BYTE ((uint8_t)0xFF)
 
-#define ABORT1                  ((uint8_t)0x41)  /* 'A' == 0x41, abort by user */
-#define ABORT2                  ((uint8_t)0x61)  /* 'a' == 0x61, abort by user */
+#define ABORT1 ((uint8_t)0x41) /* 'A' == 0x41, abort by user */
+#define ABORT2 ((uint8_t)0x61) /* 'a' == 0x61, abort by user */
 
-#define NAK_TIMEOUT             ((uint32_t)0x100000)
-#define DOWNLOAD_TIMEOUT        ((uint32_t)1000) /* One second retry delay */
-#define MAX_ERRORS              ((uint32_t)5)
+#define NAK_TIMEOUT ((uint32_t)0x100000)
+#define DOWNLOAD_TIMEOUT ((uint32_t)1000) /* One second retry delay */
+#define MAX_ERRORS ((uint32_t)5)
 
 uint8_t packet_data[PACKET_1K_SIZE + PACKET_DATA_INDEX + PACKET_TRAILER_SIZE];
 uint32_t session_done, session_begin;
 
-static km_ymodem_status_t receive_packet(uint8_t *data, uint32_t *length, uint32_t timeout);
+static km_ymodem_status_t receive_packet(uint8_t *data, uint32_t *length,
+                                         uint32_t timeout);
 static uint16_t update_crc16(uint16_t crc_in, uint8_t byte);
-static uint16_t calc_crc16(const uint8_t* p_data, uint32_t size);
+static uint16_t calc_crc16(const uint8_t *p_data, uint32_t size);
 
 /**
  * @brief  Update CRC16 for input byte
@@ -57,10 +60,8 @@ static uint16_t update_crc16(uint16_t crc_in, uint8_t byte) {
   do {
     crc <<= 1;
     in <<= 1;
-    if (in & 0x100)
-      ++crc;
-    if (crc & 0x10000)
-      crc ^= 0x1021;
+    if (in & 0x100) ++crc;
+    if (crc & 0x10000) crc ^= 0x1021;
   } while (!(in & 0x10000));
   return crc & 0xffffu;
 }
@@ -71,10 +72,10 @@ static uint16_t update_crc16(uint16_t crc_in, uint8_t byte) {
  * @param  length
  * @return None
  */
-static uint16_t calc_crc16(const uint8_t* data, uint32_t size) {
+static uint16_t calc_crc16(const uint8_t *data, uint32_t size) {
   uint32_t crc = 0;
-  const uint8_t* dataEnd = data + size;
-  while(data < dataEnd) {
+  const uint8_t *dataEnd = data + size;
+  while (data < dataEnd) {
     crc = update_crc16(crc, *data++);
   }
   crc = update_crc16(crc, 0);
@@ -93,7 +94,8 @@ static uint16_t calc_crc16(const uint8_t* data, uint32_t size) {
  * @return KM_YMODEM_OK: normally return
  *         KM_YMODEM_ABORT: aborted by user
  */
-static km_ymodem_status_t receive_packet(uint8_t *data, uint32_t *length, uint32_t timeout) {
+static km_ymodem_status_t receive_packet(uint8_t *data, uint32_t *length,
+                                         uint32_t timeout) {
   uint32_t crc;
   uint32_t packet_size = 0;
   km_ymodem_status_t status;
@@ -137,7 +139,8 @@ static km_ymodem_status_t receive_packet(uint8_t *data, uint32_t *length, uint32
     *data = ch;
 
     if (packet_size >= PACKET_SIZE) {
-      ret = km_tty_read_sync(&data[PACKET_NUMBER_INDEX], packet_size + PACKET_OVERHEAD_SIZE, timeout);
+      ret = km_tty_read_sync(&data[PACKET_NUMBER_INDEX],
+                             packet_size + PACKET_OVERHEAD_SIZE, timeout);
       if (ret > 0) {
         status = KM_YMODEM_OK;
       } else {
@@ -145,15 +148,16 @@ static km_ymodem_status_t receive_packet(uint8_t *data, uint32_t *length, uint32
       }
 
       /* Simple packet sanity check */
-      if (status == KM_YMODEM_OK ) {
-        if (data[PACKET_NUMBER_INDEX] != ((data[PACKET_CNUMBER_INDEX]) ^ NEGATIVE_BYTE)) {
+      if (status == KM_YMODEM_OK) {
+        if (data[PACKET_NUMBER_INDEX] !=
+            ((data[PACKET_CNUMBER_INDEX]) ^ NEGATIVE_BYTE)) {
           packet_size = 0;
           status = KM_YMODEM_ERROR;
         } else {
           /* Check packet CRC */
           crc = data[packet_size + PACKET_DATA_INDEX] << 8;
           crc += data[packet_size + PACKET_DATA_INDEX + 1];
-          if (calc_crc16(&data[PACKET_DATA_INDEX], packet_size) != crc ) {
+          if (calc_crc16(&data[PACKET_DATA_INDEX], packet_size) != crc) {
             packet_size = 0;
             status = KM_YMODEM_ERROR;
           }
@@ -174,7 +178,8 @@ static km_ymodem_status_t receive_packet(uint8_t *data, uint32_t *length, uint32
  * @return km_ymodem_status_t
  */
 km_ymodem_status_t km_ymodem_receive(km_ymodem_header_cb header_cb,
-    km_ymodem_packet_cb packet_cb, km_ymodem_footer_cb footer_cb) {
+                                     km_ymodem_packet_cb packet_cb,
+                                     km_ymodem_footer_cb footer_cb) {
   uint32_t i, packet_length, file_done, errors = 0;
   uint8_t file_name_str[FILE_NAME_LENGTH];
   uint8_t file_size_str[FILE_SIZE_LENGTH];
@@ -190,7 +195,8 @@ km_ymodem_status_t km_ymodem_receive(km_ymodem_header_cb header_cb,
     packets_received = 0;
     file_done = 0;
     while ((file_done == 0) && (result == KM_YMODEM_OK)) {
-      km_ymodem_status_t stat = receive_packet(packet_data, &packet_length, DOWNLOAD_TIMEOUT);
+      km_ymodem_status_t stat =
+          receive_packet(packet_data, &packet_length, DOWNLOAD_TIMEOUT);
       switch (stat) {
         case KM_YMODEM_OK:
           errors = 0;
@@ -204,7 +210,8 @@ km_ymodem_status_t km_ymodem_receive(km_ymodem_header_cb header_cb,
               file_done = 1;
               break;
             default: /* Normal packet */
-              if (packet_data[PACKET_NUMBER_INDEX] != (uint8_t)(packets_received & 0x0FF)) {
+              if (packet_data[PACKET_NUMBER_INDEX] !=
+                  (uint8_t)(packets_received & 0x0FF)) {
                 km_tty_putc(NAK);
               } else {
                 if (packets_received == 0) {
@@ -225,7 +232,7 @@ km_ymodem_status_t km_ymodem_receive(km_ymodem_header_cb header_cb,
                       file_size_str[i++] = *file_ptr++;
                     }
                     file_size_str[i++] = '\0';
-                    file_size = atoi((const char*)file_size_str);
+                    file_size = atoi((const char *)file_size_str);
 
                     // Process the received file header
                     if (header_cb) {
@@ -254,7 +261,8 @@ km_ymodem_status_t km_ymodem_receive(km_ymodem_header_cb header_cb,
                 } else { /* Data packet */
                   /* Process the received packet */
                   if (packet_cb) {
-                    int ret = packet_cb(packet_data + PACKET_DATA_INDEX, packet_length);
+                    int ret = packet_cb(packet_data + PACKET_DATA_INDEX,
+                                        packet_length);
 
                     // An error occurred while processing the packet
                     if (ret < 0) {
@@ -267,7 +275,7 @@ km_ymodem_status_t km_ymodem_receive(km_ymodem_header_cb header_cb,
                     }
                   }
                 }
-                packets_received ++;
+                packets_received++;
                 session_begin = 1;
               }
               break;
@@ -280,7 +288,7 @@ km_ymodem_status_t km_ymodem_receive(km_ymodem_header_cb header_cb,
           break;
         default:
           if (session_begin > 0) {
-            errors ++;
+            errors++;
           }
           if (errors > MAX_ERRORS) {
             /* Abort communication */

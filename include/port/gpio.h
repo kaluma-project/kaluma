@@ -22,8 +22,8 @@
 #ifndef __KM_GPIO_H
 #define __KM_GPIO_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef enum {
   KM_GPIO_IO_MODE_INPUT,

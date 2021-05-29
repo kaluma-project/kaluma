@@ -18,8 +18,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <stdlib.h>
 #include "uart.h"
+
+#include <stdlib.h>
+
 #include "ringbuffer.h"
 
 /**
@@ -27,10 +29,10 @@
  */
 km_uart_pins_t km_uart_get_default_pins(uint8_t port) {
   km_uart_pins_t pins = {
-    .tx = -1,
-    .rx = -1,
-    .cts = -1,
-    .rts = -1,
+      .tx = -1,
+      .rx = -1,
+      .cts = -1,
+      .rts = -1,
   };
   return pins;
 }
@@ -38,34 +40,24 @@ km_uart_pins_t km_uart_get_default_pins(uint8_t port) {
 /**
  * Initialize all UART when system started
  */
-void km_uart_init() {
-}
+void km_uart_init() {}
 
 /**
  * Cleanup all UART when system cleanup
  */
-void km_uart_cleanup() {
-}
+void km_uart_cleanup() {}
 
 int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
-    km_uart_parity_type_t parity, uint8_t stop, km_uart_flow_control_t flow,
-    size_t buffer_size, km_uart_pins_t pins) {
+                  km_uart_parity_type_t parity, uint8_t stop,
+                  km_uart_flow_control_t flow, size_t buffer_size,
+                  km_uart_pins_t pins) {
   return 0;
 }
 
-int km_uart_write(uint8_t port, uint8_t *buf, size_t len) {
-  return 0;
-}
+int km_uart_write(uint8_t port, uint8_t *buf, size_t len) { return 0; }
 
-uint32_t km_uart_available(uint8_t port) {
-  return 0;
-}
+uint32_t km_uart_available(uint8_t port) { return 0; }
 
+uint32_t km_uart_read(uint8_t port, uint8_t *buf, size_t len) { return 0; }
 
-uint32_t km_uart_read(uint8_t port, uint8_t *buf, size_t len) {
-  return 0;
-}
-
-int km_uart_close(uint8_t port) {
-  return 0;
-}
+int km_uart_close(uint8_t port) { return 0; }

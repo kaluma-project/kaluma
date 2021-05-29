@@ -20,38 +20,28 @@
  */
 
 #include "flash.h"
+
 #include "tty.h"
 
-void km_flash_clear() {
-}
+void km_flash_clear() {}
 
-uint8_t * km_flash_get_data() {
-  return NULL;
-}
+uint8_t *km_flash_get_data() { return NULL; }
 
 void km_flash_free_data(uint8_t *data) {
-  (void)data; //Avoiding warning
+  (void)data;  // Avoiding warning
 }
 
-uint32_t km_flash_size() {
-  return 0;
-}
+uint32_t km_flash_size() { return 0; }
 
-uint32_t km_flash_get_data_size() {
-  return 0;
-}
+uint32_t km_flash_get_data_size() { return 0; }
 
-void km_flash_program_begin() {
-}
+void km_flash_program_begin() {}
 
-km_flash_status_t km_flash_program(uint8_t * buf, uint32_t size) {
+km_flash_status_t km_flash_program(uint8_t *buf, uint32_t size) {
   km_flash_status_t status = KM_FLASH_SUCCESS;
   return status;
 }
 
-void km_flash_program_end() {
-}
+void km_flash_program_end() {}
 
-uint32_t km_flash_get_checksum() {
-  return  0;
-}
+uint32_t km_flash_get_checksum() { return 0; }

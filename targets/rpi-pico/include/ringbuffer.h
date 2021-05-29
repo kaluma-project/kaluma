@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 typedef struct {
-  uint8_t * buf;
+  uint8_t *buf;
   uint32_t length;
   uint32_t r_ptr;
   uint32_t w_ptr;
@@ -78,7 +78,8 @@ uint8_t ringbuffer_look_at(ringbuffer_t *ringbuffer, uint32_t offset);
  * @param len length of data to look.
  * @param offset position to start to look at.
  */
-void ringbuffer_look(ringbuffer_t *ringbuffer, uint8_t *buf, uint32_t len, uint32_t offset);
+void ringbuffer_look(ringbuffer_t *ringbuffer, uint8_t *buf, uint32_t len,
+                     uint32_t offset);
 
 /**
  * Flush ring buffer.

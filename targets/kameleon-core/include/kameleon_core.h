@@ -38,7 +38,7 @@
 #define SRAM_SIZE (128 * 1024)
 #define SRAM_BASE_ADDR (0x20000000)
 
-#define GPIO_NUM  22
+#define GPIO_NUM 22
 #define ADC_NUM 6
 #define PWM_NUM 6
 #define I2C_NUM 2
@@ -47,14 +47,14 @@
 #define LED_NUM 1
 #define BUTTON_NUM 1
 
-#define APB1    0
-#define APB2    1
+#define APB1 0
+#define APB2 1
 
 #define ADC_RESOLUTION_BIT 12
 /**
  * Error handler for the system driver error.
  */
-void _Error_Handler(char * file, uint32_t line);
+void _Error_Handler(char* file, uint32_t line);
 
 /**
  * Increment tick count
@@ -72,6 +72,6 @@ void tty_transmit_data();
  */
 uint32_t tty_get_tx_data_length();
 
-uint32_t tty_fill_rx_bytes(uint8_t * buf, uint32_t nToWrite);
+uint32_t tty_fill_rx_bytes(uint8_t* buf, uint32_t nToWrite);
 
 #endif /* __KALUMA_CORE_H */

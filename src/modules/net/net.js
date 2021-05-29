@@ -5,11 +5,11 @@ var stream = require('stream');
  * Socket class
  */
 class Socket extends stream.Duplex {
-  constructor () {
+  constructor() {
     super();
     if (!global.__netdev) {
       throw new Error('Network device not found');
-    }    
+    }
     this.localAddress = null;
     this.localPort = null;
     this.remoteAddress = null;
@@ -17,8 +17,8 @@ class Socket extends stream.Duplex {
     this._fd = -1;
     this._dev = global.__netdev;
   }
-  
-  _socket (fd) {
+
+  _socket(fd) {
     if (this._dev) {
       this._fd = fd;
       var sck = this._dev.get(this._fd);
@@ -26,7 +26,7 @@ class Socket extends stream.Duplex {
         this.localAddress = sck.laddr;
         this.localPort = sck.lport;
         this.remoteAddress = sck.raddr;
-        this.remotePort = sck.rport;      
+        this.remotePort = sck.rport;
         sck.connect_cb = () => {
           this.localAddress = sck.laddr;
           this.localPort = sck.lport;
@@ -51,9 +51,9 @@ class Socket extends stream.Duplex {
    * @param {function} connectListener
    * @return {Socket}
    */
-  connect (options, connectListener) {
+  connect(options, connectListener) {
     if (this._dev) {
-      var fd = this._dev.socket(null, 'STREAM');    
+      var fd = this._dev.socket(null, 'STREAM');
       if (connectListener) {
         this.on('connect', connectListener);
       }
@@ -91,14 +91,14 @@ class Socket extends stream.Duplex {
       if (cb) cb(new SystemError(6)); // ENXIO
     }
   }
-  
+
   /**
    * @override
    * Write data to the stream
    * @param {Uint8Array|string} chunk
    * @param {function} cb
    */
-  _write (chunk, cb) {
+  _write(chunk, cb) {
     if (this._dev) {
       this._dev.write(this._fd, chunk, (err) => {
         if (err) {
@@ -117,7 +117,7 @@ class Socket extends stream.Duplex {
    * Signal finish to write data
    * @param {function} cb
    */
-  _final (cb) {
+  _final(cb) {
     if (this._dev) {
       this._dev.shutdown(this._fd, 1, (err) => {
         if (err) {
@@ -136,11 +136,11 @@ class Socket extends stream.Duplex {
  * Server class
  */
 class Server extends EventEmitter {
-  constructor (options, connectionListener) {
+  constructor(options, connectionListener) {
     super();
     if (!global.__netdev) {
       throw new Error('Network device not found');
-    }    
+    }
     if (typeof options === 'function') {
       connectionListener = options;
       options = undefined;
@@ -158,7 +158,7 @@ class Server extends EventEmitter {
    * @param {function} cb
    * @return {this}
    */
-  listen (port, cb) {
+  listen(port, cb) {
     if (this._dev) {
       this._fd = this._dev.socket(null, 'STREAM');
       if (this._fd < 0) {
@@ -197,7 +197,7 @@ class Server extends EventEmitter {
    * @param {function} cb
    * @return {this}
    */
-  close (cb) {
+  close(cb) {
     if (this._dev) {
       this._dev.close(this._fd, (err) => {
         if (err) {

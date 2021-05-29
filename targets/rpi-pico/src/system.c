@@ -20,51 +20,44 @@
  */
 
 #include "system.h"
-#include "tty.h"
-#include "gpio.h"
+
 #include "adc.h"
-#include "pwm.h"
-#include "i2c.h"
-#include "spi.h"
-#include "uart.h"
-#include "pico/stdlib.h"
+#include "gpio.h"
 #include "hardware/gpio.h"
+#include "i2c.h"
+#include "pico/stdlib.h"
+#include "pwm.h"
 #include "rpi_pico.h"
+#include "spi.h"
+#include "tty.h"
+#include "uart.h"
 
 const char km_system_arch[] = "cortex-m0-plus";
 const char km_system_platform[] = "unknown";
 
 /**
-*/
-void km_delay(uint32_t msec) {
-  sleep_ms(msec);
-}
+ */
+void km_delay(uint32_t msec) { sleep_ms(msec); }
 
 /**
-*/
-uint64_t km_gettime() {
-  return to_ms_since_boot(get_absolute_time());
-}
+ */
+uint64_t km_gettime() { return to_ms_since_boot(get_absolute_time()); }
 
 /**
  * Return MAX of the micro seconde counter 44739242
-*/
+ */
 uint64_t km_micro_maxtime() {
-  return 0xFFFFFFFFFFFFFFFF; // Max of the uint64()
+  return 0xFFFFFFFFFFFFFFFF;  // Max of the uint64()
 }
 /**
  * Return micro seconde counter
-*/
-uint64_t km_micro_gettime() {
-  return get_absolute_time();
-}
+ */
+uint64_t km_micro_gettime() { return get_absolute_time(); }
 
 /**
  * micro secoded delay
-*/
-void km_micro_delay(uint32_t usec) {
-  sleep_us(usec);
-}
+ */
+void km_micro_delay(uint32_t usec) { sleep_us(usec); }
 
 /**
  * Kaluma Hardware System Initializations

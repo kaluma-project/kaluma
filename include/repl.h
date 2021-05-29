@@ -28,10 +28,7 @@
 #define MAX_BUFFER_LENGTH 1024
 #define MAX_COMMAND_HISTORY 10
 
-typedef enum {
-  KM_REPL_MODE_NORMAL,
-  KM_REPL_MODE_ESCAPE
-} km_repl_mode_t;
+typedef enum { KM_REPL_MODE_NORMAL, KM_REPL_MODE_ESCAPE } km_repl_mode_t;
 
 typedef enum {
   KM_REPL_OUTPUT_NORMAL,
@@ -55,7 +52,7 @@ struct km_repl_state_s {
   char *history[MAX_COMMAND_HISTORY];
   unsigned int history_size;
   unsigned int history_position;
-  uint8_t ymodem_state; // 0=stopped, 1=transfering
+  uint8_t ymodem_state;  // 0=stopped, 1=transfering
 };
 
 void km_repl_init();
@@ -63,7 +60,7 @@ km_repl_state_t *km_get_repl_state();
 
 void km_repl_set_output(km_repl_output_t output);
 void km_repl_print_prompt();
-#define km_repl_printf(format,args...) km_tty_printf(format, ## args)
+#define km_repl_printf(format, args...) km_tty_printf(format, ##args)
 #define km_repl_print_value(value) jerryxx_print_value(value)
 #define km_repl_putc(ch) km_tty_putc(ch)
 void km_repl_pretty_print(uint8_t indent, uint8_t depth, jerry_value_t value);

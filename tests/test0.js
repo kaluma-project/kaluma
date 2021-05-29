@@ -1,6 +1,6 @@
 const { UART } = require('./uart')
 
-async function foo () {
+async function foo() {
   var s0 = new UART('/dev/serial0')
   await s0.open()
   const data = await s0.read(10000)

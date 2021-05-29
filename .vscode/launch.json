@@ -13,6 +13,6 @@
       "autorun": [
         "load ./build/kameleon.elf"
       ]
-    }    
+    }
   ]
 }

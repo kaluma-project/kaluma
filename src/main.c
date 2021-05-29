@@ -19,12 +19,12 @@
  * SOFTWARE.
  */
 
-#include "system.h"
 #include "gpio.h"
-#include "tty.h"
 #include "io.h"
 #include "repl.h"
 #include "runtime.h"
+#include "system.h"
+#include "tty.h"
 
 int main(void) {
   bool load = false;

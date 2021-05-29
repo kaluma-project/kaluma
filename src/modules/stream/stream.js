@@ -4,35 +4,35 @@ var EventEmitter = require('events').EventEmitter;
  * Astract stream class
  */
 class Stream extends EventEmitter {
-  constructor () {
+  constructor() {
     super();
     this.destroyed = false;
   }
-  
+
   /**
    * @protected
    * @abstract
    * Implement how to destroy the stream
    * @param {Function} cb
-   */  
-  _destroy (cb) {} // eslint-disable-line
+   */
+  _destroy(cb) { } // eslint-disable-line
 
   /**
    * @protected
    * Should be called when after destroyed
    */
-  _afterDestroy () {
+  _afterDestroy() {
     if (!this.destroyed) {
       this.destroyed = true;
       this.emit('close');
     }
   }
-  
+
   /**
    * Destroy the stream
    * @return {this}
-   */  
-  destroy () {
+   */
+  destroy() {
     if (!this.destroyed) {
       this._destroy((err) => {
         if (err) {
@@ -40,7 +40,7 @@ class Stream extends EventEmitter {
         } else {
           this._afterDestroy();
         }
-      });      
+      });
     }
   }
 }
@@ -49,16 +49,16 @@ class Stream extends EventEmitter {
  * Readable class
  */
 class Readable extends Stream {
-  constructor () {
+  constructor() {
     super();
     this.readableEnded = false;
   }
-  
+
   /**
    * @protected
    * Should be called when there is no more data to read.
    */
-  _afterEnd () {
+  _afterEnd() {
     if (!this.readableEnded) {
       this.readableEnded = true;
       this.emit('end');
@@ -70,8 +70,8 @@ class Readable extends Stream {
    * Push a chunk of data to this readable stream.
    * @param {Uint8Array} chunk
    * @return {this}
-   */  
-  push (chunk) {
+   */
+  push(chunk) {
     this.emit('data', chunk);
     return this;
   }
@@ -81,7 +81,7 @@ class Readable extends Stream {
  * Writable class
  */
 class Writable extends Stream {
-  constructor () {
+  constructor() {
     super();
     this._wbuf = '';
     this.writableEnded = false;
@@ -95,7 +95,7 @@ class Writable extends Stream {
    * @param {Uint8Array|string} data
    * @param {Function} cb
    */
-  _write (data, cb) {} // eslint-disable-line
+  _write(data, cb) { } // eslint-disable-line
 
   /**
    * @protected
@@ -103,26 +103,26 @@ class Writable extends Stream {
    * Implement how to finish to write on the stream
    * @param {Function} cb
    */
-  _final (cb) {} // eslint-disable-line
-  
+  _final(cb) { } // eslint-disable-line
+
   /**
    * @protected
    * Should be called when after finished
    */
-  _afterFinish () {
+  _afterFinish() {
     if (!this.writableFinished) {
       this.emit('finish');
       this.writableFinished = true;
     }
   }
-  
+
   /**
    * Write a chunk of data to the stream
    * @param {Uint8Array|string} chunk
    * @param {Function} cb
    * @return {boolean}
    */
-  write (chunk, cb) {
+  write(chunk, cb) {
     if (!this.writableEnded) {
       if (chunk) {
         if (chunk instanceof Uint8Array) {
@@ -136,14 +136,14 @@ class Writable extends Stream {
     }
     return this._wbuf.length === 0;
   }
-  
+
   /**
    * Finish to write on the stream.
    * @param {Uint8Array|string} chunk
    * @param {Function} cb
    * @return {Writable}
-   */  
-  end (chunk, cb) {
+   */
+  end(chunk, cb) {
     if (typeof chunk === 'function') {
       cb = chunk;
       chunk = undefined;
@@ -173,8 +173,8 @@ class Writable extends Stream {
    * @protected
    * Flush data in internal buffer
    * @param {Function} cb
-   */  
-  flush (cb) {
+   */
+  flush(cb) {
     if (!this.writableFinished) {
       if (this._wbuf.length > 0) {
         this._write(this._wbuf, (err) => {
@@ -198,12 +198,12 @@ class Writable extends Stream {
       if (cb) cb();
     }
   }
-  
+
   /**
    * @protected
    * Finish to write on the stream
    */
-  finish () {
+  finish() {
     if (this.writableEnded && this._wbuf.length === 0) {
       this._final((err) => {
         if (err) {
@@ -220,16 +220,16 @@ class Writable extends Stream {
  * Duplex class
  */
 class Duplex extends Writable /*, Readable */ {
-  constructor () {
+  constructor() {
     super();
     this.readableEnded = false;
   }
-  
+
   /**
    * @protected
    * Should be called when there is no more data to read.
    */
-  _afterEnd () {
+  _afterEnd() {
     if (!this.readableEnded) {
       this.readableEnded = true;
       this.emit('end');
@@ -242,10 +242,10 @@ class Duplex extends Writable /*, Readable */ {
    * @param {Uint8Array} chunk
    * @return {this}
    */
-  push (chunk) {
+  push(chunk) {
     this.emit('data', chunk);
     return this;
-  }  
+  }
 }
 
 exports.Readable = Readable;

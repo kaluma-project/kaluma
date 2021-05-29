@@ -19,12 +19,14 @@
  * SOFTWARE.
  */
 
-#include <stdint.h>
 #include "pwm.h"
-#include "rpi_pico.h"
-#include "pico/stdlib.h"
-#include "hardware/pwm.h"
+
+#include <stdint.h>
+
 #include "hardware/clocks.h"
+#include "hardware/pwm.h"
+#include "pico/stdlib.h"
+#include "rpi_pico.h"
 
 static struct __pwm_config_s {
   double freq;
@@ -33,8 +35,7 @@ static struct __pwm_config_s {
   bool enabled;
 } __pwm_config[PWM_NUM];
 
-static int __get_pwm_index(uint8_t pin)
-{
+static int __get_pwm_index(uint8_t pin) {
   if (pin <= 22) {
     return pin;
   } else if ((pin >= 25) && (pin <= 28)) {
@@ -47,8 +48,7 @@ static int __get_pwm_index(uint8_t pin)
  * Initialize all PWM when system started
  */
 void km_pwm_init() {
-  for (int i = 0; i < PWM_NUM; i++)
-  {
+  for (int i = 0; i < PWM_NUM; i++) {
     __pwm_config[i].freq = 0;
     __pwm_config[i].duty = 0;
     __pwm_config[i].period = 0;
@@ -59,12 +59,9 @@ void km_pwm_init() {
 /**
  * Cleanup all PWM when system cleanup
  */
-void km_pwm_cleanup() {
-  km_pwm_init();
-}
+void km_pwm_cleanup() { km_pwm_init(); }
 
-uint16_t __get_period(double frequency)
-{
+uint16_t __get_period(double frequency) {
   int ref_div = 1;
   int duty_mul = 1;
   if (frequency > 100000) {
@@ -87,14 +84,14 @@ uint16_t __get_period(double frequency)
 }
 /**
  * return Returns 0 on success or -1 on failure.
-*/
+ */
 int km_pwm_setup(uint8_t pin, double frequency, double duty) {
   int pwm_index = __get_pwm_index(pin);
   if (pwm_index < 0) {
-    return KM_PWMPORT_ERROR; // Error
+    return KM_PWMPORT_ERROR;  // Error
   }
   if (frequency < 13) {
-    frequency = 13; // Min is 13Hz
+    frequency = 13;  // Min is 13Hz
   }
   uint16_t period = __get_period(frequency);
   double clk_div = clock_get_hz(clk_sys) / (frequency * period);
@@ -108,7 +105,8 @@ int km_pwm_setup(uint8_t pin, double frequency, double duty) {
     pwm_init(pwm_gpio_to_slice_num(pin), &config, false);
   }
   uint16_t uint_duty = (uint16_t)(duty * period);
-  pwm_set_chan_level(pwm_gpio_to_slice_num(pin), pwm_gpio_to_channel(pin), uint_duty);
+  pwm_set_chan_level(pwm_gpio_to_slice_num(pin), pwm_gpio_to_channel(pin),
+                     uint_duty);
   __pwm_config[pwm_index].freq = frequency;
   __pwm_config[pwm_index].duty = duty;
   __pwm_config[pwm_index].period = period;
@@ -116,11 +114,11 @@ int km_pwm_setup(uint8_t pin, double frequency, double duty) {
 }
 
 /**
-*/
+ */
 int km_pwm_start(uint8_t pin) {
   int pwm_index = __get_pwm_index(pin);
   if (pwm_index < 0) {
-    return KM_PWMPORT_ERROR; // Error
+    return KM_PWMPORT_ERROR;  // Error
   }
   pwm_set_enabled(pwm_gpio_to_slice_num(pin), true);
   __pwm_config[pwm_index].enabled = true;
@@ -128,11 +126,11 @@ int km_pwm_start(uint8_t pin) {
 }
 
 /**
-*/
+ */
 int km_pwm_stop(uint8_t pin) {
   int pwm_index = __get_pwm_index(pin);
   if (pwm_index < 0) {
-    return KM_PWMPORT_ERROR; // Error
+    return KM_PWMPORT_ERROR;  // Error
   }
   pwm_set_enabled(pwm_gpio_to_slice_num(pin), false);
   __pwm_config[pwm_index].enabled = false;
@@ -140,63 +138,66 @@ int km_pwm_stop(uint8_t pin) {
 }
 
 /**
-*/
+ */
 double km_pwm_get_frequency(uint8_t pin) {
   int pwm_index = __get_pwm_index(pin);
   if (pwm_index < 0) {
-    return KM_PWMPORT_ERROR; // Error
+    return KM_PWMPORT_ERROR;  // Error
   }
   return __pwm_config[pwm_index].freq;
 }
 
 /**
-*/
+ */
 double km_pwm_get_duty(uint8_t pin) {
   int pwm_index = __get_pwm_index(pin);
   if (pwm_index < 0) {
-    return KM_PWMPORT_ERROR; // Error
+    return KM_PWMPORT_ERROR;  // Error
   }
   return __pwm_config[pwm_index].duty;
 }
 
 /**
-*/
+ */
 int km_pwm_set_duty(uint8_t pin, double duty) {
   int pwm_index = __get_pwm_index(pin);
   if (pwm_index < 0) {
-    return KM_PWMPORT_ERROR; // Error
+    return KM_PWMPORT_ERROR;  // Error
   }
   uint16_t uint_duty = (uint16_t)(duty * __pwm_config[pwm_index].period);
   if (__pwm_config[pwm_index].enabled) {
-    while (pwm_get_counter(pwm_gpio_to_slice_num(pin)) != 0);
+    while (pwm_get_counter(pwm_gpio_to_slice_num(pin)) != 0)
+      ;
   }
-  pwm_set_chan_level(pwm_gpio_to_slice_num(pin), pwm_gpio_to_channel(pin), uint_duty);
+  pwm_set_chan_level(pwm_gpio_to_slice_num(pin), pwm_gpio_to_channel(pin),
+                     uint_duty);
   __pwm_config[pwm_index].duty = duty;
   return 0;
 }
 
 /**
-*/
+ */
 int km_pwm_set_frequency(uint8_t pin, double frequency) {
   int pwm_index = __get_pwm_index(pin);
   if (pwm_index < 0) {
-    return KM_PWMPORT_ERROR; // Error
+    return KM_PWMPORT_ERROR;  // Error
   }
   double previous_duty = km_pwm_get_duty(pin);
   /* The previous duty ratio must be hold up regardless of changing frequency */
   if (__pwm_config[pwm_index].enabled) {
-    while (pwm_get_counter(pwm_gpio_to_slice_num(pin)) != 0);
+    while (pwm_get_counter(pwm_gpio_to_slice_num(pin)) != 0)
+      ;
   }
   km_pwm_setup(pin, frequency, previous_duty);
   return 0;
 }
 
 /**
-*/
+ */
 int km_pwm_close(uint8_t pin) {
   int pwm_index = __get_pwm_index(pin);
   if (pwm_index < 0) {
-    return KM_PWMPORT_ERROR; // Error
+    return KM_PWMPORT_ERROR;  // Error
   }
   if (__pwm_config[pwm_index].enabled) {
     km_pwm_stop(pin);

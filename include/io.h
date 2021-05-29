@@ -22,10 +22,11 @@
 #ifndef ___KM_IO_H
 #define ___KM_IO_H
 
-#include <stdint.h>
 #include <stdbool.h>
-#include "utils.h"
+#include <stdint.h>
+
 #include "jerryscript.h"
+#include "utils.h"
 
 typedef struct km_io_loop_s km_io_loop_t;
 typedef struct km_io_handle_s km_io_handle_t;
@@ -47,8 +48,7 @@ typedef struct km_io_idle_handle_s km_io_idle_handle_t;
 
 /* general handle types */
 
-typedef enum km_io_type
-{
+typedef enum km_io_type {
   KM_IO_TIMER,
   KM_IO_TTY,
   KM_IO_WATCH,
@@ -58,8 +58,7 @@ typedef enum km_io_type
 
 typedef void (*km_io_close_cb)(km_io_handle_t *);
 
-struct km_io_handle_s
-{
+struct km_io_handle_s {
   km_list_node_t base;
   uint32_t id;
   km_io_type_t type;
@@ -71,31 +70,28 @@ struct km_io_handle_s
 
 typedef void (*km_io_timer_cb)(km_io_timer_handle_t *);
 
-struct km_io_timer_handle_s
-{
+struct km_io_timer_handle_s {
   km_io_handle_t base;
   km_io_timer_cb timer_cb;
   jerry_value_t timer_js_cb;
   uint64_t clamped_timeout;
   uint64_t interval;
   bool repeat;
-  uint32_t tag; // for application use
+  uint32_t tag;  // for application use
 };
 
 /* TTY handle types */
 
 typedef void (*km_io_tty_read_cb)(uint8_t *, size_t);
 
-struct km_io_tty_handle_s
-{
+struct km_io_tty_handle_s {
   km_io_handle_t base;
   km_io_tty_read_cb read_cb;
 };
 
 /* GPIO watch handle types */
 
-typedef enum
-{
+typedef enum {
   KM_IO_WATCH_MODE_LOW_LEVEL = 1,   // BIT0
   KM_IO_WATCH_MODE_HIGH_LEVEL = 2,  // BIT1
   KM_IO_WATCH_MODE_RISING = 4,      // BIT2
@@ -105,8 +101,7 @@ typedef enum
 
 typedef void (*km_io_watch_cb)(km_io_watch_handle_t *);
 
-struct km_io_watch_handle_s
-{
+struct km_io_watch_handle_s {
   km_io_handle_t base;
   km_io_watch_mode_t mode;
   uint8_t pin;
@@ -123,8 +118,7 @@ struct km_io_watch_handle_s
 typedef int (*km_io_uart_available_cb)(km_io_uart_handle_t *);
 typedef void (*km_io_uart_read_cb)(km_io_uart_handle_t *, uint8_t *, size_t);
 
-struct km_io_uart_handle_s
-{
+struct km_io_uart_handle_s {
   km_io_handle_t base;
   uint8_t port;
   km_io_uart_available_cb available_cb;
@@ -136,16 +130,14 @@ struct km_io_uart_handle_s
 
 typedef void (*km_io_idle_cb)(km_io_idle_handle_t *);
 
-struct km_io_idle_handle_s
-{
+struct km_io_idle_handle_s {
   km_io_handle_t base;
   km_io_idle_cb idle_cb;
 };
 
 /* loop type */
 
-struct km_io_loop_s
-{
+struct km_io_loop_s {
   bool stop_flag;
   uint64_t time;
   km_list_t timer_handles;
@@ -170,7 +162,8 @@ km_io_handle_t *km_io_handle_get_by_id(uint32_t id, km_list_t *handle_list);
 /* timer functions */
 
 void km_io_timer_init(km_io_timer_handle_t *timer);
-void km_io_timer_start(km_io_timer_handle_t *timer, km_io_timer_cb timer_cb, uint64_t interval, bool repeat);
+void km_io_timer_start(km_io_timer_handle_t *timer, km_io_timer_cb timer_cb,
+                       uint64_t interval, bool repeat);
 void km_io_timer_stop(km_io_timer_handle_t *timer);
 km_io_timer_handle_t *km_io_timer_get_by_id(uint32_t id);
 void km_io_timer_cleanup();
@@ -185,7 +178,8 @@ void km_io_tty_cleanup();
 /* GPIO watch functions */
 
 void km_io_watch_init(km_io_watch_handle_t *watch);
-void km_io_watch_start(km_io_watch_handle_t *watch, km_io_watch_cb watch_cb, uint8_t pin, km_io_watch_mode_t mode, uint32_t debounce);
+void km_io_watch_start(km_io_watch_handle_t *watch, km_io_watch_cb watch_cb,
+                       uint8_t pin, km_io_watch_mode_t mode, uint32_t debounce);
 void km_io_watch_stop(km_io_watch_handle_t *watch);
 km_io_watch_handle_t *km_io_watch_get_by_id(uint32_t id);
 void km_io_watch_cleanup();
@@ -193,7 +187,9 @@ void km_io_watch_cleanup();
 /* UART function */
 
 void km_io_uart_init(km_io_uart_handle_t *uart);
-void km_io_uart_read_start(km_io_uart_handle_t *uart, uint8_t port, km_io_uart_available_cb available_cb, km_io_uart_read_cb read_cb);
+void km_io_uart_read_start(km_io_uart_handle_t *uart, uint8_t port,
+                           km_io_uart_available_cb available_cb,
+                           km_io_uart_read_cb read_cb);
 void km_io_uart_read_stop(km_io_uart_handle_t *uart);
 km_io_uart_handle_t *km_io_uart_get_by_id(uint32_t id);
 void km_io_uart_cleanup();

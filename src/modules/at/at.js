@@ -12,7 +12,7 @@ var EventEmitter = require('events').EventEmitter;
  *   .interval {number}
  */
 class ATCommand extends EventEmitter {
-  constructor (serial, options = {}) {
+  constructor(serial, options = {}) {
     super();
     this.queue = [];
     this.serial = serial;
@@ -35,8 +35,8 @@ class ATCommand extends EventEmitter {
       this.process();
     }, this.options.interval);
   }
-  
-  close () {
+
+  close() {
     this.serial.removeListener('data', this.handler);
     if (this._timer) {
       clearInterval(this._timer);
@@ -49,7 +49,7 @@ class ATCommand extends EventEmitter {
       console.log(`\x1b[33m[AT] ${msg}\x1b[0m`); // brown color
     }
   }
-  
+
   /**
    * Add a handler
    * @param {string} match
@@ -58,7 +58,7 @@ class ATCommand extends EventEmitter {
   addHandler(match, handler) {
     this.handlers[match] = handler;
   }
-  
+
   /**
    * Remove a handler
    * @param {string} match
@@ -80,7 +80,7 @@ class ATCommand extends EventEmitter {
       return null;
     }
   }
-  
+
   /**
    * Unpop a line
    */
@@ -110,7 +110,7 @@ class ATCommand extends EventEmitter {
     this.queue.push(job);
     this._log(`job queued [cmd="${cmd}"]`);
   }
-  
+
   _startJob() {
     // start a pending job if buffer is empty
     if (this.queue.length > 0) {
@@ -130,7 +130,7 @@ class ATCommand extends EventEmitter {
    * Complete the job
    * @param {string} result
    */
-  _completeJob (job, result) {
+  _completeJob(job, result) {
     try {
       if (result === 'end') {
         if (job.cb) job.cb();
@@ -153,7 +153,7 @@ class ATCommand extends EventEmitter {
       if (this.queue.length > 0) {
         let job = this.queue[0];
         if (job.started) {
-          if (Array.isArray(job.waitFor))  {
+          if (Array.isArray(job.waitFor)) {
             var l = line.trim();
             if (job.waitFor.indexOf(l) > -1) {
               this._completeJob(job, l);
@@ -197,7 +197,7 @@ class ATCommand extends EventEmitter {
             return;
           }
         }
-        if (Array.isArray(job.waitFor))  {
+        if (Array.isArray(job.waitFor)) {
           if (et > job.timeout) {
             this._completeJob(job, 'timeout');
             return;

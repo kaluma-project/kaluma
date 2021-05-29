@@ -6,7 +6,7 @@ var net = require('net');
  * @param {IncomingMessage} incoming
  */
 class HTTPParser {
-  constructor (incoming) {
+  constructor(incoming) {
     this._buf = '';
     this.incoming = incoming;
     this.incoming.socket.on('data', (chunk) => { this.push(chunk) });
@@ -17,12 +17,12 @@ class HTTPParser {
     this.onHeadersComplete = null;
     this.onComplete = null;
   }
-  
+
   /**
    * Push a chunk of data to buffer
    * @param {Uint8Array|string} chunk
    */
-  push (chunk) {
+  push(chunk) {
     if (chunk instanceof Uint8Array) {
       this._buf += String.fromCharCode.apply(null, chunk);
     } else {
@@ -48,16 +48,16 @@ class HTTPParser {
    * Parse HTTP header and assign to incoming message
    * @param {string} head
    */
-  parseHead (head) {
+  parseHead(head) {
     var ls = head.split('\n');
     var lt = ls[0].split(' ');
     if (lt[0].trim().startsWith('HTTP/')) { // http response
       this.incoming.httpVersion = lt[0].trim().split('/')[1];
       this.incoming.statusCode = parseInt(lt[1].trim());
-      this.incoming.statusMessage = lt[2].trim();      
+      this.incoming.statusMessage = lt[2].trim();
     } else { // http request
       this.incoming.method = lt[0].trim();
-      this.incoming.url =  lt[1].trim();
+      this.incoming.url = lt[1].trim();
       this.incoming.httpVersion = lt[2].trim().split('/')[1];
     }
     // headers
@@ -72,7 +72,7 @@ class HTTPParser {
   /**
    * Parse HTTP body
    */
-  parseBody () {
+  parseBody() {
     if (this.incoming.headers['transfer-encoding'] === 'chunked') {
       var quit = false;
       while (!quit) {
@@ -108,17 +108,17 @@ class HTTPParser {
       }
     }
   }
-  
+
   /**
    * Finishes to parse incoming message.
    * Emits 'end' event to the incoming message.
    */
-  end () {
+  end() {
     if (!this.incoming.complete) {
       if (this._buf.length > 0) {
         var encoder = new TextEncoder('ascii');
         this.incoming.push(encoder.encode(this._buf));
-        this._buf = '';  
+        this._buf = '';
       }
       this.incoming.complete = true;
       this.incoming._afterEnd();
@@ -131,7 +131,7 @@ class HTTPParser {
  * IncomingMessage
  */
 class IncomingMessage extends stream.Readable {
-  constructor (socket) {
+  constructor(socket) {
     super();
     this.headers = {};
     this.method = null;
@@ -152,7 +152,7 @@ class IncomingMessage extends stream.Readable {
  * OutgoingMessage class
  */
 class OutgoingMessage extends stream.Writable {
-  constructor (socket) {
+  constructor(socket) {
     super();
     this.socket = socket;
     this.headers = {};
@@ -167,16 +167,16 @@ class OutgoingMessage extends stream.Writable {
    * Check is transfer-encoding is chunked
    * @return {boolean}
    */
-  _isTransferChunked () {
+  _isTransferChunked() {
     return (this.headers['transfer-encoding'] === 'chunked');
   }
-  
+
   /**
    * Encode chunk
    * @param {Uint8Array|string} chunk
    * @return {string}
    */
-  _encodeChunk (chunk) {
+  _encodeChunk(chunk) {
     if (chunk instanceof Uint8Array)
       chunk = String.fromCharCode.apply(null, chunk);
     return chunk.length.toString(16) + '\r\n' + chunk + '\r\n';
@@ -185,47 +185,47 @@ class OutgoingMessage extends stream.Writable {
   /**
    * @override
    */
-  _destroy (cb) {
+  _destroy(cb) {
     this.socket.destroy(cb);
   }
-  
+
   /**
    * @override
    */
-  _write (chunk, cb) {
+  _write(chunk, cb) {
     this.socket.write(chunk, cb);
   }
-  
+
   /**
    * @override
    */
-  _final (cb) {
+  _final(cb) {
     this.socket.end(cb);
   }
-  
+
   /**
    * Set header value
    * @param {string} name 
    * @param {string} value 
    */
-  setHeader (name, value) {
+  setHeader(name, value) {
     this.headers[name.toLowerCase()] = value;
   }
-  
+
   /**
    * get header value
    * @param {string} name 
    * @return {string}
    */
-  getHeader (name) {
+  getHeader(name) {
     return this.headers[name.toLowerCase()];
   }
-  
+
   /**
    * Remove a header value
    * @param {string} name 
    */
-  removeHeader (name) {
+  removeHeader(name) {
     delete this.headers[name.toLowerCase()];
   }
 }
@@ -234,7 +234,7 @@ class OutgoingMessage extends stream.Writable {
  * ClientRequest class
  */
 class ClientRequest extends OutgoingMessage {
-  constructor (options, socket) {
+  constructor(options, socket) {
     super(socket);
     this.options = options;
     this.path = options.path || '/';
@@ -254,7 +254,7 @@ class ClientRequest extends OutgoingMessage {
   /**
    * Flush headers to buffer.
    */
-  flushHeaders () {
+  flushHeaders() {
     if (!this.headers.hasOwnProperty['content-length']) {
       this.setHeader('transfer-encoding', 'chunked');
     }
@@ -272,7 +272,7 @@ class ClientRequest extends OutgoingMessage {
    * @param {Function} cb
    * @return {this}
    */
-  write (chunk, cb) {
+  write(chunk, cb) {
     if (!this.headersSent) {
       this.flushHeaders();
       this.headersSent = true;
@@ -289,7 +289,7 @@ class ClientRequest extends OutgoingMessage {
     if (cb) cb();
     return this;
   }
-  
+
   /**
    * @override
    * Finish to write data on the stream
@@ -297,7 +297,7 @@ class ClientRequest extends OutgoingMessage {
    * @param {Function} cb
    * @return {this}
    */
-  end (chunk, cb) {
+  end(chunk, cb) {
     if (!this.headersSent) {
       this.flushHeaders();
       this.headersSent = true;
@@ -325,12 +325,12 @@ class ClientRequest extends OutgoingMessage {
  * ServerResponse class
  */
 class ServerResponse extends OutgoingMessage {
-  constructor (socket) {
+  constructor(socket) {
     super(socket);
     this.statusCode = 200;
     this.statusMessage = 'OK';
   }
-  
+
   /**
    * Write response headers and sent to client
    * @param {number} statusCode
@@ -338,7 +338,7 @@ class ServerResponse extends OutgoingMessage {
    * @param {Object} headers
    * @return {this}
    */
-  writeHead (statusCode, statusMessage, headers) {
+  writeHead(statusCode, statusMessage, headers) {
     if (!this.headersSent) {
       this.statusCode = statusCode;
       if (statusMessage) this.statusMessage = statusMessage;
@@ -357,11 +357,11 @@ class ServerResponse extends OutgoingMessage {
     }
     return this;
   }
-  
+
   /**
    * @override
    */
-  write (chunk, cb) {
+  write(chunk, cb) {
     if (!this.headersSent) {
       this.writeHead(200);
     }
@@ -375,7 +375,7 @@ class ServerResponse extends OutgoingMessage {
   /**
    * @override
    */
-  end (chunk, cb) {
+  end(chunk, cb) {
     if (!this.headersSent) {
       this.writeHead(200);
     }
@@ -396,7 +396,7 @@ class ServerResponse extends OutgoingMessage {
  * Server
  */
 class Server extends net.Server {
-  constructor () {
+  constructor() {
     super();
     this.on('connection', (socket) => {
       var req = new IncomingMessage(socket);

@@ -19,8 +19,10 @@
  * SOFTWARE.
  */
 
-#include <stdint.h>
 #include "adc.h"
+
+#include <stdint.h>
+
 #include "linux.h"
 
 /**
@@ -42,14 +44,12 @@
 /**
  * Initialize all ADC channels when system started
  */
-void km_adc_init() {
-}
+void km_adc_init() {}
 
 /**
  * Cleanup all ADC channels when system cleanup
  */
-void km_adc_cleanup() {
-}
+void km_adc_cleanup() {}
 
 /**
  * Read value from the ADC channel
@@ -57,15 +57,8 @@ void km_adc_cleanup() {
  * @param {uint8_t} adcIndex
  * @return {double}
  */
-double km_adc_read(uint8_t adcIndex) {
-  return 0.0d;
-}
+double km_adc_read(uint8_t adcIndex) { return 0.0d; }
 
-int km_adc_setup(uint8_t pin) {
-  return 0;
-}
+int km_adc_setup(uint8_t pin) { return 0; }
 
-int km_adc_close(uint8_t pin) {
-  return 0;
-}
-
+int km_adc_close(uint8_t pin) { return 0; }

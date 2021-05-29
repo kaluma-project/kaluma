@@ -1,11 +1,11 @@
 var EventEmitter = require('events').EventEmitter;
 
 class WiFi extends EventEmitter {
-  constructor () {
+  constructor() {
     super();
     if (!global.__ieee80211dev) {
       throw new Error('IEEE 802.11 device not found');
-    }    
+    }
     this._dev = global.__ieee80211dev;
     this._dev.assoc_cb = () => {
       this.emit('associated');
@@ -22,7 +22,7 @@ class WiFi extends EventEmitter {
    * Reset device
    * @param {Function} cb
    */
-  reset (cb) {
+  reset(cb) {
     if (this._dev) {
       this._dev.reset((err) => {
         if (err) {
@@ -40,7 +40,7 @@ class WiFi extends EventEmitter {
    * Scan networks
    * @param {Function} cb
    */
-  scan (cb) {
+  scan(cb) {
     if (this._dev) {
       this._dev.scan((err, scanResults) => {
         if (err) {
@@ -53,7 +53,7 @@ class WiFi extends EventEmitter {
       if (cb) cb(new SystemError(6)); // ENXIO
     }
   }
-  
+
   /**
    * Connect to network
    * @param {object} connectInfo
@@ -61,7 +61,7 @@ class WiFi extends EventEmitter {
    *   .password {string}
    * @param {function} cb
    */
-  connect (connectInfo, cb) {
+  connect(connectInfo, cb) {
     if (this._dev) {
       if (typeof connectInfo === 'function') {
         cb = connectInfo
@@ -116,7 +116,7 @@ class WiFi extends EventEmitter {
    * Disconnect the current network connection
    * @param {function} cb
    */
-  disconnect (cb) {
+  disconnect(cb) {
     if (this._dev) {
       this._dev.disconnect(err => {
         if (err) {
@@ -135,7 +135,7 @@ class WiFi extends EventEmitter {
    * @param {function(err,connectionInfo)} cb
    *   connectionInfo = null, if has no connection
    */
-  getConnection (cb) {
+  getConnection(cb) {
     if (this._dev) {
       this._dev.get_connection((err, connectionInfo) => {
         if (err) {

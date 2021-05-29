@@ -20,46 +20,39 @@
  */
 
 #include "system.h"
-#include "tty.h"
-#include "gpio.h"
+
 #include "adc.h"
-#include "pwm.h"
+#include "gpio.h"
 #include "i2c.h"
+#include "pwm.h"
 #include "spi.h"
+#include "tty.h"
 #include "uart.h"
 
 const char km_system_arch[] = "i686";
 const char km_system_platform[] = "linux";
 
 /**
-*/
-void km_delay(uint32_t msec) {
-}
+ */
+void km_delay(uint32_t msec) {}
 
 /**
-*/
-uint64_t km_gettime() {
-  return 0;
-}
+ */
+uint64_t km_gettime() { return 0; }
 
 /**
  * Return MAX of the micro seconde counter 44739242
-*/
-uint64_t km_micro_maxtime() {
-  return 0;
-}
+ */
+uint64_t km_micro_maxtime() { return 0; }
 /**
  * Return micro seconde counter
-*/
-uint64_t km_micro_gettime() {
-  return 0;
-}
+ */
+uint64_t km_micro_gettime() { return 0; }
 
 /**
  * micro secoded delay
-*/
-void km_micro_delay(uint32_t usec) {
-}
+ */
+void km_micro_delay(uint32_t usec) {}
 
 /**
  * Kaluma Hardware System Initializations
@@ -82,6 +75,4 @@ void km_system_cleanup() {
   km_gpio_cleanup();
 }
 
-uint8_t km_running_script_check() {
-  return false;
-}
+uint8_t km_running_script_check() { return false; }

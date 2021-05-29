@@ -19,66 +19,49 @@
  * SOFTWARE.
  */
 
-#include <stdint.h>
 #include "pwm.h"
+
+#include <stdint.h>
 
 /**
  * Initialize all PWM when system started
  */
-void km_pwm_init() {
-}
+void km_pwm_init() {}
 
 /**
  * Cleanup all PWM when system cleanup
  */
-void km_pwm_cleanup() {
-}
+void km_pwm_cleanup() {}
 
 /**
  * return Returns 0 on success or -1 on failure.
-*/
-int km_pwm_setup(uint8_t pin, double frequency, double duty) {
-  return 0;
-}
+ */
+int km_pwm_setup(uint8_t pin, double frequency, double duty) { return 0; }
 
 /**
-*/
-int km_pwm_start(uint8_t pin) {
-  return 0;
-}
+ */
+int km_pwm_start(uint8_t pin) { return 0; }
 
 /**
-*/
-int km_pwm_stop(uint8_t pin) {
-  return 0;
-}
+ */
+int km_pwm_stop(uint8_t pin) { return 0; }
 
 /**
-*/
-double km_pwm_get_frequency(uint8_t pin) {
-  return 0;
-}
+ */
+double km_pwm_get_frequency(uint8_t pin) { return 0; }
 
 /**
-*/
-double km_pwm_get_duty(uint8_t pin) {
-  return 0;
-}
+ */
+double km_pwm_get_duty(uint8_t pin) { return 0; }
 
 /**
-*/
-int km_pwm_set_duty(uint8_t pin, double duty) {
-  return 0;
-}
+ */
+int km_pwm_set_duty(uint8_t pin, double duty) { return 0; }
 
 /**
-*/
-int km_pwm_set_frequency(uint8_t pin, double frequency) {
-  return 0;
-}
+ */
+int km_pwm_set_frequency(uint8_t pin, double frequency) { return 0; }
 
 /**
-*/
-int km_pwm_close(uint8_t pin) {
-  return 0;
-}
+ */
+int km_pwm_close(uint8_t pin) { return 0; }

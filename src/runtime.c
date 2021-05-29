@@ -26,20 +26,20 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "tty.h"
-#include "flash.h"
-#include "jerryscript.h"
-#include "jerryscript-port.h"
-#include "jerryscript-ext/handler.h"
-#include "io.h"
-#include "gpio.h"
-#include "global.h"
-#include "repl.h"
-#include "system.h"
-#include "runtime.h"
-#include "kaluma_magic_strings.h"
-#include "jerryxx.h"
 
+#include "flash.h"
+#include "global.h"
+#include "gpio.h"
+#include "io.h"
+#include "jerryscript-ext/handler.h"
+#include "jerryscript-port.h"
+#include "jerryscript.h"
+#include "jerryxx.h"
+#include "kaluma_magic_strings.h"
+#include "repl.h"
+#include "runtime.h"
+#include "system.h"
+#include "tty.h"
 
 // --------------------------------------------------------------------------
 // PRIVATE VARIABLES
@@ -48,7 +48,7 @@
 /**
  * Runtime VM stop
  * - 0: normal
- * - 1: break VM execution 
+ * - 1: break VM execution
  */
 static uint8_t km_runtime_vm_stop = 0;
 
@@ -61,12 +61,12 @@ static km_io_idle_handle_t idler;
 // PRIVATE FUNCTIONS
 // --------------------------------------------------------------------------
 
-static jerry_value_t vm_exec_stop_callback (void *user_p) {
+static jerry_value_t vm_exec_stop_callback(void *user_p) {
   if (km_runtime_vm_stop > 0) {
     km_runtime_vm_stop = 0;
-    return jerry_create_string ((const jerry_char_t *) "Aborted");
+    return jerry_create_string((const jerry_char_t *)"Aborted");
   }
-  return jerry_create_undefined ();
+  return jerry_create_undefined();
 }
 
 static void idler_cb() {
@@ -75,7 +75,7 @@ static void idler_cb() {
     jerryxx_print_error(ret_val, true);
   }
   jerry_release_value(ret_val);
-#ifdef _TARGET_FREERTOS_  
+#ifdef _TARGET_FREERTOS_
   // ESP32 Kick the dog
   vTaskDelay(10);
 #endif
@@ -86,9 +86,11 @@ static void idler_cb() {
 // --------------------------------------------------------------------------
 
 void km_runtime_init(bool load, bool first) {
-  jerry_init (JERRY_INIT_EMPTY);
-  jerry_set_vm_exec_stop_callback (vm_exec_stop_callback, &km_runtime_vm_stop, 16);
-  jerry_register_magic_strings (magic_string_items, num_magic_string_items, magic_string_lengths);
+  jerry_init(JERRY_INIT_EMPTY);
+  jerry_set_vm_exec_stop_callback(vm_exec_stop_callback, &km_runtime_vm_stop,
+                                  16);
+  jerry_register_magic_strings(magic_string_items, num_magic_string_items,
+                               magic_string_lengths);
   km_global_init();
   jerry_gc(JERRY_GC_PRESSURE_HIGH);
   if (load) {
@@ -115,24 +117,23 @@ void km_runtime_load() {
   uint32_t size = km_flash_get_data_size();
   if (size > 0) {
     uint8_t *script = km_flash_get_data();
-    jerry_value_t parsed_code = jerry_parse (NULL, 0, script, size, JERRY_PARSE_STRICT_MODE);
+    jerry_value_t parsed_code =
+        jerry_parse(NULL, 0, script, size, JERRY_PARSE_STRICT_MODE);
     km_flash_free_data(script);
-    if (!jerry_value_is_error (parsed_code)) {
-      jerry_value_t ret_value = jerry_run (parsed_code);
-      if (jerry_value_is_error (ret_value)) {
+    if (!jerry_value_is_error(parsed_code)) {
+      jerry_value_t ret_value = jerry_run(parsed_code);
+      if (jerry_value_is_error(ret_value)) {
         jerryxx_print_error(ret_value, true);
         km_runtime_cleanup();
         km_runtime_init(false, false);
         return;
       }
-      jerry_release_value (ret_value);
+      jerry_release_value(ret_value);
     } else {
       jerryxx_print_error(parsed_code, true);
     }
-    jerry_release_value (parsed_code);
+    jerry_release_value(parsed_code);
   }
 }
 
-void km_runtime_set_vm_stop(uint8_t stop) {
-  km_runtime_vm_stop = stop;
-}
+void km_runtime_set_vm_stop(uint8_t stop) { km_runtime_vm_stop = stop; }

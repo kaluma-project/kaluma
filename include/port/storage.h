@@ -24,12 +24,12 @@
 
 #include <stdint.h>
 
-#define KM_STORAGE_OK           0
-#define KM_STORAGE_ERROR        -1
-#define KM_STORAGE_SWEEPREQ     -2
-#define KM_STORAGE_FULL         -3
-#define KM_STORAGE_OVERLENGTH  -4
-#define KM_STORAGE_FATAL       -10 /* internal use */
+#define KM_STORAGE_OK 0
+#define KM_STORAGE_ERROR -1
+#define KM_STORAGE_SWEEPREQ -2
+#define KM_STORAGE_FULL -3
+#define KM_STORAGE_OVERLENGTH -4
+#define KM_STORAGE_FATAL -10 /* internal use */
 
 /**
  * Erase all items in the storage
@@ -55,7 +55,8 @@ int km_storage_get_item(const char *key, char *buf);
  * Set the value with a key string
  * @param key The point to key string
  * @param buf The pointer to the buffer to store value
- * @return Returns 0 on success or -1 on failure or -2 on sweep required or -3 on full storage or -4 on over length.
+ * @return Returns 0 on success or -1 on failure or -2 on sweep required or -3
+ * on full storage or -4 on over length.
  */
 int km_storage_set_item(const char *key, char *buf);
 

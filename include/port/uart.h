@@ -22,7 +22,9 @@
 #ifndef __KM_UART_H
 #define __KM_UART_H
 
+#include <stddef.h>
 #include <stdint.h>
+
 #define KM_UARTPORT_ERROR -1
 
 typedef enum {
@@ -74,8 +76,9 @@ void km_uart_cleanup();
  * @return Positive number if successfully setup, negative otherwise.
  */
 int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
-  km_uart_parity_type_t parity, uint8_t stop, km_uart_flow_control_t flow,
-  size_t buffer_size, km_uart_pins_t pins);
+                  km_uart_parity_type_t parity, uint8_t stop,
+                  km_uart_flow_control_t flow, size_t buffer_size,
+                  km_uart_pins_t pins);
 
 /**
  * Write a given buffer to the port.
@@ -94,7 +97,6 @@ int km_uart_write(uint8_t port, uint8_t *buf, size_t len);
  * @return the number of bytes in read buffer.
  */
 uint32_t km_uart_available(uint8_t port);
-
 
 /**
  * Read bytes from the port and store them into a given buffer.

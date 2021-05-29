@@ -24,7 +24,6 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <stddef.h>
 
 typedef enum {
   KM_I2C_MASTER,
@@ -86,10 +85,13 @@ int km_i2c_setup_slave(uint8_t bus, uint8_t address, km_i2c_pins_t pins);
  * @param timeout Timeout in milliseconds.
  * @return The number of bytes written or -1 on timeout or failed to write.
  */
-int km_i2c_memWrite_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout);
+int km_i2c_memWrite_master(uint8_t bus, uint8_t address, uint16_t memAddress,
+                           uint8_t memAdd16bit, uint8_t *buf, size_t len,
+                           uint32_t timeout);
 
 /**
- * Memory Read bytes from the bus and store them into a given buffer (in master mode).
+ * Memory Read bytes from the bus and store them into a given buffer (in master
+ * mode).
  *
  * @param bus The bus number.
  * @param address Where the data read from.
@@ -100,7 +102,9 @@ int km_i2c_memWrite_master(uint8_t bus, uint8_t address, uint16_t memAddress, ui
  * @param timeout Timeout in milliseconds.
  * @return The number of bytes read or -1 on timeout or failed to read.
  */
-int km_i2c_memRead_master(uint8_t bus, uint8_t address, uint16_t memAddress, uint8_t memAdd16bit, uint8_t *buf, size_t len, uint32_t timeout);
+int km_i2c_memRead_master(uint8_t bus, uint8_t address, uint16_t memAddress,
+                          uint8_t memAdd16bit, uint8_t *buf, size_t len,
+                          uint32_t timeout);
 
 /**
  * Write a given buffer to the bus (in master mode).
@@ -113,7 +117,7 @@ int km_i2c_memRead_master(uint8_t bus, uint8_t address, uint16_t memAddress, uin
  * @return The number of bytes written or -1 on timeout or failed to write.
  */
 int km_i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
-  uint32_t timeout);
+                        uint32_t timeout);
 
 /**
  * Write a given buffer to the bus (in slave mode).
@@ -137,7 +141,7 @@ int km_i2c_write_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
  * @return The number of bytes read or -1 on timeout or failed to read.
  */
 int km_i2c_read_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
-  uint32_t timeout);
+                       uint32_t timeout);
 
 /**
  * Read bytes from the bus and store them into a given buffer (in slave mode).
@@ -149,7 +153,6 @@ int km_i2c_read_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
  * @return The number of bytes read or -1 on timeout or failed to read.
  */
 int km_i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
-
 
 /**
  * Close the I2C bus.

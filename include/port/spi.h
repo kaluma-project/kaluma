@@ -24,21 +24,17 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <stddef.h>
 
 #define KM_SPIPORT_ERROR -1
 
 typedef enum {
-  KM_SPI_MODE_0, // (CPOL=0/CPHA=0)
-  KM_SPI_MODE_1, // (CPOL=0/CPHA=1)
-  KM_SPI_MODE_2, // (CPOL=1/CPHA=0)
-  KM_SPI_MODE_3  // (CPOL=1/CPHA=1)
+  KM_SPI_MODE_0,  // (CPOL=0/CPHA=0)
+  KM_SPI_MODE_1,  // (CPOL=0/CPHA=1)
+  KM_SPI_MODE_2,  // (CPOL=1/CPHA=0)
+  KM_SPI_MODE_3   // (CPOL=1/CPHA=1)
 } km_spi_mode_t;
 
-typedef enum {
-  KM_SPI_BITORDER_MSB,
-  KM_SPI_BITORDER_LSB
-} km_spi_bitorder_t;
+typedef enum { KM_SPI_BITORDER_MSB, KM_SPI_BITORDER_LSB } km_spi_bitorder_t;
 
 typedef struct {
   int8_t miso;
@@ -71,8 +67,8 @@ void km_spi_cleanup();
  * @param pins pin numbers for the CLK/MISO/MOSI
  * @return Returns 0 on success or -1 on failure.
  */
-int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate, km_spi_bitorder_t bitorder, km_spi_pins_t pins);
-
+int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
+                 km_spi_bitorder_t bitorder, km_spi_pins_t pins);
 
 /**
  * Send and receive data simultaneously to the SPI bus
@@ -84,7 +80,8 @@ int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate, km_spi_bito
  * @param timeout
  * @return the number of bytes read or -1 on timeout or nothing written.
  */
-int km_spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len, uint32_t timeout);
+int km_spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len,
+                    uint32_t timeout);
 
 /**
  * Send data to the SPI bus

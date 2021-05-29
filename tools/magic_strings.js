@@ -7,12 +7,12 @@ const mustache = require('mustache')
 var includePath = path.join(__dirname, '../include')
 var modulesPath = path.join(__dirname, '../src/modules')
 
-var magicStringHeaders = [ includePath + '/magic_strings.h' ]
+var magicStringHeaders = [includePath + '/magic_strings.h']
 var magicStrings = [];
 
 function generateMagicStrings(modules) {
   // Extract magic string from all modules
-  var headers = [ includePath + '/magic_strings.h' ]
+  var headers = [includePath + '/magic_strings.h']
   modules.forEach(mod => {
     var header = modulesPath + '/' + mod.name + '/' + mod.name + '_magic_strings.h'
     if (fs.existsSync(header)) {

@@ -22,30 +22,30 @@
 #ifndef __FONT_H
 #define __FONT_H
 
-#include <stdlib.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 /**
  * Font glyph
  */
 typedef struct {
-	uint8_t  width;
-  uint8_t  height;
-	uint8_t  advance_x;
+  uint8_t width;
+  uint8_t height;
+  uint8_t advance_x;
 } gc_font_glyph_t;
 
 /**
  * Font struct
  */
 typedef struct {
-  uint8_t *bitmap;         // Glyph bitmap data
-  gc_font_glyph_t *glyphs; // NULL if fixed-size font
-  uint8_t first;           // First char (ASCII) in bitmap
-  uint8_t last;            // Last char (ASCII) in bitmap
-  uint8_t width;           // Glyph width in pixels if no glyph data
-  uint8_t height;          // Glyph height in pixels if no glyph data
-  uint8_t advance_x;       // Distance to next char
-  uint8_t advance_y;       // Newline distance
+  uint8_t *bitmap;          // Glyph bitmap data
+  gc_font_glyph_t *glyphs;  // NULL if fixed-size font
+  uint8_t first;            // First char (ASCII) in bitmap
+  uint8_t last;             // Last char (ASCII) in bitmap
+  uint8_t width;            // Glyph width in pixels if no glyph data
+  uint8_t height;           // Glyph height in pixels if no glyph data
+  uint8_t advance_x;        // Distance to next char
+  uint8_t advance_y;        // Newline distance
 } gc_font_t;
 
 extern const uint8_t font_default_bitmap[];

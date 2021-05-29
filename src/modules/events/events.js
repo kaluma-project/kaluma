@@ -19,7 +19,7 @@ function EventEmitter() {
 
 module.exports.EventEmitter = EventEmitter;
 
-EventEmitter.prototype.emit = function(type) {
+EventEmitter.prototype.emit = function (type) {
   if (!this._events) {
     this._events = {};
   }
@@ -48,7 +48,7 @@ EventEmitter.prototype.emit = function(type) {
 };
 
 
-EventEmitter.prototype.addListener = function(type, listener) {
+EventEmitter.prototype.addListener = function (type, listener) {
   if (typeof listener !== 'function') {
     throw new TypeError('listener must be a function');
   }
@@ -65,7 +65,7 @@ EventEmitter.prototype.addListener = function(type, listener) {
   return this;
 };
 
-EventEmitter.prototype.removeListener = function(type, listener) {
+EventEmitter.prototype.removeListener = function (type, listener) {
   if (typeof listener !== 'function') {
     throw new TypeError('listener must be a function');
   }
@@ -74,7 +74,7 @@ EventEmitter.prototype.removeListener = function(type, listener) {
   if (Array.isArray(list)) {
     for (var i = list.length - 1; i >= 0; --i) {
       if (list[i] == listener ||
-          (list[i].listener && list[i].listener == listener)) {
+        (list[i].listener && list[i].listener == listener)) {
         list.splice(i, 1);
         if (!list.length) {
           delete this._events[type];
@@ -87,7 +87,7 @@ EventEmitter.prototype.removeListener = function(type, listener) {
   return this;
 };
 
-EventEmitter.prototype.removeAllListeners = function(type) {
+EventEmitter.prototype.removeAllListeners = function (type) {
   if (arguments.length === 0) {
     this._events = {};
   } else {
@@ -97,23 +97,23 @@ EventEmitter.prototype.removeAllListeners = function(type) {
   return this;
 };
 
-EventEmitter.prototype.listeners = function(type) {
+EventEmitter.prototype.listeners = function (type) {
   return this._events[type] || [];
 }
 
-EventEmitter.prototype.listenerCount = function(type) {
+EventEmitter.prototype.listenerCount = function (type) {
   return this.listeners(type).length;
 }
 
 EventEmitter.prototype.on = EventEmitter.prototype.addListener;
 EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
 
-EventEmitter.prototype.once = function(type, listener) {
+EventEmitter.prototype.once = function (type, listener) {
   if (typeof listener !== 'function') {
     throw new TypeError('listener must be a function');
   }
 
-  var f = function() {
+  var f = function () {
     // here `this` is this not global, because EventEmitter binds event object
     // for this when it calls back the handler.
     this.removeListener(f.type, f);

@@ -1,4 +1,4 @@
-const { Gpio } = require( 'onoff' );
+const { Gpio } = require('onoff');
 const { UART } = require('./uart')
 const util = require('./util')
 

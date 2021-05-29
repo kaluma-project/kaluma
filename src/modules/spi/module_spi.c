@@ -20,18 +20,17 @@
  */
 
 #include <stdlib.h>
+
 #include "jerryscript.h"
 #include "jerryxx.h"
-#include "spi_magic_strings.h"
 #include "spi.h"
+#include "spi_magic_strings.h"
 
 #define SPI_DEFAULT_MODE KM_SPI_MODE_0
 #define SPI_DEFAULT_BAUDRATE 3000000
 #define SPI_DEFAULT_BITORDER KM_SPI_BITORDER_MSB
 
-static void buffer_free_cb(void *native_p) {
-  free(native_p);
-}
+static void buffer_free_cb(void *native_p) { free(native_p); }
 
 /**
  * SPI() constructor
@@ -41,33 +40,41 @@ JERRYXX_FUN(spi_ctor_fn) {
   JERRYXX_CHECK_ARG_OBJECT_OPT(1, "options");
 
   // read parameters
-  uint8_t bus = (uint8_t) JERRYXX_GET_ARG_NUMBER(0);
+  uint8_t bus = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
   uint8_t mode = SPI_DEFAULT_MODE;
   uint32_t baudrate = SPI_DEFAULT_BAUDRATE;
   uint8_t bitorder = SPI_DEFAULT_BITORDER;
   km_spi_pins_t def_pins = km_spi_get_default_pins(bus);
   km_spi_pins_t pins = {
-    .miso = def_pins.miso,
-    .mosi = def_pins.mosi,
-    .clk = def_pins.clk,
+      .miso = def_pins.miso,
+      .mosi = def_pins.mosi,
+      .clk = def_pins.clk,
   };
   if (JERRYXX_HAS_ARG(1)) {
     jerry_value_t options = JERRYXX_GET_ARG(1);
-    mode = (uint8_t) jerryxx_get_property_number(options, MSTR_SPI_MODE, SPI_DEFAULT_MODE);
-    baudrate = (uint32_t) jerryxx_get_property_number(options, MSTR_SPI_BAUDRATE, SPI_DEFAULT_BAUDRATE);
-    bitorder = (uint8_t) jerryxx_get_property_number(options, MSTR_SPI_BITORDER, SPI_DEFAULT_BITORDER);
-    pins.miso = (int8_t) jerryxx_get_property_number(options, MSTR_SPI_MISO, def_pins.miso);
-    pins.mosi = (int8_t) jerryxx_get_property_number(options, MSTR_SPI_MOSI, def_pins.mosi);
-    pins.clk = (int8_t) jerryxx_get_property_number(options, MSTR_SPI_CLK, def_pins.clk);
+    mode = (uint8_t)jerryxx_get_property_number(options, MSTR_SPI_MODE,
+                                                SPI_DEFAULT_MODE);
+    baudrate = (uint32_t)jerryxx_get_property_number(options, MSTR_SPI_BAUDRATE,
+                                                     SPI_DEFAULT_BAUDRATE);
+    bitorder = (uint8_t)jerryxx_get_property_number(options, MSTR_SPI_BITORDER,
+                                                    SPI_DEFAULT_BITORDER);
+    pins.miso = (int8_t)jerryxx_get_property_number(options, MSTR_SPI_MISO,
+                                                    def_pins.miso);
+    pins.mosi = (int8_t)jerryxx_get_property_number(options, MSTR_SPI_MOSI,
+                                                    def_pins.mosi);
+    pins.clk = (int8_t)jerryxx_get_property_number(options, MSTR_SPI_CLK,
+                                                   def_pins.clk);
   }
 
-  if (bitorder != KM_SPI_BITORDER_LSB)
-    bitorder = KM_SPI_BITORDER_MSB;
+  if (bitorder != KM_SPI_BITORDER_LSB) bitorder = KM_SPI_BITORDER_MSB;
   if (mode < 0 || mode > 3)
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *) "SPI mode error.");
+    return jerry_create_error(JERRY_ERROR_RANGE,
+                              (const jerry_char_t *)"SPI mode error.");
   // initialize the bus
-  if (km_spi_setup(bus, (km_spi_mode_t) mode, baudrate, (km_spi_bitorder_t) bitorder, pins) == KM_SPIPORT_ERROR) {
-    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "SPI port setup fail.");
+  if (km_spi_setup(bus, (km_spi_mode_t)mode, baudrate,
+                   (km_spi_bitorder_t)bitorder, pins) == KM_SPIPORT_ERROR) {
+    return jerry_create_error(JERRY_ERROR_REFERENCE,
+                              (const jerry_char_t *)"SPI port setup fail.");
   } else {
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BUS, bus);
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_MODE, mode);
@@ -87,34 +94,41 @@ JERRYXX_FUN(spi_transfer_fn) {
   JERRYXX_CHECK_ARG(0, "data");
 
   jerry_value_t data = JERRYXX_GET_ARG(0);
-  uint32_t timeout = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 5000);
+  uint32_t timeout = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(1, 5000);
 
   // check this.bus number
-  jerry_value_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
+  jerry_value_t bus_value =
+      jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
   if (!jerry_value_is_number(bus_value)) {
-    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "SPI bus is not initialized.");
+    return jerry_create_error(
+        JERRY_ERROR_REFERENCE,
+        (const jerry_char_t *)"SPI bus is not initialized.");
   }
-  uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
+  uint8_t bus = (uint8_t)jerry_get_number_value(bus_value);
   jerry_release_value(bus_value);
 
   // write data to the bus
   if (jerry_value_is_typedarray(data) &&
-      jerry_get_typedarray_type(data) == JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
+      jerry_get_typedarray_type(data) ==
+          JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
     jerry_length_t byteLength = 0;
     jerry_length_t byteOffset = 0;
-    jerry_value_t array_buffer = jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
+    jerry_value_t array_buffer =
+        jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
     size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
     uint8_t *tx_buf = jerry_get_arraybuffer_pointer(array_buffer);
     uint8_t *rx_buf = malloc(len);
     int ret = km_spi_sendrecv(bus, tx_buf, rx_buf, len, timeout);
     if (ret == KM_SPIPORT_ERROR) {
       free(rx_buf);
-      return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to transfer data via SPI bus.");
+      return jerry_create_error(
+          JERRY_ERROR_REFERENCE,
+          (const jerry_char_t *)"Failed to transfer data via SPI bus.");
     } else {
-      jerry_value_t buffer = jerry_create_arraybuffer_external(len, rx_buf,
-        buffer_free_cb);
+      jerry_value_t buffer =
+          jerry_create_arraybuffer_external(len, rx_buf, buffer_free_cb);
       jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
-        JERRY_TYPEDARRAY_UINT8, buffer);
+          JERRY_TYPEDARRAY_UINT8, buffer);
       jerry_release_value(buffer);
       return array;
     }
@@ -127,20 +141,24 @@ JERRYXX_FUN(spi_transfer_fn) {
     int ret = km_spi_sendrecv(bus, tx_buf, rx_buf, len, timeout);
     if (ret == KM_SPIPORT_ERROR) {
       free(rx_buf);
-      return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to transfer data via SPI bus.");
+      return jerry_create_error(
+          JERRY_ERROR_REFERENCE,
+          (const jerry_char_t *)"Failed to transfer data via SPI bus.");
     } else {
-      jerry_value_t buffer = jerry_create_arraybuffer_external(len, rx_buf,
-        buffer_free_cb);
+      jerry_value_t buffer =
+          jerry_create_arraybuffer_external(len, rx_buf, buffer_free_cb);
       jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
-        JERRY_TYPEDARRAY_UINT8, buffer);
+          JERRY_TYPEDARRAY_UINT8, buffer);
       jerry_release_value(buffer);
       return array;
     }
   } else {
-    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "The data argument must be Uint8Array or string.");
+    return jerry_create_error(
+        JERRY_ERROR_TYPE,
+        (const jerry_char_t
+             *)"The data argument must be Uint8Array or string.");
   }
 }
-
 
 /**
  * SPI.prototype.send() function
@@ -149,24 +167,29 @@ JERRYXX_FUN(spi_send_fn) {
   JERRYXX_CHECK_ARG(0, "data");
 
   jerry_value_t data = JERRYXX_GET_ARG(0);
-  uint32_t timeout = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 5000);
-  uint32_t count = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(2, 1);
+  uint32_t timeout = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(1, 5000);
+  uint32_t count = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(2, 1);
 
   // check this.bus number
-  jerry_value_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
+  jerry_value_t bus_value =
+      jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
   if (!jerry_value_is_number(bus_value)) {
-    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "SPI bus is not initialized.");
+    return jerry_create_error(
+        JERRY_ERROR_REFERENCE,
+        (const jerry_char_t *)"SPI bus is not initialized.");
   }
-  uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
+  uint8_t bus = (uint8_t)jerry_get_number_value(bus_value);
   jerry_release_value(bus_value);
 
   // write data to the bus
   int ret = KM_SPIPORT_ERROR;
   if (jerry_value_is_typedarray(data) &&
-      jerry_get_typedarray_type(data) == JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
+      jerry_get_typedarray_type(data) ==
+          JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
     jerry_length_t byteLength = 0;
     jerry_length_t byteOffset = 0;
-    jerry_value_t array_buffer = jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
+    jerry_value_t array_buffer =
+        jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
     size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
     uint8_t *tx_buf = jerry_get_arraybuffer_pointer(array_buffer);
     for (int c = 0; c < count; c++) {
@@ -183,29 +206,36 @@ JERRYXX_FUN(spi_send_fn) {
       if (ret < 0) break;
     }
   } else {
-    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "The data argument must be Uint8Array or string.");
+    return jerry_create_error(
+        JERRY_ERROR_TYPE,
+        (const jerry_char_t
+             *)"The data argument must be Uint8Array or string.");
   }
   if (ret == KM_SPIPORT_ERROR)
-    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to send data via SPI bus.");
+    return jerry_create_error(
+        JERRY_ERROR_REFERENCE,
+        (const jerry_char_t *)"Failed to send data via SPI bus.");
   else
     return jerry_create_number(ret);
 }
-
 
 /**
  * SPI.prototype.recv() function
  */
 JERRYXX_FUN(spi_recv_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "length");
-  uint32_t length = (uint32_t) JERRYXX_GET_ARG_NUMBER(0);
-  uint32_t timeout = (uint32_t) JERRYXX_GET_ARG_NUMBER_OPT(1, 5000);
+  uint32_t length = (uint32_t)JERRYXX_GET_ARG_NUMBER(0);
+  uint32_t timeout = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(1, 5000);
 
   // check this.bus number
-  jerry_value_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
+  jerry_value_t bus_value =
+      jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
   if (!jerry_value_is_number(bus_value)) {
-    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "SPI bus is not initialized.");
+    return jerry_create_error(
+        JERRY_ERROR_REFERENCE,
+        (const jerry_char_t *)"SPI bus is not initialized.");
   }
-  uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
+  uint8_t bus = (uint8_t)jerry_get_number_value(bus_value);
   jerry_release_value(bus_value);
 
   // recv data
@@ -215,12 +245,14 @@ JERRYXX_FUN(spi_recv_fn) {
   // return an Uin8Array
   if (ret == KM_SPIPORT_ERROR) {
     free(buf);
-    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to receive data via SPI bus.");
+    return jerry_create_error(
+        JERRY_ERROR_REFERENCE,
+        (const jerry_char_t *)"Failed to receive data via SPI bus.");
   } else {
-    jerry_value_t array_buffer = jerry_create_arraybuffer_external(length, buf,
-        buffer_free_cb);
+    jerry_value_t array_buffer =
+        jerry_create_arraybuffer_external(length, buf, buffer_free_cb);
     jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
-      JERRY_TYPEDARRAY_UINT8, array_buffer);
+        JERRY_TYPEDARRAY_UINT8, array_buffer);
     jerry_release_value(array_buffer);
     return array;
   }
@@ -231,17 +263,21 @@ JERRYXX_FUN(spi_recv_fn) {
  */
 JERRYXX_FUN(spi_close_fn) {
   // check this.bus number
-  jerry_value_t bus_value = jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
+  jerry_value_t bus_value =
+      jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
   if (!jerry_value_is_number(bus_value)) {
-    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "SPI bus is not initialized.");
+    return jerry_create_error(
+        JERRY_ERROR_REFERENCE,
+        (const jerry_char_t *)"SPI bus is not initialized.");
   }
-  uint8_t bus = (uint8_t) jerry_get_number_value(bus_value);
+  uint8_t bus = (uint8_t)jerry_get_number_value(bus_value);
   jerry_release_value(bus_value);
 
   // close the bus
   int ret = km_spi_close(bus);
   if (ret == KM_SPIPORT_ERROR) {
-    return jerry_create_error(JERRY_ERROR_REFERENCE, (const jerry_char_t *) "Failed to close SPI bus.");
+    return jerry_create_error(JERRY_ERROR_REFERENCE,
+                              (const jerry_char_t *)"Failed to close SPI bus.");
   }
 
   // delete this.bus property
@@ -264,16 +300,17 @@ jerry_value_t module_spi_init() {
   jerryxx_set_property_number(spi_ctor, MSTR_SPI_MODE3, KM_SPI_MODE_3);
   jerryxx_set_property_number(spi_ctor, MSTR_SPI_MSB, KM_SPI_BITORDER_MSB);
   jerryxx_set_property_number(spi_ctor, MSTR_SPI_LSB, KM_SPI_BITORDER_LSB);
-  jerryxx_set_property_function(spi_prototype, MSTR_SPI_TRANSFER, spi_transfer_fn);
+  jerryxx_set_property_function(spi_prototype, MSTR_SPI_TRANSFER,
+                                spi_transfer_fn);
   jerryxx_set_property_function(spi_prototype, MSTR_SPI_SEND, spi_send_fn);
   jerryxx_set_property_function(spi_prototype, MSTR_SPI_RECV, spi_recv_fn);
   jerryxx_set_property_function(spi_prototype, MSTR_SPI_CLOSE, spi_close_fn);
-  jerry_release_value (spi_prototype);
+  jerry_release_value(spi_prototype);
 
   /* spi module exports */
   jerry_value_t exports = jerry_create_object();
   jerryxx_set_property(exports, MSTR_SPI_SPI, spi_ctor);
-  jerry_release_value (spi_ctor);
+  jerry_release_value(spi_ctor);
 
   return exports;
 }

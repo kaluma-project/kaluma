@@ -20,12 +20,13 @@
  */
 
 #include <stdlib.h>
+
 #include "jerryscript.h"
 #include "jerryxx.h"
-#include "url_magic_strings.h"
 #include "module_url.h"
+#include "url_magic_strings.h"
 
-static int fndch(const char* buf, char ch, int start, int end) {
+static int fndch(const char *buf, char ch, int start, int end) {
   for (int i = start; i <= end; i++) {
     if (buf[i] == ch) {
       return i;
@@ -71,7 +72,7 @@ JERRYXX_FUN(url_ctor_fn) {
       }
     }
     if (protocol_e > 0) {
-      origin_s = protocol_e + 3; // exclude protocol part
+      origin_s = protocol_e + 3;  // exclude protocol part
       origin_e = input_sz - 1;
       // split origin + path
       int p1 = fndch(input, '/', origin_s, origin_e);
@@ -133,56 +134,68 @@ JERRYXX_FUN(url_ctor_fn) {
         }
       }
     } else {
-      return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *) "Invalid URL");
+      return jerry_create_error(JERRY_ERROR_TYPE,
+                                (const jerry_char_t *)"Invalid URL");
     }
     // create properties
     jerry_value_t protocol;
     if (protocol_s >= 0) {
-      protocol = jerry_create_string_sz((const jerry_char_t *) input + protocol_s, protocol_e - protocol_s + 1);
+      protocol =
+          jerry_create_string_sz((const jerry_char_t *)input + protocol_s,
+                                 protocol_e - protocol_s + 1);
     } else {
-      protocol = jerry_create_string((const jerry_char_t *) "");
+      protocol = jerry_create_string((const jerry_char_t *)"");
     }
     jerry_value_t username;
     if (user_s >= 0) {
-      username = jerry_create_string_sz((const jerry_char_t *) input + user_s, user_e - user_s + 1);
+      username = jerry_create_string_sz((const jerry_char_t *)input + user_s,
+                                        user_e - user_s + 1);
     } else {
-      username = jerry_create_string((const jerry_char_t *) "");
+      username = jerry_create_string((const jerry_char_t *)"");
     }
     jerry_value_t password;
     if (pass_s >= 0) {
-      password = jerry_create_string_sz((const jerry_char_t *) input + pass_s, pass_e - pass_s + 1);
+      password = jerry_create_string_sz((const jerry_char_t *)input + pass_s,
+                                        pass_e - pass_s + 1);
     } else {
-      password = jerry_create_string((const jerry_char_t *) "");
+      password = jerry_create_string((const jerry_char_t *)"");
     }
     jerry_value_t hostname;
     if (hostname_s >= 0) {
-      hostname = jerry_create_string_sz((const jerry_char_t *) input + hostname_s, hostname_e - hostname_s + 1);
+      hostname =
+          jerry_create_string_sz((const jerry_char_t *)input + hostname_s,
+                                 hostname_e - hostname_s + 1);
     } else {
-      hostname = jerry_create_string((const jerry_char_t *) "");
+      hostname = jerry_create_string((const jerry_char_t *)"");
     }
     jerry_value_t port;
     if (port_s >= 0) {
-      port = jerry_create_string_sz((const jerry_char_t *) input + port_s, port_e - port_s + 1);
+      port = jerry_create_string_sz((const jerry_char_t *)input + port_s,
+                                    port_e - port_s + 1);
     } else {
-      port = jerry_create_string((const jerry_char_t *) "");
+      port = jerry_create_string((const jerry_char_t *)"");
     }
     jerry_value_t pathname;
     if (pathname_s >= 0) {
-      pathname = jerry_create_string_sz((const jerry_char_t *) input + pathname_s, pathname_e - pathname_s + 1);
+      pathname =
+          jerry_create_string_sz((const jerry_char_t *)input + pathname_s,
+                                 pathname_e - pathname_s + 1);
     } else {
-      pathname = jerry_create_string((const jerry_char_t *) "");
+      pathname = jerry_create_string((const jerry_char_t *)"");
     }
     jerry_value_t search;
     if (search_s >= 0) {
-      search = jerry_create_string_sz((const jerry_char_t *) input + search_s, search_e - search_s + 1);
+      search = jerry_create_string_sz((const jerry_char_t *)input + search_s,
+                                      search_e - search_s + 1);
     } else {
-      search = jerry_create_string((const jerry_char_t *) "");
+      search = jerry_create_string((const jerry_char_t *)"");
     }
     jerry_value_t hash;
     if (hash_s >= 0) {
-      hash = jerry_create_string_sz((const jerry_char_t *) input + hash_s, hash_e - hash_s + 1);
+      hash = jerry_create_string_sz((const jerry_char_t *)input + hash_s,
+                                    hash_e - hash_s + 1);
     } else {
-      hash = jerry_create_string((const jerry_char_t *) "");
+      hash = jerry_create_string((const jerry_char_t *)"");
     }
     jerryxx_set_property(JERRYXX_GET_THIS, MSTR_URL_PROTOCOL, protocol);
     jerryxx_set_property(JERRYXX_GET_THIS, MSTR_URL_USERNAME, username);
@@ -209,19 +222,21 @@ jerry_value_t module_url_init() {
   jerry_value_t url_ctor = jerry_create_external_function(url_ctor_fn);
   jerry_value_t prototype = jerry_create_object();
   jerryxx_set_property(url_ctor, "prototype", prototype);
-  jerry_release_value (prototype);
+  jerry_release_value(prototype);
   // jerryxx_set_property_function(prototype, MSTR_PWM_START, pwm_start_fn);
   // jerryxx_set_property_function(prototype, MSTR_PWM_STOP, pwm_stop_fn);
-  // jerryxx_set_property_function(prototype, MSTR_PWM_GET_FREQUENCY, pwm_get_frequency_fn);
-  // jerryxx_set_property_function(prototype, MSTR_PWM_SET_FREQUENCY, pwm_set_frequency_fn);
-  // jerryxx_set_property_function(prototype, MSTR_PWM_GET_DUTY, pwm_get_duty_fn);
-  // jerryxx_set_property_function(prototype, MSTR_PWM_SET_DUTY, pwm_set_duty_fn);
+  // jerryxx_set_property_function(prototype, MSTR_PWM_GET_FREQUENCY,
+  // pwm_get_frequency_fn); jerryxx_set_property_function(prototype,
+  // MSTR_PWM_SET_FREQUENCY, pwm_set_frequency_fn);
+  // jerryxx_set_property_function(prototype, MSTR_PWM_GET_DUTY,
+  // pwm_get_duty_fn); jerryxx_set_property_function(prototype,
+  // MSTR_PWM_SET_DUTY, pwm_set_duty_fn);
   // jerryxx_set_property_function(prototype, MSTR_PWM_CLOSE, pwm_close_fn);
 
   /* url module exports */
   jerry_value_t exports = jerry_create_object();
   jerryxx_set_property(exports, MSTR_URL_URL, url_ctor);
-  jerry_release_value (url_ctor);
+  jerry_release_value(url_ctor);
 
   return exports;
 }

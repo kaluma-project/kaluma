@@ -1,4 +1,4 @@
-function LED (pin) {
+function LED(pin) {
   this.pin = pin;
   pinMode(this.pin, OUTPUT);
 }
