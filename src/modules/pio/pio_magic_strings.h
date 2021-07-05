@@ -19,21 +19,15 @@
  * SOFTWARE.
  */
 
-#ifndef __RPI_PICO_H
-#define __RPI_PICO_H
+#ifndef __PIO_MAGIC_STRINGS_H
+#define __PIO_MAGIC_STRINGS_H
 
-#define GPIO_NUM 29  // GPIO 0 - 28
-// #define ADC_NUM 3
-#define PWM_NUM 27
-#define I2C_NUM 2
-#define SPI_NUM 2
-#define UART_NUM 2
-// #define LED_NUM 1
-// #define BUTTON_NUM 0
-#define PIO_NUM 2
+#define MSTR_PIO_PIO "PIO"
+#define MSTR_PIO_PORT "port"
+#define MSTR_PIO_PIN_OUT "pinOut"
+#define MSTR_PIO_CODE "code"
+#define MSTR_PIO_PUT "put"
+#define MSTR_PIO_GET "get"
+#define MSTR_PIO_CLOSE "close"
 
-#define ADC_RESOLUTION_BIT 12
-#define PWM_CLK_REF 1250
-#define I2C_MAX_CLOCK 1000000
-#define SCR_LOAD_GPIO 22  // GPIO 22
-#endif                    /* __RPI_PICO_H */
+#endif /* __PIO_MAGIC_STRINGS_H */
