@@ -31,7 +31,6 @@
 // #define LED_NUM 1
 // #define BUTTON_NUM 0
 #define PIO_NUM 2
-#define PIO_SM_NUM 4
 
 #define ADC_RESOLUTION_BIT 12
 #define PWM_CLK_REF 1250
