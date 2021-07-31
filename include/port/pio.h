@@ -30,22 +30,48 @@
 #define KM_PIO_FIFO_LOW 0
 #define KM_PIO_FIFO_HIGH 1
 
+#define KM_PIO_NO_SM 4
+
+#define KM_PIO_PORT_DISABLE 0x00
+#define KM_PIO_PORT_ENABLE 0x01
+
+#define KM_PIO_SM0_EN 0x10
+#define KM_PIO_SM1_EN 0x20
+#define KM_PIO_SM2_EN 0x40
+#define KM_PIO_SM3_EN 0x80
+
 /**
- * Initialize all PIO when system started
+ * Init a PIO module.
+ *
  */
 void km_pio_init(void);
 
 /**
- * Setup a PIO port.
+ * reset a PIO module.
+ *
+ */
+void km_pio_cleanup(void);
+
+/**
+ * Init a PIO port.
  *
  * @param port port number of PIO block
  * @param code code array for PIO
  * @param code_length Length of the code.
+ * @return 0 or Positive number if successfully setup, negative otherwise.
+ */
+int km_pio_port_init(uint8_t port, uint16_t *code, uint8_t code_length);
+
+/**
+ * Setup a PIO sm.
+ *
+ * @param port port number of PIO block
  * @param pin_out output pin number for the PIO
+ * @param pin_mode Pin mode settings,
  * @return Positive number if successfully setup, negative otherwise.
  */
-int km_pio_setup(uint8_t port, uint16_t *code, uint8_t code_length,
-                 uint8_t pin_out);
+int km_pio_sm_setup(uint8_t port, uint8_t sm, uint8_t pin_out,
+                    uint8_t pin_mode);
 
 /**
  * Close the PIO port
@@ -62,7 +88,7 @@ int km_pio_close(uint8_t port);
  * @param data 32bit data value
  * @return Positive number if successfully setup, negative otherwise.
  */
-int km_pio_put_fifo(uint8_t port, uint32_t data);
+int km_pio_put_fifo(uint8_t port, uint8_t sm, uint32_t data);
 
 /**
  *  GEt data from the PIO FIFO
@@ -70,5 +96,5 @@ int km_pio_put_fifo(uint8_t port, uint32_t data);
  * @param port port number of PIO block
  * @return 32bit data value
  */
-uint32_t km_pio_get_fifo(uint8_t port);
+uint32_t km_pio_get_fifo(uint8_t port, uint8_t sm);
 #endif /* __KM_PIO_H */
