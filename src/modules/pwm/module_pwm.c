@@ -38,7 +38,7 @@ JERRYXX_FUN(pwm_ctor_fn) {
   else if (duty > KM_PWM_DUTY_MAX)
     duty = KM_PWM_DUTY_MAX;
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PWM_PIN, pin);
-  if (km_pwm_setup(pin, frequency, duty) == KM_PWMPORT_ERROR) {
+  if (km_pwm_setup(pin, -1, frequency, duty) == KM_PWMPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);

@@ -586,7 +586,7 @@ JERRYXX_FUN(analog_write_fn) {
   else if (value > KM_PWM_DUTY_MAX)
     value = KM_PWM_DUTY_MAX;
   double frequency = JERRYXX_GET_ARG_NUMBER_OPT(2, 490);  // Default 490Hz
-  if (km_pwm_setup(pin, frequency, value) == KM_PWMPORT_ERROR) {
+  if (km_pwm_setup(pin, -1, frequency, value) == KM_PWMPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for analog out (PWM)", pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
@@ -606,20 +606,31 @@ JERRYXX_FUN(tone_fn) {
   JERRYXX_CHECK_ARG_NUMBER_OPT(1, "frequency");
   JERRYXX_CHECK_ARG_NUMBER_OPT(2, "duration");
   JERRYXX_CHECK_ARG_NUMBER_OPT(3, "duty");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(4, "invPin");
   uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
   double frequency = JERRYXX_GET_ARG_NUMBER_OPT(1, 261.626);  // C key frequency
   uint32_t duration = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(2, 0);
   double duty = JERRYXX_GET_ARG_NUMBER_OPT(3, 0.5);
+  int8_t invPin = JERRYXX_GET_ARG_NUMBER_OPT(4, -1);
+  if ((invPin >= 0) && (km_check_pwm_inv_port(pin, invPin) < 0)) {
+    char errmsg[255];
+    sprintf(errmsg, "The pin \"%d\" can't be used for tone inversion pin",
+            invPin);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  }
   if (duty < KM_PWM_DUTY_MIN)
     duty = KM_PWM_DUTY_MIN;
   else if (duty > KM_PWM_DUTY_MAX)
     duty = KM_PWM_DUTY_MAX;
-  if (km_pwm_setup(pin, frequency, duty) == KM_PWMPORT_ERROR) {
+  if (km_pwm_setup(pin, invPin, frequency, duty) == KM_PWMPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for tone", pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
   } else {
     km_pwm_start(pin);
+    if (invPin >= 0) {
+      km_pwm_start(invPin);
+    }
     // setup timer for duration
     if (duration > 0) {
       km_io_timer_handle_t *timer = malloc(sizeof(km_io_timer_handle_t));

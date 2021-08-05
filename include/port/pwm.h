@@ -43,11 +43,21 @@ void km_pwm_cleanup();
  * Setup a PWM channel
  *
  * @param {uint8_t} pin
+ * @param {int8_t} inv_pin, inversion pin, -1 when inv_pin is not used.
  * @param {double} frequency
  * @param {double} duty
  * @return result status code
  */
-int km_pwm_setup(uint8_t pin, double frequency, double duty);
+int km_pwm_setup(uint8_t pin, int8_t inv_pin, double frequency, double duty);
+
+/**
+ * Check inv_pin can make inversion of the pin
+ *
+ * @param {uint8_t} pin
+ * @param {int8_t} inv_pin, inversion pin, -1 when inv_pin is not used.
+ * @return -1 if inv_pin can't generate inversion of the pin
+ */
+int km_check_pwm_inv_port(uint8_t pin, int8_t inv_pin);
 
 /**
  * Start the PWM channel
