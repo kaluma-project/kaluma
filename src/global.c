@@ -604,14 +604,18 @@ static void tone_timeout_cb(km_io_timer_handle_t *timer) {
 JERRYXX_FUN(tone_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   JERRYXX_CHECK_ARG_NUMBER_OPT(1, "frequency");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(2, "duration");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(3, "duty");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(4, "invPin");
+  JERRYXX_CHECK_ARG_OBJECT_OPT(2, "options");
   uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
   double frequency = JERRYXX_GET_ARG_NUMBER_OPT(1, 261.626);  // C key frequency
-  uint32_t duration = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(2, 0);
-  double duty = JERRYXX_GET_ARG_NUMBER_OPT(3, 0.5);
-  int8_t invPin = JERRYXX_GET_ARG_NUMBER_OPT(4, -1);
+  uint32_t duration = 0;
+  double duty = 0.5;
+  int8_t invPin = -1;
+  if (JERRYXX_HAS_ARG(2)) {
+    jerry_value_t options = JERRYXX_GET_ARG(2);
+    duration = (uint32_t)jerryxx_get_property_number(options, MSTR_DURATION, 0);
+    duty = (double)jerryxx_get_property_number(options, MSTR_DUTY, 0.5);
+    invPin = (int8_t)jerryxx_get_property_number(options, MSTR_INVPIN, -1);
+  }
   if ((invPin >= 0) && (km_check_pwm_inv_port(pin, invPin) < 0)) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for tone inversion pin",
