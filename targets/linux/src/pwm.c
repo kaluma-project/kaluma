@@ -36,7 +36,15 @@ void km_pwm_cleanup() {}
 /**
  * return Returns 0 on success or -1 on failure.
  */
-int km_pwm_setup(uint8_t pin, double frequency, double duty) { return 0; }
+int km_pwm_setup(uint8_t pin, int8_t inv_pin, double frequency, double duty) {
+  return 0;
+}
+
+int km_check_pwm_inv_port(uint8_t pin, int8_t inv_pin) {
+  (void)pin;
+  (void)inv_pin;
+  return KM_PWMPORT_ERROR;
+}
 
 /**
  */

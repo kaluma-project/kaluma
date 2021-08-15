@@ -85,7 +85,7 @@ uint16_t __get_period(double frequency) {
 /**
  * return Returns 0 on success or -1 on failure.
  */
-int km_pwm_setup(uint8_t pin, double frequency, double duty) {
+int km_pwm_setup(uint8_t pin, int8_t inv_pin, double frequency, double duty) {
   int pwm_index = __get_pwm_index(pin);
   if (pwm_index < 0) {
     return KM_PWMPORT_ERROR;  // Error
@@ -95,21 +95,44 @@ int km_pwm_setup(uint8_t pin, double frequency, double duty) {
   }
   uint16_t period = __get_period(frequency);
   double clk_div = clock_get_hz(clk_sys) / (frequency * period);
+  bool enabled = false;
+  uint16_t uint_duty = (uint16_t)(duty * period);
   gpio_set_function(pin, GPIO_FUNC_PWM);
   pwm_config config = pwm_get_default_config();
   pwm_config_set_clkdiv(&config, clk_div);
   pwm_config_set_wrap(&config, period - 1);
   if (__pwm_config[pwm_index].enabled) {
-    pwm_init(pwm_gpio_to_slice_num(pin), &config, true);
-  } else {
-    pwm_init(pwm_gpio_to_slice_num(pin), &config, false);
+    enabled = true;
   }
-  uint16_t uint_duty = (uint16_t)(duty * period);
+  pwm_init(pwm_gpio_to_slice_num(pin), &config, enabled);
   pwm_set_chan_level(pwm_gpio_to_slice_num(pin), pwm_gpio_to_channel(pin),
                      uint_duty);
+  if (inv_pin >= 0) {
+    bool inv_a = false;
+    bool inv_b = false;
+    if (pwm_gpio_to_channel(inv_pin) == PWM_CHAN_A) {
+      inv_a = true;
+    } else {
+      inv_b = true;
+    }
+    pwm_set_chan_level(pwm_gpio_to_slice_num(inv_pin),
+                       pwm_gpio_to_channel(inv_pin), uint_duty);
+    pwm_set_output_polarity(pwm_gpio_to_slice_num(inv_pin), inv_a, inv_b);
+    gpio_set_function(inv_pin, GPIO_FUNC_PWM);
+  }
   __pwm_config[pwm_index].freq = frequency;
   __pwm_config[pwm_index].duty = duty;
   __pwm_config[pwm_index].period = period;
+  return 0;
+}
+
+int km_check_pwm_inv_port(uint8_t pin, int8_t inv_pin) {
+  int pwm_index = __get_pwm_index(pin);
+  if ((pwm_index < 0) || (pin == inv_pin) ||
+      (pwm_gpio_to_channel(pin) == pwm_gpio_to_channel(inv_pin)) ||
+      (pwm_gpio_to_slice_num(pin) != pwm_gpio_to_slice_num(inv_pin))) {
+    return KM_PWMPORT_ERROR;
+  }
   return 0;
 }
 
@@ -188,7 +211,7 @@ int km_pwm_set_frequency(uint8_t pin, double frequency) {
     while (pwm_get_counter(pwm_gpio_to_slice_num(pin)) != 0)
       ;
   }
-  km_pwm_setup(pin, frequency, previous_duty);
+  km_pwm_setup(pin, -1, frequency, previous_duty);
   return 0;
 }
 
