@@ -60,7 +60,7 @@
 #define MSTR_NO_TONE "noTone"
 #define MSTR_DURATION "duration"
 #define MSTR_DUTY "duty"
-#define MSTR_INVPIN "invPin"
+#define MSTR_INVERSION "inversion"
 #define MSTR_SET_TIMEOUT "setTimeout"
 #define MSTR_SET_INTERVAL "setInterval"
 #define MSTR_CLEAR_TIMEOUT "clearTimeout"
