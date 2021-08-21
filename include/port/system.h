@@ -24,6 +24,7 @@
 
 #include <stdint.h>
 
+#include "io.h"
 extern const char km_system_arch[];
 extern const char km_system_platform[];
 
@@ -64,6 +65,13 @@ uint64_t km_micro_gettime(void);
  * micro secoded delay
  */
 void km_micro_delay(uint32_t usec);
+
+/**
+ * Enter dormant state
+ * @param pin GPIO pin for wakeup
+ * @param events GPIO pin events for wakeup
+ */
+int km_enter_dormant(uint8_t pin, km_io_watch_mode_t events);
 
 /**
  * check script running mode - skipping or running user script

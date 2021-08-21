@@ -731,6 +731,23 @@ JERRYXX_FUN(millis_fn) {
   return jerry_create_number(msec);
 }
 
+JERRYXX_FUN(dormant_fn) {
+  JERRYXX_CHECK_ARG_NUMBER_OPT(0, "pin");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(1, "events");
+  uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  km_io_watch_mode_t events =
+      JERRYXX_GET_ARG_NUMBER_OPT(1, KM_IO_WATCH_MODE_FALLING);
+  if (km_enter_dormant(pin, events) < 0) {
+    char errmsg[255];
+    sprintf(
+        errmsg,
+        "The dormant mode has error, please check the pin(%d) and events(%d)",
+        pin, events);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  }
+  return jerry_create_undefined();
+}
+
 static void register_global_timers() {
   jerry_value_t global = jerry_get_global_object();
   jerryxx_set_property_function(global, MSTR_SET_TIMEOUT, set_timeout_fn);
@@ -739,6 +756,7 @@ static void register_global_timers() {
   jerryxx_set_property_function(global, MSTR_CLEAR_INTERVAL, clear_timer_fn);
   jerryxx_set_property_function(global, MSTR_DELAY, delay_fn);
   jerryxx_set_property_function(global, MSTR_MILLIS, millis_fn);
+  jerryxx_set_property_function(global, MSTR_DORMANT, dormant_fn);
   jerry_release_value(global);
 }
 
