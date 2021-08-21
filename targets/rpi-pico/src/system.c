@@ -35,6 +35,7 @@
 #include "rpi_pico.h"
 #include "spi.h"
 #include "tty.h"
+#include "tusb.h"
 #include "uart.h"
 
 const char km_system_arch[] = "cortex-m0-plus";
@@ -67,6 +68,10 @@ void km_micro_delay(uint32_t usec) { sleep_us(usec); }
 int km_enter_dormant(uint8_t pin, km_io_watch_mode_t events) {
   if (pin >= NUM_BANK0_GPIOS) {
     return KM_GPIOPORT_ERROR;  // Error
+  }
+  if (tud_ready()) {
+    /* Just return if USB is connected */
+    return 0;
   }
   uint src_hz = XOSC_MHZ * MHZ;
   uint clk_ref_src = CLOCKS_CLK_REF_CTRL_SRC_VALUE_XOSC_CLKSRC;
