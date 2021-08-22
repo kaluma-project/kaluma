@@ -38,13 +38,55 @@ JERRYXX_FUN(pwm_ctor_fn) {
   else if (duty > KM_PWM_DUTY_MAX)
     duty = KM_PWM_DUTY_MAX;
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PWM_PIN, pin);
-  if (km_pwm_setup(pin, -1, frequency, duty) == KM_PWMPORT_ERROR) {
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PWM_INV_PIN, -1);
+  if (km_pwm_setup(pin, frequency, duty) == KM_PWMPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
   } else {
     return jerry_create_undefined();
   }
+}
+
+JERRYXX_FUN(pwm_set_inversion_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, " pin");
+  int8_t inv_pin = (int8_t)JERRYXX_GET_ARG_NUMBER(0);
+  jerry_value_t pin_value =
+      jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
+  if (!jerry_value_is_number(pin_value)) {
+    return jerry_create_error(JERRY_ERROR_REFERENCE,
+                              (const jerry_char_t *)"PWM pin is not setup.");
+  }
+  int8_t pin = (int8_t)jerry_get_number_value(pin_value);
+  jerry_release_value(pin_value);
+  if (km_check_pwm_inv_port(pin, inv_pin) < 0) {
+    char errmsg[255];
+    sprintf(errmsg, "The pin \"%d\" can't be used for tone invert pin",
+            inv_pin);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  }
+  if (km_pwm_set_inversion(pin, inv_pin) == KM_PWMPORT_ERROR) {
+    char errmsg[255];
+    sprintf(errmsg, "The pin \"%d\" can't be used for PWM invresion", inv_pin);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  }
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PWM_INV_PIN, inv_pin);
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(pwm_get_inversion_fn) {
+  jerry_value_t pin_value =
+      jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_INV_PIN);
+  if (!jerry_value_is_number(pin_value)) {
+    return jerry_create_error(JERRY_ERROR_REFERENCE,
+                              (const jerry_char_t *)"PWM inversion pin error.");
+  }
+  int8_t inv_pin = (int8_t)jerry_get_number_value(pin_value);
+  jerry_release_value(pin_value);
+  if (inv_pin < 0) {
+    return jerry_create_undefined();
+  }
+  return jerry_create_number(inv_pin);
 }
 
 JERRYXX_FUN(pwm_start_fn) {
@@ -199,6 +241,10 @@ jerry_value_t module_pwm_init() {
                                 pwm_set_frequency_fn);
   jerryxx_set_property_function(prototype, MSTR_PWM_GET_DUTY, pwm_get_duty_fn);
   jerryxx_set_property_function(prototype, MSTR_PWM_SET_DUTY, pwm_set_duty_fn);
+  jerryxx_set_property_function(prototype, MSTR_PWM_SET_INVERSION,
+                                pwm_set_inversion_fn);
+  jerryxx_set_property_function(prototype, MSTR_PWM_GET_INVERSION,
+                                pwm_get_inversion_fn);
   jerryxx_set_property_function(prototype, MSTR_PWM_CLOSE, pwm_close_fn);
 
   /* pwm module exports */

@@ -32,7 +32,10 @@
 #define MSTR_PWM_SET_DUTY "setDuty"
 #define MSTR_PWM_CLOSE "close"
 #define MSTR_PWM_PIN "pin"
+#define MSTR_PWM_INV_PIN "inversion"
 #define MSTR_PWM_FREQUENCY "frequency"
 #define MSTR_PWM_DUTY "duty"
+#define MSTR_PWM_SET_INVERSION "setInversion"
+#define MSTR_PWM_GET_INVERSION "getInversion"
 
 #endif /* __PWM_MAGIC_STRINGS_H */
