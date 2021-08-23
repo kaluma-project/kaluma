@@ -338,11 +338,11 @@ void km_pwm_cleanup() {
   }
 }
 
+int8_t km_pwm_set_inversion(uint8_t pin, uint8_t inv_pin) { return 0; }
 /**
  * return Returns 0 on success or -1 on failure.
  */
-int km_pwm_setup(uint8_t pin, int8_t inv_pin, double frequency, double duty) {
-  void(inv_pin);
+int km_pwm_setup(uint8_t pin, double frequency, double duty) {
   uint32_t tick_freq, ch, prescaler, arr, pulse;
   uint8_t pduty = (duty + 0.005f) * 100;
   int n = get_pwm_index(pin);
@@ -445,7 +445,7 @@ int km_pwm_set_frequency(uint8_t pin, double frequency) {
   /* The previous duty ratio must be hold up regardless of changing frequency */
   while (__HAL_TIM_GET_COUNTER(pwm_config[n].handle) != 0)
     ;
-  km_pwm_setup(pin, -1, frequency, previous_duty);
+  km_pwm_setup(pin, frequency, previous_duty);
   pwm_config[n].start(pwm_config[n].handle, pwm_config[n].channel);
   return 0;
 }

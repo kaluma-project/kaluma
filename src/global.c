@@ -586,7 +586,7 @@ JERRYXX_FUN(analog_write_fn) {
   else if (value > KM_PWM_DUTY_MAX)
     value = KM_PWM_DUTY_MAX;
   double frequency = JERRYXX_GET_ARG_NUMBER_OPT(2, 490);  // Default 490Hz
-  if (km_pwm_setup(pin, -1, frequency, value) == KM_PWMPORT_ERROR) {
+  if (km_pwm_setup(pin, frequency, value) == KM_PWMPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for analog out (PWM)", pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
@@ -627,11 +627,20 @@ JERRYXX_FUN(tone_fn) {
     duty = KM_PWM_DUTY_MIN;
   else if (duty > KM_PWM_DUTY_MAX)
     duty = KM_PWM_DUTY_MAX;
-  if (km_pwm_setup(pin, inversion, frequency, duty) == KM_PWMPORT_ERROR) {
+  if (km_pwm_setup(pin, frequency, duty) == KM_PWMPORT_ERROR) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for tone", pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
   } else {
+    if (inversion >= 0) {
+      if (km_pwm_set_inversion(pin, inversion) < 0) {
+        char errmsg[255];
+        sprintf(errmsg, "The pin \"%d\" can't be used for inversion pin",
+                inversion);
+        return jerry_create_error(JERRY_ERROR_RANGE,
+                                  (const jerry_char_t *)errmsg);
+      }
+    }
     km_pwm_start(pin);
     if (inversion >= 0) {
       km_pwm_start(inversion);
