@@ -50,6 +50,7 @@
 #define MSTR_MODE "mode"
 #define MSTR_TRIGGER "trigger"
 #define MSTR_PIN "pin"
+#define MSTR_EVENT "event"
 #define MSTR_INTERVAL "interval"
 #define MSTR_PULSE_WRITE "pulseWrite"
 #define MSTR_SET_WATCH "setWatch"

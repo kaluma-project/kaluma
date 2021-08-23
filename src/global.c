@@ -732,17 +732,43 @@ JERRYXX_FUN(millis_fn) {
 }
 
 JERRYXX_FUN(dormant_fn) {
-  JERRYXX_CHECK_ARG_NUMBER_OPT(0, "pin");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(1, "events");
-  uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  km_io_watch_mode_t events =
-      JERRYXX_GET_ARG_NUMBER_OPT(1, KM_IO_WATCH_MODE_FALLING);
-  if (km_enter_dormant(pin, events) < 0) {
+  JERRYXX_CHECK_ARG(0, "wakeup");
+  jerry_value_t wakeup = JERRYXX_GET_ARG(0);
+  if (!jerry_value_is_typedarray(wakeup)) {
+    return jerry_create_error(
+        JERRY_ERROR_TYPE,
+        (const jerry_char_t
+             *)"The data argument must be an array of the object.");
+  }
+  jerry_length_t byteLength = 0;
+  jerry_length_t byteOffset = 0;
+  jerry_value_t array_buffer =
+      jerry_get_typedarray_buffer(wakeup, &byteOffset, &byteLength);
+  size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
+  jerry_value_t *buf = jerry_get_arraybuffer_pointer(array_buffer);
+  km_dormant_event_t params[len];
+  for (int i = 0; i < len; i++) {
+    int8_t in_pin = jerryxx_get_property_number(buf[i], MSTR_PIN, -1);
+    int8_t in_event = jerryxx_get_property_number(buf[i], MSTR_EVENT,
+                                                  KM_IO_WATCH_MODE_FALLING);
+    if (in_pin < 0) {
+      char errmsg[255];
+      sprintf(errmsg, "pin number is not defined in the wakeup object");
+      return jerry_create_error(JERRY_ERROR_RANGE,
+                                (const jerry_char_t *)errmsg);
+    }
+    params[i].pin = in_pin;
+    params[i].event = in_event;
+  }
+  int ret = km_enter_dormant(params, len);
+  if (ret < 0) {
     char errmsg[255];
-    sprintf(
-        errmsg,
-        "The dormant mode has error, please check the pin(%d) and events(%d)",
-        pin, events);
+    if (ret == KM_DORMANT_LENGTH_ERROR) {
+      sprintf(errmsg, "wakeup array length is too long");
+    } else {
+      sprintf(errmsg,
+              "The dormant mode has error, please check the input parameters");
+    }
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
   }
   return jerry_create_undefined();

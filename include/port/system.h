@@ -25,6 +25,15 @@
 #include <stdint.h>
 
 #include "io.h"
+
+#define KM_DORMANT_PARAM_ERROR (-1)
+#define KM_DORMANT_LENGTH_ERROR (-2)
+
+typedef struct {
+  uint8_t pin;
+  uint8_t event;
+} km_dormant_event_t;
+
 extern const char km_system_arch[];
 extern const char km_system_platform[];
 
@@ -68,10 +77,14 @@ void km_micro_delay(uint32_t usec);
 
 /**
  * Enter dormant state
- * @param pin GPIO pin for wakeup
- * @param events GPIO pin events for wakeup
+ * @param param_arr GPIO pin and event array for wakeup
+ * @param length length of the param_arr array
+ * @return 0 No error
+ * @return KM_DORMANT_PARAM_ERROR pin number is wrong
+ * @return KM_DORMANT_LENGTH_ERROR Array length is too long (greater than the
+ * number of GPIOs)
  */
-int km_enter_dormant(uint8_t pin, km_io_watch_mode_t events);
+int km_enter_dormant(km_dormant_event_t *param_arr, uint8_t length);
 
 /**
  * check script running mode - skipping or running user script
