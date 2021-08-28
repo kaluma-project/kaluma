@@ -71,6 +71,7 @@
 #define MSTR_LOG "log"
 #define MSTR_ERROR "error"
 #define MSTR_PRINT "print"
+#define MSTR_SEED "seed"
 #define MSTR_PROCESS "process"
 #define MSTR_ATOB "atob"
 #define MSTR_BTOA "btoa"

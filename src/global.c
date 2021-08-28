@@ -1254,9 +1254,17 @@ JERRYXX_FUN(print_fn) {
   return jerry_create_undefined();
 }
 
+JERRYXX_FUN(seed_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "seed")
+  uint32_t seed = (uint32_t)JERRYXX_GET_ARG_NUMBER(0);
+  srand(seed);
+  return jerry_create_undefined();
+}
+
 static void register_global_etc() {
   jerry_value_t global = jerry_get_global_object();
   jerryxx_set_property_function(global, MSTR_PRINT, print_fn);
+  jerryxx_set_property_function(global, MSTR_SEED, seed_fn);
   jerry_release_value(global);
 }
 
