@@ -14,7 +14,8 @@
     "kameleon_core.h": "c",
     "ymodem.h": "c",
     "jerryxx.h": "c",
-    "string_view": "c"
+    "string_view": "c",
+    "random": "c"
   },
   "cpplint.filters": [
     "-build/include_subdir",

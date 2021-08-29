@@ -32,6 +32,8 @@ static struct km_pio_s {
   uint8_t enabled;
   uint8_t code_length;
   uint offset;
+  pio_sm_config sm_config[PIO_SM_NUM];
+  uint16_t sm_enabled;
 } km_pio[PIO_NUM];
 
 static struct pio_program pio_code = {
@@ -45,6 +47,10 @@ static void __reset_pio_block(void) {
     km_pio[i].enabled = KM_PIO_PORT_DISABLE;
     km_pio[i].code_length = 0;
     km_pio[i].offset = 0;
+    km_pio[i].sm_enabled = 0;
+    for (int j = 0; j < PIO_SM_NUM; j++) {
+      km_pio[i].sm_config[j] = pio_get_default_sm_config();
+    }
   }
 }
 void km_pio_init(void) { __reset_pio_block(); }
@@ -64,7 +70,7 @@ static PIO __get_pio(uint8_t port) {
 }
 
 static bool __sm_enabled(uint8_t port, uint8_t sm) {
-  if (km_pio[port].enabled & ((0x10) << sm)) {
+  if (km_pio[port].sm_enabled & (1u << sm)) {
     return true;
   }
   return false;
@@ -84,31 +90,87 @@ int km_pio_port_init(uint8_t port, uint16_t *code, uint8_t code_length) {
   return 0;
 }
 
-int km_pio_sm_setup(uint8_t port, uint8_t sm, uint8_t pin_out,
-                    uint8_t pin_mode) {
-  (void)pin_mode;  // OUTPUT is the only option to use now.
+int km_pio_sm_setup(uint8_t port, uint8_t sm) {
   PIO pio = __get_pio(port);
   if ((pio == NULL) || (km_pio[port].enabled != KM_PIO_PORT_ENABLE) ||
       (__sm_enabled(port, sm))) {
     return KM_PIO_ERROR;
   }
 
-  pio_sm_config c = pio_get_default_sm_config();
-  sm_config_set_wrap(&c, km_pio[port].offset,
+  sm_config_set_wrap(&km_pio[port].sm_config[sm], km_pio[port].offset,
                      km_pio[port].offset + km_pio[port].code_length - 1);
 
+  return 0;
+}
+
+int km_pio_sm_set_out(uint8_t port, uint8_t sm, uint8_t pin_out,
+                      uint8_t pin_out_cnt) {
+  PIO pio = __get_pio(port);
+  if ((pio == NULL) || (km_pio[port].enabled != KM_PIO_PORT_ENABLE) ||
+      (__sm_enabled(port, sm)) || (pin_out >= GPIO_NUM)) {
+    return KM_PIO_ERROR;
+  }
   // output settings
   if (pin_out < GPIO_NUM) {
+    if (pin_out + pin_out_cnt - 1 >= GPIO_NUM) {
+      pin_out_cnt = GPIO_NUM - pin_out;
+    }
     // parameter to this function.
-    sm_config_set_out_pins(&c, pin_out, 1);
-    // Set this pin's GPIO function (connect PIO to the pad)
-    pio_gpio_init(pio, pin_out);
+    sm_config_set_out_pins(&km_pio[port].sm_config[sm], pin_out, pin_out_cnt);
     // Set the pin direction to output at the PIO
-    pio_sm_set_consecutive_pindirs(pio, sm, pin_out, 1, true);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin_out, pin_out_cnt, true);
+    // Set this pin's GPIO function (connect PIO to the pad)
+    for (int i = 0; i < pin_out_cnt; i++) {
+      pio_gpio_init(pio, pin_out + i);
+    }
   }
-  pio_sm_init(pio, sm, km_pio[port].offset, &c);
-  // Set the state machine running
-  pio_sm_set_enabled(pio, sm, true);
+  return 0;
+}
+
+int km_pio_sm_set_in(uint8_t port, uint8_t sm, uint8_t pin_in,
+                     uint8_t pin_in_cnt) {
+  PIO pio = __get_pio(port);
+  if ((pio == NULL) || (km_pio[port].enabled != KM_PIO_PORT_ENABLE) ||
+      (__sm_enabled(port, sm)) || (pin_in >= GPIO_NUM)) {
+    return KM_PIO_ERROR;
+  }
+  // input settings
+  if (pin_in < GPIO_NUM) {
+    if (pin_in + pin_in_cnt - 1 >= GPIO_NUM) {
+      pin_in_cnt = GPIO_NUM - pin_in;
+    }
+    // parameter to this function.
+    sm_config_set_in_pins(&km_pio[port].sm_config[sm], pin_in);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin_in, pin_in_cnt, false);
+    // Set this pin's GPIO function (connect PIO to the pad)
+    for (int i = 0; i < pin_in_cnt; i++) {
+      pio_gpio_init(pio, pin_in + i);
+    }
+  }
+  return 0;
+}
+
+int km_pio_sm_init(uint8_t port, uint8_t sm) {
+  PIO pio = __get_pio(port);
+  if ((pio == NULL) || (km_pio[port].enabled != KM_PIO_PORT_ENABLE) ||
+      (__sm_enabled(port, sm))) {
+    return KM_PIO_ERROR;
+  }
+  pio_sm_init(pio, sm, km_pio[port].offset, &km_pio[port].sm_config[sm]);
+  return 0;
+}
+
+int km_pio_sm_enable(uint8_t port, uint8_t sm, bool en) {
+  PIO pio = __get_pio(port);
+  if ((pio == NULL) || (km_pio[port].enabled != KM_PIO_PORT_ENABLE)) {
+    return KM_PIO_ERROR;
+  }
+  pio_sm_set_enabled(pio, sm, en);
+  if (en) {
+    km_pio[port].sm_enabled |= (1u << sm);
+  } else {
+    km_pio[port].sm_enabled &= ~(1u << sm);
+  }
   return 0;
 }
 
