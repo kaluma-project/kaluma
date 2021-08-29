@@ -62,7 +62,7 @@ JERRYXX_FUN(pio_ctor_fn) {
              *)"The code argument must be Uint16Array or string.");
   }
   if (km_pio_port_init(port, code_arr, code_len) < 0) {
-    return jerry_create_error(JERRY_ERROR_TYPE,
+    return jerry_create_error(JERRY_ERROR_COMMON,
                               (const jerry_char_t *)"Port init fails.");
   }
 
@@ -82,15 +82,14 @@ JERRYXX_FUN(pio_sm_setup_fn) {
   if (sm >= KM_PIO_NO_SM) {
     return jerry_create_error(
         JERRY_ERROR_TYPE,
-        (const jerry_char_t *)"This state machine is already used");
+        (const jerry_char_t *)"State machine number is not supported.");
   }
   // check this.port
   jerry_value_t port_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PIO_PORT);
   if (!jerry_value_is_number(port_value)) {
     return jerry_create_error(
-        JERRY_ERROR_REFERENCE,
-        (const jerry_char_t *)"PIO port is not initialized.");
+        JERRY_ERROR_TYPE, (const jerry_char_t *)"PIO port is not a number.");
   }
   uint8_t port = (uint8_t)jerry_get_number_value(port_value);
   jerry_release_value(port_value);
@@ -113,15 +112,45 @@ JERRYXX_FUN(pio_sm_setup_fn) {
   if (ret == 0) {
     ret = km_pio_sm_init(port, sm);
   }
-  if (ret == 0) {
-    ret = km_pio_sm_enable(port, sm, true);
-  }
   if (ret < 0) {
-    return jerry_create_error(JERRY_ERROR_TYPE,
-                              (const jerry_char_t *)"State machine init fail.");
+    return jerry_create_error(
+        JERRY_ERROR_COMMON, (const jerry_char_t *)"State machine init fails.");
   }
   return jerry_create_number(sm);
 }
+
+/**
+ * PIO.prototype.smEnable() function
+ */
+JERRYXX_FUN(pio_sm_enable_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "sm");
+  JERRYXX_CHECK_ARG_BOOLEAN_OPT(1, "enable");
+
+  uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  if (sm >= KM_PIO_NO_SM) {
+    return jerry_create_error(
+        JERRY_ERROR_TYPE,
+        (const jerry_char_t *)"State machine number is not supported.");
+  }
+  // check this.port
+  jerry_value_t port_value =
+      jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PIO_PORT);
+  if (!jerry_value_is_number(port_value)) {
+    return jerry_create_error(
+        JERRY_ERROR_TYPE, (const jerry_char_t *)"PIO port is not a number.");
+  }
+  uint8_t port = (uint8_t)jerry_get_number_value(port_value);
+  jerry_release_value(port_value);
+  uint8_t en = (uint8_t)JERRYXX_GET_ARG_BOOLEAN_OPT(1, true);
+
+  if (km_pio_sm_enable(port, sm, en) < 0) {
+    return jerry_create_error(
+        JERRY_ERROR_COMMON,
+        (const jerry_char_t *)"Enabling state machine fails.");
+  }
+  return jerry_create_number(sm);
+}
+
 /**
  * PIO.prototype.put() function
  */
@@ -136,11 +165,13 @@ JERRYXX_FUN(pio_put_fn) {
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PIO_PORT);
   if (!jerry_value_is_number(port_value)) {
     return jerry_create_error(
-        JERRY_ERROR_REFERENCE,
-        (const jerry_char_t *)"PIO port is not initialized.");
+        JERRY_ERROR_TYPE, (const jerry_char_t *)"PIO port is not a number.");
   }
   uint8_t port = (uint8_t)jerry_get_number_value(port_value);
-  km_pio_put_fifo(port, sm, data);
+  if (km_pio_put_fifo(port, sm, data) < 0) {
+    return jerry_create_error(JERRY_ERROR_COMMON,
+                              (const jerry_char_t *)"Put FIFO fails.");
+  }
   return jerry_create_undefined();
 }
 
@@ -156,11 +187,15 @@ JERRYXX_FUN(pio_get_fn) {
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PIO_PORT);
   if (!jerry_value_is_number(port_value)) {
     return jerry_create_error(
-        JERRY_ERROR_REFERENCE,
-        (const jerry_char_t *)"PIO port is not initialized.");
+        JERRY_ERROR_TYPE, (const jerry_char_t *)"PIO port is not a number.");
   }
   uint8_t port = (uint8_t)jerry_get_number_value(port_value);
-  uint32_t data = km_pio_get_fifo(port, sm);
+  int8_t err;
+  uint32_t data = km_pio_get_fifo(port, sm, &err);
+  if (err) {
+    return jerry_create_error(JERRY_ERROR_COMMON,
+                              (const jerry_char_t *)"Get FIFO fails.");
+  }
   return jerry_create_number(data);
 }
 
@@ -183,6 +218,8 @@ jerry_value_t module_pio_init() {
   jerryxx_set_property(pio_ctor, "prototype", pio_prototype);
   jerryxx_set_property_function(pio_prototype, MSTR_PIO_SM_SETUP,
                                 pio_sm_setup_fn);
+  jerryxx_set_property_function(pio_prototype, MSTR_PIO_SM_ENABLE,
+                                pio_sm_enable_fn);
   jerryxx_set_property_function(pio_prototype, MSTR_PIO_PUT, pio_put_fn);
   jerryxx_set_property_function(pio_prototype, MSTR_PIO_GET, pio_get_fn);
   jerryxx_set_property_function(pio_prototype, MSTR_PIO_CLOSE, pio_close_fn);

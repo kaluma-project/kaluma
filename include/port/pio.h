@@ -138,7 +138,9 @@ int km_pio_put_fifo(uint8_t port, uint8_t sm, uint32_t data);
  *  GEt data from the PIO FIFO
  *
  * @param port port number of PIO block
+ * @param sm state machine
+ * @param err error code, O if there's no error.
  * @return 32bit data value
  */
-uint32_t km_pio_get_fifo(uint8_t port, uint8_t sm);
+uint32_t km_pio_get_fifo(uint8_t port, uint8_t sm, int8_t *err);
 #endif /* __KM_PIO_H */
