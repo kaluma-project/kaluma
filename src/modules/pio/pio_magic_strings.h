@@ -24,6 +24,7 @@
 
 #define MSTR_PIO_PIO "PIO"
 #define MSTR_PIO_SM_SETUP "smSetup"
+#define MSTR_PIO_SM_ENABLE "smEnable"
 #define MSTR_PIO_PORT "port"
 #define MSTR_PIO_PIN_OUT "pinOut"
 #define MSTR_PIO_PIN_OUT_CNT "pinOutCount"

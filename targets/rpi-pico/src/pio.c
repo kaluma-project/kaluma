@@ -188,17 +188,21 @@ int km_pio_close(uint8_t port) {
 
 int km_pio_put_fifo(uint8_t port, uint8_t sm, uint32_t data) {
   PIO pio = __get_pio(port);
-  if ((pio == NULL) || !(km_pio[port].enabled & KM_PIO_PORT_ENABLE)) {
+  if ((pio == NULL) || !(km_pio[port].enabled & KM_PIO_PORT_ENABLE) ||
+      (__sm_enabled(port, sm) == false)) {
     return KM_PIO_ERROR;
   }
   pio_sm_put_blocking(pio, sm, data);
   return 0;
 }
 
-uint32_t km_pio_get_fifo(uint8_t port, uint8_t sm) {
+uint32_t km_pio_get_fifo(uint8_t port, uint8_t sm, int8_t *err) {
   PIO pio = __get_pio(port);
-  if ((pio == NULL) || !(km_pio[port].enabled & KM_PIO_PORT_ENABLE)) {
-    return KM_PIO_ERROR;
+  if ((pio == NULL) || !(km_pio[port].enabled & KM_PIO_PORT_ENABLE) ||
+      (__sm_enabled(port, sm) == false)) {
+    *err = KM_PIO_ERROR;
+    return 0;
   }
+  *err = 0;
   return pio_sm_get_blocking(pio, sm);
 }
