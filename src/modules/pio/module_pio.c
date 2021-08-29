@@ -97,7 +97,26 @@ JERRYXX_FUN(pio_sm_setup_fn) {
   jerry_value_t options = JERRYXX_GET_ARG(1);
   uint8_t pin_out =
       (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_PIN_OUT, 0xFF);
-  if (km_pio_sm_setup(port, sm, pin_out, 0) < 0) {
+  uint8_t pin_in =
+      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_PIN_IN, 0xFF);
+  uint8_t pin_out_cnt =
+      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_PIN_OUT_CNT, 1);
+  uint8_t pin_in_cnt =
+      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_PIN_IN_CNT, 1);
+  int ret = km_pio_sm_setup(port, sm);
+  if ((ret == 0) && (pin_out != 0xFF)) {
+    ret = km_pio_sm_set_out(port, sm, pin_out, pin_out_cnt);
+  }
+  if ((ret == 0) && (pin_in != 0xFF)) {
+    ret = km_pio_sm_set_in(port, sm, pin_in, pin_in_cnt);
+  }
+  if (ret == 0) {
+    ret = km_pio_sm_init(port, sm);
+  }
+  if (ret == 0) {
+    ret = km_pio_sm_enable(port, sm, true);
+  }
+  if (ret < 0) {
     return jerry_create_error(JERRY_ERROR_TYPE,
                               (const jerry_char_t *)"State machine init fail.");
   }
