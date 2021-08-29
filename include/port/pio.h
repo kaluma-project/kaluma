@@ -22,6 +22,7 @@
 #ifndef __KM_PIO_H
 #define __KM_PIO_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -66,12 +67,55 @@ int km_pio_port_init(uint8_t port, uint16_t *code, uint8_t code_length);
  * Setup a PIO sm.
  *
  * @param port port number of PIO block
- * @param pin_out output pin number for the PIO
- * @param pin_mode Pin mode settings,
+ * @param sm state machine
  * @return Positive number if successfully setup, negative otherwise.
  */
-int km_pio_sm_setup(uint8_t port, uint8_t sm, uint8_t pin_out,
-                    uint8_t pin_mode);
+int km_pio_sm_setup(uint8_t port, uint8_t sm);
+
+/**
+ * Setup a PIO sm output pins.
+ *
+ * @param port port number of PIO block
+ * @param sm state machine
+ * @param pin_out output base pin number for the PIO
+ * @param pin_out_cnt output consecutive pin counts
+ * @return Positive number if successfully setup output pins, negative
+ * otherwise.
+ */
+int km_pio_sm_set_out(uint8_t port, uint8_t sm, uint8_t pin_out,
+                      uint8_t pin_out_cnt);
+
+/**
+ * Setup a PIO sm input pins.
+ *
+ * @param port port number of PIO block
+ * @param sm state machine
+ * @param pin_in input base pin number for the PIO
+ * @param pin_in_cnt input consecutive pin count
+ * @return Positive number if successfully setup input pins, negative otherwise.
+ */
+int km_pio_sm_set_in(uint8_t port, uint8_t sm, uint8_t pin_in,
+                     uint8_t pin_in_cnt);
+
+/**
+ * initialize a PIO sm.
+ *
+ * @param port port number of PIO block
+ * @param sm state machine
+ * @return Positive number if successfully initialized, negative otherwise.
+ */
+int km_pio_sm_init(uint8_t port, uint8_t sm);
+
+/**
+ * Enable/Disable a PIO sm.
+ *
+ * @param port port number of PIO block
+ * @param sm state machine
+ * @param en true is enable, false is diable
+ * @return Positive number if successfully enable or disabled, negative
+ * otherwise.
+ */
+int km_pio_sm_enable(uint8_t port, uint8_t sm, bool en);
 
 /**
  * Close the PIO port
