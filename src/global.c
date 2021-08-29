@@ -769,6 +769,17 @@ static void register_global_analog_io() {
   jerry_release_value(global);
 }
 
+static void register_global_timers() {
+  jerry_value_t global = jerry_get_global_object();
+  jerryxx_set_property_function(global, MSTR_SET_TIMEOUT, set_timeout_fn);
+  jerryxx_set_property_function(global, MSTR_SET_INTERVAL, set_interval_fn);
+  jerryxx_set_property_function(global, MSTR_CLEAR_TIMEOUT, clear_timer_fn);
+  jerryxx_set_property_function(global, MSTR_CLEAR_INTERVAL, clear_timer_fn);
+  jerryxx_set_property_function(global, MSTR_DELAY, delay_fn);
+  jerryxx_set_property_function(global, MSTR_MILLIS, millis_fn);
+  jerry_release_value(global);
+}
+
 /****************************************************************************/
 /*                                                                          */
 /*                              CONSOLE OBJECT                              */
@@ -1261,10 +1272,52 @@ JERRYXX_FUN(seed_fn) {
   return jerry_create_undefined();
 }
 
+JERRYXX_FUN(dormant_fn) {
+  JERRYXX_CHECK_ARG_ARRAY(0, "pins");
+  JERRYXX_CHECK_ARG_ARRAY(1, "events");
+  jerry_value_t pins = JERRYXX_GET_ARG(0);
+  jerry_value_t events = JERRYXX_GET_ARG(1);
+  int plen = jerry_get_array_length(pins);
+  int elen = jerry_get_array_length(events);
+  if (plen != elen) {
+    return jerry_create_error(
+        JERRY_ERROR_TYPE,
+        (const jerry_char_t
+             *)"The length of pins and events should be the same.");
+  }
+
+  uint8_t _pins[plen];
+  uint8_t _events[elen];
+  for (int i = 0; i < plen; i++) {
+    jerry_value_t pin = jerry_get_property_by_index(pins, i);
+    jerry_value_t event = jerry_get_property_by_index(events, i);
+    if (!jerry_value_is_number(pin)) {
+      return jerry_create_error(
+          JERRY_ERROR_TYPE,
+          (const jerry_char_t *)"The pin should be a number.");
+    }
+    if (!jerry_value_is_number(event)) {
+      return jerry_create_error(
+          JERRY_ERROR_TYPE,
+          (const jerry_char_t *)"The event should be a number.");
+    }
+    _pins[i] = (uint8_t)jerry_get_number_value(pin);
+    _events[i] = (uint8_t)jerry_get_number_value(event);
+  }
+
+  int ret = km_dormant(_pins, _events, plen);
+  if (ret < 0) {
+    return jerry_create_error(
+        JERRY_ERROR_TYPE, (const jerry_char_t *)"Error to enter dormant mode.");
+  }
+  return jerry_create_undefined();
+}
+
 static void register_global_etc() {
   jerry_value_t global = jerry_get_global_object();
   jerryxx_set_property_function(global, MSTR_PRINT, print_fn);
   jerryxx_set_property_function(global, MSTR_SEED, seed_fn);
+  jerryxx_set_property_function(global, MSTR_DORMANT, dormant_fn);
   jerry_release_value(global);
 }
 
