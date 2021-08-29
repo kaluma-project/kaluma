@@ -338,6 +338,7 @@ void km_pwm_cleanup() {
   }
 }
 
+int8_t km_pwm_set_inversion(uint8_t pin, uint8_t inv_pin) { return 0; }
 /**
  * return Returns 0 on success or -1 on failure.
  */
@@ -365,6 +366,12 @@ int km_pwm_setup(uint8_t pin, double frequency, double duty) {
   pwm_config[n].setup(ch, prescaler, arr, pulse);
   pwm_configured[n] = 1;
   return 0;
+}
+
+int km_check_pwm_inv_port(uint8_t pin, int8_t inv_pin) {
+  (void)pin;
+  (void)inv_pin;
+  return KM_PWMPORT_ERROR;
 }
 
 /**

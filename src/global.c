@@ -557,102 +557,6 @@ static void register_global_digital_io() {
 
 /****************************************************************************/
 /*                                                                          */
-/*                           ANALOG I/O FUNCTIONS                           */
-/*                                                                          */
-/****************************************************************************/
-
-JERRYXX_FUN(analog_read_fn) {
-  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
-  uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  int adcIndex = km_adc_setup(pin);
-  if (adcIndex == KM_ADCPORT_ERRROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for ADC channel", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
-  }
-  km_delay(1);  // To prevent issue #55
-  double value = km_adc_read((uint8_t)adcIndex);
-  return jerry_create_number(value);
-}
-
-JERRYXX_FUN(analog_write_fn) {
-  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(1, "value");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(2, "frequency");
-  uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  double value = JERRYXX_GET_ARG_NUMBER_OPT(1, 0.5);
-  if (value < KM_PWM_DUTY_MIN)
-    value = KM_PWM_DUTY_MIN;
-  else if (value > KM_PWM_DUTY_MAX)
-    value = KM_PWM_DUTY_MAX;
-  double frequency = JERRYXX_GET_ARG_NUMBER_OPT(2, 490);  // Default 490Hz
-  if (km_pwm_setup(pin, frequency, value) == KM_PWMPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for analog out (PWM)", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
-  } else {
-    km_pwm_start(pin);
-    return jerry_create_undefined();
-  }
-}
-
-static void tone_timeout_cb(km_io_timer_handle_t *timer) {
-  uint8_t pin = timer->tag;
-  km_pwm_stop(pin);
-}
-
-JERRYXX_FUN(tone_fn) {
-  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(1, "frequency");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(2, "duration");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(3, "duty");
-  uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  double frequency = JERRYXX_GET_ARG_NUMBER_OPT(1, 261.626);  // C key frequency
-  uint32_t duration = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(2, 0);
-  double duty = JERRYXX_GET_ARG_NUMBER_OPT(3, 0.5);
-  if (duty < KM_PWM_DUTY_MIN)
-    duty = KM_PWM_DUTY_MIN;
-  else if (duty > KM_PWM_DUTY_MAX)
-    duty = KM_PWM_DUTY_MAX;
-  if (km_pwm_setup(pin, frequency, duty) == KM_PWMPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for tone", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
-  } else {
-    km_pwm_start(pin);
-    // setup timer for duration
-    if (duration > 0) {
-      km_io_timer_handle_t *timer = malloc(sizeof(km_io_timer_handle_t));
-      km_io_timer_init(timer);
-      timer->tag = pin;
-      km_io_timer_start(timer, tone_timeout_cb, duration, false);
-    }
-    return jerry_create_undefined();
-  }
-}
-
-JERRYXX_FUN(no_tone_fn) {
-  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
-  uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  if (km_pwm_stop(pin) == KM_PWMPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
-  }
-  return jerry_create_undefined();
-}
-
-static void register_global_analog_io() {
-  jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property_function(global, MSTR_ANALOG_READ, analog_read_fn);
-  jerryxx_set_property_function(global, MSTR_ANALOG_WRITE, analog_write_fn);
-  jerryxx_set_property_function(global, MSTR_TONE, tone_fn);
-  jerryxx_set_property_function(global, MSTR_NO_TONE, no_tone_fn);
-  jerry_release_value(global);
-}
-
-/****************************************************************************/
-/*                                                                          */
 /*                              TIMER FUNCTIONS                             */
 /*                                                                          */
 /****************************************************************************/
@@ -731,45 +635,138 @@ JERRYXX_FUN(millis_fn) {
   return jerry_create_number(msec);
 }
 
-JERRYXX_FUN(dormant_fn) {
-  JERRYXX_CHECK_ARG_ARRAY(0, "pins");
-  JERRYXX_CHECK_ARG_ARRAY(1, "events");
-  jerry_value_t pins = JERRYXX_GET_ARG(0);
-  jerry_value_t events = JERRYXX_GET_ARG(1);
-  int plen = jerry_get_array_length(pins);
-  int elen = jerry_get_array_length(events);
-  if (plen != elen) {
-    return jerry_create_error(
-        JERRY_ERROR_TYPE,
-        (const jerry_char_t
-             *)"The length of pins and events should be the same.");
-  }
+static void register_global_timers() {
+  jerry_value_t global = jerry_get_global_object();
+  jerryxx_set_property_function(global, MSTR_SET_TIMEOUT, set_timeout_fn);
+  jerryxx_set_property_function(global, MSTR_SET_INTERVAL, set_interval_fn);
+  jerryxx_set_property_function(global, MSTR_CLEAR_TIMEOUT, clear_timer_fn);
+  jerryxx_set_property_function(global, MSTR_CLEAR_INTERVAL, clear_timer_fn);
+  jerryxx_set_property_function(global, MSTR_DELAY, delay_fn);
+  jerryxx_set_property_function(global, MSTR_MILLIS, millis_fn);
+  jerry_release_value(global);
+}
 
-  uint8_t _pins[plen];
-  uint8_t _events[elen];
-  for (int i = 0; i < plen; i++) {
-    jerry_value_t pin = jerry_get_property_by_index(pins, i);
-    jerry_value_t event = jerry_get_property_by_index(events, i);
-    if (!jerry_value_is_number(pin)) {
-      return jerry_create_error(
-          JERRY_ERROR_TYPE,
-          (const jerry_char_t *)"The pin should be a number.");
-    }
-    if (!jerry_value_is_number(event)) {
-      return jerry_create_error(
-          JERRY_ERROR_TYPE,
-          (const jerry_char_t *)"The event should be a number.");
-    }
-    _pins[i] = (uint8_t)jerry_get_number_value(pin);
-    _events[i] = (uint8_t)jerry_get_number_value(event);
-  }
+/****************************************************************************/
+/*                                                                          */
+/*                           ANALOG I/O FUNCTIONS                           */
+/*                                                                          */
+/****************************************************************************/
 
-  int ret = km_dormant(_pins, _events, plen);
-  if (ret < 0) {
-    return jerry_create_error(
-        JERRY_ERROR_TYPE, (const jerry_char_t *)"Error to enter dormant mode.");
+JERRYXX_FUN(analog_read_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
+  uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  int adcIndex = km_adc_setup(pin);
+  if (adcIndex == KM_ADCPORT_ERRROR) {
+    char errmsg[255];
+    sprintf(errmsg, "The pin \"%d\" can't be used for ADC channel", pin);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  }
+  km_delay(1);  // To prevent issue #55
+  double value = km_adc_read((uint8_t)adcIndex);
+  return jerry_create_number(value);
+}
+
+JERRYXX_FUN(analog_write_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(1, "value");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(2, "frequency");
+  uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  double value = JERRYXX_GET_ARG_NUMBER_OPT(1, 0.5);
+  if (value < KM_PWM_DUTY_MIN)
+    value = KM_PWM_DUTY_MIN;
+  else if (value > KM_PWM_DUTY_MAX)
+    value = KM_PWM_DUTY_MAX;
+  double frequency = JERRYXX_GET_ARG_NUMBER_OPT(2, 490);  // Default 490Hz
+  if (km_pwm_setup(pin, frequency, value) == KM_PWMPORT_ERROR) {
+    char errmsg[255];
+    sprintf(errmsg, "The pin \"%d\" can't be used for analog out (PWM)", pin);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  } else {
+    km_pwm_start(pin);
+    return jerry_create_undefined();
+  }
+}
+
+static void tone_timeout_cb(km_io_timer_handle_t *timer) {
+  uint8_t pin = timer->tag;
+  km_pwm_stop(pin);
+  km_io_timer_stop(timer);
+  km_io_handle_close((km_io_handle_t *)timer, timer_close_cb);
+}
+
+JERRYXX_FUN(tone_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(1, "frequency");
+  JERRYXX_CHECK_ARG_OBJECT_OPT(2, "options");
+  uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  double frequency = JERRYXX_GET_ARG_NUMBER_OPT(1, 261.626);  // C key frequency
+  uint32_t duration = 0;
+  double duty = 0.5;
+  int8_t inversion = -1;
+  if (JERRYXX_HAS_ARG(2)) {
+    jerry_value_t options = JERRYXX_GET_ARG(2);
+    duration = (uint32_t)jerryxx_get_property_number(options, MSTR_DURATION, 0);
+    duty = (double)jerryxx_get_property_number(options, MSTR_DUTY, 0.5);
+    inversion =
+        (int8_t)jerryxx_get_property_number(options, MSTR_INVERSION, -1);
+  }
+  if ((inversion >= 0) && (km_check_pwm_inv_port(pin, inversion) < 0)) {
+    char errmsg[255];
+    sprintf(errmsg, "The pin \"%d\" can't be used for tone invert pin",
+            inversion);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  }
+  if (duty < KM_PWM_DUTY_MIN)
+    duty = KM_PWM_DUTY_MIN;
+  else if (duty > KM_PWM_DUTY_MAX)
+    duty = KM_PWM_DUTY_MAX;
+  if (km_pwm_setup(pin, frequency, duty) == KM_PWMPORT_ERROR) {
+    char errmsg[255];
+    sprintf(errmsg, "The pin \"%d\" can't be used for tone", pin);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  } else {
+    if (inversion >= 0) {
+      if (km_pwm_set_inversion(pin, inversion) < 0) {
+        char errmsg[255];
+        sprintf(errmsg, "The pin \"%d\" can't be used for inversion pin",
+                inversion);
+        return jerry_create_error(JERRY_ERROR_RANGE,
+                                  (const jerry_char_t *)errmsg);
+      }
+    }
+    km_pwm_start(pin);
+    if (inversion >= 0) {
+      km_pwm_start(inversion);
+    }
+    // setup timer for duration
+    if (duration > 0) {
+      km_io_timer_handle_t *timer = malloc(sizeof(km_io_timer_handle_t));
+      km_io_timer_init(timer);
+      timer->tag = pin;
+      km_io_timer_start(timer, tone_timeout_cb, duration, false);
+    }
+    return jerry_create_undefined();
+  }
+}
+
+JERRYXX_FUN(no_tone_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
+  uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  if (km_pwm_stop(pin) == KM_PWMPORT_ERROR) {
+    char errmsg[255];
+    sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
   }
   return jerry_create_undefined();
+}
+
+static void register_global_analog_io() {
+  jerry_value_t global = jerry_get_global_object();
+  jerryxx_set_property_function(global, MSTR_ANALOG_READ, analog_read_fn);
+  jerryxx_set_property_function(global, MSTR_ANALOG_WRITE, analog_write_fn);
+  jerryxx_set_property_function(global, MSTR_TONE, tone_fn);
+  jerryxx_set_property_function(global, MSTR_NO_TONE, no_tone_fn);
+  jerry_release_value(global);
 }
 
 static void register_global_timers() {
@@ -780,7 +777,6 @@ static void register_global_timers() {
   jerryxx_set_property_function(global, MSTR_CLEAR_INTERVAL, clear_timer_fn);
   jerryxx_set_property_function(global, MSTR_DELAY, delay_fn);
   jerryxx_set_property_function(global, MSTR_MILLIS, millis_fn);
-  jerryxx_set_property_function(global, MSTR_DORMANT, dormant_fn);
   jerry_release_value(global);
 }
 
@@ -1269,9 +1265,59 @@ JERRYXX_FUN(print_fn) {
   return jerry_create_undefined();
 }
 
+JERRYXX_FUN(seed_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "seed")
+  uint32_t seed = (uint32_t)JERRYXX_GET_ARG_NUMBER(0);
+  srand(seed);
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(dormant_fn) {
+  JERRYXX_CHECK_ARG_ARRAY(0, "pins");
+  JERRYXX_CHECK_ARG_ARRAY(1, "events");
+  jerry_value_t pins = JERRYXX_GET_ARG(0);
+  jerry_value_t events = JERRYXX_GET_ARG(1);
+  int plen = jerry_get_array_length(pins);
+  int elen = jerry_get_array_length(events);
+  if (plen != elen) {
+    return jerry_create_error(
+        JERRY_ERROR_TYPE,
+        (const jerry_char_t
+             *)"The length of pins and events should be the same.");
+  }
+
+  uint8_t _pins[plen];
+  uint8_t _events[elen];
+  for (int i = 0; i < plen; i++) {
+    jerry_value_t pin = jerry_get_property_by_index(pins, i);
+    jerry_value_t event = jerry_get_property_by_index(events, i);
+    if (!jerry_value_is_number(pin)) {
+      return jerry_create_error(
+          JERRY_ERROR_TYPE,
+          (const jerry_char_t *)"The pin should be a number.");
+    }
+    if (!jerry_value_is_number(event)) {
+      return jerry_create_error(
+          JERRY_ERROR_TYPE,
+          (const jerry_char_t *)"The event should be a number.");
+    }
+    _pins[i] = (uint8_t)jerry_get_number_value(pin);
+    _events[i] = (uint8_t)jerry_get_number_value(event);
+  }
+
+  int ret = km_dormant(_pins, _events, plen);
+  if (ret < 0) {
+    return jerry_create_error(
+        JERRY_ERROR_TYPE, (const jerry_char_t *)"Error to enter dormant mode.");
+  }
+  return jerry_create_undefined();
+}
+
 static void register_global_etc() {
   jerry_value_t global = jerry_get_global_object();
   jerryxx_set_property_function(global, MSTR_PRINT, print_fn);
+  jerryxx_set_property_function(global, MSTR_SEED, seed_fn);
+  jerryxx_set_property_function(global, MSTR_DORMANT, dormant_fn);
   jerry_release_value(global);
 }
 
