@@ -769,17 +769,6 @@ static void register_global_analog_io() {
   jerry_release_value(global);
 }
 
-static void register_global_timers() {
-  jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property_function(global, MSTR_SET_TIMEOUT, set_timeout_fn);
-  jerryxx_set_property_function(global, MSTR_SET_INTERVAL, set_interval_fn);
-  jerryxx_set_property_function(global, MSTR_CLEAR_TIMEOUT, clear_timer_fn);
-  jerryxx_set_property_function(global, MSTR_CLEAR_INTERVAL, clear_timer_fn);
-  jerryxx_set_property_function(global, MSTR_DELAY, delay_fn);
-  jerryxx_set_property_function(global, MSTR_MILLIS, millis_fn);
-  jerry_release_value(global);
-}
-
 /****************************************************************************/
 /*                                                                          */
 /*                              CONSOLE OBJECT                              */
