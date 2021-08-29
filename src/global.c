@@ -732,44 +732,42 @@ JERRYXX_FUN(millis_fn) {
 }
 
 JERRYXX_FUN(dormant_fn) {
-  JERRYXX_CHECK_ARG(0, "wakeup");
-  jerry_value_t wakeup = JERRYXX_GET_ARG(0);
-  if (!jerry_value_is_typedarray(wakeup)) {
+  JERRYXX_CHECK_ARG_ARRAY(0, "pins");
+  JERRYXX_CHECK_ARG_ARRAY(1, "events");
+  jerry_value_t pins = JERRYXX_GET_ARG(0);
+  jerry_value_t events = JERRYXX_GET_ARG(1);
+  int plen = jerry_get_array_length(pins);
+  int elen = jerry_get_array_length(events);
+  if (plen != elen) {
     return jerry_create_error(
         JERRY_ERROR_TYPE,
         (const jerry_char_t
-             *)"The data argument must be an array of the object.");
+             *)"The length of pins and events should be the same.");
   }
-  jerry_length_t byteLength = 0;
-  jerry_length_t byteOffset = 0;
-  jerry_value_t array_buffer =
-      jerry_get_typedarray_buffer(wakeup, &byteOffset, &byteLength);
-  size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
-  jerry_value_t *buf = jerry_get_arraybuffer_pointer(array_buffer);
-  km_dormant_event_t params[len];
-  for (int i = 0; i < len; i++) {
-    int8_t in_pin = jerryxx_get_property_number(buf[i], MSTR_PIN, -1);
-    int8_t in_event = jerryxx_get_property_number(buf[i], MSTR_EVENT,
-                                                  KM_IO_WATCH_MODE_FALLING);
-    if (in_pin < 0) {
-      char errmsg[255];
-      sprintf(errmsg, "pin number is not defined in the wakeup object");
-      return jerry_create_error(JERRY_ERROR_RANGE,
-                                (const jerry_char_t *)errmsg);
+
+  uint8_t _pins[plen];
+  uint8_t _events[elen];
+  for (int i = 0; i < plen; i++) {
+    jerry_value_t pin = jerry_get_property_by_index(pins, i);
+    jerry_value_t event = jerry_get_property_by_index(events, i);
+    if (!jerry_value_is_number(pin)) {
+      return jerry_create_error(
+          JERRY_ERROR_TYPE,
+          (const jerry_char_t *)"The pin should be a number.");
     }
-    params[i].pin = in_pin;
-    params[i].event = in_event;
+    if (!jerry_value_is_number(event)) {
+      return jerry_create_error(
+          JERRY_ERROR_TYPE,
+          (const jerry_char_t *)"The event should be a number.");
+    }
+    _pins[i] = (uint8_t)jerry_get_number_value(pin);
+    _events[i] = (uint8_t)jerry_get_number_value(event);
   }
-  int ret = km_enter_dormant(params, len);
+
+  int ret = km_dormant(_pins, _events, plen);
   if (ret < 0) {
-    char errmsg[255];
-    if (ret == KM_DORMANT_LENGTH_ERROR) {
-      sprintf(errmsg, "wakeup array length is too long");
-    } else {
-      sprintf(errmsg,
-              "The dormant mode has error, please check the input parameters");
-    }
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+    return jerry_create_error(
+        JERRY_ERROR_TYPE, (const jerry_char_t *)"Error to enter dormant mode.");
   }
   return jerry_create_undefined();
 }

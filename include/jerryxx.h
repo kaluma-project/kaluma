@@ -127,6 +127,23 @@
     }                                                                        \
   }
 
+#define JERRYXX_CHECK_ARG_ARRAY(index, argname)                                \
+  if ((args_cnt <= index) || (!jerry_value_is_array(args_p[index]))) {         \
+    char errmsg[255];                                                          \
+    sprintf(errmsg, "\"%s\" argument must be an array", argname);              \
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *)errmsg); \
+  }
+
+#define JERRYXX_CHECK_ARG_ARRAY_OPT(index, argname)                 \
+  if (args_cnt > index) {                                           \
+    if (!jerry_value_is_array(args_p[index])) {                     \
+      char errmsg[255];                                             \
+      sprintf(errmsg, "\"%s\" argument must be an array", argname); \
+      return jerry_create_error(JERRY_ERROR_TYPE,                   \
+                                (const jerry_char_t *)errmsg);      \
+    }                                                               \
+  }
+
 #define JERRYXX_CHECK_ARG_ARRAYBUFFER(index, argname)                          \
   if ((args_cnt <= index) || (!jerry_value_is_arraybuffer(args_p[index]))) {   \
     char errmsg[255];                                                          \

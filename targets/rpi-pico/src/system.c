@@ -42,10 +42,12 @@ const char km_system_arch[] = "cortex-m0-plus";
 const char km_system_platform[] = "unknown";
 
 /**
+ * Delay in milliseconds
  */
 void km_delay(uint32_t msec) { sleep_ms(msec); }
 
 /**
+ * Return current time (UNIX timestamp in milliseconds)
  */
 uint64_t km_gettime() { return to_ms_since_boot(get_absolute_time()); }
 
@@ -55,6 +57,7 @@ uint64_t km_gettime() { return to_ms_since_boot(get_absolute_time()); }
 uint64_t km_micro_maxtime() {
   return 0xFFFFFFFFFFFFFFFF;  // Max of the uint64()
 }
+
 /**
  * Return micro seconde counter
  */
@@ -65,22 +68,10 @@ uint64_t km_micro_gettime() { return get_absolute_time(); }
  */
 void km_micro_delay(uint32_t usec) { sleep_us(usec); }
 
-int km_enter_dormant(km_dormant_event_t *param_arr, uint8_t length) {
-  if (length >= NUM_BANK0_GPIOS) {
-    return KM_DORMANT_LENGTH_ERROR;  // Error
-  }
-  for (int i = 0; i < length; i++) {
-    if (param_arr[i].pin >= NUM_BANK0_GPIOS) {
-      return KM_DORMANT_PARAM_ERROR;  // Error
-    }
-  }
-
-  uint32_t _event[length];
-  if (tud_ready()) {
-    /* Just return if USB is connected */
-    return 0;
-  }
-
+/**
+ * Enter dormant state
+ */
+int km_dormant(uint8_t *pins, uint8_t *events, uint8_t length) {
   uint src_hz = XOSC_MHZ * MHZ;
   uint clk_ref_src = CLOCKS_CLK_REF_CTRL_SRC_VALUE_XOSC_CLKSRC;
 
@@ -114,35 +105,40 @@ int km_enter_dormant(km_dormant_event_t *param_arr, uint8_t length) {
   pll_deinit(pll_sys);
   pll_deinit(pll_usb);
 
+  // Setup GPIOs for wakeup
+  uint32_t _events[length];
   for (int i = 0; i < length; i++) {
-    switch (param_arr[i].event) {
+    switch (events[i]) {
       case KM_IO_WATCH_MODE_LOW_LEVEL:
-        _event[i] = IO_BANK0_DORMANT_WAKE_INTE0_GPIO0_LEVEL_LOW_BITS;
+        _events[i] = IO_BANK0_DORMANT_WAKE_INTE0_GPIO0_LEVEL_LOW_BITS;
         break;
       case KM_IO_WATCH_MODE_HIGH_LEVEL:
-        _event[i] = IO_BANK0_DORMANT_WAKE_INTE0_GPIO0_LEVEL_HIGH_BITS;
+        _events[i] = IO_BANK0_DORMANT_WAKE_INTE0_GPIO0_LEVEL_HIGH_BITS;
         break;
       case KM_IO_WATCH_MODE_RISING:
-        _event[i] = IO_BANK0_DORMANT_WAKE_INTE0_GPIO0_EDGE_HIGH_BITS;
+        _events[i] = IO_BANK0_DORMANT_WAKE_INTE0_GPIO0_EDGE_HIGH_BITS;
         break;
       case KM_IO_WATCH_MODE_FALLING:
-        _event[i] = IO_BANK0_DORMANT_WAKE_INTE0_GPIO0_EDGE_LOW_BITS;
+        _events[i] = IO_BANK0_DORMANT_WAKE_INTE0_GPIO0_EDGE_LOW_BITS;
         break;
       case KM_IO_WATCH_MODE_CHANGE:
-        _event[i] = (IO_BANK0_DORMANT_WAKE_INTE0_GPIO0_EDGE_HIGH_BITS |
-                     IO_BANK0_DORMANT_WAKE_INTE0_GPIO0_EDGE_LOW_BITS);
-        break;
+        _events[i] = IO_BANK0_DORMANT_WAKE_INTE0_GPIO0_EDGE_HIGH_BITS |
+                     IO_BANK0_DORMANT_WAKE_INTE0_GPIO0_EDGE_LOW_BITS;
       default:
-        return KM_GPIOPORT_ERROR;  // Event error
+        return -1;  // Error (unknown event)
     }
-    gpio_set_dormant_irq_enabled(param_arr[i].pin, _event[i], true);
+    gpio_set_dormant_irq_enabled(pins[i], _events[i], true);
   }
+
+  // Enter dormant state
   xosc_dormant();
+
   // Execution stops here until woken up
   for (int i = 0; i < length; i++) {
     // Clear the irq so we can go back to dormant mode again if we want
-    gpio_acknowledge_irq(param_arr[i].pin, _event[i]);
+    gpio_acknowledge_irq(pins[i], _events[i]);
   }
+
   /* Resume the system */
   pll_init(pll_sys, 1, 1500 * MHZ, 6, 2);
   pll_init(pll_usb, 1, 480 * MHZ, 5, 2);
