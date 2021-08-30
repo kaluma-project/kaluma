@@ -79,11 +79,6 @@ JERRYXX_FUN(pio_sm_setup_fn) {
   JERRYXX_CHECK_ARG_OBJECT(1, "options");
 
   uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  if (sm >= KM_PIO_NO_SM) {
-    return jerry_create_error(
-        JERRY_ERROR_TYPE,
-        (const jerry_char_t *)"State machine number is not supported.");
-  }
   // check this.port
   jerry_value_t port_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PIO_PORT);
@@ -102,12 +97,46 @@ JERRYXX_FUN(pio_sm_setup_fn) {
       (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_PIN_OUT_CNT, 1);
   uint8_t pin_in_cnt =
       (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_PIN_IN_CNT, 1);
+  uint8_t fifo = (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_FIFO,
+                                                      KM_PIO_FIFO_JOIN_NONE);
+  uint8_t in_shift_dir = (uint8_t)jerryxx_get_property_number(
+      options, MSTR_PIO_IN_SHIFTDIR, KM_PIO_SHIFT_RIGHT);
+  uint8_t in_auto_push_value =
+      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_IN_AUTOPUSH, 0);
+  bool in_auto_push = (in_auto_push_value) ? true : false;
+  uint8_t in_auto_thd =
+      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_IN_AUTOTHD, 32);
+  uint8_t out_shift_dir = (uint8_t)jerryxx_get_property_number(
+      options, MSTR_PIO_OUT_SHIFTDIR, KM_PIO_SHIFT_RIGHT);
+  uint8_t out_auto_push_value =
+      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_OUT_AUTOPUSH, 0);
+  bool out_auto_push = (out_auto_push_value) ? true : false;
+  uint8_t out_auto_thd =
+      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_OUT_AUTOTHD, 32);
   int ret = km_pio_sm_setup(port, sm);
+  printf("inshift %d inautopush %d inautothd %d\r\n", in_shift_dir,
+         in_auto_push, in_auto_thd);
+  printf("outshift %d outautopush %d outautothd %d\r\n", out_shift_dir,
+         out_auto_push, out_auto_thd);
+  if (fifo >= KM_PIO_FIFO_JOIN_NONE_DEFINED) {
+    ret = -1;  // Error!!!
+  }
   if ((ret == 0) && (pin_out != 0xFF)) {
     ret = km_pio_sm_set_out(port, sm, pin_out, pin_out_cnt);
   }
   if ((ret == 0) && (pin_in != 0xFF)) {
     ret = km_pio_sm_set_in(port, sm, pin_in, pin_in_cnt);
+  }
+  if (ret == 0) {
+    ret = km_pio_sm_set_shift(port, sm, KM_PIO_IN_SHIFT, in_shift_dir,
+                              in_auto_push, in_auto_thd);
+  }
+  if (ret == 0) {
+    ret = km_pio_sm_set_shift(port, sm, KM_PIO_OUT_SHIFT, out_shift_dir,
+                              out_auto_push, out_auto_thd);
+  }
+  if (ret == 0) {
+    ret = km_pio_sm_set_fifo_join(port, sm, fifo);
   }
   if (ret == 0) {
     ret = km_pio_sm_init(port, sm);
@@ -127,11 +156,6 @@ JERRYXX_FUN(pio_sm_enable_fn) {
   JERRYXX_CHECK_ARG_BOOLEAN_OPT(1, "enable");
 
   uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  if (sm >= KM_PIO_NO_SM) {
-    return jerry_create_error(
-        JERRY_ERROR_TYPE,
-        (const jerry_char_t *)"State machine number is not supported.");
-  }
   // check this.port
   jerry_value_t port_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PIO_PORT);
@@ -148,7 +172,7 @@ JERRYXX_FUN(pio_sm_enable_fn) {
         JERRY_ERROR_COMMON,
         (const jerry_char_t *)"Enabling state machine fails.");
   }
-  return jerry_create_number(sm);
+  return jerry_create_undefined();
 }
 
 /**
@@ -216,6 +240,16 @@ jerry_value_t module_pio_init() {
   jerry_value_t pio_ctor = jerry_create_external_function(pio_ctor_fn);
   jerry_value_t pio_prototype = jerry_create_object();
   jerryxx_set_property(pio_ctor, "prototype", pio_prototype);
+  jerryxx_set_property_number(pio_ctor, MSTR_PIO_FIFO_JOIN_NONE,
+                              KM_PIO_FIFO_JOIN_NONE);
+  jerryxx_set_property_number(pio_ctor, MSTR_PIO_FIFO_JOIN_TX,
+                              KM_PIO_FIFO_JOIN_TX);
+  jerryxx_set_property_number(pio_ctor, MSTR_PIO_FIFO_JOIN_RX,
+                              KM_PIO_FIFO_JOIN_RX);
+  jerryxx_set_property_number(pio_ctor, MSTR_PIO_FIFO_SHIFT_RIGHT,
+                              KM_PIO_SHIFT_RIGHT);
+  jerryxx_set_property_number(pio_ctor, MSTR_PIO_FIFO_SHIFT_LEFT,
+                              KM_PIO_SHIFT_LEFT);
   jerryxx_set_property_function(pio_prototype, MSTR_PIO_SM_SETUP,
                                 pio_sm_setup_fn);
   jerryxx_set_property_function(pio_prototype, MSTR_PIO_SM_ENABLE,

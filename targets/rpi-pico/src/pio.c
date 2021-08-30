@@ -70,7 +70,7 @@ static PIO __get_pio(uint8_t port) {
 }
 
 static bool __sm_enabled(uint8_t port, uint8_t sm) {
-  if (km_pio[port].sm_enabled & (1u << sm)) {
+  if ((sm < PIO_SM_NUM) && (km_pio[port].sm_enabled & (1u << sm))) {
     return true;
   }
   return false;
@@ -150,6 +150,37 @@ int km_pio_sm_set_in(uint8_t port, uint8_t sm, uint8_t pin_in,
   return 0;
 }
 
+int km_pio_sm_set_fifo_join(uint8_t port, uint8_t sm, km_pio_fifo_t fifo_type) {
+  PIO pio = __get_pio(port);
+  if ((pio == NULL) || (km_pio[port].enabled != KM_PIO_PORT_ENABLE) ||
+      (__sm_enabled(port, sm))) {
+    return KM_PIO_ERROR;
+  }
+  sm_config_set_fifo_join(&km_pio[port].sm_config[sm], fifo_type);
+  return 0;
+}
+
+int km_pio_sm_set_shift(uint8_t port, uint8_t sm,
+                        km_pio_shift_port_t shift_port, uint8_t shift_dir,
+                        bool auto_push, uint8_t auto_thd) {
+  PIO pio = __get_pio(port);
+  if ((pio == NULL) || (km_pio[port].enabled != KM_PIO_PORT_ENABLE) ||
+      (__sm_enabled(port, sm)) || (auto_thd > 32)) {
+    return KM_PIO_ERROR;
+  }
+  bool dir = (shift_dir == KM_PIO_SHIFT_RIGHT) ? true : false;
+  if (shift_port == KM_PIO_IN_SHIFT) {
+    sm_config_set_in_shift(&km_pio[port].sm_config[sm], dir, auto_push,
+                           auto_thd);
+  } else if (shift_port == KM_PIO_OUT_SHIFT) {
+    sm_config_set_out_shift(&km_pio[port].sm_config[sm], dir, auto_push,
+                            auto_thd);
+  } else {
+    return KM_PIO_ERROR;
+  }
+  return 0;
+}
+
 int km_pio_sm_init(uint8_t port, uint8_t sm) {
   PIO pio = __get_pio(port);
   if ((pio == NULL) || (km_pio[port].enabled != KM_PIO_PORT_ENABLE) ||
@@ -179,7 +210,7 @@ int km_pio_close(uint8_t port) {
   if ((pio == NULL) || !(km_pio[port].enabled & KM_PIO_PORT_ENABLE)) {
     return KM_PIO_ERROR;
   }
-  for (int i = 0; i < KM_PIO_NO_SM; i++) {
+  for (int i = 0; i < PIO_SM_NUM; i++) {
     pio_sm_unclaim(pio, i);
   }
   pio_clear_instruction_memory(pio);
