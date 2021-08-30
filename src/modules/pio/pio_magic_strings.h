@@ -23,6 +23,18 @@
 #define __PIO_MAGIC_STRINGS_H
 
 #define MSTR_PIO_PIO "PIO"
+#define MSTR_PIO_FIFO_JOIN_NONE "FIFO_NONE"
+#define MSTR_PIO_FIFO_JOIN_TX "FIFO_TX"
+#define MSTR_PIO_FIFO_JOIN_RX "FIFO_RX"
+#define MSTR_PIO_FIFO_SHIFT_RIGHT "SHIFT_RIGHT"
+#define MSTR_PIO_FIFO_SHIFT_LEFT "SHIFT_LEFT"
+#define MSTR_PIO_FIFO "fifo"
+#define MSTR_PIO_IN_SHIFTDIR "inShiftDir"
+#define MSTR_PIO_IN_AUTOPUSH "inAutoPush"
+#define MSTR_PIO_IN_AUTOTHD "inAutoThd"
+#define MSTR_PIO_OUT_SHIFTDIR "outShiftDir"
+#define MSTR_PIO_OUT_AUTOPUSH "outAutoPush"
+#define MSTR_PIO_OUT_AUTOTHD "outAutoThd"
 #define MSTR_PIO_SM_SETUP "smSetup"
 #define MSTR_PIO_SM_ENABLE "smEnable"
 #define MSTR_PIO_PORT "port"
