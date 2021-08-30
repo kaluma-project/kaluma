@@ -31,15 +31,22 @@
 #define KM_PIO_FIFO_LOW 0
 #define KM_PIO_FIFO_HIGH 1
 
-#define KM_PIO_NO_SM 4
-
 #define KM_PIO_PORT_DISABLE 0x00
 #define KM_PIO_PORT_ENABLE 0x01
 
-#define KM_PIO_SM0_EN 0x10
-#define KM_PIO_SM1_EN 0x20
-#define KM_PIO_SM2_EN 0x40
-#define KM_PIO_SM3_EN 0x80
+typedef enum {
+  KM_PIO_FIFO_JOIN_NONE = 0,
+  KM_PIO_FIFO_JOIN_TX = 1,
+  KM_PIO_FIFO_JOIN_RX = 2,
+  KM_PIO_FIFO_JOIN_NONE_DEFINED = 3,
+} km_pio_fifo_t;
+
+typedef enum {
+  KM_PIO_SHIFT_LEFT = 0,
+  KM_PIO_SHIFT_RIGHT = 1
+} km_pio_shift_dir_t;
+
+typedef enum { KM_PIO_IN_SHIFT = 0, KM_PIO_OUT_SHIFT = 1 } km_pio_shift_port_t;
 
 /**
  * Init a PIO module.
@@ -96,6 +103,32 @@ int km_pio_sm_set_out(uint8_t port, uint8_t sm, uint8_t pin_out,
  */
 int km_pio_sm_set_in(uint8_t port, uint8_t sm, uint8_t pin_in,
                      uint8_t pin_in_cnt);
+
+/**
+ * Setup a PIO sm fifo join settings.
+ *
+ * @param port port number of PIO block
+ * @param sm state machine
+ * @param fifo_type KM_PIO_FIFO_JOIN_NONE, KM_PIO_FIFO_JOIN_TX,
+ * KM_PIO_FIFO_JOIN_RX
+ * @return Positive number if successfully setup fifo join, negative otherwise.
+ */
+int km_pio_sm_set_fifo_join(uint8_t port, uint8_t sm, km_pio_fifo_t fifo_type);
+
+/**
+ * Setup a PIO sm fifo shift settings.
+ *
+ * @param port port number of PIO block
+ * @param sm state machine
+ * @param shift_port KM_PIO_IN_SHIFT, KM_PIO_OUT_SHIFT
+ * @param shift_dir KM_PIO_SHIFT_LEFT, KM_PIO_SHIFT_RIGHT
+ * @param auto_push auto push is enabled when it's true.
+ * @param auto_thd auto push threshold
+ * @return Positive number if successfully setup shift, negative otherwise.
+ */
+int km_pio_sm_set_shift(uint8_t port, uint8_t sm,
+                        km_pio_shift_port_t shift_port, uint8_t shift_dir,
+                        bool auto_push, uint8_t auto_thd);
 
 /**
  * initialize a PIO sm.
