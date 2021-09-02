@@ -114,10 +114,10 @@ JERRYXX_FUN(pio_sm_setup_fn) {
   uint8_t out_auto_thd =
       (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_OUT_AUTOTHD, 32);
   int ret = km_pio_sm_setup(port, sm);
-  printf("inshift %d inautopush %d inautothd %d\r\n", in_shift_dir,
-         in_auto_push, in_auto_thd);
-  printf("outshift %d outautopush %d outautothd %d\r\n", out_shift_dir,
-         out_auto_push, out_auto_thd);
+  // printf("inshift %d inautopush %d inautothd %d\r\n", in_shift_dir,
+  //        in_auto_push, in_auto_thd);
+  // printf("outshift %d outautopush %d outautothd %d\r\n", out_shift_dir,
+  //        out_auto_push, out_auto_thd);
   if (fifo >= KM_PIO_FIFO_JOIN_NONE_DEFINED) {
     ret = -1;  // Error!!!
   }
