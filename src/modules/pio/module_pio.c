@@ -101,23 +101,17 @@ JERRYXX_FUN(pio_sm_setup_fn) {
                                                       KM_PIO_FIFO_JOIN_NONE);
   uint8_t in_shift_dir = (uint8_t)jerryxx_get_property_number(
       options, MSTR_PIO_IN_SHIFTDIR, KM_PIO_SHIFT_RIGHT);
-  uint8_t in_auto_push_value =
-      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_IN_AUTOPUSH, 0);
-  bool in_auto_push = (in_auto_push_value) ? true : false;
+  bool in_auto_push =
+      (bool)jerryxx_get_property_boolean(options, MSTR_PIO_IN_AUTOPUSH, false);
   uint8_t in_auto_thd =
       (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_IN_AUTOTHD, 32);
   uint8_t out_shift_dir = (uint8_t)jerryxx_get_property_number(
       options, MSTR_PIO_OUT_SHIFTDIR, KM_PIO_SHIFT_RIGHT);
-  uint8_t out_auto_push_value =
-      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_OUT_AUTOPUSH, 0);
-  bool out_auto_push = (out_auto_push_value) ? true : false;
+  bool out_auto_push =
+      (bool)jerryxx_get_property_boolean(options, MSTR_PIO_OUT_AUTOPUSH, false);
   uint8_t out_auto_thd =
       (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_OUT_AUTOTHD, 32);
   int ret = km_pio_sm_setup(port, sm);
-  // printf("inshift %d inautopush %d inautothd %d\r\n", in_shift_dir,
-  //        in_auto_push, in_auto_thd);
-  // printf("outshift %d outautopush %d outautothd %d\r\n", out_shift_dir,
-  //        out_auto_push, out_auto_thd);
   if (fifo >= KM_PIO_FIFO_JOIN_NONE_DEFINED) {
     ret = -1;  // Error!!!
   }

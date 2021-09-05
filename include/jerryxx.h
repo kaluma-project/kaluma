@@ -186,6 +186,8 @@ void jerryxx_set_property_function(jerry_value_t object, const char *name,
 jerry_value_t jerryxx_get_property(jerry_value_t object, const char *name);
 double jerryxx_get_property_number(jerry_value_t object, const char *name,
                                    double default_value);
+bool jerryxx_get_property_boolean(jerry_value_t object, const char *name,
+                                  bool default_value);
 bool jerryxx_delete_property(jerry_value_t object, const char *name);
 
 void jerryxx_print_value(jerry_value_t value);
