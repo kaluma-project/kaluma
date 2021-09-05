@@ -192,7 +192,7 @@ JERRYXX_FUN(pio_put_fn) {
   if (ret == KM_PIO_TIMEOUT) {
     return jerry_create_error(JERRY_ERROR_COMMON,
                               (const jerry_char_t *)"Put FIFO timeout.");
-  } else if (ret == KM_PIO_TIMEOUT) {
+  } else if (ret < 0) {
     return jerry_create_error(JERRY_ERROR_COMMON,
                               (const jerry_char_t *)"Put FIFO fails.");
   }
@@ -221,7 +221,7 @@ JERRYXX_FUN(pio_get_fn) {
   if (err == KM_PIO_TIMEOUT) {
     return jerry_create_error(JERRY_ERROR_COMMON,
                               (const jerry_char_t *)"Get FIFO timeout.");
-  } else if (err == KM_PIO_TIMEOUT) {
+  } else if (err < 0) {
     return jerry_create_error(JERRY_ERROR_COMMON,
                               (const jerry_char_t *)"Get FIFO fails.");
   }
