@@ -217,17 +217,24 @@ int km_pio_close(uint8_t port) {
   return 0;
 }
 
-int km_pio_put_fifo(uint8_t port, uint8_t sm, uint32_t data) {
+int km_pio_put_fifo(uint8_t port, uint8_t sm, uint32_t data, uint32_t tout) {
   PIO pio = __get_pio(port);
   if ((pio == NULL) || !(km_pio[port].enabled & KM_PIO_PORT_ENABLE) ||
       (__sm_enabled(port, sm) == false)) {
     return KM_PIO_ERROR;
   }
-  pio_sm_put_blocking(pio, sm, data);
+  uint64_t start_time = get_absolute_time();
+  while (pio_sm_is_tx_fifo_full(pio, sm)) {
+    int64_t diff = absolute_time_diff_us(start_time, get_absolute_time());
+    if (((diff >= 0) && (diff > tout)) || ((diff < 0) && (diff > -tout))) {
+      return KM_PIO_TIMEOUT;
+    }
+  }
+  pio_sm_put(pio, sm, data);
   return 0;
 }
 
-uint32_t km_pio_get_fifo(uint8_t port, uint8_t sm, int8_t *err) {
+uint32_t km_pio_get_fifo(uint8_t port, uint8_t sm, uint32_t tout, int8_t *err) {
   PIO pio = __get_pio(port);
   if ((pio == NULL) || !(km_pio[port].enabled & KM_PIO_PORT_ENABLE) ||
       (__sm_enabled(port, sm) == false)) {
@@ -235,5 +242,13 @@ uint32_t km_pio_get_fifo(uint8_t port, uint8_t sm, int8_t *err) {
     return 0;
   }
   *err = 0;
-  return pio_sm_get_blocking(pio, sm);
+  uint64_t start_time = get_absolute_time();
+  while (pio_sm_is_rx_fifo_empty(pio, sm)) {
+    int64_t diff = absolute_time_diff_us(start_time, get_absolute_time());
+    if (((diff >= 0) && (diff > tout)) || ((diff < 0) && (diff > -tout))) {
+      *err = KM_PIO_TIMEOUT;
+      break;
+    }
+  }
+  return pio_sm_get(pio, sm);
 }

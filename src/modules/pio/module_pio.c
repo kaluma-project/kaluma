@@ -175,9 +175,11 @@ JERRYXX_FUN(pio_sm_enable_fn) {
 JERRYXX_FUN(pio_put_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "sm");
   JERRYXX_CHECK_ARG_NUMBER(1, "data");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(2, "tout");
   // read parameters
   uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  uint32_t data = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
+  uint32_t data = (uint32_t)JERRYXX_GET_ARG_NUMBER(1);
+  uint32_t tout = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(2, 1000);
   // check this.port
   jerry_value_t port_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PIO_PORT);
@@ -186,7 +188,11 @@ JERRYXX_FUN(pio_put_fn) {
         JERRY_ERROR_TYPE, (const jerry_char_t *)"PIO port is not a number.");
   }
   uint8_t port = (uint8_t)jerry_get_number_value(port_value);
-  if (km_pio_put_fifo(port, sm, data) < 0) {
+  int ret = km_pio_put_fifo(port, sm, data, tout);
+  if (ret == KM_PIO_TIMEOUT) {
+    return jerry_create_error(JERRY_ERROR_COMMON,
+                              (const jerry_char_t *)"Put FIFO timeout.");
+  } else if (ret == KM_PIO_TIMEOUT) {
     return jerry_create_error(JERRY_ERROR_COMMON,
                               (const jerry_char_t *)"Put FIFO fails.");
   }
@@ -198,8 +204,10 @@ JERRYXX_FUN(pio_put_fn) {
  */
 JERRYXX_FUN(pio_get_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "sm");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(1, "tout");
   // read parameters
   uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  uint32_t tout = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(1, 1000);
   // check this.port
   jerry_value_t port_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PIO_PORT);
@@ -209,8 +217,11 @@ JERRYXX_FUN(pio_get_fn) {
   }
   uint8_t port = (uint8_t)jerry_get_number_value(port_value);
   int8_t err;
-  uint32_t data = km_pio_get_fifo(port, sm, &err);
-  if (err) {
+  uint32_t data = km_pio_get_fifo(port, sm, tout, &err);
+  if (err == KM_PIO_TIMEOUT) {
+    return jerry_create_error(JERRY_ERROR_COMMON,
+                              (const jerry_char_t *)"Get FIFO timeout.");
+  } else if (err == KM_PIO_TIMEOUT) {
     return jerry_create_error(JERRY_ERROR_COMMON,
                               (const jerry_char_t *)"Get FIFO fails.");
   }

@@ -27,6 +27,7 @@
 #include <stdint.h>
 
 #define KM_PIO_ERROR -1
+#define KM_PIO_TIMEOUT -2
 
 #define KM_PIO_FIFO_LOW 0
 #define KM_PIO_FIFO_HIGH 1
@@ -163,17 +164,19 @@ int km_pio_close(uint8_t port);
  *
  * @param port port number of PIO block
  * @param data 32bit data value
+ * @param tout micro seconds timeout
  * @return Positive number if successfully setup, negative otherwise.
  */
-int km_pio_put_fifo(uint8_t port, uint8_t sm, uint32_t data);
+int km_pio_put_fifo(uint8_t port, uint8_t sm, uint32_t data, uint32_t tout);
 
 /**
  *  GEt data from the PIO FIFO
  *
  * @param port port number of PIO block
  * @param sm state machine
+ * @param tout micro seconds timeout
  * @param err error code, O if there's no error.
  * @return 32bit data value
  */
-uint32_t km_pio_get_fifo(uint8_t port, uint8_t sm, int8_t *err);
+uint32_t km_pio_get_fifo(uint8_t port, uint8_t sm, uint32_t tout, int8_t *err);
 #endif /* __KM_PIO_H */
