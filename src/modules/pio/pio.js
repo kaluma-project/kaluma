@@ -9,14 +9,22 @@
 }
 
 class ASM {
-  constructor() {
+  constructor(options) {
     this.code = [];
     this.labels = {};
     this.jmps = [];
+    options = Object.assign({
+      sideset: 0
+    }, options);
+    this.sideset = options.sideset
   }
 
   jmp(cond, target) {
     let c = ASM.JMP;
+    if (arguments.length < 2) {
+      target = cond;
+      cond = null;
+    }
     switch (cond) {
       case null: break;
       case '': break;
@@ -90,16 +98,16 @@ class ASM {
 
   push(iffull, block = 1) {
     let c = ASM.PUSH;
-    if (iffull) c |= 0x0040;
-    if (block) c |= 0x0020;
+    if (iffull === 1 || iffull === 'iffull') c |= 0x0040;
+    if (block === 1 || block === 'block') c |= 0x0020;
     this.code.push(c);    
     return this;
   }
 
   pull(ifempty, block = 1) {
     let c = ASM.PULL;
-    if (ifempty) c |= 0x0040;
-    if (block) c |= 0x0020;
+    if (ifempty === 1 || ifempty === 'ifempty') c |= 0x0040;
+    if (block === 1 || block === 'block') c |= 0x0020;
     this.code.push(c);
     return this;
   }
@@ -141,11 +149,28 @@ class ASM {
     return this;
   }
 
-  irq(wait, clear, irqnum, rel) {
+  irq(cmd, irqnum, rel) {
     let c = ASM.IRQ;
+    let wait = 0;
+    let clear = 0;
+    if (typeof cmd === 'number') {
+      rel = irqnum;
+      irqnum = cmd;
+      cmd = null;
+    }
+    switch (cmd) {
+      case null: break;
+      case 'set': break;
+      case 'nowait': break;
+      case 'wait': wait = 1; break;
+      case 'clear': clear = 1; break;
+    }
     if (wait) c |= 1 << 5;
     if (clear) c |= 1 << 6;
-    // TODO: irqnum, rel
+    c |= irqnum;
+    if (rel === 'rel') {
+      c |= 1 << 4;
+    }
     this.code.push(c);
     return this;
   }
@@ -168,17 +193,39 @@ class ASM {
     return this;
   }
 
+  nop() {
+    return this.mov('y', 'y');
+  }
+
   // additional
   label(name) {
     this.labels[name] = this.code.length;
     return this;
   }
 
-  wrap_target() {}
-  wrap() {}
+  wrap_target() {
+    return this.label('wrap_target');
+  }
 
-  sideset() {}
-  delay() {}
+  wrap() {
+    return this.label('wrap');
+  }
+
+  side(val) {
+    const i = this.code.length - 1;
+    let c = this.code[i];
+    c |= val << (13 - this.sideset);
+    this.code[i] = c;
+    return this;
+  }
+
+  delay(val) {
+    const i = this.code.length - 1;
+    let c = this.code[i];
+    c |= val << 8;
+    this.code[i] = c;
+    return this;
+  }
 
   end () {
     // update all jmp
@@ -187,14 +234,11 @@ class ASM {
       c |= this.labels[jmp.target]
       this.code[jmp.offset] = c;
     });
+    return this;
   }
 
   toBinary () {
     return new Uint16Array(this.code);
-  }
-
-  _print() {
-    console.log(`[${this.code.map(c => c.toString(16)).join(', ')}]`);
   }
 
   // instruction
@@ -207,26 +251,6 @@ class ASM {
   static MOV = 0xa000;
   static IRQ = 0xc000;
   static SET = 0xe000;
-
-  // destination
-  static DST_PINS = 0; // PINS
-  static DST_X = 1; // X
-  static DST_Y = 2; // Y
-  static DST_NULL = 3; // NULL
-  static DST_PINDIRS = 4; // PINDIRS
-  static DST_PC = 5; // PC
-  static DST_ISR = 6; // ISR
-  static DST_EXEC = 7; // EXEC
-
-  // condition
-  static CND_ALWAYS = 0;
-  static CND_X_ZERO = 1; // !X
-  static CND_X_DEC = 2; // X--
-  static CND_Y_ZERO = 3; // !Y
-  static CND_Y_DEC = 4; // Y--
-  static CND_NEQ_XY = 5; // X!=Y
-  static CND_PIN = 6; // PIN
-  static CND_OSRE_NEM = 0; // !OSRE
 }
 
 class StateMachine {
@@ -256,15 +280,20 @@ sm.pull();
 
 /* --------------------- examples ------------------------- */
 
+function print(asm) {
+  console.log(`[${asm.code.map(c => c.toString(16)).join(', ')}]`);
+}
+
+
 // hello.pio
 const hello_asm = new ASM();
 hello_asm
 .label('loop')
   .pull()
   .out('pins', 1)
-  .jmp(null, 'loop')
-  .end()
-hello_asm._print();
+  .jmp('loop')
+  .end();
+print(hello_asm);
 
 // addition.pio
 const addition_asm = new ASM();
@@ -273,15 +302,15 @@ addition_asm
   .mov('x', '~osr')
   .pull()
   .mov('y', 'osr')
-  .jmp(null, 'test')
+  .jmp('test')
 .label('incr')
   .jmp('x--', 'test')
 .label('test')
   .jmp('y--', 'incr')
   .mov('isr', '~x')
   .push()
-  .end()
-addition_asm._print();
+  .end();
+print(addition_asm);
 
 // clocked-input.pio
 const clocked_input_asm = new ASM();
@@ -289,5 +318,17 @@ clocked_input_asm
   .wait(0, 'pin', 1)
   .wait(1, 'pin', 1)
   .in('pins', 1)
-  .end()
-clocked_input_asm._print();
+  .end();
+print(clocked_input_asm);
+
+// squareware_fast.pio
+const squareware_fast_asm = new ASM();
+squareware_fast_asm
+  .set('pindirs', 1)
+.wrap_target()
+  .set('pins', 1)
+  .set('pins', 0)
+.wrap()
+  .end();
+print(squareware_fast_asm);
+console.log(squareware_fast_asm);
