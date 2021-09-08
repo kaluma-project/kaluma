@@ -1,11 +1,22 @@
-/**
- * PIO (Programmable I/O) class
- */
+const pio_native = process.binding(process.binding.pio)
 
- class PIO {
-  constructor(block) {
-    this.block = block;
-  }
+// pio_add_program(uint8_t pio, uint16_t[] prog) -> uint8_t
+// pio_sm_init(uint8_t pio, uint8_t sm, uint8_t offset, jerry_value_t options) -> void
+// pio_sm_set_enable(uint8_t pio, uint8_t sm, bool value);
+// pio_sm_restart(uint8_t pio, uint8_t sm);
+// pio_sm_exec(uint8_t pio, uint8_t sm, uint16_t inst);
+// pio_sm_get(uint8_t pio, uint8_t sm) -> uint32_t;
+// pio_sm_put(uint8_t pio, uint8_t sm, uint32_t value);
+// pio_sm_irq(uint8_t pio, uint8_t sm, ...);
+
+const PIO = {
+  FIFO_JOIN_NONE: 0,
+  FIFO_JOIN_TX: 1,
+  FIFO_JOIN_RX: 2,
+  SHIFT_LEFT: 0,
+  SHIFT_RIGHT: 1,
+  TX_LESSTHAN: 0,
+  RX_LESSTHAN: 1
 }
 
 class ASM {
@@ -254,14 +265,73 @@ class ASM {
 }
 
 class StateMachine {
-  constructor(pio, id, options) {}
-  active(value) {}
-  push() {}
-  pull() {}
+  constructor(id, asm, options) {
+    this.pio = id > 3 ? 1 : 0;
+    this.sm = id - (this.pio * 4);
+    if (!asm._pio) asm._pio = new Array(2);
+    if (!asm._pio[this.pio]) {
+      const bin = asm.toBinary();
+      this.offset = pio_native.pio_add_program(this.pio, bin);
+      // this.offset = 0; // TODO: THIS IS FOR TEST
+      this.length = bin.length;
+      asm._pio[this.pio] = {
+        offset: this.offset
+      }
+    }
+    pio_native.pio_sm_init(this.pio, this.sm, Object.assign({
+      // freq,
+      inBase: 0,
+      outBase: 0, 
+      outCount: 32,
+      setBase: 0,
+      setCount: 0,
+      sidesetBase: 0,
+      sideset: asm.sideset > 0,
+      sidesetBitCount: asm.sideset,
+      sidesetOpt: false,
+      sidesetPindirs: false,
+      jmpPin: 0,
+      wrapTarget: this.offset + (asm.labels['wrap_target'] ?? 0),
+      wrap: this.offset + (asm.labels['wrap'] ?? asm.code.length - 1),
+      inShiftDir: PIO.SHIFT_RIGHT,
+      autopush: false,
+      pushThreshold: 32,
+      outShiftDir: PIO.SHIFT_RIGHT,
+      autopull: false,
+      pullThreshold: 32,
+      fifoJoin: PIO.FIFO_JOIN_NONE,
+      outSticky: false,
+      outEnablePin: -1,
+      movStatusSel: PIO.TX_LESSTHAN,
+      movStatusN: 0,
+    }, options));
+  }
+
+  active(value) {
+    pio_native.pio_sm_set_enabled(this.pio, this.sm, value);
+  }
+
+  restart () {}
+
+  exec (inst) {}
+
+  get() {
+    return pio_native.pio_sm_get(this.pio, this.sm)
+  }
+
+  put(value) {
+    pio_native.pio_sm_put(this.pio, this.sm, value);
+  }
+
+  irq () {}
 }
 
+exports.PIO = PIO;
+exports.ASM = ASM;
+exports.StateMachine = StateMachine;
+
 /*
-const {PIO, ASM, StateMachine} = require('pio');
+const {ASM, StateMachine} = require('pio');
 const asm = new ASM();
 asm
   .push(...)
@@ -270,16 +340,18 @@ asm
   ...
   .end()
 
-const pio = new PIO(0, asm);
-const sm = new StateMachine(pio, 0, options);
-sm.push(1);
-sm.push(2);
-sm.pull();
+const sm = new StateMachine(0, asm, options);
+sm.put(1);
+sm.put(2);
+sm.get();
+const inst = (new ASM()).set('pins', 1).toBinary()[0];
+sm.exec(inst);
 ...
 */
 
 /* --------------------- examples ------------------------- */
 
+/*
 function print(asm) {
   console.log(`[${asm.code.map(c => c.toString(16)).join(', ')}]`);
 }
@@ -332,3 +404,7 @@ squareware_fast_asm
   .end();
 print(squareware_fast_asm);
 console.log(squareware_fast_asm);
+
+console.log('inst', (new ASM()).set('pins', 1).toBinary()[0]);
+
+*/
