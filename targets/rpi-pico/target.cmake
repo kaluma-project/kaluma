@@ -27,7 +27,6 @@ set(SOURCES
   ${TARGET_SRC_DIR}/flash.c
   ${TARGET_SRC_DIR}/storage.c
   ${TARGET_SRC_DIR}/uart.c
-  ${TARGET_SRC_DIR}/pio.c
   ${TARGET_SRC_DIR}/i2c.c
   ${TARGET_SRC_DIR}/spi.c)
 

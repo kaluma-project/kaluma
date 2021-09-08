@@ -21,253 +21,193 @@
 
 #include <stdlib.h>
 
+#include "hardware/irq.h"
+#include "hardware/pio.h"
 #include "io.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
-#include "pio.h"
+#include "pico/stdlib.h"
 #include "pio_magic_strings.h"
 
-/**
- * pio_native constructor
- * args:
- *   port {number}
- *   options {Object}
- *   callback (function(data))
- */
-JERRYXX_FUN(pio_ctor_fn) {
-  JERRYXX_CHECK_ARG_NUMBER(0, "port");
-  JERRYXX_CHECK_ARG(1, "code");
+// --- REQUIRED FUNCTIONS ---
+// pio_add_program(pio, prog) -> uint8_t
+// pio_sm_init(uint8_t pio, uint8_t sm, uint8_t offset, jerry_value_t options)
+// -> void pio_sm_set_enable(uint8_t pio, uint8_t sm, bool value);
+// pio_sm_restart(uint8_t pio, uint8_t sm);
+// pio_sm_exec(uint8_t pio, uint8_t sm, uint16_t inst);
+// pio_sm_get(uint8_t pio, uint8_t sm) -> uint32_t;
+// pio_sm_put(uint8_t pio, uint8_t sm, uint32_t value);
+// pio_sm_irq(uint8_t pio, uint8_t sm, ...);
 
-  // read parameters
-  uint8_t port = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  jerry_value_t code = JERRYXX_GET_ARG(1);
-  int code_len;
-  uint16_t *code_arr;
+/*
+static struct pio_sm_s {
+  uint8_t length;
+  uint8_t offset;
+  pio_sm_config sm_config;
+  uint16_t sm_enabled;
+};
+typedef struct pio_sm_s pio_sm_t;
+static pio_sm_t pio_sm[8];
+*/
 
-  if (jerry_value_is_typedarray(code) &&
-      jerry_get_typedarray_type(code) ==
+static PIO __pio(uint8_t pio) {
+  if (pio == 0) {
+    return pio0;
+  } else if (pio == 1) {
+    return pio1;
+  }
+  return NULL;
+}
+
+JERRYXX_FUN(pio_add_program_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pio");
+  JERRYXX_CHECK_ARG(1, "prog");
+  uint8_t pio = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  jerry_value_t prog = JERRYXX_GET_ARG(1);
+  pio_program_t pio_prog;
+  if (jerry_value_is_typedarray(prog) &&
+      jerry_get_typedarray_type(prog) ==
           JERRY_TYPEDARRAY_UINT16) { /* Uint16Array */
     jerry_length_t byteLength = 0;
     jerry_length_t byteOffset = 0;
     jerry_value_t array_buffer =
-        jerry_get_typedarray_buffer(code, &byteOffset, &byteLength);
-    code_len = jerry_get_arraybuffer_byte_length(array_buffer);
-    code_len /= 2;  // because it's 16bit array
-    code_arr = (uint16_t *)jerry_get_arraybuffer_pointer(array_buffer);
+        jerry_get_typedarray_buffer(prog, &byteOffset, &byteLength);
+    pio_prog.origin = -1;
+    pio_prog.instructions =
+        (uint16_t *)jerry_get_arraybuffer_pointer(array_buffer),
+    pio_prog.length = jerry_get_arraybuffer_byte_length(array_buffer) / 2,
     jerry_release_value(array_buffer);
+    PIO _pio = __pio(pio);
+    int offset = pio_add_program(_pio, &pio_prog);
+    return jerry_create_number(offset);
   } else {
     return jerry_create_error(
         JERRY_ERROR_TYPE,
-        (const jerry_char_t
-             *)"The code argument must be Uint16Array or string.");
+        (const jerry_char_t *)"The prog argument must be Uint16Array");
   }
-  if (km_pio_port_init(port, code_arr, code_len) < 0) {
-    return jerry_create_error(JERRY_ERROR_COMMON,
-                              (const jerry_char_t *)"Port init fails.");
-  }
+}
 
-  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PIO_PORT, port);
-  jerryxx_set_property(JERRYXX_GET_THIS, MSTR_PIO_CODE, code);
+JERRYXX_FUN(pio_sm_init_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pio");
+  JERRYXX_CHECK_ARG_NUMBER(1, "sm");
+  JERRYXX_CHECK_ARG_OBJECT(2, "options");
+  uint8_t pio = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
+  jerry_value_t options = JERRYXX_GET_ARG(2);
+  pio_sm_config sm_config = pio_get_default_sm_config();
+  PIO _pio = __pio(pio);
+  // setup freq ...
+  // setup in pins ...
+  uint8_t in_base =
+      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_SM_IN_BASE, 0);
+  sm_config_set_in_pins(&sm_config, in_base);
+  pio_sm_set_consecutive_pindirs(_pio, sm, in_base, 1, false);
+  pio_gpio_init(_pio, in_base);
+  // setup out pins
+  uint8_t out_base =
+      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_SM_OUT_BASE, 0);
+  uint8_t out_count =
+      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_SM_OUT_COUNT, 0);
+  sm_config_set_out_pins(&sm_config, out_base, out_count);
+  pio_sm_set_consecutive_pindirs(_pio, sm, out_base, out_count, true);
+  for (int i = 0; i < out_count; i++) {
+    pio_gpio_init(_pio, out_base + i);
+  }
+  // setup set pins ...
+  uint8_t set_base =
+      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_SM_SET_BASE, 0);
+  uint8_t set_count =
+      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_SM_SET_COUNT, 0);
+  sm_config_set_set_pins(&sm_config, set_base, set_count);
+
+  // setup sideset pins ...
+  // setup jmp pin
+  // setup wrap
+  uint8_t wrap_target =
+      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_SM_WRAP_TARGET, 0);
+  uint8_t wrap =
+      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_SM_WRAP, 31);
+  sm_config_set_wrap(&sm_config, wrap_target, wrap);
+  // setup in-shift
+  uint8_t inshift_dir =
+      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_SM_INSHIFT_DIR, 0);
+  bool autopush =
+      (uint8_t)jerryxx_get_property_boolean(options, MSTR_PIO_SM_AUTOPUSH, 0);
+  uint8_t push_threshold = (uint8_t)jerryxx_get_property_number(
+      options, MSTR_PIO_SM_PUSH_THRESHOLD, 0);
+  sm_config_set_in_shift(&sm_config, inshift_dir, autopush, push_threshold);
+  // setup out-shift
+  uint8_t outshift_dir = (uint8_t)jerryxx_get_property_number(
+      options, MSTR_PIO_SM_OUTSHIFT_DIR, 0);
+  bool autopull =
+      (uint8_t)jerryxx_get_property_boolean(options, MSTR_PIO_SM_AUTOPULL, 0);
+  uint8_t pull_threshold = (uint8_t)jerryxx_get_property_number(
+      options, MSTR_PIO_SM_PULL_THRESHOLD, 0);
+  sm_config_set_out_shift(&sm_config, outshift_dir, autopull, pull_threshold);
+  // setup fifoJoin
+  uint8_t fifo_join =
+      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_SM_FIFO_JOIN, 0);
+  sm_config_set_fifo_join(&sm_config, fifo_join);
+
+  // setup out special ...
+  // setup mov status ...
+  pio_sm_init(_pio, sm, wrap_target, &sm_config);
   return jerry_create_undefined();
 }
 
-/**
- * PIO.prototype.smSetup() function
- */
-JERRYXX_FUN(pio_sm_setup_fn) {
-  JERRYXX_CHECK_ARG_NUMBER(0, "sm");
-  JERRYXX_CHECK_ARG_OBJECT(1, "options");
-
-  uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  // check this.port
-  jerry_value_t port_value =
-      jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PIO_PORT);
-  if (!jerry_value_is_number(port_value)) {
-    return jerry_create_error(
-        JERRY_ERROR_TYPE, (const jerry_char_t *)"PIO port is not a number.");
-  }
-  uint8_t port = (uint8_t)jerry_get_number_value(port_value);
-  jerry_release_value(port_value);
-  jerry_value_t options = JERRYXX_GET_ARG(1);
-  uint8_t pin_out =
-      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_PIN_OUT, 0xFF);
-  uint8_t pin_in =
-      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_PIN_IN, 0xFF);
-  uint8_t pin_out_cnt =
-      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_PIN_OUT_CNT, 1);
-  uint8_t pin_in_cnt =
-      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_PIN_IN_CNT, 1);
-  uint8_t fifo = (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_FIFO,
-                                                      KM_PIO_FIFO_JOIN_NONE);
-  uint8_t in_shift_dir = (uint8_t)jerryxx_get_property_number(
-      options, MSTR_PIO_IN_SHIFTDIR, KM_PIO_SHIFT_RIGHT);
-  bool in_auto_push =
-      (bool)jerryxx_get_property_boolean(options, MSTR_PIO_IN_AUTOPUSH, false);
-  uint8_t in_auto_thd =
-      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_IN_AUTOTHD, 32);
-  uint8_t out_shift_dir = (uint8_t)jerryxx_get_property_number(
-      options, MSTR_PIO_OUT_SHIFTDIR, KM_PIO_SHIFT_RIGHT);
-  bool out_auto_push =
-      (bool)jerryxx_get_property_boolean(options, MSTR_PIO_OUT_AUTOPUSH, false);
-  uint8_t out_auto_thd =
-      (uint8_t)jerryxx_get_property_number(options, MSTR_PIO_OUT_AUTOTHD, 32);
-  int ret = km_pio_sm_setup(port, sm);
-  if (fifo >= KM_PIO_FIFO_JOIN_NONE_DEFINED) {
-    ret = -1;  // Error!!!
-  }
-  if ((ret == 0) && (pin_out != 0xFF)) {
-    ret = km_pio_sm_set_out(port, sm, pin_out, pin_out_cnt);
-  }
-  if ((ret == 0) && (pin_in != 0xFF)) {
-    ret = km_pio_sm_set_in(port, sm, pin_in, pin_in_cnt);
-  }
-  if (ret == 0) {
-    ret = km_pio_sm_set_shift(port, sm, KM_PIO_IN_SHIFT, in_shift_dir,
-                              in_auto_push, in_auto_thd);
-  }
-  if (ret == 0) {
-    ret = km_pio_sm_set_shift(port, sm, KM_PIO_OUT_SHIFT, out_shift_dir,
-                              out_auto_push, out_auto_thd);
-  }
-  if (ret == 0) {
-    ret = km_pio_sm_set_fifo_join(port, sm, fifo);
-  }
-  if (ret == 0) {
-    ret = km_pio_sm_init(port, sm);
-  }
-  if (ret < 0) {
-    return jerry_create_error(
-        JERRY_ERROR_COMMON, (const jerry_char_t *)"State machine init fails.");
-  }
-  return jerry_create_number(sm);
-}
-
-/**
- * PIO.prototype.smEnable() function
- */
-JERRYXX_FUN(pio_sm_enable_fn) {
-  JERRYXX_CHECK_ARG_NUMBER(0, "sm");
-  JERRYXX_CHECK_ARG_BOOLEAN_OPT(1, "enable");
-
-  uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  // check this.port
-  jerry_value_t port_value =
-      jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PIO_PORT);
-  if (!jerry_value_is_number(port_value)) {
-    return jerry_create_error(
-        JERRY_ERROR_TYPE, (const jerry_char_t *)"PIO port is not a number.");
-  }
-  uint8_t port = (uint8_t)jerry_get_number_value(port_value);
-  jerry_release_value(port_value);
-  uint8_t en = (uint8_t)JERRYXX_GET_ARG_BOOLEAN_OPT(1, true);
-
-  if (km_pio_sm_enable(port, sm, en) < 0) {
-    return jerry_create_error(
-        JERRY_ERROR_COMMON,
-        (const jerry_char_t *)"Enabling state machine fails.");
-  }
+JERRYXX_FUN(pio_sm_set_enabled_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pio");
+  JERRYXX_CHECK_ARG_NUMBER(1, "sm");
+  JERRYXX_CHECK_ARG_BOOLEAN(2, "enabled");
+  uint8_t pio = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
+  bool enabled = JERRYXX_GET_ARG_BOOLEAN(2);
+  PIO _pio = __pio(pio);
+  pio_sm_set_enabled(_pio, sm, enabled);
   return jerry_create_undefined();
 }
 
-/**
- * PIO.prototype.put() function
- */
-JERRYXX_FUN(pio_put_fn) {
-  JERRYXX_CHECK_ARG_NUMBER(0, "sm");
-  JERRYXX_CHECK_ARG_NUMBER(1, "data");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(2, "tout");
-  // read parameters
-  uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  uint32_t data = (uint32_t)JERRYXX_GET_ARG_NUMBER(1);
-  uint32_t tout = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(2, 1000);
-  // check this.port
-  jerry_value_t port_value =
-      jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PIO_PORT);
-  if (!jerry_value_is_number(port_value)) {
-    return jerry_create_error(
-        JERRY_ERROR_TYPE, (const jerry_char_t *)"PIO port is not a number.");
-  }
-  uint8_t port = (uint8_t)jerry_get_number_value(port_value);
-  int ret = km_pio_put_fifo(port, sm, data, tout);
-  if (ret == KM_PIO_TIMEOUT) {
-    return jerry_create_error(JERRY_ERROR_COMMON,
-                              (const jerry_char_t *)"Put FIFO timeout.");
-  } else if (ret < 0) {
-    return jerry_create_error(JERRY_ERROR_COMMON,
-                              (const jerry_char_t *)"Put FIFO fails.");
-  }
+JERRYXX_FUN(pio_sm_put_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pio");
+  JERRYXX_CHECK_ARG_NUMBER(1, "sm");
+  JERRYXX_CHECK_ARG_NUMBER(2, "data");
+  uint8_t pio = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
+  uint32_t data = (uint32_t)JERRYXX_GET_ARG_NUMBER(2);
+  PIO _pio = __pio(pio);
+  pio_sm_put_blocking(_pio, sm, data);
   return jerry_create_undefined();
 }
 
-/**
- * PIO.prototype.get() function
- */
-JERRYXX_FUN(pio_get_fn) {
-  JERRYXX_CHECK_ARG_NUMBER(0, "sm");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(1, "tout");
-  // read parameters
-  uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  uint32_t tout = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(1, 1000);
-  // check this.port
-  jerry_value_t port_value =
-      jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PIO_PORT);
-  if (!jerry_value_is_number(port_value)) {
-    return jerry_create_error(
-        JERRY_ERROR_TYPE, (const jerry_char_t *)"PIO port is not a number.");
-  }
-  uint8_t port = (uint8_t)jerry_get_number_value(port_value);
-  int8_t err;
-  uint32_t data = km_pio_get_fifo(port, sm, tout, &err);
-  if (err == KM_PIO_TIMEOUT) {
-    return jerry_create_error(JERRY_ERROR_COMMON,
-                              (const jerry_char_t *)"Get FIFO timeout.");
-  } else if (err < 0) {
-    return jerry_create_error(JERRY_ERROR_COMMON,
-                              (const jerry_char_t *)"Get FIFO fails.");
-  }
+JERRYXX_FUN(pio_sm_get_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pio");
+  JERRYXX_CHECK_ARG_NUMBER(1, "sm");
+  uint8_t pio = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
+  PIO _pio = __pio(pio);
+  uint32_t data = pio_sm_get_blocking(_pio, sm);
   return jerry_create_number(data);
-}
-
-/**
- * PIO.prototype.close() function
- */
-JERRYXX_FUN(pio_close_fn) {
-  uint8_t port = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  km_pio_close(port);
-  return jerry_create_undefined();
 }
 
 /**
  * Initialize 'pio' module and return exports
  */
 jerry_value_t module_pio_init() {
-  /* PIO class */
-  jerry_value_t pio_ctor = jerry_create_external_function(pio_ctor_fn);
-  jerry_value_t pio_prototype = jerry_create_object();
-  jerryxx_set_property(pio_ctor, "prototype", pio_prototype);
-  jerryxx_set_property_number(pio_ctor, MSTR_PIO_FIFO_JOIN_NONE,
-                              KM_PIO_FIFO_JOIN_NONE);
-  jerryxx_set_property_number(pio_ctor, MSTR_PIO_FIFO_JOIN_TX,
-                              KM_PIO_FIFO_JOIN_TX);
-  jerryxx_set_property_number(pio_ctor, MSTR_PIO_FIFO_JOIN_RX,
-                              KM_PIO_FIFO_JOIN_RX);
-  jerryxx_set_property_number(pio_ctor, MSTR_PIO_FIFO_SHIFT_RIGHT,
-                              KM_PIO_SHIFT_RIGHT);
-  jerryxx_set_property_number(pio_ctor, MSTR_PIO_FIFO_SHIFT_LEFT,
-                              KM_PIO_SHIFT_LEFT);
-  jerryxx_set_property_function(pio_prototype, MSTR_PIO_SM_SETUP,
-                                pio_sm_setup_fn);
-  jerryxx_set_property_function(pio_prototype, MSTR_PIO_SM_ENABLE,
-                                pio_sm_enable_fn);
-  jerryxx_set_property_function(pio_prototype, MSTR_PIO_PUT, pio_put_fn);
-  jerryxx_set_property_function(pio_prototype, MSTR_PIO_GET, pio_get_fn);
-  jerryxx_set_property_function(pio_prototype, MSTR_PIO_CLOSE, pio_close_fn);
-  jerry_release_value(pio_prototype);
-
-  /* pio module exports */
+  // clear PIO and state machines
+  for (int i = 0; i < 4; i++) {
+    pio_sm_unclaim(pio0, i);
+    pio_sm_unclaim(pio1, i);
+  }
+  pio_clear_instruction_memory(pio0);
+  pio_clear_instruction_memory(pio1);
+  // pio module exports
   jerry_value_t exports = jerry_create_object();
-  jerryxx_set_property(exports, MSTR_PIO_PIO, pio_ctor);
-  jerry_release_value(pio_ctor);
-
+  jerryxx_set_property_function(exports, MSTR_PIO_ADD_PROGRAM,
+                                pio_add_program_fn);
+  jerryxx_set_property_function(exports, MSTR_PIO_SM_INIT, pio_sm_init_fn);
+  jerryxx_set_property_function(exports, MSTR_PIO_SM_SET_ENABLED,
+                                pio_sm_set_enabled_fn);
+  jerryxx_set_property_function(exports, MSTR_PIO_SM_PUT, pio_sm_put_fn);
+  jerryxx_set_property_function(exports, MSTR_PIO_SM_GET, pio_sm_get_fn);
   return exports;
 }
