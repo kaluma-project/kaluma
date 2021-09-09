@@ -75,8 +75,8 @@ JERRYXX_FUN(pio_sm_init_fn) {
   jerry_value_t options = JERRYXX_GET_ARG(2);
   pio_sm_config sm_config = pio_get_default_sm_config();
   PIO _pio = __pio(pio);
-  // setup freq ...
-  // setup in pins ...
+  // TODO: setup freq ...
+  // setup in pins
   uint8_t in_base =
       (uint8_t)jerryxx_get_property_number(options, MSTR_RP2_PIO_SM_IN_BASE, 0);
   sm_config_set_in_pins(&sm_config, in_base);
@@ -92,15 +92,32 @@ JERRYXX_FUN(pio_sm_init_fn) {
   for (int i = 0; i < out_count; i++) {
     pio_gpio_init(_pio, out_base + i);
   }
-  // setup set pins ...
+  // setup set pins
   uint8_t set_base = (uint8_t)jerryxx_get_property_number(
       options, MSTR_RP2_PIO_SM_SET_BASE, 0);
   uint8_t set_count = (uint8_t)jerryxx_get_property_number(
       options, MSTR_RP2_PIO_SM_SET_COUNT, 0);
   sm_config_set_set_pins(&sm_config, set_base, set_count);
-
-  // setup sideset pins ...
+  // setup sideset pins
+  bool sideset = (uint8_t)jerryxx_get_property_boolean(
+      options, MSTR_RP2_PIO_SM_SIDESET, false);
+  if (sideset) {
+    uint8_t sideset_base = (uint8_t)jerryxx_get_property_number(
+        options, MSTR_RP2_PIO_SM_SIDESET_BASE, 0);
+    uint8_t sideset_bits = (uint8_t)jerryxx_get_property_number(
+        options, MSTR_RP2_PIO_SM_SIDESET_BITS, 0);
+    bool sideset_opt = (uint8_t)jerryxx_get_property_boolean(
+        options, MSTR_RP2_PIO_SM_SIDESET_OPT, false);
+    bool sideset_pindirs = (uint8_t)jerryxx_get_property_boolean(
+        options, MSTR_RP2_PIO_SM_SIDESET_PINDIRS, false);
+    sm_config_set_sideset_pins(&sm_config, sideset_base);
+    sm_config_set_sideset(&sm_config, sideset_bits, sideset_opt,
+                          sideset_pindirs);
+  }
   // setup jmp pin
+  uint8_t jmp_pin =
+      (uint8_t)jerryxx_get_property_number(options, MSTR_RP2_PIO_SM_JMP_PIN, 0);
+  sm_config_set_jmp_pin(&sm_config, jmp_pin);
   // setup wrap
   uint8_t wrap_target = (uint8_t)jerryxx_get_property_number(
       options, MSTR_RP2_PIO_SM_WRAP_TARGET, 0);
@@ -127,9 +144,21 @@ JERRYXX_FUN(pio_sm_init_fn) {
   uint8_t fifo_join = (uint8_t)jerryxx_get_property_number(
       options, MSTR_RP2_PIO_SM_FIFO_JOIN, 0);
   sm_config_set_fifo_join(&sm_config, fifo_join);
-
-  // setup out special ...
-  // setup mov status ...
+  /*
+  // TODO: setup out special
+  bool out_sticky = (uint8_t)jerryxx_get_property_boolean(
+      options, MSTR_RP2_PIO_SM_OUT_STICKY, false);
+  int out_enable_pin = (uint8_t)jerryxx_get_property_number(
+      options, MSTR_RP2_PIO_SM_OUT_ENABLE_PIN, -1);
+  sm_config_set_out_special(&sm_config, out_sticky, out_enable_pin > -1,
+                            out_enable_pin);
+  // TODO: setup mov status
+  uint8_t move_status_sel = (uint8_t)jerryxx_get_property_number(
+      options, MSTR_RP2_PIO_SM_MOV_STATUS_SEL, 0);
+  uint32_t move_status_n = (uint8_t)jerryxx_get_property_number(
+      options, MSTR_RP2_PIO_SM_MOV_STATUS_N, 0);
+  sm_config_set_mov_status(&sm_config, move_status_sel, move_status_n);
+  */
   pio_sm_init(_pio, sm, wrap_target, &sm_config);
   return jerry_create_undefined();
 }
@@ -143,6 +172,28 @@ JERRYXX_FUN(pio_sm_set_enabled_fn) {
   bool enabled = JERRYXX_GET_ARG_BOOLEAN(2);
   PIO _pio = __pio(pio);
   pio_sm_set_enabled(_pio, sm, enabled);
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(pio_sm_restart_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pio");
+  JERRYXX_CHECK_ARG_NUMBER(1, "sm");
+  uint8_t pio = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
+  PIO _pio = __pio(pio);
+  pio_sm_restart(_pio, sm);
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(pio_sm_exec_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pio");
+  JERRYXX_CHECK_ARG_NUMBER(1, "sm");
+  JERRYXX_CHECK_ARG_NUMBER(2, "inst");
+  uint8_t pio = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
+  uint16_t inst = (uint8_t)JERRYXX_GET_ARG_NUMBER(2);
+  PIO _pio = __pio(pio);
+  pio_sm_exec(_pio, sm, inst);
   return jerry_create_undefined();
 }
 
@@ -187,6 +238,10 @@ jerry_value_t module_rp2_init() {
   jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_INIT, pio_sm_init_fn);
   jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_SET_ENABLED,
                                 pio_sm_set_enabled_fn);
+  jerryxx_set_property_function(exports, MSTR_RP2_STATE_MACHINE_RESTART,
+                                pio_sm_restart_fn);
+  jerryxx_set_property_function(exports, MSTR_RP2_STATE_MACHINE_EXEC,
+                                pio_sm_exec_fn);
   jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_PUT, pio_sm_put_fn);
   jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_GET, pio_sm_get_fn);
   return exports;

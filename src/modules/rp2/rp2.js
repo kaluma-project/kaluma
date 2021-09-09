@@ -416,9 +416,13 @@ class StateMachine {
     rp2_native.pio_sm_set_enabled(this.pio, this.sm, value);
   }
 
-  restart() {}
+  restart() {
+    rp2_native.pio_sm_restart(this.pio, this.sm);
+  }
 
-  exec(inst) {}
+  exec(inst) {
+    rp2_native.pio_sm_exec(this.pio, this.sm, inst);
+  }
 
   get() {
     return rp2_native.pio_sm_get(this.pio, this.sm);
