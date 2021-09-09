@@ -18,10 +18,14 @@ class ASM {
     options = Object.assign(
       {
         sideset: 0,
+        sidesetOpt: false,
+        sidesetPindirs: false,
       },
       options
     );
     this.sideset = options.sideset;
+    this.sidesetOpt = options.sidesetOpt;
+    this.sidesetPindirs = options.sidesetPindirs;
   }
 
   jmp(cond, target) {
@@ -385,9 +389,9 @@ class StateMachine {
           setCount: 0,
           sidesetBase: 0,
           sideset: asm.sideset > 0, // for internal
-          sidesetBitCount: asm.sideset, // for internal
-          sidesetOpt: false,
-          sidesetPindirs: false,
+          sidesetBits: asm.sideset, // for internal
+          sidesetOpt: asm.sidesetOpt, // for internal
+          sidesetPindirs: asm.sidesetPindirs, // for internal
           jmpPin: 0,
           wrapTarget: this.offset + (asm.labels["wrap_target"] ?? 0), // for internal
           wrap: this.offset + (asm.labels["wrap"] ?? asm.code.length - 1), // for internal
