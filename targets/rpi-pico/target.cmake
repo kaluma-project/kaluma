@@ -35,7 +35,7 @@ include_directories(${TARGET_INC_DIR} )
 set(TARGET_HEAPSIZE 192)
 set(JERRY_TOOLCHAIN toolchain_mcu_cortexm0plus.cmake)
 
-set(KALUMA_MODULES events gpio led button pwm adc i2c spi uart graphics at storage wifi stream net http url pio startup)
+set(KALUMA_MODULES events gpio led button pwm adc i2c spi uart graphics at storage wifi stream net http url rp2 startup)
 
 set(CMAKE_SYSTEM_PROCESSOR cortex-m0plus)
 set(CMAKE_C_FLAGS "-march=armv6-m -mcpu=cortex-m0plus -mthumb ${OPT} -Wall -fdata-sections -ffunction-sections")

@@ -1,4 +1,4 @@
-const pio_native = process.binding(process.binding.pio);
+const rp2_native = process.binding(process.binding.rp2);
 
 const PIO = {
   FIFO_JOIN_NONE: 0,
@@ -366,14 +366,14 @@ class StateMachine {
     if (!asm._pio) asm._pio = new Array(2);
     if (!asm._pio[this.pio]) {
       const bin = asm.toBinary();
-      this.offset = pio_native.pio_add_program(this.pio, bin);
+      this.offset = rp2_native.pio_add_program(this.pio, bin);
       // this.offset = 0; // TODO: THIS IS FOR TEST
       this.length = bin.length;
       asm._pio[this.pio] = {
         offset: this.offset,
       };
     }
-    pio_native.pio_sm_init(
+    rp2_native.pio_sm_init(
       this.pio,
       this.sm,
       Object.assign(
@@ -410,7 +410,7 @@ class StateMachine {
   }
 
   active(value) {
-    pio_native.pio_sm_set_enabled(this.pio, this.sm, value);
+    rp2_native.pio_sm_set_enabled(this.pio, this.sm, value);
   }
 
   restart() {}
@@ -418,11 +418,11 @@ class StateMachine {
   exec(inst) {}
 
   get() {
-    return pio_native.pio_sm_get(this.pio, this.sm);
+    return rp2_native.pio_sm_get(this.pio, this.sm);
   }
 
   put(value) {
-    pio_native.pio_sm_put(this.pio, this.sm, value);
+    rp2_native.pio_sm_put(this.pio, this.sm, value);
   }
 
   irq() {}
@@ -431,71 +431,3 @@ class StateMachine {
 exports.PIO = PIO;
 exports.ASM = ASM;
 exports.StateMachine = StateMachine;
-
-/*
-const {ASM, StateMachine} = require('pio');
-const asm = new ASM();
-asm
-  .push(...)
-  .set(...)
-  .jmp(...)
-  ...
-
-const sm = new StateMachine(0, asm, options);
-sm.put(1);
-sm.put(2);
-sm.get();
-const inst = (new ASM()).set('pins', 1).toBinary()[0];
-sm.exec(inst);
-...
-*/
-
-/* --------------------- examples ------------------------- */
-
-/*
-function print(asm) {
-  console.log(
-    `[${asm
-      .toBinary()
-      .map((c) => c.toString(16))
-      .join(", ")}]`
-  );
-}
-
-// hello.pio
-const hello_asm = new ASM();
-hello_asm.label("loop").pull().out("pins", 1).jmp("loop");
-print(hello_asm);
-
-// addition.pio
-const addition_asm = new ASM();
-addition_asm
-  .pull()
-  .mov("x", "~osr")
-  .pull()
-  .mov("y", "osr")
-  .jmp("test")
-  .label("incr")
-  .jmp("x--", "test")
-  .label("test")
-  .jmp("y--", "incr")
-  .mov("isr", "~x")
-  .push();
-print(addition_asm);
-
-// clocked-input.pio
-const clocked_input_asm = new ASM();
-clocked_input_asm.wait(0, "pin", 1).wait(1, "pin", 1).in("pins", 1);
-print(clocked_input_asm);
-
-// squareware_fast.pio
-const squareware_fast_asm = new ASM();
-squareware_fast_asm
-  .set("pindirs", 1)
-  .wrap_target()
-  .set("pins", 1)
-  .set("pins", 0)
-  .wrap();
-print(squareware_fast_asm);
-console.log(squareware_fast_asm);
-*/
