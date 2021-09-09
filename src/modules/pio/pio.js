@@ -1,13 +1,4 @@
-const pio_native = process.binding(process.binding.pio)
-
-// pio_add_program(uint8_t pio, uint16_t[] prog) -> uint8_t
-// pio_sm_init(uint8_t pio, uint8_t sm, uint8_t offset, jerry_value_t options) -> void
-// pio_sm_set_enable(uint8_t pio, uint8_t sm, bool value);
-// pio_sm_restart(uint8_t pio, uint8_t sm);
-// pio_sm_exec(uint8_t pio, uint8_t sm, uint16_t inst);
-// pio_sm_get(uint8_t pio, uint8_t sm) -> uint32_t;
-// pio_sm_put(uint8_t pio, uint8_t sm, uint32_t value);
-// pio_sm_irq(uint8_t pio, uint8_t sm, ...);
+const pio_native = process.binding(process.binding.pio);
 
 const PIO = {
   FIFO_JOIN_NONE: 0,
@@ -16,18 +7,21 @@ const PIO = {
   SHIFT_LEFT: 0,
   SHIFT_RIGHT: 1,
   TX_LESSTHAN: 0,
-  RX_LESSTHAN: 1
-}
+  RX_LESSTHAN: 1,
+};
 
 class ASM {
   constructor(options) {
     this.code = [];
     this.labels = {};
     this.jmps = [];
-    options = Object.assign({
-      sideset: 0
-    }, options);
-    this.sideset = options.sideset
+    options = Object.assign(
+      {
+        sideset: 0,
+      },
+      options
+    );
+    this.sideset = options.sideset;
   }
 
   jmp(cond, target) {
@@ -37,20 +31,37 @@ class ASM {
       cond = null;
     }
     switch (cond) {
-      case null: break;
-      case '': break;
-      case '!x': c |= 1 << 5; break;
-      case 'x--': c |= 2 << 5; break;
-      case '!y': c |= 3 << 5; break;
-      case 'y--': c |= 4 << 5; break;
-      case 'x!=y': c |= 5 << 5; break;
-      case 'pin': c |= 6 << 5; break;
-      case '!osre': c |= 7 << 5; break;
-      default: throw new Error('Unknown condition of jmp()');
+      case null:
+        break;
+      case "":
+        break;
+      case "!x":
+        c |= 1 << 5;
+        break;
+      case "x--":
+        c |= 2 << 5;
+        break;
+      case "!y":
+        c |= 3 << 5;
+        break;
+      case "y--":
+        c |= 4 << 5;
+        break;
+      case "x!=y":
+        c |= 5 << 5;
+        break;
+      case "pin":
+        c |= 6 << 5;
+        break;
+      case "!osre":
+        c |= 7 << 5;
+        break;
+      default:
+        throw new Error("Unknown condition of jmp()");
     }
     this.jmps.push({
       offset: this.code.length,
-      target: target
+      target: target,
     });
     this.code.push(c);
     return this;
@@ -60,11 +71,18 @@ class ASM {
     let c = ASM.WAIT;
     if (pol) c |= 1 << 7;
     switch (src) {
-      case 'gpio': c |= 0 << 5; break;
-      case 'pin': c |= 1 << 5; break;
-      case 'irq': c |= 2 << 5; break;
+      case "gpio":
+        c |= 0 << 5;
+        break;
+      case "pin":
+        c |= 1 << 5;
+        break;
+      case "irq":
+        c |= 2 << 5;
+        break;
       // case reserved: c |= 3 << 5; break;
-      default: throw new Error('Unknown source of wait()');
+      default:
+        throw new Error("Unknown source of wait()");
     }
     c |= idx;
     this.code.push(c);
@@ -74,15 +92,28 @@ class ASM {
   in(src, bits) {
     let c = ASM.IN;
     switch (src) {
-      case 'pins': c |= 0 << 5; break;
-      case 'x': c |= 1 << 5; break;
-      case 'y': c |= 2 << 5; break;
-      case 'null': c |= 3 << 5; break;
+      case "pins":
+        c |= 0 << 5;
+        break;
+      case "x":
+        c |= 1 << 5;
+        break;
+      case "y":
+        c |= 2 << 5;
+        break;
+      case "null":
+        c |= 3 << 5;
+        break;
       // reserved: c |= 4 << 5; break;
       // reserved: c |= 5 << 5; break;
-      case 'isr': c |= 6 << 5; break;
-      case 'osr': c |= 7 << 5; break;
-      default: throw new Error('Unknown source of in()');
+      case "isr":
+        c |= 6 << 5;
+        break;
+      case "osr":
+        c |= 7 << 5;
+        break;
+      default:
+        throw new Error("Unknown source of in()");
     }
     c |= bits;
     this.code.push(c);
@@ -92,15 +123,32 @@ class ASM {
   out(dst, bits) {
     let c = ASM.OUT;
     switch (dst) {
-      case 'pins': c |= 0; break;
-      case 'x': c |= 1 << 5; break;
-      case 'y': c |= 2 << 5; break;
-      case 'null': c |= 3 << 5; break;
-      case 'pindirs': c |= 4 << 5; break;
-      case 'pc': c |= 5 << 5; break;
-      case 'isr': c |= 6 << 5; break;
-      case 'exec': c |= 7 << 5; break;
-      default: throw new Error('Unknown destination of out()');
+      case "pins":
+        c |= 0;
+        break;
+      case "x":
+        c |= 1 << 5;
+        break;
+      case "y":
+        c |= 2 << 5;
+        break;
+      case "null":
+        c |= 3 << 5;
+        break;
+      case "pindirs":
+        c |= 4 << 5;
+        break;
+      case "pc":
+        c |= 5 << 5;
+        break;
+      case "isr":
+        c |= 6 << 5;
+        break;
+      case "exec":
+        c |= 7 << 5;
+        break;
+      default:
+        throw new Error("Unknown destination of out()");
     }
     c |= bits;
     this.code.push(c);
@@ -109,16 +157,16 @@ class ASM {
 
   push(iffull, block = 1) {
     let c = ASM.PUSH;
-    if (iffull === 1 || iffull === 'iffull') c |= 0x0040;
-    if (block === 1 || block === 'block') c |= 0x0020;
-    this.code.push(c);    
+    if (iffull === 1 || iffull === "iffull") c |= 0x0040;
+    if (block === 1 || block === "block") c |= 0x0020;
+    this.code.push(c);
     return this;
   }
 
   pull(ifempty, block = 1) {
     let c = ASM.PULL;
-    if (ifempty === 1 || ifempty === 'ifempty') c |= 0x0040;
-    if (block === 1 || block === 'block') c |= 0x0020;
+    if (ifempty === 1 || ifempty === "ifempty") c |= 0x0040;
+    if (block === 1 || block === "block") c |= 0x0020;
     this.code.push(c);
     return this;
   }
@@ -126,35 +174,66 @@ class ASM {
   mov(dst, src) {
     let c = ASM.MOV;
     switch (dst) {
-      case 'pins': c |= 0 << 5; break;
-      case 'x': c |= 1 << 5; break;
-      case 'y': c |= 2 << 5; break;
+      case "pins":
+        c |= 0 << 5;
+        break;
+      case "x":
+        c |= 1 << 5;
+        break;
+      case "y":
+        c |= 2 << 5;
+        break;
       // reserved: c |= 3 << 5; break;
-      case 'exec': c |= 4 << 5; break;
-      case 'pc': c |= 5 << 5; break;
-      case 'isr': c |= 6 << 5; break;
-      case 'osr': c |= 7 << 5; break;
-      default: throw new Error('Unknown destination of mov()');
+      case "exec":
+        c |= 4 << 5;
+        break;
+      case "pc":
+        c |= 5 << 5;
+        break;
+      case "isr":
+        c |= 6 << 5;
+        break;
+      case "osr":
+        c |= 7 << 5;
+        break;
+      default:
+        throw new Error("Unknown destination of mov()");
     }
     // operation
-    if (src.startsWith('~') || src.startsWith('!')) { // invert
+    if (src.startsWith("~") || src.startsWith("!")) {
+      // invert
       c |= 1 << 3;
       src = src.substr(1);
     }
-    if (src.startsWith('::')) { // bit-reverse
+    if (src.startsWith("::")) {
+      // bit-reverse
       c |= 2 << 3;
       src = src.substr(2);
     }
     switch (src) {
-      case 'pins': c |= 0; break;
-      case 'x': c |= 1; break;
-      case 'y': c |= 2; break;
-      case 'null': c |= 3;
+      case "pins":
+        c |= 0;
+        break;
+      case "x":
+        c |= 1;
+        break;
+      case "y":
+        c |= 2;
+        break;
+      case "null":
+        c |= 3;
       // reserved: c |= 4;
-      case 'status': c |= 5; break;
-      case 'isr': c |= 6; break;
-      case 'osr': c |= 7; break;
-      default: throw new Error('Unknown source of mov()');
+      case "status":
+        c |= 5;
+        break;
+      case "isr":
+        c |= 6;
+        break;
+      case "osr":
+        c |= 7;
+        break;
+      default:
+        throw new Error("Unknown source of mov()");
     }
     this.code.push(c);
     return this;
@@ -164,22 +243,29 @@ class ASM {
     let c = ASM.IRQ;
     let wait = 0;
     let clear = 0;
-    if (typeof cmd === 'number') {
+    if (typeof cmd === "number") {
       rel = irqnum;
       irqnum = cmd;
       cmd = null;
     }
     switch (cmd) {
-      case null: break;
-      case 'set': break;
-      case 'nowait': break;
-      case 'wait': wait = 1; break;
-      case 'clear': clear = 1; break;
+      case null:
+        break;
+      case "set":
+        break;
+      case "nowait":
+        break;
+      case "wait":
+        wait = 1;
+        break;
+      case "clear":
+        clear = 1;
+        break;
     }
     if (wait) c |= 1 << 5;
     if (clear) c |= 1 << 6;
     c |= irqnum;
-    if (rel === 'rel') {
+    if (rel === "rel") {
       c |= 1 << 4;
     }
     this.code.push(c);
@@ -189,15 +275,24 @@ class ASM {
   set(dst, val) {
     let c = ASM.SET;
     switch (dst) {
-      case 'pins': c |= 0 << 5; break;
-      case 'x': c |= 1 << 5; break;
-      case 'y': c |= 2 << 5; break;
+      case "pins":
+        c |= 0 << 5;
+        break;
+      case "x":
+        c |= 1 << 5;
+        break;
+      case "y":
+        c |= 2 << 5;
+        break;
       // reserved: c |= 3 << 5; break;
-      case 'pindirs': c |= 4 << 5; break;
+      case "pindirs":
+        c |= 4 << 5;
+        break;
       // reserved: c |= 5 << 5; break;
       // reserved: c |= 6 << 5; break;
       // reserved: c |= 7 << 5; break;
-      default: throw new Error('Unknown destination of set()');
+      default:
+        throw new Error("Unknown destination of set()");
     }
     c |= val;
     this.code.push(c);
@@ -205,7 +300,7 @@ class ASM {
   }
 
   nop() {
-    return this.mov('y', 'y');
+    return this.mov("y", "y");
   }
 
   // additional
@@ -215,11 +310,11 @@ class ASM {
   }
 
   wrap_target() {
-    return this.label('wrap_target');
+    return this.label("wrap_target");
   }
 
   wrap() {
-    return this.label('wrap');
+    return this.label("wrap");
   }
 
   side(val) {
@@ -238,17 +333,17 @@ class ASM {
     return this;
   }
 
-  end () {
-    // update all jmp
-    this.jmps.forEach(jmp => {
+  _updateJmps() {
+    this.jmps.forEach((jmp) => {
       let c = this.code[jmp.offset];
-      c |= this.labels[jmp.target]
+      c |= this.labels[jmp.target];
       this.code[jmp.offset] = c;
     });
-    return this;
+    this.jmps = [];
   }
 
-  toBinary () {
+  toBinary() {
+    this._updateJmps();
     return new Uint16Array(this.code);
   }
 
@@ -267,7 +362,7 @@ class ASM {
 class StateMachine {
   constructor(id, asm, options) {
     this.pio = id > 3 ? 1 : 0;
-    this.sm = id - (this.pio * 4);
+    this.sm = id - this.pio * 4;
     if (!asm._pio) asm._pio = new Array(2);
     if (!asm._pio[this.pio]) {
       const bin = asm.toBinary();
@@ -275,55 +370,62 @@ class StateMachine {
       // this.offset = 0; // TODO: THIS IS FOR TEST
       this.length = bin.length;
       asm._pio[this.pio] = {
-        offset: this.offset
-      }
+        offset: this.offset,
+      };
     }
-    pio_native.pio_sm_init(this.pio, this.sm, Object.assign({
-      // freq,
-      inBase: 0,
-      outBase: 0, 
-      outCount: 32,
-      setBase: 0,
-      setCount: 0,
-      sidesetBase: 0,
-      sideset: asm.sideset > 0,
-      sidesetBitCount: asm.sideset,
-      sidesetOpt: false,
-      sidesetPindirs: false,
-      jmpPin: 0,
-      wrapTarget: this.offset + (asm.labels['wrap_target'] ?? 0),
-      wrap: this.offset + (asm.labels['wrap'] ?? asm.code.length - 1),
-      inShiftDir: PIO.SHIFT_RIGHT,
-      autopush: false,
-      pushThreshold: 32,
-      outShiftDir: PIO.SHIFT_RIGHT,
-      autopull: false,
-      pullThreshold: 32,
-      fifoJoin: PIO.FIFO_JOIN_NONE,
-      outSticky: false,
-      outEnablePin: -1,
-      movStatusSel: PIO.TX_LESSTHAN,
-      movStatusN: 0,
-    }, options));
+    pio_native.pio_sm_init(
+      this.pio,
+      this.sm,
+      Object.assign(
+        {
+          // freq,
+          inBase: 0,
+          outBase: 0,
+          outCount: 32,
+          setBase: 0,
+          setCount: 0,
+          sidesetBase: 0,
+          sideset: asm.sideset > 0,
+          sidesetBitCount: asm.sideset,
+          sidesetOpt: false,
+          sidesetPindirs: false,
+          jmpPin: 0,
+          wrapTarget: this.offset + (asm.labels["wrap_target"] ?? 0),
+          wrap: this.offset + (asm.labels["wrap"] ?? asm.code.length - 1),
+          inShiftDir: PIO.SHIFT_RIGHT,
+          autopush: false,
+          pushThreshold: 32,
+          outShiftDir: PIO.SHIFT_RIGHT,
+          autopull: false,
+          pullThreshold: 32,
+          fifoJoin: PIO.FIFO_JOIN_NONE,
+          outSticky: false,
+          outEnablePin: -1,
+          movStatusSel: PIO.TX_LESSTHAN,
+          movStatusN: 0,
+        },
+        options
+      )
+    );
   }
 
   active(value) {
     pio_native.pio_sm_set_enabled(this.pio, this.sm, value);
   }
 
-  restart () {}
+  restart() {}
 
-  exec (inst) {}
+  exec(inst) {}
 
   get() {
-    return pio_native.pio_sm_get(this.pio, this.sm)
+    return pio_native.pio_sm_get(this.pio, this.sm);
   }
 
   put(value) {
     pio_native.pio_sm_put(this.pio, this.sm, value);
   }
 
-  irq () {}
+  irq() {}
 }
 
 exports.PIO = PIO;
@@ -338,7 +440,6 @@ asm
   .set(...)
   .jmp(...)
   ...
-  .end()
 
 const sm = new StateMachine(0, asm, options);
 sm.put(1);
@@ -353,58 +454,48 @@ sm.exec(inst);
 
 /*
 function print(asm) {
-  console.log(`[${asm.code.map(c => c.toString(16)).join(', ')}]`);
+  console.log(
+    `[${asm
+      .toBinary()
+      .map((c) => c.toString(16))
+      .join(", ")}]`
+  );
 }
-
 
 // hello.pio
 const hello_asm = new ASM();
-hello_asm
-.label('loop')
-  .pull()
-  .out('pins', 1)
-  .jmp('loop')
-  .end();
+hello_asm.label("loop").pull().out("pins", 1).jmp("loop");
 print(hello_asm);
 
 // addition.pio
 const addition_asm = new ASM();
 addition_asm
   .pull()
-  .mov('x', '~osr')
+  .mov("x", "~osr")
   .pull()
-  .mov('y', 'osr')
-  .jmp('test')
-.label('incr')
-  .jmp('x--', 'test')
-.label('test')
-  .jmp('y--', 'incr')
-  .mov('isr', '~x')
-  .push()
-  .end();
+  .mov("y", "osr")
+  .jmp("test")
+  .label("incr")
+  .jmp("x--", "test")
+  .label("test")
+  .jmp("y--", "incr")
+  .mov("isr", "~x")
+  .push();
 print(addition_asm);
 
 // clocked-input.pio
 const clocked_input_asm = new ASM();
-clocked_input_asm
-  .wait(0, 'pin', 1)
-  .wait(1, 'pin', 1)
-  .in('pins', 1)
-  .end();
+clocked_input_asm.wait(0, "pin", 1).wait(1, "pin", 1).in("pins", 1);
 print(clocked_input_asm);
 
 // squareware_fast.pio
 const squareware_fast_asm = new ASM();
 squareware_fast_asm
-  .set('pindirs', 1)
-.wrap_target()
-  .set('pins', 1)
-  .set('pins', 0)
-.wrap()
-  .end();
+  .set("pindirs", 1)
+  .wrap_target()
+  .set("pins", 1)
+  .set("pins", 0)
+  .wrap();
 print(squareware_fast_asm);
 console.log(squareware_fast_asm);
-
-console.log('inst', (new ASM()).set('pins', 1).toBinary()[0]);
-
 */
