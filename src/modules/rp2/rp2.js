@@ -367,7 +367,6 @@ class StateMachine {
     if (!asm._pio[this.pio]) {
       const bin = asm.toBinary();
       this.offset = rp2_native.pio_add_program(this.pio, bin);
-      // this.offset = 0; // TODO: THIS IS FOR TEST
       this.length = bin.length;
       asm._pio[this.pio] = {
         offset: this.offset,
@@ -385,13 +384,13 @@ class StateMachine {
           setBase: 0,
           setCount: 0,
           sidesetBase: 0,
-          sideset: asm.sideset > 0,
-          sidesetBitCount: asm.sideset,
+          sideset: asm.sideset > 0, // for internal
+          sidesetBitCount: asm.sideset, // for internal
           sidesetOpt: false,
           sidesetPindirs: false,
           jmpPin: 0,
-          wrapTarget: this.offset + (asm.labels["wrap_target"] ?? 0),
-          wrap: this.offset + (asm.labels["wrap"] ?? asm.code.length - 1),
+          wrapTarget: this.offset + (asm.labels["wrap_target"] ?? 0), // for internal
+          wrap: this.offset + (asm.labels["wrap"] ?? asm.code.length - 1), // for internal
           inShiftDir: PIO.SHIFT_RIGHT,
           autopush: false,
           pushThreshold: 32,
