@@ -21,4 +21,4 @@
 
 #include "jerryscript.h"
 
-jerry_value_t module_pio_init();
+jerry_value_t module_rp2_init();
