@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 
+#include "hardware/clocks.h"
 #include "hardware/irq.h"
 #include "hardware/pio.h"
 #include "io.h"
@@ -75,7 +76,10 @@ JERRYXX_FUN(pio_sm_init_fn) {
   jerry_value_t options = JERRYXX_GET_ARG(2);
   pio_sm_config sm_config = pio_get_default_sm_config();
   PIO _pio = __pio(pio);
-  // TODO: setup freq ...
+  uint32_t freq = (uint32_t)jerryxx_get_property_number(
+      options, MSTR_RP2_PIO_SM_FREQ, 125000000);
+  float div = clock_get_hz(clk_sys) / freq;
+  sm_config_set_clkdiv(&sm_config, div);
   // setup in pins
   uint8_t in_base =
       (uint8_t)jerryxx_get_property_number(options, MSTR_RP2_PIO_SM_IN_BASE, 0);
