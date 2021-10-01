@@ -58,6 +58,7 @@
 
 #define MSTR_RP2_PIO_ADD_PROGRAM "pio_add_program"
 #define MSTR_RP2_PIO_SM_INIT "pio_sm_init"
+#define MSTR_RP2_PIO_SM_FREQ "freq"
 #define MSTR_RP2_PIO_SM_IN_BASE "inBase"
 #define MSTR_RP2_PIO_SM_OUT_BASE "outBase"
 #define MSTR_RP2_PIO_SM_OUT_COUNT "outCount"
