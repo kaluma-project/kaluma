@@ -204,12 +204,33 @@ JERRYXX_FUN(pio_sm_exec_fn) {
 JERRYXX_FUN(pio_sm_put_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pio");
   JERRYXX_CHECK_ARG_NUMBER(1, "sm");
-  JERRYXX_CHECK_ARG_NUMBER(2, "data");
+  JERRYXX_CHECK_ARG(2, "data");
   uint8_t pio = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
   uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
-  uint32_t data = (uint32_t)JERRYXX_GET_ARG_NUMBER(2);
+  jerry_value_t data = JERRYXX_GET_ARG(2);
   PIO _pio = __pio(pio);
-  pio_sm_put_blocking(_pio, sm, data);
+  if (jerry_value_is_typedarray(data) &&
+      jerry_get_typedarray_type(data) ==
+          JERRY_TYPEDARRAY_UINT32) { /* Uint32Array */
+    jerry_length_t byteLength = 0;
+    jerry_length_t byteOffset = 0;
+    jerry_value_t array_buffer =
+        jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
+    size_t len = jerry_get_arraybuffer_byte_length(array_buffer) / 4;
+    uint8_t *data_buf = jerry_get_arraybuffer_pointer(array_buffer);
+    jerry_release_value(array_buffer);
+    for (int i = 0; i < len; i++) {
+      pio_sm_put_blocking(_pio, sm, *((uint32_t *)data_buf + i));
+    }
+  } else if (jerry_value_is_number(data)) {
+    uint32_t data_value = jerry_get_number_value(data);
+    pio_sm_put_blocking(_pio, sm, data_value);
+  } else {
+    return jerry_create_error(
+        JERRY_ERROR_TYPE,
+        (const jerry_char_t
+             *)"The data argument must be number of Uint32Array");
+  }
   return jerry_create_undefined();
 }
 
