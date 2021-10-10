@@ -81,47 +81,70 @@ JERRYXX_FUN(pio_sm_init_fn) {
   float div = clock_get_hz(clk_sys) / freq;
   sm_config_set_clkdiv(&sm_config, div);
   // setup in pins
-  uint8_t in_base =
-      (uint8_t)jerryxx_get_property_number(options, MSTR_RP2_PIO_SM_IN_BASE, 0);
-  sm_config_set_in_pins(&sm_config, in_base);
-  pio_sm_set_consecutive_pindirs(_pio, sm, in_base, 1, false);
-  pio_gpio_init(_pio, in_base);
+  int8_t in_base =
+      (int8_t)jerryxx_get_property_number(options, MSTR_RP2_PIO_SM_IN_BASE, -1);
+  if (in_base >= 0) {
+    uint8_t in_count = (uint8_t)jerryxx_get_property_number(
+        options, MSTR_RP2_PIO_SM_IN_COUNT, 1);
+    sm_config_set_in_pins(&sm_config, in_base);
+    pio_sm_set_consecutive_pindirs(_pio, sm, in_base, in_count, false);
+    for (int i = 0; i < in_count; i++) {
+      pio_gpio_init(_pio, in_base + i);
+    }
+  }
   // setup out pins
-  uint8_t out_base = (uint8_t)jerryxx_get_property_number(
-      options, MSTR_RP2_PIO_SM_OUT_BASE, 0);
-  uint8_t out_count = (uint8_t)jerryxx_get_property_number(
-      options, MSTR_RP2_PIO_SM_OUT_COUNT, 0);
-  sm_config_set_out_pins(&sm_config, out_base, out_count);
-  pio_sm_set_consecutive_pindirs(_pio, sm, out_base, out_count, true);
-  for (int i = 0; i < out_count; i++) {
-    pio_gpio_init(_pio, out_base + i);
+  int8_t out_base = (int8_t)jerryxx_get_property_number(
+      options, MSTR_RP2_PIO_SM_OUT_BASE, -1);
+  if (out_base >= 0) {
+    uint8_t out_count = (uint8_t)jerryxx_get_property_number(
+        options, MSTR_RP2_PIO_SM_OUT_COUNT, 1);
+    sm_config_set_out_pins(&sm_config, out_base, out_count);
+    pio_sm_set_consecutive_pindirs(_pio, sm, out_base, out_count, true);
+    for (int i = 0; i < out_count; i++) {
+      pio_gpio_init(_pio, out_base + i);
+    }
   }
   // setup set pins
-  uint8_t set_base = (uint8_t)jerryxx_get_property_number(
-      options, MSTR_RP2_PIO_SM_SET_BASE, 0);
-  uint8_t set_count = (uint8_t)jerryxx_get_property_number(
-      options, MSTR_RP2_PIO_SM_SET_COUNT, 0);
-  sm_config_set_set_pins(&sm_config, set_base, set_count);
+  int8_t set_base = (int8_t)jerryxx_get_property_number(
+      options, MSTR_RP2_PIO_SM_SET_BASE, -1);
+  if (set_base >= 0) {
+    uint8_t set_count = (uint8_t)jerryxx_get_property_number(
+        options, MSTR_RP2_PIO_SM_SET_COUNT, 1);
+    sm_config_set_set_pins(&sm_config, set_base, set_count);
+    pio_sm_set_consecutive_pindirs(_pio, sm, set_base, set_count, true);
+    for (int i = 0; i < set_count; i++) {
+      pio_gpio_init(_pio, set_base + i);
+    }
+  }
   // setup sideset pins
   bool sideset = (uint8_t)jerryxx_get_property_boolean(
       options, MSTR_RP2_PIO_SM_SIDESET, false);
   if (sideset) {
-    uint8_t sideset_base = (uint8_t)jerryxx_get_property_number(
-        options, MSTR_RP2_PIO_SM_SIDESET_BASE, 0);
-    uint8_t sideset_bits = (uint8_t)jerryxx_get_property_number(
-        options, MSTR_RP2_PIO_SM_SIDESET_BITS, 0);
-    bool sideset_opt = (uint8_t)jerryxx_get_property_boolean(
-        options, MSTR_RP2_PIO_SM_SIDESET_OPT, false);
-    bool sideset_pindirs = (uint8_t)jerryxx_get_property_boolean(
-        options, MSTR_RP2_PIO_SM_SIDESET_PINDIRS, false);
-    sm_config_set_sideset_pins(&sm_config, sideset_base);
-    sm_config_set_sideset(&sm_config, sideset_bits, sideset_opt,
-                          sideset_pindirs);
+    int8_t sideset_base = (int8_t)jerryxx_get_property_number(
+        options, MSTR_RP2_PIO_SM_SIDESET_BASE, -1);
+    if (sideset_base >= 0) {
+      uint8_t sideset_bits = (uint8_t)jerryxx_get_property_number(
+          options, MSTR_RP2_PIO_SM_SIDESET_BITS, 1);
+      bool sideset_opt = (uint8_t)jerryxx_get_property_boolean(
+          options, MSTR_RP2_PIO_SM_SIDESET_OPT, false);
+      bool sideset_pindirs = (uint8_t)jerryxx_get_property_boolean(
+          options, MSTR_RP2_PIO_SM_SIDESET_PINDIRS, false);
+      pio_sm_set_consecutive_pindirs(_pio, sm, sideset_base, sideset_bits,
+                                     true);
+      for (int i = 0; i < sideset_bits; i++) {
+        pio_gpio_init(_pio, sideset_base + i);
+      }
+      sm_config_set_sideset_pins(&sm_config, sideset_base);
+      sm_config_set_sideset(&sm_config, sideset_bits, sideset_opt,
+                            sideset_pindirs);
+    }
   }
   // setup jmp pin
-  uint8_t jmp_pin =
-      (uint8_t)jerryxx_get_property_number(options, MSTR_RP2_PIO_SM_JMP_PIN, 0);
-  sm_config_set_jmp_pin(&sm_config, jmp_pin);
+  int8_t jmp_pin =
+      (int8_t)jerryxx_get_property_number(options, MSTR_RP2_PIO_SM_JMP_PIN, -1);
+  if (jmp_pin >= 0) {
+    sm_config_set_jmp_pin(&sm_config, jmp_pin);
+  }
   // setup wrap
   uint8_t wrap_target = (uint8_t)jerryxx_get_property_number(
       options, MSTR_RP2_PIO_SM_WRAP_TARGET, 0);
@@ -130,19 +153,19 @@ JERRYXX_FUN(pio_sm_init_fn) {
   sm_config_set_wrap(&sm_config, wrap_target, wrap);
   // setup in-shift
   uint8_t inshift_dir = (uint8_t)jerryxx_get_property_number(
-      options, MSTR_RP2_PIO_SM_INSHIFT_DIR, 0);
+      options, MSTR_RP2_PIO_SM_INSHIFT_DIR, 1);
   bool autopush = (uint8_t)jerryxx_get_property_boolean(
       options, MSTR_RP2_PIO_SM_AUTOPUSH, 0);
   uint8_t push_threshold = (uint8_t)jerryxx_get_property_number(
-      options, MSTR_RP2_PIO_SM_PUSH_THRESHOLD, 0);
+      options, MSTR_RP2_PIO_SM_PUSH_THRESHOLD, 32);
   sm_config_set_in_shift(&sm_config, inshift_dir, autopush, push_threshold);
   // setup out-shift
   uint8_t outshift_dir = (uint8_t)jerryxx_get_property_number(
-      options, MSTR_RP2_PIO_SM_OUTSHIFT_DIR, 0);
+      options, MSTR_RP2_PIO_SM_OUTSHIFT_DIR, 1);
   bool autopull = (uint8_t)jerryxx_get_property_boolean(
       options, MSTR_RP2_PIO_SM_AUTOPULL, 0);
   uint8_t pull_threshold = (uint8_t)jerryxx_get_property_number(
-      options, MSTR_RP2_PIO_SM_PULL_THRESHOLD, 0);
+      options, MSTR_RP2_PIO_SM_PULL_THRESHOLD, 32);
   sm_config_set_out_shift(&sm_config, outshift_dir, autopull, pull_threshold);
   // setup fifoJoin
   uint8_t fifo_join = (uint8_t)jerryxx_get_property_number(

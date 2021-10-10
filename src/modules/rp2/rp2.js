@@ -382,17 +382,18 @@ class StateMachine {
       Object.assign(
         {
           // freq,
-          inBase: 0,
-          outBase: 0,
-          outCount: 32,
-          setBase: 0,
-          setCount: 0,
-          sidesetBase: 0,
+          inBase: -1,
+          inCount: 1,
+          outBase: -1,
+          outCount: 1,
+          setBase: -1,
+          setCount: 1,
+          sidesetBase: -1,
           sideset: asm.sideset > 0, // for internal
           sidesetBits: asm.sideset, // for internal
           sidesetOpt: asm.sidesetOpt, // for internal
           sidesetPindirs: asm.sidesetPindirs, // for internal
-          jmpPin: 0,
+          jmpPin: -1,
           wrapTarget: this.offset + (asm.labels["wrap_target"] ?? 0), // for internal
           wrap: this.offset + (asm.labels["wrap"] ?? asm.code.length - 1), // for internal
           inShiftDir: PIO.SHIFT_RIGHT,
@@ -432,7 +433,7 @@ class StateMachine {
     rp2_native.pio_sm_put(this.pio, this.sm, value);
   }
 
-  irq() {}
+  irq() { }
 }
 
 exports.PIO = PIO;
