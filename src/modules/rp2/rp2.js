@@ -381,7 +381,7 @@ class StateMachine {
       this.sm,
       Object.assign(
         {
-          // freq,
+          freq: 125000000,
           inBase: -1,
           inCount: 1,
           outBase: -1,

@@ -171,21 +171,20 @@ JERRYXX_FUN(pio_sm_init_fn) {
   uint8_t fifo_join = (uint8_t)jerryxx_get_property_number(
       options, MSTR_RP2_PIO_SM_FIFO_JOIN, 0);
   sm_config_set_fifo_join(&sm_config, fifo_join);
-  /*
-  // TODO: setup out special
+  // setup out special
   bool out_sticky = (uint8_t)jerryxx_get_property_boolean(
       options, MSTR_RP2_PIO_SM_OUT_STICKY, false);
   int out_enable_pin = (uint8_t)jerryxx_get_property_number(
       options, MSTR_RP2_PIO_SM_OUT_ENABLE_PIN, -1);
-  sm_config_set_out_special(&sm_config, out_sticky, out_enable_pin > -1,
-                            out_enable_pin);
-  // TODO: setup mov status
+  sm_config_set_out_special(&sm_config, out_sticky, (out_enable_pin > -1),
+                            (out_enable_pin > -1) ? out_enable_pin : 0);
+  // setup mov status
   uint8_t move_status_sel = (uint8_t)jerryxx_get_property_number(
       options, MSTR_RP2_PIO_SM_MOV_STATUS_SEL, 0);
   uint32_t move_status_n = (uint8_t)jerryxx_get_property_number(
       options, MSTR_RP2_PIO_SM_MOV_STATUS_N, 0);
   sm_config_set_mov_status(&sm_config, move_status_sel, move_status_n);
-  */
+
   pio_sm_init(_pio, sm, wrap_target, &sm_config);
   return jerry_create_undefined();
 }
