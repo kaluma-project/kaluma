@@ -324,7 +324,12 @@ class ASM {
   side(val) {
     const i = this.code.length - 1;
     let c = this.code[i];
-    c |= val << (13 - this.sideset);
+    if (this.sidesetOpt === true) {
+      c |= (1 << 12) | (val << (13 - this.sideset - 1));
+    } else {
+      c |= val << (13 - this.sideset);
+    }
+    if (this.sidesetOpt === true) c |= 1 << 12;
     this.code[i] = c;
     return this;
   }

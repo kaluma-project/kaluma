@@ -135,6 +135,9 @@ JERRYXX_FUN(pio_sm_init_fn) {
         pio_gpio_init(_pio, sideset_base + i);
       }
       sm_config_set_sideset_pins(&sm_config, sideset_base);
+      if (sideset_opt) {
+        sideset_bits++;  // Add 1 bit for option.
+      }
       sm_config_set_sideset(&sm_config, sideset_bits, sideset_opt,
                             sideset_pindirs);
     }
