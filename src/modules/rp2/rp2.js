@@ -71,7 +71,7 @@ class ASM {
     return this;
   }
 
-  wait(pol, src, idx) {
+  wait(pol, src, idx, rel) {
     let c = ASM.WAIT;
     if (pol) c |= 1 << 7;
     switch (src) {
@@ -83,6 +83,9 @@ class ASM {
         break;
       case "irq":
         c |= 2 << 5;
+        if (rel === "rel") {
+          c |= 1 << 4;
+        }
         break;
       // case reserved: c |= 3 << 5; break;
       default:
