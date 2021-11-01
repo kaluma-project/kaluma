@@ -321,7 +321,8 @@ class ASM {
   }
 
   wrap() {
-    return this.label("wrap");
+    this.labels["wrap"] = this.code.length - 1;
+    return this;
   }
 
   side(val) {
