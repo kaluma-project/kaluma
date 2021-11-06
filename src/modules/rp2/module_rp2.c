@@ -153,7 +153,9 @@ JERRYXX_FUN(pio_sm_init_fn) {
       options, MSTR_RP2_PIO_SM_WRAP_TARGET, 0);
   uint8_t wrap =
       (uint8_t)jerryxx_get_property_number(options, MSTR_RP2_PIO_SM_WRAP, 31);
-  sm_config_set_wrap(&sm_config, wrap_target, wrap);
+  int offset =
+      (int)jerryxx_get_property_number(options, MSTR_RP2_PIO_SM_OFFSET, 0);
+  sm_config_set_wrap(&sm_config, offset + wrap_target, offset + wrap);
   // setup in-shift
   uint8_t inshift_dir = (uint8_t)jerryxx_get_property_number(
       options, MSTR_RP2_PIO_SM_INSHIFT_DIR, 1);
@@ -188,7 +190,7 @@ JERRYXX_FUN(pio_sm_init_fn) {
       options, MSTR_RP2_PIO_SM_MOV_STATUS_N, 0);
   sm_config_set_mov_status(&sm_config, move_status_sel, move_status_n);
 
-  pio_sm_init(_pio, sm, wrap_target, &sm_config);
+  pio_sm_init(_pio, sm, offset, &sm_config);
   return jerry_create_undefined();
 }
 

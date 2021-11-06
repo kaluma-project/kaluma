@@ -403,8 +403,9 @@ class StateMachine {
           sidesetOpt: asm.sidesetOpt, // for internal
           sidesetPindirs: asm.sidesetPindirs, // for internal
           jmpPin: -1,
-          wrapTarget: this.offset + (asm.labels["wrap_target"] ?? 0), // for internal
-          wrap: this.offset + (asm.labels["wrap"] ?? asm.code.length - 1), // for internal
+          offset: this.offset, // for internal
+          wrapTarget: asm.labels["wrap_target"] ?? 0, // for internal
+          wrap: asm.labels["wrap"] ?? asm.code.length - 1, // for internal
           inShiftDir: PIO.SHIFT_RIGHT,
           autopush: false,
           pushThreshold: 32,
