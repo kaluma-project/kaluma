@@ -71,6 +71,7 @@
 #define MSTR_RP2_PIO_SM_SIDESET_OPT "sidesetOpt"
 #define MSTR_RP2_PIO_SM_SIDESET_PINDIRS "sidesetPindirs"
 #define MSTR_RP2_PIO_SM_JMP_PIN "jmpPin"
+#define MSTR_RP2_PIO_SM_OFFSET "offset"
 #define MSTR_RP2_PIO_SM_WRAP_TARGET "wrapTarget"
 #define MSTR_RP2_PIO_SM_WRAP "wrap"
 #define MSTR_RP2_PIO_SM_INSHIFT_DIR "inShiftDir"
