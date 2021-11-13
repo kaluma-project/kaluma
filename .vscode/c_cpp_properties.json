@@ -30,11 +30,15 @@
         "${workspaceRoot}/lib/STM32_USB_Device_Library/Class/CDC/Inc",
         "/usr/local/include"
       ],
+<<<<<<< HEAD
       "defines": [
         "USE_HAL_DRIVER",
         "STM32F411xE",
         "uint32_t=int"
       ],
+=======
+      "defines": ["USE_HAL_DRIVER", "STM32F411xE", "uint32_t=int"],
+>>>>>>> ab39676ed49f37c7bf548270544525c7c1b86d0a
       "intelliSenseMode": "clang-x64",
       "browse": {
         "path": [
@@ -71,10 +75,14 @@
         "limitSymbolsToIncludedHeaders": true,
         "databaseFilename": ""
       },
+<<<<<<< HEAD
       "macFrameworkPath": [
         "/System/Library/Frameworks",
         "/Library/Frameworks"
       ],
+=======
+      "macFrameworkPath": ["/System/Library/Frameworks", "/Library/Frameworks"],
+>>>>>>> ab39676ed49f37c7bf548270544525c7c1b86d0a
       "compilerPath": "/usr/bin/clang",
       "cStandard": "c11",
       "cppStandard": "c++17"
@@ -179,10 +187,14 @@
         "/usr/include",
         "/usr/local/include"
       ],
+<<<<<<< HEAD
       "defines": [
         "_DEBUG",
         "UNICODE"
       ],
+=======
+      "defines": ["_DEBUG", "UNICODE"],
+>>>>>>> ab39676ed49f37c7bf548270544525c7c1b86d0a
       "intelliSenseMode": "msvc-x64",
       "browse": {
         "path": [
@@ -198,4 +210,8 @@
     }
   ],
   "version": 4
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> ab39676ed49f37c7bf548270544525c7c1b86d0a
