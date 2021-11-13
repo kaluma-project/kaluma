@@ -443,7 +443,12 @@ class StateMachine {
     rp2_native.pio_sm_put(this.pio, this.sm, value);
   }
 
-  irq() { }
+  setPins(value, mask) {
+    if (mask == undefined) {
+      mask = 0xFFFFFFFF;
+    }
+    rp2_native.pio_sm_set_pins(this.pio, this.sm, value, mask);
+  }
 }
 
 exports.PIO = PIO;

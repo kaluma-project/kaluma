@@ -48,14 +48,6 @@
 #define MSTR_RP2_ASM_DELAY "delay"
 #define MSTR_RP2_ASM_TO_BINARY "toBinary"
 
-#define MSTR_RP2_STATE_MACHINE "StateMachine"
-#define MSTR_RP2_STATE_MACHINE_ACTIVE "active"
-#define MSTR_RP2_STATE_MACHINE_RESTART "restart"
-#define MSTR_RP2_STATE_MACHINE_EXEC "exec"
-#define MSTR_RP2_STATE_MACHINE_GET "get"
-#define MSTR_RP2_STATE_MACHINE_PUT "put"
-#define MSTR_RP2_STATE_MACHINE_IRQ "irq"
-
 #define MSTR_RP2_PIO_ADD_PROGRAM "pio_add_program"
 #define MSTR_RP2_PIO_SM_INIT "pio_sm_init"
 #define MSTR_RP2_PIO_SM_FREQ "freq"
@@ -86,7 +78,10 @@
 #define MSTR_RP2_PIO_SM_MOV_STATUS_SEL "movStatusSel"
 #define MSTR_RP2_PIO_SM_MOV_STATUS_N "movStatusN"
 #define MSTR_RP2_PIO_SM_SET_ENABLED "pio_sm_set_enabled"
+#define MSTR_RP2_PIO_SM_RESTART "pio_sm_restart"
+#define MSTR_RP2_PIO_SM_EXEC "pio_sm_exec"
 #define MSTR_RP2_PIO_SM_PUT "pio_sm_put"
 #define MSTR_RP2_PIO_SM_GET "pio_sm_get"
+#define MSTR_RP2_PIO_SM_SET_PINS "pio_sm_set_pins"
 
 #endif /* __PIO_MAGIC_STRINGS_H */

@@ -222,7 +222,7 @@ JERRYXX_FUN(pio_sm_exec_fn) {
   JERRYXX_CHECK_ARG_NUMBER(2, "inst");
   uint8_t pio = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
   uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
-  uint16_t inst = (uint8_t)JERRYXX_GET_ARG_NUMBER(2);
+  uint16_t inst = (uint16_t)JERRYXX_GET_ARG_NUMBER(2);
   PIO _pio = __pio(pio);
   pio_sm_exec(_pio, sm, inst);
   return jerry_create_undefined();
@@ -271,6 +271,20 @@ JERRYXX_FUN(pio_sm_get_fn) {
   return jerry_create_number(data);
 }
 
+JERRYXX_FUN(pio_sm_set_pins_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pio");
+  JERRYXX_CHECK_ARG_NUMBER(1, "sm");
+  JERRYXX_CHECK_ARG_NUMBER(2, "value");
+  JERRYXX_CHECK_ARG_NUMBER(3, "mask");
+  uint8_t pio = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
+  uint32_t value = (uint32_t)JERRYXX_GET_ARG_NUMBER(2);
+  uint32_t mask = (uint32_t)JERRYXX_GET_ARG_NUMBER(3);
+  PIO _pio = __pio(pio);
+  pio_sm_set_pins_with_mask(_pio, sm, value, mask);
+  return jerry_create_undefined();
+}
+
 /**
  * Initialize 'rp2' module and return exports
  */
@@ -290,11 +304,12 @@ jerry_value_t module_rp2_init() {
   jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_INIT, pio_sm_init_fn);
   jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_SET_ENABLED,
                                 pio_sm_set_enabled_fn);
-  jerryxx_set_property_function(exports, MSTR_RP2_STATE_MACHINE_RESTART,
+  jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_RESTART,
                                 pio_sm_restart_fn);
-  jerryxx_set_property_function(exports, MSTR_RP2_STATE_MACHINE_EXEC,
-                                pio_sm_exec_fn);
+  jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_EXEC, pio_sm_exec_fn);
   jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_PUT, pio_sm_put_fn);
   jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_GET, pio_sm_get_fn);
+  jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_SET_PINS,
+                                pio_sm_set_pins_fn);
   return exports;
 }
