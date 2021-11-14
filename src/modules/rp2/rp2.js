@@ -122,6 +122,9 @@ class ASM {
       default:
         throw new Error("Unknown source of in()");
     }
+    if (bits >= 32) {
+      bits = 0;
+    }
     c |= bits;
     this.code.push(c);
     return this;
@@ -156,6 +159,9 @@ class ASM {
         break;
       default:
         throw new Error("Unknown destination of out()");
+    }
+    if (bits >= 32) {
+      bits = 0;
     }
     c |= bits;
     this.code.push(c);
