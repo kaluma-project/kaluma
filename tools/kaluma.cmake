@@ -113,3 +113,8 @@ if("graphics" IN_LIST KALUMA_MODULES)
     ${SRC_DIR}/modules/graphics/module_graphics.c)
   include_directories(${SRC_DIR}/modules/graphics)
 endif()
+
+if("rp2" IN_LIST KALUMA_MODULES)
+  list(APPEND SOURCES ${SRC_DIR}/modules/rp2/module_rp2.c)
+  include_directories(${SRC_DIR}/modules/rp2)
+endif()

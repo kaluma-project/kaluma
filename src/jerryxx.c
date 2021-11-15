@@ -87,6 +87,19 @@ double jerryxx_get_property_number(jerry_value_t object, const char *name,
   return value;
 }
 
+bool jerryxx_get_property_boolean(jerry_value_t object, const char *name,
+                                  bool default_value) {
+  jerry_value_t prop = jerry_create_string((const jerry_char_t *)name);
+  jerry_value_t ret = jerry_get_property(object, prop);
+  bool value = default_value;
+  if (jerry_value_is_boolean(ret)) {
+    value = jerry_get_boolean_value(ret);
+  }
+  jerry_release_value(ret);
+  jerry_release_value(prop);
+  return value;
+}
+
 bool jerryxx_delete_property(jerry_value_t object, const char *name) {
   jerry_value_t prop = jerry_create_string((const jerry_char_t *)name);
   bool ret = jerry_delete_property(object, prop);

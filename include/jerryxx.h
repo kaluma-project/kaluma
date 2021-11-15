@@ -55,6 +55,13 @@
     }                                                               \
   }
 
+#define JERRYXX_CHECK_ARG_BOOLEAN(index, argname)                              \
+  if ((args_cnt <= index) || (!jerry_value_is_boolean(args_p[index]))) {       \
+    char errmsg[255];                                                          \
+    sprintf(errmsg, "\"%s\" argument must be a boolean", argname);             \
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *)errmsg); \
+  }
+
 #define JERRYXX_CHECK_ARG_BOOLEAN_OPT(index, argname)                \
   if (args_cnt > index) {                                            \
     if (!jerry_value_is_boolean(args_p[index])) {                    \
@@ -164,6 +171,7 @@
 #define JERRYXX_GET_ARG_NUMBER(index) jerry_get_number_value(args_p[index])
 #define JERRYXX_GET_ARG_NUMBER_OPT(index, default) \
   (args_cnt > index ? jerry_get_number_value(args_p[index]) : default)
+#define JERRYXX_GET_ARG_BOOLEAN(index) jerry_get_boolean_value(args_p[index])
 #define JERRYXX_GET_ARG_BOOLEAN_OPT(index, default) \
   (args_cnt > index ? jerry_get_boolean_value(args_p[index]) : default)
 #define JERRYXX_GET_ARG_STRING_AS_CHAR(index, name)                            \
@@ -186,6 +194,8 @@ void jerryxx_set_property_function(jerry_value_t object, const char *name,
 jerry_value_t jerryxx_get_property(jerry_value_t object, const char *name);
 double jerryxx_get_property_number(jerry_value_t object, const char *name,
                                    double default_value);
+bool jerryxx_get_property_boolean(jerry_value_t object, const char *name,
+                                  bool default_value);
 bool jerryxx_delete_property(jerry_value_t object, const char *name);
 
 void jerryxx_print_value(jerry_value_t value);
