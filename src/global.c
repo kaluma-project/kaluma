@@ -384,6 +384,52 @@ JERRYXX_FUN(clear_watch_fn) {
   return jerry_create_undefined();
 }
 
+static void register_global_digital_io() {
+  jerry_value_t global = jerry_get_global_object();
+  jerryxx_set_property_number(global, MSTR_HIGH, KM_GPIO_HIGH);
+  jerryxx_set_property_number(global, MSTR_LOW, KM_GPIO_LOW);
+  jerryxx_set_property_number(global, MSTR_INPUT,
+                              (double)KM_GPIO_IO_MODE_INPUT);
+  jerryxx_set_property_number(global, MSTR_OUTPUT,
+                              (double)KM_GPIO_IO_MODE_OUTPUT);
+  jerryxx_set_property_number(global, MSTR_INPUT_PULLUP,
+                              (double)KM_GPIO_IO_MODE_INPUT_PULLUP);
+  jerryxx_set_property_number(global, MSTR_INPUT_PULLDOWN,
+                              (double)KM_GPIO_IO_MODE_INPUT_PULLDOWN);
+  jerryxx_set_property_number(global, MSTR_LOW_LEVEL,
+                              (double)KM_IO_WATCH_MODE_LOW_LEVEL);
+  jerryxx_set_property_number(global, MSTR_HIGH_LEVEL,
+                              (double)KM_IO_WATCH_MODE_HIGH_LEVEL);
+  jerryxx_set_property_number(global, MSTR_RISING,
+                              (double)KM_IO_WATCH_MODE_RISING);
+  jerryxx_set_property_number(global, MSTR_FALLING,
+                              (double)KM_IO_WATCH_MODE_FALLING);
+  jerryxx_set_property_number(global, MSTR_CHANGE,
+                              (double)KM_IO_WATCH_MODE_CHANGE);
+  jerryxx_set_property_function(global, MSTR_PIN_MODE, pin_mode_fn);
+  jerryxx_set_property_function(global, MSTR_DIGITAL_READ, digital_read_fn);
+  jerryxx_set_property_function(global, MSTR_DIGITAL_WRITE, digital_write_fn);
+  jerryxx_set_property_function(global, MSTR_DIGITAL_TOGGLE, digital_toggle_fn);
+  jerryxx_set_property_function(global, MSTR_PULSE_READ, pulse_read_fn);
+  jerryxx_set_property_function(global, MSTR_PULSE_WRITE, pulse_write_fn);
+  jerryxx_set_property_function(global, MSTR_SET_WATCH, set_watch_fn);
+  jerryxx_set_property_function(global, MSTR_CLEAR_WATCH, clear_watch_fn);
+  jerry_release_value(global);
+}
+
+/****************************************************************************/
+/*                                                                          */
+/*                           INTERRUPT FUNCTIONS                            */
+/*                                                                          */
+/****************************************************************************/
+
+static jerry_value_t irq_js_cb[GPIO_MAX];
+
+static void irq_cb(uint8_t pin) {
+  // ... call irq_js_cb[pin]
+}
+
+/*
 static km_gpio_intr_handle_t *km_gpio_handle_head = NULL;
 
 static km_gpio_intr_handle_t *__get_gpio_handle(uint8_t pin) {
@@ -461,6 +507,7 @@ void km_gpio_irq(uint8_t pin, uint8_t events) {
     }
   }
 }
+*/
 
 JERRYXX_FUN(attach_interrupt_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
@@ -476,6 +523,7 @@ JERRYXX_FUN(attach_interrupt_fn) {
             "Only RISING, FALLING and CHANGE can be set for interrupt event.");
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
   }
+  /*
   if (km_gpio_handle_head == NULL) {
     km_gpio_intr_en(true, km_gpio_irq);
   }
@@ -486,71 +534,53 @@ JERRYXX_FUN(attach_interrupt_fn) {
     sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
   }
+  */
+  if (km_gpio_irq_attach(pin, irq_cb, events) < 0) {
+    char errmsg[255];
+    sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  }
   return jerry_create_undefined();
 }
 
 JERRYXX_FUN(detach_interrupt_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  if (km_gpio_set_interrupt(false, pin, 0) < 0) {
+  if (km_gpio_irq_detach(pin) < 0) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
   }
+  /*
   km_gpio_handle_head = __remove_gpio_handle(pin);
   if (km_gpio_handle_head == NULL) {
     km_gpio_intr_en(false, km_gpio_irq);
   }
+  */
   return jerry_create_undefined();
 }
 
 JERRYXX_FUN(enable_interrupts_fn) {
-  km_gpio_intr_en(true, km_gpio_irq);
+  // km_gpio_intr_en(true, km_gpio_irq);
+  km_gpio_irq_enable();
   return jerry_create_undefined();
 }
 
 JERRYXX_FUN(disable_interrupts_fn) {
-  km_gpio_intr_en(false, km_gpio_irq);
+  // km_gpio_intr_en(false, km_gpio_irq);
+  km_gpio_irq_disable();
   return jerry_create_undefined();
 }
 
-static void register_global_digital_io() {
+static void register_global_interrupts() {
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property_number(global, MSTR_HIGH, KM_GPIO_HIGH);
-  jerryxx_set_property_number(global, MSTR_LOW, KM_GPIO_LOW);
-  jerryxx_set_property_number(global, MSTR_INPUT,
-                              (double)KM_GPIO_IO_MODE_INPUT);
-  jerryxx_set_property_number(global, MSTR_OUTPUT,
-                              (double)KM_GPIO_IO_MODE_OUTPUT);
-  jerryxx_set_property_number(global, MSTR_INPUT_PULLUP,
-                              (double)KM_GPIO_IO_MODE_INPUT_PULLUP);
-  jerryxx_set_property_number(global, MSTR_INPUT_PULLDOWN,
-                              (double)KM_GPIO_IO_MODE_INPUT_PULLDOWN);
-  jerryxx_set_property_number(global, MSTR_LOW_LEVEL,
-                              (double)KM_IO_WATCH_MODE_LOW_LEVEL);
-  jerryxx_set_property_number(global, MSTR_HIGH_LEVEL,
-                              (double)KM_IO_WATCH_MODE_HIGH_LEVEL);
-  jerryxx_set_property_number(global, MSTR_RISING,
-                              (double)KM_IO_WATCH_MODE_RISING);
-  jerryxx_set_property_number(global, MSTR_FALLING,
-                              (double)KM_IO_WATCH_MODE_FALLING);
-  jerryxx_set_property_number(global, MSTR_CHANGE,
-                              (double)KM_IO_WATCH_MODE_CHANGE);
-  jerryxx_set_property_function(global, MSTR_PIN_MODE, pin_mode_fn);
-  jerryxx_set_property_function(global, MSTR_DIGITAL_READ, digital_read_fn);
-  jerryxx_set_property_function(global, MSTR_DIGITAL_WRITE, digital_write_fn);
-  jerryxx_set_property_function(global, MSTR_DIGITAL_TOGGLE, digital_toggle_fn);
-  jerryxx_set_property_function(global, MSTR_PULSE_READ, pulse_read_fn);
-  jerryxx_set_property_function(global, MSTR_PULSE_WRITE, pulse_write_fn);
-  jerryxx_set_property_function(global, MSTR_SET_WATCH, set_watch_fn);
-  jerryxx_set_property_function(global, MSTR_CLEAR_WATCH, clear_watch_fn);
-  jerryxx_set_property_function(global, MSTR_DIGITAL_ATTACH_INTERRUPT,
+  jerryxx_set_property_function(global, MSTR_ATTACH_INTERRUPT,
                                 attach_interrupt_fn);
-  jerryxx_set_property_function(global, MSTR_DIGITAL_DETACH_INTERRUPT,
+  jerryxx_set_property_function(global, MSTR_DETACH_INTERRUPT,
                                 detach_interrupt_fn);
-  jerryxx_set_property_function(global, MSTR_DIGITAL_ENABLE_INTERRUPTS,
+  jerryxx_set_property_function(global, MSTR_ENABLE_INTERRUPTS,
                                 enable_interrupts_fn);
-  jerryxx_set_property_function(global, MSTR_DIGITAL_DISABLE_INTERRUPTS,
+  jerryxx_set_property_function(global, MSTR_DISABLE_INTERRUPTS,
                                 disable_interrupts_fn);
   jerry_release_value(global);
 }
@@ -1341,6 +1371,7 @@ static void run_board_module() {
 void km_global_init() {
   register_global_objects();
   register_global_digital_io();
+  register_global_interrupts();
   register_global_analog_io();
   register_global_timers();
   register_global_console_object();
