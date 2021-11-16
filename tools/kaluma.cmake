@@ -74,6 +74,7 @@ list(APPEND SOURCES
   ${SRC_DIR}/jerryxx.c
   ${SRC_DIR}/global.c
   ${SRC_DIR}/ymodem.c
+  ${SRC_DIR}/ringbuffer.c
   ${KALUMA_GENERATED_C})
 
 # KALUMA MODULES -------------------------------------------------------------

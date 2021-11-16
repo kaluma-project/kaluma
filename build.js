@@ -8,7 +8,8 @@ const childProcess = require('child_process')
 // Parse options
 var argv = minimist(process.argv.slice(2))
 
-const target = argv.target || 'rpi-pico'
+const target = argv.target || 'rp2'
+const board = argv.board || 'pico'
 const buildPath = path.join(__dirname, 'build')
 const srcGenPath = path.join(__dirname, 'src/gen')
 
@@ -29,7 +30,7 @@ function build() {
 
   // execute cmake and make
   process.chdir(buildPath)
-  cmd('cmake', ['..', `-DTARGET=${target}`])
+  cmd('cmake', ['..', `-DTARGET=${target}`, `-DBOARD=${board}`])
   cmd('make')
   process.chdir(__dirname)
 }

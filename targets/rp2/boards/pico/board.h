@@ -19,62 +19,26 @@
  * SOFTWARE.
  */
 
-#ifndef __KM_SYSTEM_H
-#define __KM_SYSTEM_H
+#ifndef __RP2_PICO_H
+#define __RP2_PICO_H
 
-#include <stdint.h>
+#define SYSTEM_ARCH "cortex-m0-plus"
+#define SYSTEM_PLATFORM "rp2"
 
-#include "io.h"
+#define GPIO_NUM 29  // GPIO 0 - 28
+// #define ADC_NUM 3
+#define PWM_NUM 27
+#define I2C_NUM 2
+#define SPI_NUM 2
+#define UART_NUM 2
+// #define LED_NUM 1
+// #define BUTTON_NUM 0
+#define PIO_NUM 2
+#define PIO_SM_NUM 4
 
-/**
- * Initialize the system
- */
-void km_system_init();
+#define ADC_RESOLUTION_BIT 12
+#define PWM_CLK_REF 1250
+#define I2C_MAX_CLOCK 1000000
+#define SCR_LOAD_GPIO 22  // GPIO 22
 
-/**
- * Cleanup all resources in the system
- */
-void km_system_cleanup();
-
-/**
- * Delay in milliseconds
- *
- * @param {uint32_t} msec
- */
-void km_delay(uint32_t msec);
-
-/**
- * Return current time (UNIX timestamp in milliseconds)
- */
-uint64_t km_gettime();
-
-/**
- * Return MAX of the micro seconde counter
- * Use this value to detect counter overflow
- */
-uint64_t km_micro_maxtime(void);
-
-/**
- * Return micro seconde counter
- */
-uint64_t km_micro_gettime(void);
-
-/**
- * micro secoded delay
- */
-void km_micro_delay(uint32_t usec);
-
-/**
- * Enter dormant state
- * @param pins An array of GPIO pins for wakeup
- * @param events An array of events for wakeup
- * @param length length of the pins and events array. The both should be same.
- */
-int km_dormant(uint8_t *pins, uint8_t *events, uint8_t length);
-
-/**
- * check script running mode - skipping or running user script
- */
-uint8_t km_running_script_check();
-
-#endif /* __KM_SYSTEM_H */
+#endif /* __RP2_PICO_H */
