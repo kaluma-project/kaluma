@@ -19,62 +19,62 @@
  * SOFTWARE.
  */
 
-#ifndef __KM_SYSTEM_H
-#define __KM_SYSTEM_H
+#ifndef __KAMELEON_CORE_H
+#define __KAMELEON_CORE_H
 
-#include <stdint.h>
+#include "stm32f4xx.h"
 
-#include "io.h"
+#define SYSTEM_ARCH "cortex-m4"
+#define SYSTEM_PLATFORM "stm32"
+
+#define KALUMA_MANUFACTURER_STRING "Kaluma (kaluma.io)"
+#define KALUMA_PRODUCT_STRING "Kameleon Core"
+#define KALUMA_SERIALNUMBER_STRING "00000000001A"
+
+#define PLL_M 8
+#define PLL_N 192
+#define PLL_Q 4
+
+#define FLASH_SIZE (512 * 1024)
+#define FLASH_BASE_ADDR (0x08000000)
+
+#define SRAM_SIZE (128 * 1024)
+#define SRAM_BASE_ADDR (0x20000000)
+
+#define GPIO_NUM 22
+#define ADC_NUM 6
+#define PWM_NUM 6
+#define I2C_NUM 2
+#define SPI_NUM 2
+#define UART_NUM 2
+#define LED_NUM 1
+#define BUTTON_NUM 1
+
+#define APB1 0
+#define APB2 1
+
+#define ADC_RESOLUTION_BIT 12
+/**
+ * Error handler for the system driver error.
+ */
+void _Error_Handler(char* file, uint32_t line);
 
 /**
- * Initialize the system
+ * Increment tick count
  */
-void km_system_init();
+void __inc_tick();
 
 /**
- * Cleanup all resources in the system
+ * this function is called in the pendable interrupt service routine which has
+ * lowest priority to allow other interrupts service.
  */
-void km_system_cleanup();
+void tty_transmit_data();
 
 /**
- * Delay in milliseconds
- *
- * @param {uint32_t} msec
+ * return tx data length
  */
-void km_delay(uint32_t msec);
+uint32_t tty_get_tx_data_length();
 
-/**
- * Return current time (UNIX timestamp in milliseconds)
- */
-uint64_t km_gettime();
+uint32_t tty_fill_rx_bytes(uint8_t* buf, uint32_t nToWrite);
 
-/**
- * Return MAX of the micro seconde counter
- * Use this value to detect counter overflow
- */
-uint64_t km_micro_maxtime(void);
-
-/**
- * Return micro seconde counter
- */
-uint64_t km_micro_gettime(void);
-
-/**
- * micro secoded delay
- */
-void km_micro_delay(uint32_t usec);
-
-/**
- * Enter dormant state
- * @param pins An array of GPIO pins for wakeup
- * @param events An array of events for wakeup
- * @param length length of the pins and events array. The both should be same.
- */
-int km_dormant(uint8_t *pins, uint8_t *events, uint8_t length);
-
-/**
- * check script running mode - skipping or running user script
- */
-uint8_t km_running_script_check();
-
-#endif /* __KM_SYSTEM_H */
+#endif /* __KAMELEON_CORE_H */

@@ -19,62 +19,63 @@
  * SOFTWARE.
  */
 
-#ifndef __KM_SYSTEM_H
-#define __KM_SYSTEM_H
+#include "adc.h"
 
 #include <stdint.h>
 
-#include "io.h"
+#include "board.h"
+#include "hardware/adc.h"
+#include "hardware/gpio.h"
+#include "pico/stdlib.h"
 
 /**
- * Initialize the system
- */
-void km_system_init();
-
-/**
- * Cleanup all resources in the system
- */
-void km_system_cleanup();
-
-/**
- * Delay in milliseconds
+ * Get ADC index
  *
- * @param {uint32_t} msec
+ * @param pin Pin number.
+ * @return Returns index on success or KM_ADCPORT_ERRROR(-1) on failure.
  */
-void km_delay(uint32_t msec);
+static int __get_adc_index(uint8_t pin) {
+  if ((pin >= 26) && (pin <= 28)) {
+    return pin - 26;  // GPIO 26 is channel 0
+  }
+  return KM_ADCPORT_ERRROR;  // Error
+}
 
 /**
- * Return current time (UNIX timestamp in milliseconds)
+ * Initialize all ADC channels when system started
  */
-uint64_t km_gettime();
+void km_adc_init() { adc_init(); }
 
 /**
- * Return MAX of the micro seconde counter
- * Use this value to detect counter overflow
+ * Cleanup all ADC channels when system cleanup
  */
-uint64_t km_micro_maxtime(void);
+void km_adc_cleanup() {
+  // adc pins will be reset at the GPIO cleanup function.
+}
 
 /**
- * Return micro seconde counter
+ * Read value from the ADC channel
+ *
+ * @param {uint8_t} adcIndex
+ * @return {double}
  */
-uint64_t km_micro_gettime(void);
+double km_adc_read(uint8_t adcIndex) {
+  return (double)adc_read() / (1 << ADC_RESOLUTION_BIT);
+}
 
-/**
- * micro secoded delay
- */
-void km_micro_delay(uint32_t usec);
+int km_adc_setup(uint8_t pin) {
+  int ch = __get_adc_index(pin);
+  if (ch < 0) {
+    return KM_ADCPORT_ERRROR;
+  }
+  adc_gpio_init(pin);
+  adc_select_input(ch);
+  return 0;
+}
 
-/**
- * Enter dormant state
- * @param pins An array of GPIO pins for wakeup
- * @param events An array of events for wakeup
- * @param length length of the pins and events array. The both should be same.
- */
-int km_dormant(uint8_t *pins, uint8_t *events, uint8_t length);
-
-/**
- * check script running mode - skipping or running user script
- */
-uint8_t km_running_script_check();
-
-#endif /* __KM_SYSTEM_H */
+int km_adc_close(uint8_t pin) {
+  if (__get_adc_index(pin) < 0) {
+    return KM_ADCPORT_ERRROR;
+  }
+  return 0;
+}

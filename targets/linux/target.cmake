@@ -14,7 +14,6 @@ set(TARGET_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(SOURCES
   ${SOURCES}
   ${TARGET_SRC_DIR}/adc.c
-  ${TARGET_SRC_DIR}/ringbuffer.c
   ${TARGET_SRC_DIR}/system.c
   ${TARGET_SRC_DIR}/gpio.c
   ${TARGET_SRC_DIR}/pwm.c

@@ -26,6 +26,7 @@
 
 #include "adc.h"
 #include "base64.h"
+#include "board.h"
 #include "gpio.h"
 #include "io.h"
 #include "jerryscript-ext/handler.h"
@@ -891,9 +892,8 @@ JERRYXX_FUN(process_get_builtin_module_fn) {
 
 static void register_global_process_object() {
   jerry_value_t process = jerry_create_object();
-  jerryxx_set_property_string(process, MSTR_ARCH, (char *)km_system_arch);
-  jerryxx_set_property_string(process, MSTR_PLATFORM,
-                              (char *)km_system_platform);
+  jerryxx_set_property_string(process, MSTR_ARCH, SYSTEM_ARCH);
+  jerryxx_set_property_string(process, MSTR_PLATFORM, SYSTEM_PLATFORM);
   jerryxx_set_property_string(process, MSTR_VERSION, KALUMA_VERSION);
 
   /* Add `process.binding` function and it's properties */
@@ -1349,6 +1349,6 @@ void km_global_init() {
   register_global_textdecoder();
   register_global_encoders();
   register_global_etc();
-  run_board_module();
   run_startup_module();
+  run_board_module();
 }

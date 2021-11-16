@@ -11,11 +11,12 @@
     "diskio.h": "c",
     "buffer.h": "c",
     "limits": "c",
-    "kameleon_core.h": "c",
+    "board.h": "c",
     "ymodem.h": "c",
     "jerryxx.h": "c",
     "string_view": "c",
-    "random": "c"
+    "random": "c",
+    "rpi_pico.h": "c"
   },
   "cpplint.filters": [
     "-build/include_subdir",

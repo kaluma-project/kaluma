@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.5)
 # Available targets are in /targets
 if(NOT TARGET)
-  set(TARGET "rpi-pico") # default: rpi-pico
+  set(TARGET "rp2") # default target: rp2
 endif()
 
-if(NOT "${TARGET}" STREQUAL "rpi-pico")
+if(NOT BOARD)
+  set(BOARD "pico") # default board: pico
+endif()
+
+if(NOT "${TARGET}" STREQUAL "rp2")
   project(KM_CMAKE NONE)
 endif()
 
