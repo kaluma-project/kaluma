@@ -57,7 +57,7 @@ add_custom_command(OUTPUT ${JERRY_LIBS}
 add_custom_command(OUTPUT ${KALUMA_GENERATED_C}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   COMMAND python ${JERRY_ROOT}/tools/build.py --clean --jerry-cmdline-snapshot=ON --snapshot-save=ON --snapshot-exec=ON --profile=es.next #es2015-subset
-  COMMAND node tools/js2c.js --modules=${KALUMA_MODULE_LIST} --target=${TARGET}
+  COMMAND node tools/js2c.js --modules=${KALUMA_MODULE_LIST} --target=${TARGET} --board=${BOARD}
   COMMAND rm -rf lib/jerryscript/build)
 
 set(KALUMA_INC ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/port ${SRC_DIR}/gen ${SRC_DIR}/modules)
