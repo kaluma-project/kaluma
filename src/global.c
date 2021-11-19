@@ -456,8 +456,8 @@ JERRYXX_FUN(attach_interrupt_fn) {
   }
   if (jerry_value_is_function(callback)) {
     irq_js_cb[pin] = jerry_acquire_value(callback);
+    km_gpio_irq_set_callback(irq_cb);
   }
-  km_gpio_irq_set_callback(irq_cb);
   if (km_gpio_irq_attach(pin, events) < 0) {
     char errmsg[255];
     sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
