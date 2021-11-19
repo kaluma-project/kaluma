@@ -366,6 +366,10 @@ class ASM {
     return new Uint16Array(this.code);
   }
 
+  toInst(idx = 0) {
+    return this.toBinary()[idx];
+  }
+
   // instruction
   static JMP = 0x0000;
   static WAIT = 0x2000;
