@@ -18,7 +18,11 @@
     "random": "c",
     "rpi_pico.h": "c",
     "gpio.h": "c",
-    "pico.h": "c"
+    "pico.h": "c",
+    "__locale": "c",
+    "__string": "c",
+    "string": "c",
+    "clocks.h": "c"
   },
   "cpplint.filters": [
     "-build/include_subdir",

@@ -84,4 +84,6 @@
 #define MSTR_RP2_PIO_SM_GET "pio_sm_get"
 #define MSTR_RP2_PIO_SM_SET_PINS "pio_sm_set_pins"
 
+#define MSTR_RP2_DORMANT "dormant"
+
 #endif /* __PIO_MAGIC_STRINGS_H */

@@ -457,6 +457,11 @@ class StateMachine {
   }
 }
 
+function dormant(pins, events) {
+  rp2_native.dormant(pins, events);
+}
+
 exports.PIO = PIO;
 exports.ASM = ASM;
 exports.StateMachine = StateMachine;
+exports.dormant = dormant;

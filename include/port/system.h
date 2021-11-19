@@ -65,14 +65,6 @@ uint64_t km_micro_gettime(void);
 void km_micro_delay(uint32_t usec);
 
 /**
- * Enter dormant state
- * @param pins An array of GPIO pins for wakeup
- * @param events An array of events for wakeup
- * @param length length of the pins and events array. The both should be same.
- */
-int km_dormant(uint8_t *pins, uint8_t *events, uint8_t length);
-
-/**
  * check script running mode - skipping or running user script
  */
 uint8_t km_running_script_check();

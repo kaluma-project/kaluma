@@ -22,8 +22,12 @@
 #include <stdlib.h>
 
 #include "hardware/clocks.h"
+#include "hardware/gpio.h"
 #include "hardware/irq.h"
 #include "hardware/pio.h"
+#include "hardware/pll.h"
+#include "hardware/regs/io_bank0.h"
+#include "hardware/xosc.h"
 #include "io.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
@@ -285,6 +289,115 @@ JERRYXX_FUN(pio_sm_set_pins_fn) {
   return jerry_create_undefined();
 }
 
+JERRYXX_FUN(dormant_fn) {
+  JERRYXX_CHECK_ARG_ARRAY(0, "pins");
+  JERRYXX_CHECK_ARG_ARRAY(1, "events");
+  jerry_value_t pins = JERRYXX_GET_ARG(0);
+  jerry_value_t events = JERRYXX_GET_ARG(1);
+  int len = jerry_get_array_length(pins);
+  int elen = jerry_get_array_length(events);
+  if (len != elen) {
+    return jerry_create_error(
+        JERRY_ERROR_TYPE,
+        (const jerry_char_t
+             *)"The length of pins and events should be the same.");
+  }
+
+  uint8_t _pins[len];
+  uint8_t _events[elen];
+  for (int i = 0; i < len; i++) {
+    jerry_value_t pin = jerry_get_property_by_index(pins, i);
+    jerry_value_t event = jerry_get_property_by_index(events, i);
+    if (!jerry_value_is_number(pin)) {
+      return jerry_create_error(
+          JERRY_ERROR_TYPE,
+          (const jerry_char_t *)"The pin should be a number.");
+    }
+    if (!jerry_value_is_number(event)) {
+      return jerry_create_error(
+          JERRY_ERROR_TYPE,
+          (const jerry_char_t *)"The event should be a number.");
+    }
+    _pins[i] = (uint8_t)jerry_get_number_value(pin);
+    _events[i] = (uint8_t)jerry_get_number_value(event);
+  }
+
+  // Hibernate system for dormant
+  uint src_hz = XOSC_MHZ * MHZ;
+  uint clk_ref_src = CLOCKS_CLK_REF_CTRL_SRC_VALUE_XOSC_CLKSRC;
+  // CLK_REF = XOSC
+  clock_configure(clk_ref, clk_ref_src,
+                  0,  // No aux mux
+                  src_hz, src_hz);
+  // CLK SYS = CLK_REF
+  clock_configure(clk_sys, CLOCKS_CLK_SYS_CTRL_SRC_VALUE_CLK_REF,
+                  0,  // Using glitchless mux
+                  src_hz, src_hz);
+  // CLK USB = 0MHz
+  clock_stop(clk_usb);
+  // CLK ADC = 0MHz
+  clock_stop(clk_adc);
+  // CLK RTC = ideally XOSC (12MHz) / 256 = 46875Hz but could be rosc
+  uint clk_rtc_src = CLOCKS_CLK_RTC_CTRL_AUXSRC_VALUE_XOSC_CLKSRC;
+  clock_configure(clk_rtc, 0,  // No GLMUX
+                  clk_rtc_src, src_hz, 46875);
+  // CLK PERI = clk_sys. Used as reference clock for Peripherals. No dividers so
+  // just select and enable
+  clock_configure(clk_peri, 0, CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLK_SYS,
+                  src_hz, src_hz);
+  pll_deinit(pll_sys);
+  pll_deinit(pll_usb);
+
+  // Setup GPIOs for wakeup
+  for (int i = 0; i < len; i++) {
+    gpio_set_dormant_irq_enabled(_pins[i], _events[i], true);
+  }
+
+  // Enter dormant state
+  xosc_dormant();
+
+  // Execution stops here until woken up
+  for (int i = 0; i < len; i++) {
+    // Clear the irq so we can go back to dormant mode again if we want
+    gpio_acknowledge_irq(_pins[i], _events[i]);
+  }
+
+  // Resume the system
+  pll_init(pll_sys, 1, 1500 * MHZ, 6, 2);
+  pll_init(pll_usb, 1, 480 * MHZ, 5, 2);
+  // Configure clocks
+  // CLK_REF = XOSC (12MHz) / 1 = 12MHz
+  clock_configure(clk_ref, CLOCKS_CLK_REF_CTRL_SRC_VALUE_XOSC_CLKSRC,
+                  0,  // No aux mux
+                  12 * MHZ, 12 * MHZ);
+  /// \tag::configure_clk_sys[]
+  // CLK SYS = PLL SYS (125MHz) / 1 = 125MHz
+  clock_configure(clk_sys, CLOCKS_CLK_SYS_CTRL_SRC_VALUE_CLKSRC_CLK_SYS_AUX,
+                  CLOCKS_CLK_SYS_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS, 125 * MHZ,
+                  125 * MHZ);
+  /// \end::configure_clk_sys[]
+  // CLK USB = PLL USB (48MHz) / 1 = 48MHz
+  clock_configure(clk_usb,
+                  0,  // No GLMUX
+                  CLOCKS_CLK_USB_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB, 48 * MHZ,
+                  48 * MHZ);
+  // CLK ADC = PLL USB (48MHZ) / 1 = 48MHz
+  clock_configure(clk_adc,
+                  0,  // No GLMUX
+                  CLOCKS_CLK_ADC_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB, 48 * MHZ,
+                  48 * MHZ);
+  // CLK RTC = PLL USB (48MHz) / 1024 = 46875Hz
+  clock_configure(clk_rtc,
+                  0,  // No GLMUX
+                  CLOCKS_CLK_RTC_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB, 48 * MHZ,
+                  46875);
+  // CLK PERI = clk_sys. Used as reference clock for Peripherals. No dividers so
+  // just select and enable Normally choose clk_sys or clk_usb
+  clock_configure(clk_peri, 0, CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLK_SYS,
+                  125 * MHZ, 125 * MHZ);
+  return jerry_create_undefined();
+}
+
 /**
  * Initialize 'rp2' module and return exports
  */
@@ -311,5 +424,6 @@ jerry_value_t module_rp2_init() {
   jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_GET, pio_sm_get_fn);
   jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_SET_PINS,
                                 pio_sm_set_pins_fn);
+  jerryxx_set_property_function(exports, MSTR_RP2_DORMANT, dormant_fn);
   return exports;
 }
