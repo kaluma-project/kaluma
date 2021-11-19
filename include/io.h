@@ -94,8 +94,8 @@ struct km_io_tty_handle_s {
 typedef enum {
   KM_IO_WATCH_MODE_LOW_LEVEL = 1,   // BIT0
   KM_IO_WATCH_MODE_HIGH_LEVEL = 2,  // BIT1
-  KM_IO_WATCH_MODE_RISING = 4,      // BIT2
-  KM_IO_WATCH_MODE_FALLING = 8,     // BIT3
+  KM_IO_WATCH_MODE_FALLING = 4,     // BIT2
+  KM_IO_WATCH_MODE_RISING = 8,      // BIT3
   KM_IO_WATCH_MODE_CHANGE = 12,     // BIT2 | BIT3
 } km_io_watch_mode_t;
 
