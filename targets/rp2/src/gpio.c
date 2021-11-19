@@ -28,7 +28,6 @@
 #include "hardware/irq.h"
 #include "pico/stdlib.h"
 
-static km_gpio_callback_t __gpio_callback = NULL;
 static int __check_gpio(uint8_t pin) {
   if ((pin <= 28) && !((pin == 23) || (pin == 24))) {
     return 0;
@@ -87,37 +86,33 @@ int km_gpio_toggle(uint8_t pin) {
   return 0;
 }
 
-static void __gpio_irq_handler(uint gpio, uint32_t events) {
-  if (__gpio_callback) {
-    if (events == 4) {         // BIT2 is Falling edge in Pico
-      events = 8;              // BIT3 is Falling edge in Kaluma
-    } else if (events == 8) {  // BIT3 is Rising edge in Pico
-      events = 4;              // BIT2 is Rising Rising in Kaluma
-    }
-    __gpio_callback(gpio, events);
+static km_gpio_irq_callback_t __gpio_irq_cb = NULL;
+
+static void __gpio_irq_callback(uint gpio, uint32_t events) {
+  if (__gpio_irq_cb) {
+    __gpio_irq_cb((uint8_t)gpio);
   }
 }
 
-void km_gpio_intr_en(bool en, km_gpio_callback_t call_back) {
-  if (en) {
-    __gpio_callback = call_back;
-  }
+void km_gpio_irq_set_callback(km_gpio_irq_callback_t cb) { __gpio_irq_cb = cb; }
+
+int km_gpio_irq_attach(uint8_t pin, uint8_t events) {
+  gpio_acknowledge_irq(pin, 0xF);
+  gpio_set_irq_enabled_with_callback(pin, (uint32_t)events, true,
+                                     __gpio_irq_callback);
+  return 0;
+}
+
+int km_gpio_irq_detach(uint8_t pin) {
+  gpio_set_irq_enabled(pin, 0xF, false);
+  return 0;
+}
+
+void km_gpio_irq_enable() {
   for (uint gpio = 0; gpio < NUM_BANK0_GPIOS; gpio++) {
     gpio_acknowledge_irq(gpio, 0xF);
   }
-  irq_set_enabled(IO_IRQ_BANK0, en);
+  irq_set_enabled(IO_IRQ_BANK0, true);
 }
 
-int km_gpio_set_interrupt(bool en, uint8_t pin, uint8_t events) {
-  if (__check_gpio(pin) < 0) {
-    return KM_GPIOPORT_ERROR;
-  }
-  if (events == 4) {         // BIT2 is Rising edge in Kaluma
-    events = 8;              // BIT3 is Rising edge in Pico
-  } else if (events == 8) {  // BIT3 is Falling edge in Kaluma
-    events = 4;              // BIT2 is Rising Falling in Pico
-  }
-  gpio_set_irq_enabled_with_callback(pin, (uint32_t)events, en,
-                                     __gpio_irq_handler);
-  return 0;
-}
+void km_gpio_irq_disable() { irq_set_enabled(IO_IRQ_BANK0, false); }

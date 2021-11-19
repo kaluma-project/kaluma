@@ -16,7 +16,9 @@
     "jerryxx.h": "c",
     "string_view": "c",
     "random": "c",
-    "rpi_pico.h": "c"
+    "rpi_pico.h": "c",
+    "gpio.h": "c",
+    "pico.h": "c"
   },
   "cpplint.filters": [
     "-build/include_subdir",

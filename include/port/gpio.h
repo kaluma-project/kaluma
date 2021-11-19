@@ -40,15 +40,15 @@ typedef enum {
 
 #define KM_GPIOPORT_ERROR -1
 
-typedef void (*km_gpio_callback_t)(uint8_t, uint8_t);
+typedef void (*km_gpio_irq_callback_t)(uint8_t);
 
 /**
- * Initialize all GPIO when system started
+ * Initialize all GPIO on system boot
  */
 void km_gpio_init();
 
 /**
- * Cleanup all GPIO when system cleanup
+ * Cleanup all GPIO on soft reset
  */
 void km_gpio_cleanup();
 
@@ -56,7 +56,10 @@ int km_gpio_set_io_mode(uint8_t pin, km_gpio_io_mode_t mode);
 int km_gpio_write(uint8_t pin, uint8_t value);
 int km_gpio_toggle(uint8_t pin);
 int km_gpio_read(uint8_t pin);
-void km_gpio_intr_en(bool en, km_gpio_callback_t call_back);
-int km_gpio_set_interrupt(bool en, uint8_t pin, uint8_t events);
+void km_gpio_irq_set_callback(km_gpio_irq_callback_t cb);
+int km_gpio_irq_attach(uint8_t pin, uint8_t events);
+int km_gpio_irq_detach(uint8_t pin);
+void km_gpio_irq_enable();
+void km_gpio_irq_disable();
 
 #endif /* __KM_GPIO_H */

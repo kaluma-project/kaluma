@@ -359,17 +359,17 @@ static void set_watch_cb(km_io_watch_handle_t *watch) {
 JERRYXX_FUN(set_watch_fn) {
   JERRYXX_CHECK_ARG_FUNCTION(0, "callback");
   JERRYXX_CHECK_ARG_NUMBER(1, "pin");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(2, "mode");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(2, "events");
   JERRYXX_CHECK_ARG_NUMBER_OPT(3, "debounce");
   jerry_value_t callback = JERRYXX_GET_ARG(0);
   uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
-  km_io_watch_mode_t mode =
+  km_io_watch_mode_t events =
       JERRYXX_GET_ARG_NUMBER_OPT(2, KM_IO_WATCH_MODE_CHANGE);
   uint32_t debounce = JERRYXX_GET_ARG_NUMBER_OPT(3, 0);
   km_io_watch_handle_t *watch = malloc(sizeof(km_io_watch_handle_t));
   km_io_watch_init(watch);
   watch->watch_js_cb = jerry_acquire_value(callback);
-  km_io_watch_start(watch, set_watch_cb, pin, mode, debounce);
+  km_io_watch_start(watch, set_watch_cb, pin, events, debounce);
   return jerry_create_number(watch->base.id);
 }
 
@@ -382,136 +382,6 @@ JERRYXX_FUN(clear_watch_fn) {
     km_io_watch_stop(watch);
     km_io_handle_close((km_io_handle_t *)watch, watch_close_cb);
   }
-  return jerry_create_undefined();
-}
-
-static km_gpio_intr_handle_t *km_gpio_handle_head = NULL;
-
-static km_gpio_intr_handle_t *__get_gpio_handle(uint8_t pin) {
-  km_gpio_intr_handle_t *current = km_gpio_handle_head;
-  while (current) {
-    if (current->gpio_int.pin == pin) {
-      return current;
-    }
-    current = current->next;
-  }
-  return NULL;
-}
-
-static km_gpio_intr_handle_t *__remove_gpio_handle(uint8_t pin) {
-  if (km_gpio_handle_head == NULL) {
-    return NULL;
-  } else {
-    if (km_gpio_handle_head->gpio_int.pin == pin) {
-      km_gpio_intr_handle_t *new_head = km_gpio_handle_head->next;
-      free(km_gpio_handle_head);
-      return new_head;
-    }
-  }
-  km_gpio_intr_handle_t *current = km_gpio_handle_head;
-  while (current->next) {
-    if (current->next->gpio_int.pin == pin) {
-      current->next = current->next->next;
-      free(current->next);
-      return km_gpio_handle_head;
-    }
-    current = current->next;
-  }
-  return km_gpio_handle_head;
-}
-
-static km_gpio_intr_handle_t *__add_gpio_handle(uint8_t pin, uint8_t event,
-                                                jerry_value_t call_back) {
-  if (__get_gpio_handle(pin)) {
-    km_gpio_handle_head = __remove_gpio_handle(pin);
-  }
-  km_gpio_intr_handle_t *new_handle =
-      (km_gpio_intr_handle_t *)malloc(sizeof(km_gpio_intr_handle_t));
-  new_handle->gpio_int.pin = pin;
-  new_handle->gpio_int.event = event;
-  new_handle->gpio_int.call_back = call_back;
-  new_handle->next = NULL;
-  if (km_gpio_handle_head) {
-    km_gpio_intr_handle_t *current = km_gpio_handle_head;
-    while (current->next) {
-      current = current->next;
-    }
-    current->next = new_handle;
-  } else {
-    km_gpio_handle_head = new_handle;
-  }
-  return km_gpio_handle_head;
-}
-
-void km_gpio_irq(uint8_t pin, uint8_t events) {
-  km_gpio_intr_handle_t *current = __get_gpio_handle(pin);
-  if (current) {
-    if (jerry_value_is_function(current->gpio_int.call_back)) {
-      jerry_value_t this_val = jerry_create_undefined();
-      jerry_value_t args[2];
-      args[0] = jerry_create_number(pin);
-      args[1] = jerry_create_number(events);
-      jerry_value_t ret_val =
-          jerry_call_function(current->gpio_int.call_back, this_val, args, 2);
-      if (jerry_value_is_error(ret_val)) {
-        // print error
-        jerryxx_print_error(ret_val, true);
-      }
-      jerry_release_value(ret_val);
-      jerry_release_value(this_val);
-    }
-  }
-}
-
-JERRYXX_FUN(attach_interrupt_fn) {
-  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
-  JERRYXX_CHECK_ARG_FUNCTION(1, "callback");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(2, "events");
-  uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  jerry_value_t callback = JERRYXX_GET_ARG(1);
-  km_io_watch_mode_t events =
-      JERRYXX_GET_ARG_NUMBER_OPT(2, KM_IO_WATCH_MODE_CHANGE);
-  if ((events & KM_IO_WATCH_MODE_CHANGE) == 0) {
-    char errmsg[255];
-    sprintf(errmsg,
-            "Only RISING, FALLING and CHANGE can be set for interrupt event.");
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
-  }
-  if (km_gpio_handle_head == NULL) {
-    km_gpio_intr_en(true, km_gpio_irq);
-  }
-  km_gpio_handle_head =
-      __add_gpio_handle(pin, events, jerry_acquire_value(callback));
-  if (km_gpio_set_interrupt(true, pin, events) < 0) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
-  }
-  return jerry_create_undefined();
-}
-
-JERRYXX_FUN(detach_interrupt_fn) {
-  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
-  uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  if (km_gpio_set_interrupt(false, pin, 0) < 0) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
-  }
-  km_gpio_handle_head = __remove_gpio_handle(pin);
-  if (km_gpio_handle_head == NULL) {
-    km_gpio_intr_en(false, km_gpio_irq);
-  }
-  return jerry_create_undefined();
-}
-
-JERRYXX_FUN(enable_interrupts_fn) {
-  km_gpio_intr_en(true, km_gpio_irq);
-  return jerry_create_undefined();
-}
-
-JERRYXX_FUN(disable_interrupts_fn) {
-  km_gpio_intr_en(false, km_gpio_irq);
   return jerry_create_undefined();
 }
 
@@ -545,13 +415,92 @@ static void register_global_digital_io() {
   jerryxx_set_property_function(global, MSTR_PULSE_WRITE, pulse_write_fn);
   jerryxx_set_property_function(global, MSTR_SET_WATCH, set_watch_fn);
   jerryxx_set_property_function(global, MSTR_CLEAR_WATCH, clear_watch_fn);
-  jerryxx_set_property_function(global, MSTR_DIGITAL_ATTACH_INTERRUPT,
+  jerry_release_value(global);
+}
+
+/****************************************************************************/
+/*                                                                          */
+/*                           INTERRUPT FUNCTIONS                            */
+/*                                                                          */
+/****************************************************************************/
+
+static jerry_value_t irq_js_cb[GPIO_MAX];
+
+static void irq_cb(uint8_t pin) {
+  jerry_value_t cb = irq_js_cb[pin];
+  if (jerry_value_is_function(cb)) {
+    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t ret_val = jerry_call_function(cb, this_val, NULL, 0);
+    if (jerry_value_is_error(ret_val)) {
+      // print error
+      jerryxx_print_error(ret_val, true);
+    }
+    jerry_release_value(ret_val);
+    jerry_release_value(this_val);
+  }
+}
+
+JERRYXX_FUN(attach_interrupt_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
+  JERRYXX_CHECK_ARG_FUNCTION(1, "callback");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(2, "events");
+  uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  jerry_value_t callback = JERRYXX_GET_ARG(1);
+  km_io_watch_mode_t events =
+      JERRYXX_GET_ARG_NUMBER_OPT(2, KM_IO_WATCH_MODE_CHANGE);
+  if ((events & KM_IO_WATCH_MODE_CHANGE) == 0) {
+    char errmsg[255];
+    sprintf(errmsg,
+            "Only RISING, FALLING and CHANGE can be set for interrupt event.");
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  }
+  if (jerry_value_is_function(callback)) {
+    irq_js_cb[pin] = jerry_acquire_value(callback);
+    km_gpio_irq_set_callback(irq_cb);
+  }
+  if (km_gpio_irq_attach(pin, events) < 0) {
+    char errmsg[255];
+    sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  }
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(detach_interrupt_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pin");
+  uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  if (km_gpio_irq_detach(pin) < 0) {
+    char errmsg[255];
+    sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
+    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  }
+  km_gpio_irq_detach(pin);
+  jerry_release_value(irq_js_cb[pin]);
+  irq_js_cb[pin] = 0;
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(enable_interrupts_fn) {
+  km_gpio_irq_set_callback(irq_cb);
+  km_gpio_irq_enable();
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(disable_interrupts_fn) {
+  km_gpio_irq_set_callback(NULL);
+  km_gpio_irq_disable();
+  return jerry_create_undefined();
+}
+
+static void register_global_interrupts() {
+  jerry_value_t global = jerry_get_global_object();
+  jerryxx_set_property_function(global, MSTR_ATTACH_INTERRUPT,
                                 attach_interrupt_fn);
-  jerryxx_set_property_function(global, MSTR_DIGITAL_DETACH_INTERRUPT,
+  jerryxx_set_property_function(global, MSTR_DETACH_INTERRUPT,
                                 detach_interrupt_fn);
-  jerryxx_set_property_function(global, MSTR_DIGITAL_ENABLE_INTERRUPTS,
+  jerryxx_set_property_function(global, MSTR_ENABLE_INTERRUPTS,
                                 enable_interrupts_fn);
-  jerryxx_set_property_function(global, MSTR_DIGITAL_DISABLE_INTERRUPTS,
+  jerryxx_set_property_function(global, MSTR_DISABLE_INTERRUPTS,
                                 disable_interrupts_fn);
   jerry_release_value(global);
 }
@@ -1341,6 +1290,7 @@ static void run_board_module() {
 void km_global_init() {
   register_global_objects();
   register_global_digital_io();
+  register_global_interrupts();
   register_global_analog_io();
   register_global_timers();
   register_global_console_object();
