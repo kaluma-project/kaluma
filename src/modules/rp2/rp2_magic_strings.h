@@ -48,6 +48,15 @@
 #define MSTR_RP2_ASM_DELAY "delay"
 #define MSTR_RP2_ASM_TO_BINARY "toBinary"
 
+#define MSTR_RP2_STATE_MACHINE "StateMachine"
+#define MSTR_RP2_STATE_MACHINE_GET_AVAILABLE_ID "getAvailableId"
+#define MSTR_RP2_STATE_MACHINE_ACTIVE "active"
+#define MSTR_RP2_STATE_MACHINE_RESTART "restart"
+#define MSTR_RP2_STATE_MACHINE_EXEC "exec"
+#define MSTR_RP2_STATE_MACHINE_GET "get"
+#define MSTR_RP2_STATE_MACHINE_PUT "put"
+#define MSTR_RP2_STATE_MACHINE_SET_PINS "setPins"
+
 #define MSTR_RP2_PIO_ADD_PROGRAM "pio_add_program"
 #define MSTR_RP2_PIO_SM_INIT "pio_sm_init"
 #define MSTR_RP2_PIO_SM_FREQ "freq"
