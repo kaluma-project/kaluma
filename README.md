@@ -5,9 +5,9 @@
 Kaluma is a tiny and efficient JavaScript runtime for microcontrollers. The main features are:
 
 - Small footprint (Run minimally on 300KB ROM, 64KB RAM)
-- ECMAScript 5.1/2015(subset) standard compliant (Powered by [JerryScript](http://jerryscript.net/))
+- ECMAScript 5.1/6+ (subset) standard compliant (Powered by [JerryScript](http://jerryscript.net/))
 - Non-blocking I/O
-- Easy API similar with Arduino
+- [APIs](https://docs.kaluma.io/) like Node.js and Arduino
 - Support REPL mode
 - Easy to port
 
@@ -15,7 +15,9 @@ Kaluma is a tiny and efficient JavaScript runtime for microcontrollers. The main
 
 - **RP2040**
   - [Raspberry Pi Pico](https://www.raspberrypi.org/products/raspberry-pi-pico/)
-  - All boards based on RP2040
+  - Support boards based on RP2040
+  - Supports PIO (Programmable I/O)
+  - Dormant mode for low-power
 
 # Resources
 
