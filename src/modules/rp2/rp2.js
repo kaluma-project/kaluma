@@ -383,7 +383,12 @@ class ASM {
 }
 
 class StateMachine {
+  static ids = [0, 4, 1, 5, 2, 6, 3, 7]
+  static getAvailableId () {
+    return StateMachine.ids.length > 0 ? StateMachine.ids[0] : null;
+  }
   constructor(id, asm, options) {
+    StateMachine.ids.splice(StateMachine.ids.indexOf(id), 1);
     this.pio = id > 3 ? 1 : 0;
     this.sm = id - this.pio * 4;
     if (!asm._pio) asm._pio = new Array(2);
