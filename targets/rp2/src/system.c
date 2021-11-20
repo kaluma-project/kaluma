@@ -49,19 +49,19 @@ void km_delay(uint32_t msec) { sleep_ms(msec); }
 uint64_t km_gettime() { return to_ms_since_boot(get_absolute_time()); }
 
 /**
- * Return MAX of the micro seconde counter 44739242
+ * Return MAX of the microsecond counter 44739242
  */
 uint64_t km_micro_maxtime() {
   return 0xFFFFFFFFFFFFFFFF;  // Max of the uint64()
 }
 
 /**
- * Return micro seconde counter
+ * Return microsecond counter
  */
 uint64_t km_micro_gettime() { return get_absolute_time(); }
 
 /**
- * micro secoded delay
+ * microsecond delay
  */
 void km_micro_delay(uint32_t usec) { sleep_us(usec); }
 

@@ -184,16 +184,17 @@ void km_delay(uint32_t msec) { HAL_Delay(msec); }
 uint64_t km_gettime() { return tick_count; }
 
 /**
- * Return MAX of the micro seconde counter 44739242
+ * Return MAX of the microsecond counter 44739242
  */
 uint64_t km_micro_maxtime() { return (0xFFFFFFFFU / microseconds_cycle); }
+
 /**
- * Return micro seconde counter
+ * Return microsecond counter
  */
 uint64_t km_micro_gettime() { return (DWT->CYCCNT / microseconds_cycle); }
 
 /**
- * micro secoded delay
+ * microsecond delay
  */
 void km_micro_delay(uint32_t usec) {
   uint32_t time_diff;

@@ -574,7 +574,7 @@ JERRYXX_FUN(clear_timer_fn) {
 }
 
 JERRYXX_FUN(delay_fn) {
-  JERRYXX_CHECK_ARG_NUMBER_OPT(0, "id");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(0, "msec");
   uint32_t delay_val = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
   km_delay(delay_val);
   return jerry_create_undefined();
@@ -585,6 +585,18 @@ JERRYXX_FUN(millis_fn) {
   return jerry_create_number(msec);
 }
 
+JERRYXX_FUN(delay_microseconds_fn) {
+  JERRYXX_CHECK_ARG_NUMBER_OPT(0, "usec");
+  uint32_t delay_val = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
+  km_micro_delay(delay_val);
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(micros_fn) {
+  uint64_t usec = km_micro_gettime();
+  return jerry_create_number(usec);
+}
+
 static void register_global_timers() {
   jerry_value_t global = jerry_get_global_object();
   jerryxx_set_property_function(global, MSTR_SET_TIMEOUT, set_timeout_fn);
@@ -593,6 +605,9 @@ static void register_global_timers() {
   jerryxx_set_property_function(global, MSTR_CLEAR_INTERVAL, clear_timer_fn);
   jerryxx_set_property_function(global, MSTR_DELAY, delay_fn);
   jerryxx_set_property_function(global, MSTR_MILLIS, millis_fn);
+  jerryxx_set_property_function(global, MSTR_DELAY_MICROSECONDS,
+                                delay_microseconds_fn);
+  jerryxx_set_property_function(global, MSTR_MICROS, micros_fn);
   jerry_release_value(global);
 }
 

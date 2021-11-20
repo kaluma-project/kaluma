@@ -49,18 +49,18 @@ void km_delay(uint32_t msec);
 uint64_t km_gettime();
 
 /**
- * Return MAX of the micro seconde counter
+ * Return MAX of the microsecond counter
  * Use this value to detect counter overflow
  */
 uint64_t km_micro_maxtime(void);
 
 /**
- * Return micro seconde counter
+ * Return microsecond counter
  */
 uint64_t km_micro_gettime(void);
 
 /**
- * micro secoded delay
+ * micro microsecond
  */
 void km_micro_delay(uint32_t usec);
 
