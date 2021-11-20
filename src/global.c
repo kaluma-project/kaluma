@@ -835,7 +835,19 @@ JERRYXX_FUN(process_get_builtin_module_fn) {
       }
     }
   }
-  /* return undefined */
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(process_memory_usage_fn) {
+  jerry_heap_stats_t stats = {0};
+  bool stats_ret = jerry_get_memory_stats(&stats);
+  if (stats_ret) {
+    jerry_value_t obj = jerry_create_object();
+    jerryxx_set_property_number(obj, "heapTotal", stats.size);
+    jerryxx_set_property_number(obj, "heapUsed", stats.allocated_bytes);
+    jerryxx_set_property_number(obj, "heapPeak", stats.peak_allocated_bytes);
+    return obj;
+  }
   return jerry_create_undefined();
 }
 
@@ -844,6 +856,8 @@ static void register_global_process_object() {
   jerryxx_set_property_string(process, MSTR_ARCH, SYSTEM_ARCH);
   jerryxx_set_property_string(process, MSTR_PLATFORM, SYSTEM_PLATFORM);
   jerryxx_set_property_string(process, MSTR_VERSION, KALUMA_VERSION);
+  jerryxx_set_property_function(process, MSTR_MEMORY_USAGE,
+                                process_memory_usage_fn);
 
   /* Add `process.binding` function and it's properties */
   jerry_value_t binding_fn = jerry_create_external_function(process_binding_fn);

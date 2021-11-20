@@ -81,6 +81,7 @@
 #define MSTR_ARCH "arch"
 #define MSTR_PLATFORM "platform"
 #define MSTR_VERSION "version"
+#define MSTR_MEMORY_USAGE "memoryUsage"
 #define MSTR_BINDING "binding"
 #define MSTR_BUILTIN_MODULES "builtin_modules"
 #define MSTR_GET_BUILTIN_MODULE "getBuiltinModule"
