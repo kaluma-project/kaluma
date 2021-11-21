@@ -30,7 +30,7 @@ km_spi_pins_t km_spi_get_default_pins(uint8_t bus) {
   km_spi_pins_t pins;
   pins.miso = 0;
   pins.mosi = 1;
-  pins.clk = 2;
+  pins.sck = 2;
   return pins;
 }
 /**

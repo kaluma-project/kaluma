@@ -48,7 +48,7 @@ JERRYXX_FUN(spi_ctor_fn) {
   km_spi_pins_t pins = {
       .miso = def_pins.miso,
       .mosi = def_pins.mosi,
-      .clk = def_pins.clk,
+      .sck = def_pins.sck,
   };
   if (JERRYXX_HAS_ARG(1)) {
     jerry_value_t options = JERRYXX_GET_ARG(1);
@@ -62,8 +62,8 @@ JERRYXX_FUN(spi_ctor_fn) {
                                                     def_pins.miso);
     pins.mosi = (int8_t)jerryxx_get_property_number(options, MSTR_SPI_MOSI,
                                                     def_pins.mosi);
-    pins.clk = (int8_t)jerryxx_get_property_number(options, MSTR_SPI_CLK,
-                                                   def_pins.clk);
+    pins.sck = (int8_t)jerryxx_get_property_number(options, MSTR_SPI_SCK,
+                                                   def_pins.sck);
   }
 
   if (bitorder != KM_SPI_BITORDER_LSB) bitorder = KM_SPI_BITORDER_MSB;
@@ -82,7 +82,7 @@ JERRYXX_FUN(spi_ctor_fn) {
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BITORDER, bitorder);
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_MISO, pins.miso);
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_MOSI, pins.mosi);
-    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_CLK, pins.clk);
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_SCK, pins.sck);
     return jerry_create_undefined();
   }
 }

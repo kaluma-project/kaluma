@@ -71,15 +71,15 @@ km_spi_pins_t km_spi_get_default_pins(uint8_t bus) {
   if (bus == 0) {
     pins.miso = 11;
     pins.mosi = 12;
-    pins.clk = 10;
+    pins.sck = 10;
   } else if (bus == 1) {
     pins.miso = 13;
     pins.mosi = 14;
-    pins.clk = 18;
+    pins.sck = 18;
   } else {
     pins.miso = -1;
     pins.mosi = -1;
-    pins.clk = -1;
+    pins.sck = -1;
   }
   return pins;
 }

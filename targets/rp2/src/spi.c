@@ -30,7 +30,7 @@ struct __spi_status_s {
 } __spi_status[SPI_NUM];
 
 static bool __check_spi_pins(uint8_t bus, km_spi_pins_t pins) {
-  if ((pins.clk < 0) || (pins.miso < 0) || (pins.mosi < 0)) {
+  if ((pins.sck < 0) || (pins.miso < 0) || (pins.mosi < 0)) {
     return false;
   }
   if (bus == 0) {
@@ -40,7 +40,7 @@ static bool __check_spi_pins(uint8_t bus, km_spi_pins_t pins) {
     if ((pins.mosi != 3) && (pins.mosi != 7) && (pins.mosi != 19)) {
       return false;
     }
-    if ((pins.clk != 2) && (pins.clk != 6) && (pins.clk != 18)) {
+    if ((pins.sck != 2) && (pins.sck != 6) && (pins.sck != 18)) {
       return false;
     }
   } else if (bus == 1) {
@@ -50,7 +50,7 @@ static bool __check_spi_pins(uint8_t bus, km_spi_pins_t pins) {
     if ((pins.mosi != 11) && (pins.mosi != 15)) {
       return false;
     }
-    if ((pins.clk != 10) && (pins.clk != 14)) {
+    if ((pins.sck != 10) && (pins.sck != 14)) {
       return false;
     }
   } else {
@@ -67,15 +67,15 @@ km_spi_pins_t km_spi_get_default_pins(uint8_t bus) {
   if (bus == 0) {
     pins.miso = 16;
     pins.mosi = 19;
-    pins.clk = 18;
+    pins.sck = 18;
   } else if (bus == 1) {
     pins.miso = 12;
     pins.mosi = 11;
-    pins.clk = 10;
+    pins.sck = 10;
   } else {
     pins.miso = -1;
     pins.mosi = -1;
-    pins.clk = -1;
+    pins.sck = -1;
   }
   return pins;
 }
@@ -147,7 +147,7 @@ int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
   spi_set_format(spi, 8, pol, pha, order);
   gpio_set_function(pins.miso, GPIO_FUNC_SPI);
   gpio_set_function(pins.mosi, GPIO_FUNC_SPI);
-  gpio_set_function(pins.clk, GPIO_FUNC_SPI);
+  gpio_set_function(pins.sck, GPIO_FUNC_SPI);
   __spi_status[bus].enabled = true;
   return 0;
 }

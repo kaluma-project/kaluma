@@ -40,5 +40,5 @@
 #define MSTR_SPI_LSB "LSB"
 #define MSTR_SPI_MISO "miso"
 #define MSTR_SPI_MOSI "mosi"
-#define MSTR_SPI_CLK "clk"
+#define MSTR_SPI_SCK "sck"
 #endif /* __SPI_MAGIC_STRINGS_H */
