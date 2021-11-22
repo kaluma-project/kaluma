@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 
+#include "board.h"
 #include "hardware/clocks.h"
 #include "hardware/gpio.h"
 #include "hardware/irq.h"
@@ -34,6 +35,19 @@
 #include "pico/stdlib.h"
 #include "rp2_magic_strings.h"
 
+#define __PIO_INT_EN_PIO0_0 1
+#define __PIO_INT_EN_PIO0_1 2
+#define __PIO_INT_EN_PIO1_0 4
+#define __PIO_INT_EN_PIO1_1 8
+
+#define __PIO_INT_SM0 0x100
+#define __PIO_INT_SM1 0x200
+#define __PIO_INT_SM2 0x400
+#define __PIO_INT_SM3 0x800
+#define __PIO_INT_FULL 0xF00
+
+static jerry_value_t __pio_call_back[PIO_NUM];
+
 static PIO __pio(uint8_t pio) {
   if (pio == 0) {
     return pio0;
@@ -41,6 +55,38 @@ static PIO __pio(uint8_t pio) {
     return pio1;
   }
   return NULL;
+}
+
+void __pio_handler(uint8_t pio, uint8_t interrupt) {
+  if (jerry_value_is_function(__pio_call_back[pio])) {
+    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t args[1];
+    args[0] = jerry_create_number(interrupt);
+    jerry_value_t ret_val =
+        jerry_call_function(__pio_call_back[pio], this_val, args, 1);
+    if (jerry_value_is_error(ret_val)) {
+      // print error
+      jerryxx_print_error(ret_val, true);
+    }
+    jerry_release_value(ret_val);
+    jerry_release_value(this_val);
+  }
+}
+
+void __pio0_irq_0_handler(void) {
+  PIO _pio = __pio(0);
+  uint32_t ints = _pio->ints0;
+  ints >>= 8;
+  _pio->irq = ints;
+  __pio_handler(0, ints);
+}
+
+void __pio1_irq_0_handler(void) {
+  PIO _pio = __pio(1);
+  uint32_t ints = _pio->ints0;
+  ints >>= 8;
+  _pio->irq = ints;
+  __pio_handler(1, ints);
 }
 
 JERRYXX_FUN(pio_add_program_fn) {
@@ -289,6 +335,66 @@ JERRYXX_FUN(pio_sm_set_pins_fn) {
   return jerry_create_undefined();
 }
 
+JERRYXX_FUN(pio_sm_rxfifo_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pio");
+  JERRYXX_CHECK_ARG_NUMBER(1, "sm");
+  uint8_t pio = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
+  PIO _pio = __pio(pio);
+  uint length = pio_sm_get_rx_fifo_level(_pio, sm);
+  return jerry_create_number(length);
+}
+
+JERRYXX_FUN(pio_sm_txfifo_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pio");
+  JERRYXX_CHECK_ARG_NUMBER(1, "sm");
+  uint8_t pio = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
+  PIO _pio = __pio(pio);
+  uint length = pio_sm_get_tx_fifo_level(_pio, sm);
+  return jerry_create_number(length);
+}
+
+JERRYXX_FUN(pio_sm_clear_fifos_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pio");
+  JERRYXX_CHECK_ARG_NUMBER(1, "sm");
+  uint8_t pio = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
+  PIO _pio = __pio(pio);
+  pio_sm_clear_fifos(_pio, sm);
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(pio_sm_drain_txfifo_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pio");
+  JERRYXX_CHECK_ARG_NUMBER(1, "sm");
+  uint8_t pio = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
+  PIO _pio = __pio(pio);
+  pio_sm_drain_tx_fifo(_pio, sm);
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(pio_sm_irq_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "pio");
+  JERRYXX_CHECK_ARG_FUNCTION(1, "callback");
+  uint8_t pio = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
+  jerry_value_t callback = JERRYXX_GET_ARG(1);
+  PIO _pio = __pio(pio);
+  if (pio == 0) {
+    _pio->inte0 = __PIO_INT_FULL;
+    irq_set_mask_enabled((1u << PIO0_IRQ_0), true);
+    irq_set_enabled(PIO0_IRQ_0, true);
+  } else {
+    _pio->inte0 = __PIO_INT_FULL;
+    irq_set_mask_enabled((1u << PIO1_IRQ_0), true);
+    irq_set_enabled(PIO1_IRQ_0, true);
+  }
+  __pio_call_back[pio] = jerry_acquire_value(callback);
+
+  return jerry_create_undefined();
+}
+
 JERRYXX_FUN(dormant_fn) {
   JERRYXX_CHECK_ARG_ARRAY(0, "pins");
   JERRYXX_CHECK_ARG_ARRAY(1, "events");
@@ -397,18 +503,22 @@ JERRYXX_FUN(dormant_fn) {
                   125 * MHZ, 125 * MHZ);
   return jerry_create_undefined();
 }
-
 /**
  * Initialize 'rp2' module and return exports
  */
 jerry_value_t module_rp2_init() {
   // clear PIO and state machines
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < PIO_SM_NUM; i++) {
     pio_sm_unclaim(pio0, i);
     pio_sm_unclaim(pio1, i);
   }
   pio_clear_instruction_memory(pio0);
   pio_clear_instruction_memory(pio1);
+  irq_set_exclusive_handler(PIO0_IRQ_0, __pio0_irq_0_handler);
+  irq_set_exclusive_handler(PIO1_IRQ_0, __pio1_irq_0_handler);
+  for (int i = 0; i < PIO_NUM; i++) {
+    __pio_call_back[i] = jerry_create_undefined();
+  }
 
   // pio module exports
   jerry_value_t exports = jerry_create_object();
@@ -424,6 +534,15 @@ jerry_value_t module_rp2_init() {
   jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_GET, pio_sm_get_fn);
   jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_SET_PINS,
                                 pio_sm_set_pins_fn);
+  jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_RXFIFO,
+                                pio_sm_rxfifo_fn);
+  jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_TXFIFO,
+                                pio_sm_txfifo_fn);
+  jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_CLEAR_FIFOS,
+                                pio_sm_clear_fifos_fn);
+  jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_DRAIN_TXFIFO,
+                                pio_sm_drain_txfifo_fn);
+  jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_IRQ, pio_sm_irq_fn);
   jerryxx_set_property_function(exports, MSTR_RP2_DORMANT, dormant_fn);
   return exports;
 }

@@ -92,7 +92,10 @@
 #define MSTR_RP2_PIO_SM_PUT "pio_sm_put"
 #define MSTR_RP2_PIO_SM_GET "pio_sm_get"
 #define MSTR_RP2_PIO_SM_SET_PINS "pio_sm_set_pins"
-
+#define MSTR_RP2_PIO_SM_RXFIFO "pio_sm_rxfifo"
+#define MSTR_RP2_PIO_SM_TXFIFO "pio_sm_txfifo"
+#define MSTR_RP2_PIO_SM_CLEAR_FIFOS "pio_sm_clear_fifos"
+#define MSTR_RP2_PIO_SM_DRAIN_TXFIFO "pio_sm_drain_txfifo"
+#define MSTR_RP2_PIO_SM_IRQ "pio_sm_irq"
 #define MSTR_RP2_DORMANT "dormant"
-
 #endif /* __PIO_MAGIC_STRINGS_H */
