@@ -384,7 +384,7 @@ class ASM {
 
 class StateMachine {
   static ids = [0, 4, 1, 5, 2, 6, 3, 7]
-  static getAvailableId () {
+  static getAvailableId() {
     return StateMachine.ids.length > 0 ? StateMachine.ids[0] : null;
   }
   constructor(id, asm, options) {
@@ -463,6 +463,26 @@ class StateMachine {
       mask = 0xFFFFFFFF;
     }
     rp2_native.pio_sm_set_pins(this.pio, this.sm, value, mask);
+  }
+
+  rxfifo() {
+    return rp2_native.pio_sm_rxfifo(this.pio, this.sm);
+  }
+
+  txfifo() {
+    return rp2_native.pio_sm_txfifo(this.pio, this.sm);
+  }
+
+  clearFIFOs() {
+    return rp2_native.pio_sm_clear_fifos(this.pio, this.sm);
+  }
+
+  drainTXFIFO() {
+    return rp2_native.pio_sm_drain_txfifo(this.pio, this.sm);
+  }
+
+  irq(handler) {
+    return rp2_native.pio_sm_irq(this.pio, handler);
   }
 }
 
