@@ -58,7 +58,7 @@ void gc_prim_1bit_set_pixel(gc_handle_t *handle, int16_t x, int16_t y,
         y = handle->device_height - y - 1;
         break;
     }
-    uint16_t idx = x + (y / 8) * handle->device_width;
+    uint32_t idx = x + (y / 8) * handle->device_width;
     uint8_t mask = (1 << (y & 7));
     if (color) {
       handle->buffer[idx] |= mask;

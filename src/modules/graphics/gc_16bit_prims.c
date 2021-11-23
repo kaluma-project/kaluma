@@ -51,9 +51,9 @@ void gc_prim_16bit_set_pixel(gc_handle_t *handle, int16_t x, int16_t y,
         y = handle->device_height - y - 1;
         break;
     }
-    uint16_t idx = ((y * handle->device_width) + x) * 2;
+    uint32_t idx = ((y * handle->device_width) + x) * 2;
     handle->buffer[idx] = color >> 8;
-    handle->buffer[idx + 1] = color;
+    handle->buffer[idx + 1] = color & 0xFF;
   }
 }
 
@@ -74,7 +74,7 @@ void gc_prim_16bit_get_pixel(gc_handle_t *handle, int16_t x, int16_t y,
         y = handle->device_height - y - 1;
         break;
     }
-    uint16_t idx = ((y * handle->device_width) + x) * 2;
+    uint32_t idx = ((y * handle->device_width) + x) * 2;
     *color = handle->buffer[idx] << 8 | handle->buffer[idx + 1];
   }
 }
@@ -103,7 +103,7 @@ void gc_prim_16bit_fill_rect(gc_handle_t *handle, int16_t x, int16_t y,
 void gc_prim_16bit_fill_screen(gc_handle_t *handle, uint16_t color) {
   for (int16_t y = 0; y < handle->device_height; y++) {
     for (int16_t x = 0; x < handle->device_width; x++) {
-      uint16_t idx = ((y * handle->device_width) + x) * 2;
+      uint32_t idx = ((y * handle->device_width) + x) * 2;
       handle->buffer[idx] = color >> 8;
       handle->buffer[idx + 1] = color;
     }

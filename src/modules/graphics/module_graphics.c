@@ -693,8 +693,8 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
   }
 
   // allocate buffer
-  uint16_t size = (gc_handle->device_width * gc_handle->device_height *
-                   (gc_handle->bpp / 8.0f));
+  size_t size = (gc_handle->device_width * gc_handle->device_height *
+                 ((double)gc_handle->bpp / 8.0));
   jerry_value_t buffer = jerry_create_typedarray(JERRY_TYPEDARRAY_UINT8, size);
   jerryxx_set_property(JERRYXX_GET_THIS, MSTR_GRAPHICS_BUFFER, buffer);
   jerry_length_t byteOffset = 0;
