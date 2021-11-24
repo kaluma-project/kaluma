@@ -13,7 +13,7 @@ if(NOT "${TARGET}" STREQUAL "rp2")
 endif()
 
 if(NOT VER)
-  set(VER "1.0.0-beta.8")
+  set(VER "1.0.0-beta.9")
 endif()
 configure_file(${CMAKE_SOURCE_DIR}/tools/kaluma_config.h.in ${CMAKE_SOURCE_DIR}/src/gen/kaluma_config.h)
 include(${CMAKE_SOURCE_DIR}/targets/${TARGET}/target.cmake)
