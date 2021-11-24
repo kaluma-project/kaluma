@@ -29,7 +29,7 @@
 #include "pico/stdlib.h"
 
 static int __check_gpio(uint8_t pin) {
-  if ((pin <= 28) && !((pin == 23) || (pin == 24))) {
+  if (pin <= 29) {
     return 0;
   } else {
     return KM_GPIOPORT_ERROR;  // Not a GPIO pins
