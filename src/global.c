@@ -341,8 +341,10 @@ static void watch_close_cb(km_io_handle_t *handle) { free(handle); }
 static void set_watch_cb(km_io_watch_handle_t *watch) {
   if (jerry_value_is_function(watch->watch_js_cb)) {
     jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t pin = jerry_create_number(watch->pin);
+    jerry_value_t args[1] = {pin};
     jerry_value_t ret_val =
-        jerry_call_function(watch->watch_js_cb, this_val, NULL, 0);
+        jerry_call_function(watch->watch_js_cb, this_val, args, 1);
     if (jerry_value_is_error(ret_val)) {
       // print error
       jerryxx_print_error(ret_val, true);
@@ -352,6 +354,7 @@ static void set_watch_cb(km_io_watch_handle_t *watch) {
       km_io_handle_close((km_io_handle_t *)watch, watch_close_cb);
     }
     jerry_release_value(ret_val);
+    jerry_release_value(pin);
     jerry_release_value(this_val);
   }
 }
