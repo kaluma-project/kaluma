@@ -75,11 +75,11 @@ void km_flash_program_begin() {
   __code_offset = 0;
   __remaining_data_size = 0;
   km_flash_clear();
+  __buff = (uint8_t *)malloc(FLASH_PAGE_SIZE * sizeof(uint8_t));  // 256 byte
 }
 
 km_flash_status_t km_flash_program(uint8_t *buf, uint32_t size) {
   uint32_t page_offset = 0;
-  __buff = (uint8_t *)malloc(FLASH_PAGE_SIZE * sizeof(uint8_t));  // 256 byte
   if (__buff == NULL) {
     return KM_FLASH_FAIL;
   }
