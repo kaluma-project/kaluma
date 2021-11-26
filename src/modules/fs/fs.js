@@ -249,10 +249,12 @@ function writeFileSync(path, data) {
 // function writeFile(path, data, callback)
 
 exports.Stats = Stats;
-
-exports.closeSync = closeSync;
+// exports.ReadStream = ReadStream
+// exports.WriteStream = WriteStream
 exports.createReadStream = createReadStream;
 exports.createWriteStream = createWriteStream;
+
+exports.closeSync = closeSync;
 exports.existsSync = existsSync;
 exports.fstatSync = fstatSync;
 exports.mkdirSync = mkdirSync;
