@@ -22,12 +22,10 @@
     "__locale": "c",
     "__string": "c",
     "string": "c",
-    "clocks.h": "c"
+    "clocks.h": "c",
+    "jerryscript.h": "c"
   },
-  "cpplint.filters": [
-    "-build/include_subdir",
-    "-build/header_guard"
-  ],
+  "cpplint.filters": ["-build/include_subdir", "-build/header_guard"],
   "C_Cpp.clang_format_fallbackStyle": "Google",
   "editor.formatOnSave": true
 }

@@ -165,20 +165,41 @@
   }
 
 #define JERRYXX_GET_THIS this_val
+
 #define JERRYXX_HAS_ARG(index) (args_cnt > index)
+
 #define JERRYXX_GET_ARG_COUNT args_cnt
+
 #define JERRYXX_GET_ARG(index) args_p[index]
+
 #define JERRYXX_GET_ARG_NUMBER(index) jerry_get_number_value(args_p[index])
+
 #define JERRYXX_GET_ARG_NUMBER_OPT(index, default) \
   (args_cnt > index ? jerry_get_number_value(args_p[index]) : default)
+
 #define JERRYXX_GET_ARG_BOOLEAN(index) jerry_get_boolean_value(args_p[index])
+
 #define JERRYXX_GET_ARG_BOOLEAN_OPT(index, default) \
   (args_cnt > index ? jerry_get_boolean_value(args_p[index]) : default)
+
 #define JERRYXX_GET_ARG_STRING_AS_CHAR(index, name)                            \
   jerry_size_t name##_sz = jerry_get_string_size(args_p[index]);               \
   char name[name##_sz + 1];                                                    \
   jerry_string_to_char_buffer(args_p[index], (jerry_char_t *)name, name##_sz); \
   name[name##_sz] = '\0';
+
+#define JERRYXX_GET_ARG_STRING_AS_CHAR_OPT(index, name, default)      \
+  jerry_size_t name##_sz = (args_cnt > index)                         \
+                               ? jerry_get_string_size(args_p[index]) \
+                               : (sizeof(default) - 1);               \
+  char name[name##_sz + 1];                                           \
+  if (args_cnt > index) {                                             \
+    jerry_string_to_char_buffer(args_p[index], (jerry_char_t *)name,  \
+                                name##_sz);                           \
+    name[name##_sz] = '\0';                                           \
+  } else {                                                            \
+    strcpy(name, default);                                            \
+  }
 
 #define JERRYXX_CREATE_ERROR(errmsg) \
   jerry_create_error(JERRY_ERROR_COMMON, (const jerry_char_t *)errmsg)
