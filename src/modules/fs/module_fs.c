@@ -28,6 +28,26 @@
 #include "tty.h"  // for tty_printf()
 
 /**
+ * fs_native.mount()
+ * args:
+ *   path {string}
+ *   vfs {object}
+ */
+JERRYXX_FUN(fs_mount_fn) {
+  // check args
+  JERRYXX_CHECK_ARG_STRING(0, "path")
+  JERRYXX_CHECK_ARG_OBJECT(1, "vfs")
+
+  // get args
+  JERRYXX_GET_ARG_STRING_AS_CHAR(0, path)
+  jerry_value_t vfs = JERRYXX_GET_ARG(1);
+
+  // add to mount table
+
+  return jerry_create_undefined();
+}
+
+/**
  * fs_native.closeSync()
  * args:
  *   fd {number}
