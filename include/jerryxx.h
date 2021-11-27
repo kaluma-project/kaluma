@@ -204,6 +204,17 @@
 #define JERRYXX_CREATE_ERROR(errmsg) \
   jerry_create_error(JERRY_ERROR_COMMON, (const jerry_char_t *)errmsg)
 
+#define JERRYXX_GET_NATIVE_HANDLE(name, handle_type, handle_info)         \
+  void *native_pointer;                                                   \
+  bool has_p = jerry_get_object_native_pointer(this_val, &native_pointer, \
+                                               &handle_info);             \
+  if (!has_p) {                                                           \
+    return jerry_create_error(                                            \
+        JERRY_ERROR_REFERENCE,                                            \
+        (const jerry_char_t *)"Failed to get native handle");             \
+  }                                                                       \
+  handle_type *name = (handle_type *)native_pointer;
+
 void jerryxx_set_property(jerry_value_t object, const char *name,
                           jerry_value_t value);
 void jerryxx_set_property_number(jerry_value_t object, const char *name,

@@ -19,6 +19,8 @@
  * SOFTWARE.
  */
 
+#include "module_vfslittlefs.h"
+
 #include <stdlib.h>
 
 #include "io.h"
@@ -27,10 +29,23 @@
 #include "tty.h"  // for tty_printf()
 #include "vfslittlefs_magic_strings.h"
 
+static void vfs_handle_freecb(void *handle) { free(handle); }
+
+static const jerry_object_native_info_t vfs_handle_info = {
+    .free_cb = vfs_handle_freecb};
+
 /**
  * VFSLittleFS constructor
  */
-JERRYXX_FUN(vfs_littlefs_ctor_fn) { return jerry_create_undefined(); }
+JERRYXX_FUN(vfs_littlefs_ctor_fn) {
+  vfs_littlefs_handle_t *vfs_handle =
+      (vfs_littlefs_handle_t *)malloc(sizeof(vfs_littlefs_handle_t));
+  // vfs_handle->field1 = value1
+  // ...
+  jerry_set_object_native_pointer(this_val, vfs_handle, &vfs_handle_info);
+
+  return jerry_create_undefined();
+}
 
 /**
  * VFSLittleFS.prototype.mount()
@@ -44,6 +59,8 @@ JERRYXX_FUN(vfs_littlefs_mount_fn) {
   // get args
   jerry_value_t bdev = JERRYXX_GET_ARG(0);
   return jerry_create_undefined();
+
+  JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_littlefs_handle_t, vfs_handle_info);
 }
 
 /**
