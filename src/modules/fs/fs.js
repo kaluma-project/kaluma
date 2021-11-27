@@ -1,7 +1,7 @@
 // const fs_native = process.binding(process.binding.fs);
 
 class Stats {
-  constructor () {
+  constructor() {
     this.mode = 0;
     /*
     dev: 2114,
@@ -24,15 +24,21 @@ class Stats {
     birthtime: Mon, 10 Oct 2011 23:24:11 GMT
     */
   }
-  isDirectory () { return false }
-  isFile() {return false }
+  isDirectory() {
+    return false;
+  }
+  isFile() {
+    return false;
+  }
 }
 // class fs.ReadStream
 // class fs.WriteStream
 
 /*
 interface BlockDev {
-  ...
+  readblocks(bnum, buf, offset);
+  writeblocks(bnum, buf, offset);
+  ioctrl(op, arg);
 }
 
 interface VFSStat {
@@ -67,17 +73,17 @@ const __vfs = [];
  * file objects (array index is file descriptor)
  * @type {Array.<{id: number, vfs:VFS}>}
  */
-const __files = []
+const __files = [];
 __files.push({ id: 0, vfs: null }); // fd = 0 (linux stdin)
 __files.push({ id: 1, vfs: null }); // fd = 1 (linux stdout)
 __files.push({ id: 2, vfs: null }); // fd = 2 (linux stderr)
 
 /**
  * Lookup VFS with pathout
- * @param {string} path 
+ * @param {string} path
  * @returns {VFS}
  */
-function _lookup (path) {
+function _lookup(path) {
   for (let i = 0; i < __vfs.length; i++) {
     vfs = __vfs[i];
     if (path.startsWith(vfs.path)) {
@@ -88,7 +94,7 @@ function _lookup (path) {
   return null;
 }
 
-function _getfd (fo) {
+function _getfd(fo) {
   let fd = -1;
   for (let i = 0; i < __files.length; i++) {
     if (__files[i] === null) {
@@ -101,8 +107,8 @@ function _getfd (fo) {
   return fd;
 }
 
-function _getfo (fd) {
-  return (fd < __files.length) ? __files[fd] : null;
+function _getfo(fd) {
+  return fd < __files.length ? __files[fd] : null;
 }
 
 /**
@@ -117,7 +123,7 @@ function mount(path, vfs) {
 
 /**
  * Unmount VFS
- * @param {string} path 
+ * @param {string} path
  */
 function unmount(path) {
   // __vfs.splice(__vfs.indexOf(...))
@@ -141,7 +147,7 @@ function closeSync(fd) {
     let ret = fo.vfs.close(fo.id);
     if (ret > -1) {
       files[fd] = null;
-    }  
+    }
   } else {
     // unknown fd
   }
@@ -160,7 +166,7 @@ function fstatSync(fd) {
   const fo = _getfo(fd);
   if (fo) {
     let ret = fo.vfs.fstat(fo.id);
-    let stats = new Stats()
+    let stats = new Stats();
     // stats.... = ...
     return stats;
   }
@@ -179,7 +185,7 @@ function openSync(path, flags = "r", mode = 0o666) {
     // TODO: if id < 0, id is error code
     let fo = {
       id: id,
-      vfs: vfs
+      vfs: vfs,
     };
     let fd = _getfd(fo);
     return fd;
@@ -254,6 +260,8 @@ exports.Stats = Stats;
 exports.createReadStream = createReadStream;
 exports.createWriteStream = createWriteStream;
 
+exports.mount = mount;
+exports.unmount = unmount;
 exports.closeSync = closeSync;
 exports.existsSync = existsSync;
 exports.fstatSync = fstatSync;

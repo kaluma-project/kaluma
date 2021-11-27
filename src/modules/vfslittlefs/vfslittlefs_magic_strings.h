@@ -19,26 +19,21 @@
  * SOFTWARE.
  */
 
-#ifndef __FS_MAGIC_STRINGS_H
-#define __FS_MAGIC_STRINGS_H
+#ifndef __VFSLITTLEFS_MAGIC_STRINGS_H
+#define __VFSLITTLEFS_MAGIC_STRINGS_H
 
-#define MSTR_FS_MOUNT "mount"
-#define MSTR_FS_UNMOUNT "unmount"
-#define MSTR_FS_CLOSE_SYNC "closeSync"
-#define MSTR_FS_CREATE_READ_STREAM "createReadStream"
-#define MSTR_FS_CREATE_WRITE_STREAM "createWriteStream"
-#define MSTR_FS_EXISTS_SYNC "existsSync"
-#define MSTR_FS_FSTAT_SYNC "fstatSync"
-#define MSTR_FS_MKDIR_SYNC "mkdirSync"
-#define MSTR_FS_OPEN_SYNC "openSync"
-#define MSTR_FS_READ_SYNC "readSync"
-#define MSTR_FS_READDIR_SYNC "readdirSync"
-#define MSTR_FS_READ_FILE_SYNC "readFileSync"
-#define MSTR_FS_RENAME_SYNC "renameSync"
-#define MSTR_FS_RMDIR_SYNC "rmdirSync"
-#define MSTR_FS_STAT_SYNC "statSync"
-#define MSTR_FS_UNLINK_SYNC "unlinkSync"
-#define MSTR_FS_WRITE_SYNC "writeSync"
-#define MSTR_FS_WRITE_FILE_SYNC "writeFileSync"
+#define MSTR_VFSLITTLEFS_VFSLITTLEFS "VFSLittleFS"
+#define MSTR_VFSLITTLEFS_MOUNT "mount"
+#define MSTR_VFSLITTLEFS_UNMOUNT "unmount"
+#define MSTR_VFSLITTLEFS_OPEN "open"
+#define MSTR_VFSLITTLEFS_WRITE "write"
+#define MSTR_VFSLITTLEFS_READ "read"
+#define MSTR_VFSLITTLEFS_CLOSE "close"
+#define MSTR_VFSLITTLEFS_FSTAT "fstat"
+#define MSTR_VFSLITTLEFS_RENAME "rename"
+#define MSTR_VFSLITTLEFS_UNLINK "unlink"
+#define MSTR_VFSLITTLEFS_MKDIR "mkdir"
+#define MSTR_VFSLITTLEFS_READDIR "readdir"
+#define MSTR_VFSLITTLEFS_RMDIR "rmdir"
 
-#endif /* __FS_MAGIC_STRINGS_H */
+#endif /* __VFSLITTLEFS_MAGIC_STRINGS_H */

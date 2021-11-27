@@ -9,6 +9,7 @@
         "${workspaceRoot}/src/modules",
         "${workspaceRoot}/targets/stm32/boards/kameleon-core",
         "${workspaceRoot}/lib/jerryscript/**",
+        "${workspaceRoot}/lib/jerryscript/jerry-core/include",
         "${workspaceRoot}/lib/pico-sdk/**",
         "${workspaceRoot}/lib/STM32F4xx_HAL_Driver/Inc",
         "${workspaceRoot}/lib/STM32F4xx_HAL_Driver/Inc/Legacy",

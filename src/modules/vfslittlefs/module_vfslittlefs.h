@@ -19,26 +19,6 @@
  * SOFTWARE.
  */
 
-#ifndef __FS_MAGIC_STRINGS_H
-#define __FS_MAGIC_STRINGS_H
+#include "jerryscript.h"
 
-#define MSTR_FS_MOUNT "mount"
-#define MSTR_FS_UNMOUNT "unmount"
-#define MSTR_FS_CLOSE_SYNC "closeSync"
-#define MSTR_FS_CREATE_READ_STREAM "createReadStream"
-#define MSTR_FS_CREATE_WRITE_STREAM "createWriteStream"
-#define MSTR_FS_EXISTS_SYNC "existsSync"
-#define MSTR_FS_FSTAT_SYNC "fstatSync"
-#define MSTR_FS_MKDIR_SYNC "mkdirSync"
-#define MSTR_FS_OPEN_SYNC "openSync"
-#define MSTR_FS_READ_SYNC "readSync"
-#define MSTR_FS_READDIR_SYNC "readdirSync"
-#define MSTR_FS_READ_FILE_SYNC "readFileSync"
-#define MSTR_FS_RENAME_SYNC "renameSync"
-#define MSTR_FS_RMDIR_SYNC "rmdirSync"
-#define MSTR_FS_STAT_SYNC "statSync"
-#define MSTR_FS_UNLINK_SYNC "unlinkSync"
-#define MSTR_FS_WRITE_SYNC "writeSync"
-#define MSTR_FS_WRITE_FILE_SYNC "writeFileSync"
-
-#endif /* __FS_MAGIC_STRINGS_H */
+jerry_value_t module_vfslittlefs_init();

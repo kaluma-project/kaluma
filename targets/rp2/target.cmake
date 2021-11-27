@@ -15,7 +15,28 @@ endif()
 
 # default modules
 if(NOT MODULES)
-  set(MODULES events gpio led button pwm adc i2c spi uart graphics at storage wifi stream net http url rp2 fs startup)
+  set(MODULES 
+    events
+    gpio
+    led
+    button
+    pwm
+    adc
+    i2c
+    spi
+    uart
+    graphics
+    at
+    storage
+    wifi
+    stream
+    net
+    http
+    url
+    rp2
+    fs
+    vfslittlefs
+    startup)
 endif()
 
 set(PICO_SDK_PATH ${CMAKE_SOURCE_DIR}/lib/pico-sdk)
