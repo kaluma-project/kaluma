@@ -77,50 +77,8 @@ list(APPEND SOURCES
   ${SRC_DIR}/ringbuffer.c
   ${KALUMA_GENERATED_C})
 
-# KALUMA MODULES -------------------------------------------------------------
-
-if("pwm" IN_LIST KALUMA_MODULES)
-  list(APPEND SOURCES ${SRC_DIR}/modules/pwm/module_pwm.c)
-  include_directories(${SRC_DIR}/modules/pwm)
-endif()
-
-if("i2c" IN_LIST KALUMA_MODULES)
-  list(APPEND SOURCES ${SRC_DIR}/modules/i2c/module_i2c.c)
-  include_directories(${SRC_DIR}/modules/i2c)
-endif()
-
-if("spi" IN_LIST KALUMA_MODULES)
-  list(APPEND SOURCES ${SRC_DIR}/modules/spi/module_spi.c)
-  include_directories(${SRC_DIR}/modules/spi)
-endif()
-
-if("storage" IN_LIST KALUMA_MODULES)
-  list(APPEND SOURCES ${SRC_DIR}/modules/storage/module_storage.c)
-  include_directories(${SRC_DIR}/modules/storage)
-endif()
-
-if("uart" IN_LIST KALUMA_MODULES)
-  list(APPEND SOURCES ${SRC_DIR}/modules/uart/module_uart.c)
-  include_directories(${SRC_DIR}/modules/uart)
-endif()
-
-if("graphics" IN_LIST KALUMA_MODULES)
-  list(APPEND SOURCES
-    ${SRC_DIR}/modules/graphics/gc_cb_prims.c
-    ${SRC_DIR}/modules/graphics/gc_1bit_prims.c
-    ${SRC_DIR}/modules/graphics/gc_16bit_prims.c
-    ${SRC_DIR}/modules/graphics/gc.c
-    ${SRC_DIR}/modules/graphics/font_default.c
-    ${SRC_DIR}/modules/graphics/module_graphics.c)
-  include_directories(${SRC_DIR}/modules/graphics)
-endif()
-
-if("fs" IN_LIST KALUMA_MODULES)
-  list(APPEND SOURCES ${SRC_DIR}/modules/fs/module_fs.c)
-  include_directories(${SRC_DIR}/modules/fs)
-endif()
-
-if("rp2" IN_LIST KALUMA_MODULES)
-  list(APPEND SOURCES ${SRC_DIR}/modules/rp2/module_rp2.c)
-  include_directories(${SRC_DIR}/modules/rp2)
-endif()
+FOREACH(MOD ${KALUMA_MODULES})
+  if(EXISTS "${SRC_DIR}/modules/${MOD}/module.cmake")
+    include(${SRC_DIR}/modules/${MOD}/module.cmake)
+  endif()
+ENDFOREACH()
