@@ -43,7 +43,7 @@ set(KALUMA_GENERATED_H
 file(GLOB_RECURSE KALUMA_MODULE_SRC ${SRC_DIR}/modules/*)
 set(KALUMA_GENERATED ${KALUMA_GENERATED_C} ${KALUMA_GENERATED_H})
 
-string (REPLACE ";" " " KALUMA_MODULE_LIST "${KALUMA_MODULES}")
+string (REPLACE ";" " " MODULE_LIST "${MODULES}")
 
 set(JERRY_LIBS
   ${JERRY_ROOT}/build/lib/libjerry-core.a
@@ -57,7 +57,7 @@ add_custom_command(OUTPUT ${JERRY_LIBS}
 add_custom_command(OUTPUT ${KALUMA_GENERATED_C}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   COMMAND python ${JERRY_ROOT}/tools/build.py --clean --jerry-cmdline-snapshot=ON --snapshot-save=ON --snapshot-exec=ON --profile=es.next #es2015-subset
-  COMMAND node tools/js2c.js --modules=${KALUMA_MODULE_LIST} --target=${TARGET} --board=${BOARD}
+  COMMAND node tools/js2c.js --modules=${MODULE_LIST} --target=${TARGET} --board=${BOARD}
   COMMAND rm -rf lib/jerryscript/build)
 
 set(KALUMA_INC ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/port ${SRC_DIR}/gen ${SRC_DIR}/modules)
@@ -77,7 +77,7 @@ list(APPEND SOURCES
   ${SRC_DIR}/ringbuffer.c
   ${KALUMA_GENERATED_C})
 
-FOREACH(MOD ${KALUMA_MODULES})
+FOREACH(MOD ${MODULES})
   if(EXISTS "${SRC_DIR}/modules/${MOD}/module.cmake")
     include(${SRC_DIR}/modules/${MOD}/module.cmake)
   endif()
