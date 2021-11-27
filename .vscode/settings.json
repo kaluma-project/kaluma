@@ -23,7 +23,8 @@
     "__string": "c",
     "string": "c",
     "clocks.h": "c",
-    "jerryscript.h": "c"
+    "jerryscript.h": "c",
+    "lfs.h": "c"
   },
   "cpplint.filters": ["-build/include_subdir", "-build/header_guard"],
   "C_Cpp.clang_format_fallbackStyle": "Google",

@@ -26,6 +26,7 @@
 #include "io.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
+#include "lfs.h"
 #include "tty.h"  // for tty_printf()
 #include "vfslittlefs_magic_strings.h"
 
@@ -36,11 +37,30 @@ static const jerry_object_native_info_t vfs_handle_info = {
 
 /**
  * VFSLittleFS constructor
+ * args:
+ *   blockdev {object}
  */
 JERRYXX_FUN(vfs_littlefs_ctor_fn) {
+  // check args
+  JERRYXX_CHECK_ARG_OBJECT(0, "blockdev")
+  // get args
+  jerry_value_t blockdev = JERRYXX_GET_ARG(0);
+  // init vfs native handle
   vfs_littlefs_handle_t *vfs_handle =
       (vfs_littlefs_handle_t *)malloc(sizeof(vfs_littlefs_handle_t));
-  // vfs_handle->field1 = value1
+  vfs_handle->blockdev_js = blockdev;
+  // ...
+  // vfs_handle->config.read = (call to blockdev.read)
+  // vfs_handle->config.prog = (call to blockdev.write)
+  // vfs_handle->config.erase = (call to blockdev.ioctl)
+  // vfs_handle->config.sync = (call to blockdev.ioctl)
+  // vfs_handle->config.read_size = 16
+  // vfs_handle->config.prog_size = 16,
+  // vfs_handle->config.block_size = 4096,
+  // vfs_handle->config.block_count = 128,
+  // vfs_handle->config.cache_size = 16,
+  // vfs_handle->config.lookahead_size = 16,
+  // vfs_handle->config.block_cycles = 500,
   // ...
   jerry_set_object_native_pointer(this_val, vfs_handle, &vfs_handle_info);
 
@@ -49,18 +69,13 @@ JERRYXX_FUN(vfs_littlefs_ctor_fn) {
 
 /**
  * VFSLittleFS.prototype.mount()
- * args:
- *   blockdev {object}
  */
 JERRYXX_FUN(vfs_littlefs_mount_fn) {
-  // check args
-  JERRYXX_CHECK_ARG_OBJECT(0, "blockdev")
-
-  // get args
-  jerry_value_t bdev = JERRYXX_GET_ARG(0);
   return jerry_create_undefined();
 
   JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_littlefs_handle_t, vfs_handle_info);
+
+  // int err = lfs_mount(&vfs_handle->lfs, &vfs_handle->config);
 }
 
 /**

@@ -11,6 +11,7 @@
         "${workspaceRoot}/lib/jerryscript/**",
         "${workspaceRoot}/lib/jerryscript/jerry-core/include",
         "${workspaceRoot}/lib/pico-sdk/**",
+        "${workspaceRoot}/lib/littlefs/**",
         "${workspaceRoot}/lib/STM32F4xx_HAL_Driver/Inc",
         "${workspaceRoot}/lib/STM32F4xx_HAL_Driver/Inc/Legacy",
         "${workspaceRoot}/lib/CMSIS/Include",

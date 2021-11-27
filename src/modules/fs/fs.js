@@ -46,7 +46,8 @@ interface VFSStat {
 }
 
 interface VFS {
-  mount(blockdev)
+  constructor(blockdev)
+  mount()
   unmount()
   open(path, flag, mode) -> number (id)
   write(id, buffer, offset, length, position) -> number (bytes written)
