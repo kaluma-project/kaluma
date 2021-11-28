@@ -36,9 +36,15 @@ class Stats {
 
 /*
 interface BlockDev {
-  readblocks(bnum, buf, offset);
-  writeblocks(bnum, buf, offset);
+  read(bnum, buf, offset);
+  write(bnum, buf, offset);
   ioctrl(op, arg);
+   - 1: initialize the device
+   - 2: shutdown the device
+   - 3: sync the device
+   - 4: get a count of the number of blocks
+   - 5: get the number in a block
+   - 6: erase a block (arg = block num)
 }
 
 interface VFSStat {
@@ -84,7 +90,7 @@ __files.push({ id: 2, vfs: null }); // fd = 2 (linux stderr)
  * @param {string} path
  * @returns {VFS}
  */
-function _lookup(path) {
+function __lookup(path) {
   for (let i = 0; i < __vfs.length; i++) {
     vfs = __vfs[i];
     if (path.startsWith(vfs.path)) {
@@ -95,7 +101,12 @@ function _lookup(path) {
   return null;
 }
 
-function _getfd(fo) {
+/**
+ * Get file descriptor of file object
+ * @param {object} fo
+ * @returns {number}
+ */
+function __getfd(fo) {
   let fd = -1;
   for (let i = 0; i < __files.length; i++) {
     if (__files[i] === null) {
@@ -108,7 +119,12 @@ function _getfd(fo) {
   return fd;
 }
 
-function _getfo(fd) {
+/**
+ * Get file object from file descriptor
+ * @param {number} fd 
+ * @returns {object}
+ */
+function __getfo(fd) {
   return fd < __files.length ? __files[fd] : null;
 }
 
@@ -143,7 +159,7 @@ function createWriteStream(path, options) {
 // ---------------------------------------------------------------------------
 
 function closeSync(fd) {
-  const fo = _getfo(fd);
+  const fo = __getfo(fd);
   if (fo) {
     let ret = fo.vfs.close(fo.id);
     if (ret > -1) {
@@ -155,7 +171,7 @@ function closeSync(fd) {
 }
 
 function existsSync(path) {
-  const vfs = _lookup(path);
+  const vfs = __lookup(path);
   if (vfs) {
     return vfs.exists(vfs.__pathout);
   }
@@ -164,7 +180,7 @@ function existsSync(path) {
 
 function fstatSync(fd) {
   // return fs_native.fstatSync(fd);
-  const fo = _getfo(fd);
+  const fo = __getfo(fd);
   if (fo) {
     let ret = fo.vfs.fstat(fo.id);
     let stats = new Stats();
@@ -176,11 +192,17 @@ function fstatSync(fd) {
 
 function mkdirSync(path, options) {
   options = Object.assign({ mode: 0o777 }, options);
-  // return fs_native.mkdirSync(path, options.mode);
+  const vfs = __lookup(path);
+  if (vfs) {
+    vfs.mkdir(vfs.__pathout);
+  }
+  // TODO: if no vfs found, what error should be thrown?
+  // file not found?
+  return -1;
 }
 
 function openSync(path, flags = "r", mode = 0o666) {
-  const vfs = _lookup(path);
+  const vfs = __lookup(path);
   if (vfs) {
     let id = vfs.open(vfs.__pathout, flags, mode);
     // TODO: if id < 0, id is error code
@@ -188,7 +210,7 @@ function openSync(path, flags = "r", mode = 0o666) {
       id: id,
       vfs: vfs,
     };
-    let fd = _getfd(fo);
+    let fd = __getfd(fo);
     return fd;
   }
   // TODO: if no vfs found, what error should be thrown?
@@ -201,7 +223,11 @@ function readSync(fd, buffer, offset, length, position) {
 }
 
 function readdirSync(path) {
-  // return fs_native.readdirSync(path);
+  const vfs = __lookup(path);
+  if (vfs) {
+    return vfs.readdir(vfs.__pathout);
+  }
+  return null;
 }
 
 function readFileSync(path) {

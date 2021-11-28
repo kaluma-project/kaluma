@@ -19,21 +19,21 @@
  * SOFTWARE.
  */
 
-#ifndef __VFSLITTLEFS_MAGIC_STRINGS_H
-#define __VFSLITTLEFS_MAGIC_STRINGS_H
+#ifndef __VFSLFS_MAGIC_STRINGS_H
+#define __VFSLFS_MAGIC_STRINGS_H
 
-#define MSTR_VFSLITTLEFS_VFSLITTLEFS "VFSLittleFS"
-#define MSTR_VFSLITTLEFS_MOUNT "mount"
-#define MSTR_VFSLITTLEFS_UNMOUNT "unmount"
-#define MSTR_VFSLITTLEFS_OPEN "open"
-#define MSTR_VFSLITTLEFS_WRITE "write"
-#define MSTR_VFSLITTLEFS_READ "read"
-#define MSTR_VFSLITTLEFS_CLOSE "close"
-#define MSTR_VFSLITTLEFS_FSTAT "fstat"
-#define MSTR_VFSLITTLEFS_RENAME "rename"
-#define MSTR_VFSLITTLEFS_UNLINK "unlink"
-#define MSTR_VFSLITTLEFS_MKDIR "mkdir"
-#define MSTR_VFSLITTLEFS_READDIR "readdir"
-#define MSTR_VFSLITTLEFS_RMDIR "rmdir"
+#define MSTR_VFSLFS_VFSLITTLEFS "VFSLittleFS"
+#define MSTR_VFSLFS_MOUNT "mount"
+#define MSTR_VFSLFS_UNMOUNT "unmount"
+#define MSTR_VFSLFS_OPEN "open"
+#define MSTR_VFSLFS_WRITE "write"
+#define MSTR_VFSLFS_READ "read"
+#define MSTR_VFSLFS_CLOSE "close"
+#define MSTR_VFSLFS_FSTAT "fstat"
+#define MSTR_VFSLFS_RENAME "rename"
+#define MSTR_VFSLFS_UNLINK "unlink"
+#define MSTR_VFSLFS_MKDIR "mkdir"
+#define MSTR_VFSLFS_READDIR "readdir"
+#define MSTR_VFSLFS_RMDIR "rmdir"
 
-#endif /* __VFSLITTLEFS_MAGIC_STRINGS_H */
+#endif /* __VFSLFS_MAGIC_STRINGS_H */

@@ -19,19 +19,34 @@
  * SOFTWARE.
  */
 
+#ifndef __VFSLFS_H
+#define __VFSLFS_H
+
 #include "jerryscript.h"
 #include "lfs.h"
+#include "utils.h"
 
-typedef struct vfs_littlefs_handle_s vfs_littlefs_handle_t;
+typedef struct vfslfs_handle_s vfslfs_handle_t;
+typedef struct vfslfs_file_handle_s vfslfs_file_handle_t;
 
 /**
  * VFSLittleFS native handle
  */
-struct vfs_littlefs_handle_s {
+struct vfslfs_handle_s {
   lfs_t lfs;
   struct lfs_config config;
+  km_list_t file_handles;
   jerry_value_t blockdev_js;
-  // ...
 };
 
-jerry_value_t module_vfslittlefs_init();
+struct vfslfs_file_handle_s {
+  km_list_node_t base;
+  uint32_t id;
+  lfs_file_t lfs_file;
+};
+
+void vfslfs_file_add(vfslfs_handle_t *, vfslfs_file_handle_t *);
+void vfslfs_file_remove(vfslfs_handle_t *, vfslfs_file_handle_t *);
+vfslfs_file_handle_t *vfslfs_file_get(vfslfs_handle_t *, uint32_t);
+
+#endif /* __VFSLFS_H */

@@ -19,57 +19,30 @@
  * SOFTWARE.
  */
 
-#include "utils.h"
+#include "vfslfs.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 
-void km_list_init(km_list_t *list) {
-  list->head = NULL;
-  list->tail = NULL;
+#include "lfs.h"
+#include "utils.h"
+
+void vfslfs_file_add(vfslfs_handle_t *handle, vfslfs_file_handle_t *file) {
+  km_list_append(&handle->file_handles, (km_list_node_t *)file);
 }
 
-void km_list_append(km_list_t *list, km_list_node_t *node) {
-  if (list->tail == NULL && list->head == NULL) {
-    list->head = node;
-    list->tail = node;
-    node->next = NULL;
-    node->prev = NULL;
-  } else {
-    list->tail->next = node;
-    node->prev = list->tail;
-    node->next = NULL;
-    list->tail = node;
-  }
+void vfslfs_file_remove(vfslfs_handle_t *handle, vfslfs_file_handle_t *file) {
+  km_list_remove(&handle->file_handles, (km_list_node_t *)file);
 }
 
-void km_list_remove(km_list_t *list, km_list_node_t *node) {
-  if (list->head == node) {
-    list->head = node->next;
+vfslfs_file_handle_t *vfslfs_file_get(vfslfs_handle_t *handle,
+                                      uint32_t file_id) {
+  vfslfs_file_handle_t *file =
+      (vfslfs_file_handle_t *)handle->file_handles.head;
+  while (file != NULL) {
+    if (file->lfs_file.id == file_id) {
+      return file;
+    }
+    file = (vfslfs_file_handle_t *)((km_list_node_t *)file)->next;
   }
-  if (list->tail == node) {
-    list->tail = node->prev;
-  }
-  if (node->prev != NULL) {
-    node->prev->next = node->next;
-  }
-  if (node->next != NULL) {
-    node->next->prev = node->prev;
-  }
-}
-
-uint8_t km_hex1(char hex) {
-  if (hex >= 'a') {
-    return (hex - 'a' + 10);
-  } else if (hex >= 'A') {
-    return (hex - 'A' + 10);
-  } else {
-    return (hex - '0');
-  }
-}
-
-uint8_t km_hex2bin(unsigned char *hex) {
-  uint8_t hh = km_hex1(hex[0]);
-  uint8_t hl = km_hex1(hex[1]);
-  return hh << 4 | hl;
+  return NULL;
 }
