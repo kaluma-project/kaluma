@@ -43,7 +43,7 @@ interface BlockDev {
    - 2: shutdown the device
    - 3: sync the device
    - 4: get a count of the number of blocks
-   - 5: get the number in a block
+   - 5: get the number of bytes in a block
    - 6: erase a block (arg = block num)
 }
 
@@ -92,7 +92,7 @@ __files.push({ id: 2, vfs: null }); // fd = 2 (linux stderr)
  */
 function __lookup(path) {
   for (let i = 0; i < __vfs.length; i++) {
-    vfs = __vfs[i];
+    let vfs = __vfs[i];
     if (path.startsWith(vfs.path)) {
       vfs.__pathout = path.substr(vfs.path.length);
       return vfs;
@@ -121,7 +121,7 @@ function __getfd(fo) {
 
 /**
  * Get file object from file descriptor
- * @param {number} fd 
+ * @param {number} fd
  * @returns {object}
  */
 function __getfo(fd) {
@@ -135,6 +135,7 @@ function __getfo(fd) {
  */
 function mount(path, vfs) {
   vfs.path = path;
+  vfs.mount();
   __vfs.push(vfs);
 }
 
@@ -286,6 +287,13 @@ exports.Stats = Stats;
 // exports.WriteStream = WriteStream
 exports.createReadStream = createReadStream;
 exports.createWriteStream = createWriteStream;
+
+// for debugging
+exports.__vfs = __vfs;
+exports.__files = __files;
+exports.__lookup = __lookup;
+exports.__getfd = __getfd;
+exports.__getfo = __getfo;
 
 exports.mount = mount;
 exports.unmount = unmount;

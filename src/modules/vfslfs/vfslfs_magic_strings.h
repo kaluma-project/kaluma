@@ -35,5 +35,8 @@
 #define MSTR_VFSLFS_MKDIR "mkdir"
 #define MSTR_VFSLFS_READDIR "readdir"
 #define MSTR_VFSLFS_RMDIR "rmdir"
+#define MSTR_VFSLFS_BLOCKDEV_READ "read"
+#define MSTR_VFSLFS_BLOCKDEV_WRITE "write"
+#define MSTR_VFSLFS_BLOCKDEV_IOCTL "ioctl"
 
 #endif /* __VFSLFS_MAGIC_STRINGS_H */
