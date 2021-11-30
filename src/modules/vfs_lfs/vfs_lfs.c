@@ -19,30 +19,63 @@
  * SOFTWARE.
  */
 
-#include "vfslfs.h"
+#include "vfs_lfs.h"
 
 #include <stdlib.h>
 
 #include "lfs.h"
 #include "utils.h"
 
-void vfslfs_file_add(vfslfs_handle_t *handle, vfslfs_file_handle_t *file) {
-  km_list_append(&handle->file_handles, (km_list_node_t *)file);
+static vfs_lfs_root_t vfslfs_root;
+
+void vfs_lfs_init() {
+  vfslfs_root.file_id_count = 0;
+  km_list_init(&vfslfs_root.vfslfs_handles);
 }
 
-void vfslfs_file_remove(vfslfs_handle_t *handle, vfslfs_file_handle_t *file) {
+void vfs_lfs_cleanup() {
+  vfs_lfs_handle_t *handle =
+      (vfs_lfs_handle_t *)vfslfs_root.vfslfs_handles.head;
+  while (handle != NULL) {
+    vfs_lfs_handle_t *next =
+        (vfs_lfs_handle_t *)((km_list_node_t *)handle)->next;
+    free(handle);
+    handle = next;
+  }
+  km_list_init(&vfslfs_root.vfslfs_handles);
+}
+
+void vfs_lfs_handle_init(vfs_lfs_handle_t *handle) {
+  km_list_init(&handle->file_handles);
+}
+
+void vfs_lfs_handle_add(vfs_lfs_handle_t *handle) {
+  km_list_append(&vfslfs_root.vfslfs_handles, (km_list_node_t *)handle);
+}
+
+void vfs_lfs_handle_remove(vfs_lfs_handle_t *handle) {
+  km_list_remove(&vfslfs_root.vfslfs_handles, (km_list_node_t *)handle);
+}
+
+void vfs_lfs_file_add(vfs_lfs_handle_t *handle, vfs_lfs_file_handle_t *file) {
+  km_list_append(&handle->file_handles, (km_list_node_t *)file);
+  file->id = ++vfslfs_root.file_id_count;
+}
+
+void vfs_lfs_file_remove(vfs_lfs_handle_t *handle,
+                         vfs_lfs_file_handle_t *file) {
   km_list_remove(&handle->file_handles, (km_list_node_t *)file);
 }
 
-vfslfs_file_handle_t *vfslfs_file_get(vfslfs_handle_t *handle,
-                                      uint32_t file_id) {
-  vfslfs_file_handle_t *file =
-      (vfslfs_file_handle_t *)handle->file_handles.head;
+vfs_lfs_file_handle_t *vfs_lfs_file_get_by_id(vfs_lfs_handle_t *handle,
+                                              uint32_t file_id) {
+  vfs_lfs_file_handle_t *file =
+      (vfs_lfs_file_handle_t *)handle->file_handles.head;
   while (file != NULL) {
     if (file->lfs_file.id == file_id) {
       return file;
     }
-    file = (vfslfs_file_handle_t *)((km_list_node_t *)file)->next;
+    file = (vfs_lfs_file_handle_t *)((km_list_node_t *)file)->next;
   }
   return NULL;
 }

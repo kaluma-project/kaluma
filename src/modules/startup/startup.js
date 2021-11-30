@@ -27,6 +27,12 @@ Module.prototype.loadBuiltin = function () {
   fn(this.exports, Module.require, this);
 }
 
+global.require = Module.require;
+
+/**
+ * SystemError
+ */
+
 class SystemError extends Error {
   constructor(errno, code, message) {
     super(message);
@@ -37,7 +43,6 @@ class SystemError extends Error {
   }
 }
 
-global.require = Module.require;
 global.SystemError = SystemError;
 
 /**

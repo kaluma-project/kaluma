@@ -35,7 +35,7 @@ if(NOT MODULES)
     url
     rp2
     fs
-    vfslfs
+    vfs_lfs
     startup)
 endif()
 

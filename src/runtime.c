@@ -106,11 +106,7 @@ void km_runtime_init(bool load, bool first) {
 void km_runtime_cleanup() {
   jerry_cleanup();
   km_system_cleanup();
-  km_io_timer_cleanup();
-  km_io_watch_cleanup();
-  km_io_uart_cleanup();
-  // km_io_idle_cleanup();
-  // Do not cleanup tty I/O to keep terminal communication
+  km_io_cleanup();
 }
 
 void km_runtime_load() {

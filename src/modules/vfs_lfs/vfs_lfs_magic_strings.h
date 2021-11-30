@@ -19,24 +19,24 @@
  * SOFTWARE.
  */
 
-#ifndef __VFSLFS_MAGIC_STRINGS_H
-#define __VFSLFS_MAGIC_STRINGS_H
+#ifndef __VFS_LFS_MAGIC_STRINGS_H
+#define __VFS_LFS_MAGIC_STRINGS_H
 
-#define MSTR_VFSLFS_VFSLITTLEFS "VFSLittleFS"
-#define MSTR_VFSLFS_MOUNT "mount"
-#define MSTR_VFSLFS_UNMOUNT "unmount"
-#define MSTR_VFSLFS_OPEN "open"
-#define MSTR_VFSLFS_WRITE "write"
-#define MSTR_VFSLFS_READ "read"
-#define MSTR_VFSLFS_CLOSE "close"
-#define MSTR_VFSLFS_FSTAT "fstat"
-#define MSTR_VFSLFS_RENAME "rename"
-#define MSTR_VFSLFS_UNLINK "unlink"
-#define MSTR_VFSLFS_MKDIR "mkdir"
-#define MSTR_VFSLFS_READDIR "readdir"
-#define MSTR_VFSLFS_RMDIR "rmdir"
-#define MSTR_VFSLFS_BLOCKDEV_READ "read"
-#define MSTR_VFSLFS_BLOCKDEV_WRITE "write"
-#define MSTR_VFSLFS_BLOCKDEV_IOCTL "ioctl"
+#define MSTR_VFS_LFS_VFSLITTLEFS "VFSLittleFS"
+#define MSTR_VFS_LFS_MOUNT "mount"
+#define MSTR_VFS_LFS_UNMOUNT "unmount"
+#define MSTR_VFS_LFS_OPEN "open"
+#define MSTR_VFS_LFS_WRITE "write"
+#define MSTR_VFS_LFS_READ "read"
+#define MSTR_VFS_LFS_CLOSE "close"
+#define MSTR_VFS_LFS_FSTAT "fstat"
+#define MSTR_VFS_LFS_RENAME "rename"
+#define MSTR_VFS_LFS_UNLINK "unlink"
+#define MSTR_VFS_LFS_MKDIR "mkdir"
+#define MSTR_VFS_LFS_READDIR "readdir"
+#define MSTR_VFS_LFS_RMDIR "rmdir"
+#define MSTR_VFS_LFS_BLOCKDEV_READ "read"
+#define MSTR_VFS_LFS_BLOCKDEV_WRITE "write"
+#define MSTR_VFS_LFS_BLOCKDEV_IOCTL "ioctl"
 
-#endif /* __VFSLFS_MAGIC_STRINGS_H */
+#endif /* __VFS_LFS_MAGIC_STRINGS_H */

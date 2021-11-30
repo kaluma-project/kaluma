@@ -92,6 +92,14 @@ void km_io_init() {
   km_list_init(&loop.closing_handles);
 }
 
+void km_io_cleanup() {
+  km_io_timer_cleanup();
+  km_io_watch_cleanup();
+  km_io_uart_cleanup();
+  // km_io_idle_cleanup();
+  // Do not cleanup tty I/O to keep terminal communication
+}
+
 void km_io_run() {
   while (loop.stop_flag == false) {
     io_update_time();
