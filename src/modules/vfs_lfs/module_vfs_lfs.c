@@ -23,6 +23,7 @@
 
 #include <stdlib.h>
 
+#include "err.h"
 #include "io.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
@@ -174,11 +175,14 @@ JERRYXX_FUN(vfslfs_ctor_fn) {
 JERRYXX_FUN(vfs_lfs_mount_fn) {
   JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_lfs_handle_t, vfs_handle_info);
   km_tty_printf("VFSLittleFS.mount()\r\n");
-  int err = lfs_mount(&vfs_handle->lfs, &vfs_handle->config);
-  km_tty_printf("ret=%d", err);
-  if (err) {
+  int ret = lfs_mount(&vfs_handle->lfs, &vfs_handle->config);
+  km_tty_printf("ret=%d", ret);
+  if (ret) {
     lfs_format(&vfs_handle->lfs, &vfs_handle->config);
-    lfs_mount(&vfs_handle->lfs, &vfs_handle->config);
+    ret = lfs_mount(&vfs_handle->lfs, &vfs_handle->config);
+    if (ret < 0) {
+      return jerry_create_error_from_value(create_system_error(ret), true);
+    }
   }
   return jerry_create_undefined();
 }
@@ -189,7 +193,10 @@ JERRYXX_FUN(vfs_lfs_mount_fn) {
 JERRYXX_FUN(vfs_lfs_unmount_fn) {
   JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_lfs_handle_t, vfs_handle_info);
   km_tty_printf("VFSLittleFS.unmount()");
-  lfs_unmount(&vfs_handle->lfs);
+  int ret = lfs_unmount(&vfs_handle->lfs);
+  if (ret < 0) {
+    return jerry_create_error_from_value(create_system_error(ret), true);
+  }
   return jerry_create_undefined();
 }
 

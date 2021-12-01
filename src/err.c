@@ -19,9 +19,12 @@
  * SOFTWARE.
  */
 
-#include "errno.h"
+#include "err.h"
 
 #include <stdio.h>
+
+#include "jerryscript.h"
+#include "jerryxx.h"
 
 const char* errmsg[] = {
     NULL,
@@ -159,3 +162,15 @@ const char* errmsg[] = {
     "Operation not possible due to RF-kill",
     "Memory page has hardware error",
 };
+
+jerry_value_t create_system_error(const int errno) {
+  jerry_value_t global = jerry_get_global_object();
+  jerry_value_t system_error = jerryxx_get_property(global, "SystemError");
+  jerry_value_t _errno = jerry_create_number(errno);
+  jerry_value_t _args[1] = {_errno};
+  jerry_value_t err = jerry_construct_object(system_error, _args, 1);
+  jerry_release_value(_errno);
+  jerry_release_value(system_error);
+  jerry_release_value(global);
+  return err;
+}

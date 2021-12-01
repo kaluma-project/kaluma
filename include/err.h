@@ -19,9 +19,12 @@
  * SOFTWARE.
  */
 
-#ifndef __KM_ERRNO_H
-#define __KM_ERRNO_H
+#ifndef __KM_ERR_H
+#define __KM_ERR_H
 
+#include "jerryscript.h"
+
+// System Errors
 #define EPERM 1            /* Operation not permitted */
 #define ENOENT 2           /* No such file or directory */
 #define ESRCH 3            /* No such process */
@@ -62,7 +65,7 @@
 #define ENOSYS 38          /* Invalid system call number */
 #define ENOTEMPTY 39       /* Directory not empty */
 #define ELOOP 40           /* Too many symbolic links encountered */
-#define EWOULDBLOCK EAGAIN /* Operation would block */
+#define EWOULDBLOCK 41     /* Operation would block */
 #define ENOMSG 42          /* No message of desired type */
 #define EIDRM 43           /* Identifier removed */
 #define ECHRNG 44          /* Channel number out of range */
@@ -79,7 +82,7 @@
 #define ENOANO 55          /* No anode */
 #define EBADRQC 56         /* Invalid request code */
 #define EBADSLT 57         /* Invalid slot */
-#define EDEADLOCK EDEADLK
+#define EDEADLOCK 58       /* not implemented */
 #define EBFONT 59          /* Bad font file format */
 #define ENOSTR 60          /* Device not a stream */
 #define ENODATA 61         /* No data available */
@@ -158,4 +161,6 @@
 
 extern const char* errmsg[];
 
-#endif /* __KM_ERRNO_H */
+jerry_value_t create_system_error(const int errno);
+
+#endif /* __KM_ERR_H */

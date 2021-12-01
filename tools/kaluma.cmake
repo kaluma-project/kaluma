@@ -65,7 +65,7 @@ include_directories(${KALUMA_INC} ${JERRY_INC})
 
 list(APPEND SOURCES
   ${SRC_DIR}/main.c
-  ${SRC_DIR}/errno.c
+  ${SRC_DIR}/err.c
   ${SRC_DIR}/utils.c
   ${SRC_DIR}/base64.c
   ${SRC_DIR}/io.c

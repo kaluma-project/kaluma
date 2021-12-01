@@ -49,10 +49,6 @@ interface BlockDev {
    - 6: erase a block (arg = block num)
 }
 
-interface VFSStat {
-  ...
-}
-
 interface VFS {
   constructor(blockdev)
   mount()
@@ -61,8 +57,8 @@ interface VFS {
   write(id: number, buffer: Uint8Array, offset: number, length: number, position: number): number (bytes written)
   read(id: number, buffer: Uint8Array, offset: number, length: number, position: number): number (bytes read)
   close(id: number)
-  fstat(id: number) -> VFSStat?
-  stat(path: string) -> VFSStat?
+  fstat(id: number) -> {type:, size:, name:, ...}
+  stat(path: string) -> {type:, size:, name:, ...}
   exists(path: string) -> boolean
   mkdir(path: string)
   rmdir(path: string)
@@ -70,15 +66,16 @@ interface VFS {
   rename(oldPath: string, newPath: string)
   unlink(path: string)
 }
+(throws SystemError)
 */
 
 // constants for flags
-const VFS_FLAG_READ = 1
-const VFS_FLAG_WRITE = 2
-const VFS_FLAG_CREATE = 4
-const VFS_FLAG_APPEND = 8
-const VFS_FLAG_EXCL = 16
-const VFS_FLAG_TRUNC = 32
+const VFS_FLAG_READ = 1;
+const VFS_FLAG_WRITE = 2;
+const VFS_FLAG_CREATE = 4;
+const VFS_FLAG_APPEND = 8;
+const VFS_FLAG_EXCL = 16;
+const VFS_FLAG_TRUNC = 32;
 
 /**
  * VFS mount table
@@ -217,45 +214,45 @@ function openSync(path, flags = "r", mode = 0o666) {
   if (vfs) {
     let vfs_flags = 0;
     switch (flags) {
-      case 'r':
-      case 'rs':
-      case 'sr':
+      case "r":
+      case "rs":
+      case "sr":
         vfs_flags = VFS_FLAG_READ;
         break;
-      case 'r+':
-      case 'rs+':
-      case 'sr+':
-          vfs_flags = VFS_FLAG_READ | VFS_FLAG_WRITE;
+      case "r+":
+      case "rs+":
+      case "sr+":
+        vfs_flags = VFS_FLAG_READ | VFS_FLAG_WRITE;
         break;
-      case 'w':
+      case "w":
         vfs_flags = VFS_FLAG_WRITE;
         break;
-      case 'wx':
-      case 'xw':
+      case "wx":
+      case "xw":
         vfs_flags = VFS_FLAG_WRITE | VFS_FLAG_EXCL;
         break;
-      case 'w+':
+      case "w+":
         vfs_flags = VFS_FLAG_WRITE | VFS_FLAG_READ | VFS_FLAG_TRUNC;
         break;
-      case 'wx+':
-      case 'xw+':
+      case "wx+":
+      case "xw+":
         vfs_flags = VFS_FLAG_WRITE | VFS_FLAG_READ | VFS_FLAG_EXCL;
         break;
-      case 'a':
+      case "a":
         vfs_flags = VFS_FLAG_APPEND;
         break;
-      case 'ax':
-      case 'xa':
+      case "ax":
+      case "xa":
         vfs_flags = VFS_FLAG_APPEND | VFS_FLAG_EXCL;
         break;
-      case 'a+':
+      case "a+":
         vfs_flags = VFS_FLAG_APPEND | VFS_FLAG_READ;
-        break;  
-      case 'ax+':
-      case 'xa+':
+        break;
+      case "ax+":
+      case "xa+":
         vfs_flags = VFS_FLAG_APPEND | VFS_FLAG_READ | VFS_FLAG_EXCL;
-        break;  
-      }
+        break;
+    }
     let id = vfs.open(vfs.__pathout, vfs_flags, mode);
     // TODO: if id < 0, id is error code
     let fo = {

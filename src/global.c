@@ -27,7 +27,7 @@
 #include "adc.h"
 #include "base64.h"
 #include "board.h"
-#include "errno.h"
+#include "err.h"
 #include "gpio.h"
 #include "io.h"
 #include "jerryscript-ext/handler.h"
@@ -1232,11 +1232,6 @@ JERRYXX_FUN(system_error_ctor_fn) {
                               (char *)errmsg[-errno]);
   return jerry_create_undefined();
 }
-
-/**
- * SystemError.prototype.toString() function
- */
-JERRYXX_FUN(system_error_to_string_fn) {}
 
 static void register_global_system_error() {
   jerry_value_t global = jerry_get_global_object();
