@@ -27,6 +27,7 @@
 #include "adc.h"
 #include "base64.h"
 #include "board.h"
+#include "errno.h"
 #include "gpio.h"
 #include "io.h"
 #include "jerryscript-ext/handler.h"
@@ -980,7 +981,7 @@ JERRYXX_FUN(textencoder_encode_fn) {
   }
 }
 
-static void register_global_textencoder() {
+static void register_global_text_encoder() {
   /* TextEncoder class */
   jerry_value_t textencoder_ctor =
       jerry_create_external_function(textencoder_ctor_fn);
@@ -991,7 +992,7 @@ static void register_global_textencoder() {
   jerry_release_value(textencoder_prototype);
 
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property(global, MSTR_TEXTENCODER, textencoder_ctor);
+  jerryxx_set_property(global, MSTR_TEXT_ENCODER, textencoder_ctor);
   jerry_release_value(global);
 }
 
@@ -1064,7 +1065,7 @@ JERRYXX_FUN(textdecoder_decode_fn) {
   }
 }
 
-static void register_global_textdecoder() {
+static void register_global_text_decoder() {
   /* TextDecoder class */
   jerry_value_t textdecoder_ctor =
       jerry_create_external_function(textdecoder_ctor_fn);
@@ -1075,7 +1076,7 @@ static void register_global_textdecoder() {
   jerry_release_value(textdecoder_prototype);
 
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property(global, MSTR_TEXTDECODER, textdecoder_ctor);
+  jerryxx_set_property(global, MSTR_TEXT_DECODER, textdecoder_ctor);
   jerry_release_value(global);
 }
 
@@ -1215,6 +1216,60 @@ static void register_global_encoders() {
 
 /****************************************************************************/
 /*                                                                          */
+/*                                SYSTEM ERROR                              */
+/*                                                                          */
+/****************************************************************************/
+
+/**
+ * SystemError() constructor
+ */
+JERRYXX_FUN(system_error_ctor_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "errno")
+  int errno = JERRYXX_GET_ARG_NUMBER(0);
+  if (errno > 0) errno = -errno;
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_ERRNO, errno);
+  jerryxx_set_property_string(JERRYXX_GET_THIS, MSTR_MESSAGE,
+                              (char *)errmsg[-errno]);
+  return jerry_create_undefined();
+}
+
+/**
+ * SystemError.prototype.toString() function
+ */
+JERRYXX_FUN(system_error_to_string_fn) {}
+
+static void register_global_system_error() {
+  jerry_value_t global = jerry_get_global_object();
+  /* SystemError class */
+  jerry_value_t system_error_ctor =
+      jerry_create_external_function(system_error_ctor_fn);
+  // SystemError.prototype = Object.create(Error.prototype);
+  jerry_value_t global_object = jerryxx_get_property(global, MSTR_OBJECT);
+  jerry_value_t global_object_create =
+      jerryxx_get_property(global_object, "create");
+  jerry_value_t global_error = jerryxx_get_property(global, MSTR_ERROR_CLASS);
+  jerry_value_t global_error_prototype =
+      jerryxx_get_property(global_error, MSTR_PROTOTYPE);
+  jerry_value_t _args[1] = {global_error_prototype};
+  jerry_value_t system_error_prototype =
+      jerry_call_function(global_object_create, global_object, _args, 1);
+  jerryxx_set_property(system_error_ctor, MSTR_PROTOTYPE,
+                       system_error_prototype);
+  jerry_release_value(system_error_prototype);
+  // SystemError.prototype.constructor = SystemError
+  jerryxx_set_property(system_error_prototype, MSTR_CONSTRUCTOR,
+                       system_error_ctor);
+  // global.SystemError = SystemError
+  jerryxx_set_property(global, MSTR_SYSTEM_ERROR, system_error_ctor);
+  jerry_release_value(global_error_prototype);
+  jerry_release_value(global_error);
+  jerry_release_value(global_object_create);
+  jerry_release_value(global_object);
+  jerry_release_value(global);
+}
+
+/****************************************************************************/
+/*                                                                          */
 /*                                ETC FUNCTIONS                             */
 /*                                                                          */
 /****************************************************************************/
@@ -1285,9 +1340,10 @@ void km_global_init() {
   register_global_timers();
   register_global_console_object();
   register_global_process_object();
-  register_global_textencoder();
-  register_global_textdecoder();
+  register_global_text_encoder();
+  register_global_text_decoder();
   register_global_encoders();
+  register_global_system_error();
   register_global_etc();
   run_startup_module();
   run_board_module();

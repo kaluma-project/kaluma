@@ -156,4 +156,6 @@
 #define ERFKILL 132         /* Operation not possible due to RF-kill */
 #define EHWPOISON 133       /* Memory page has hardware error */
 
+extern const char* errmsg[];
+
 #endif /* __KM_ERRNO_H */
