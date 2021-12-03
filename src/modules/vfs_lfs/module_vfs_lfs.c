@@ -175,10 +175,14 @@ JERRYXX_FUN(vfslfs_ctor_fn) {
  * VFSLittleFS.prototype.mount()
  */
 JERRYXX_FUN(vfs_lfs_mount_fn) {
+  // get native vfs handle
   JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_lfs_handle_t, vfs_handle_info);
-  // km_tty_printf("VFSLittleFS.mount()\r\n");
+
+  // initialize block device
+  bd_ioctl(vfs_handle->blockdev_js, 1, 0);
+
+  // mount vfs
   int ret = lfs_mount(&vfs_handle->lfs, &vfs_handle->config);
-  // km_tty_printf("ret=%d", ret);
   if (ret < 0) {
     lfs_format(&vfs_handle->lfs, &vfs_handle->config);
     ret = lfs_mount(&vfs_handle->lfs, &vfs_handle->config);
@@ -193,12 +197,17 @@ JERRYXX_FUN(vfs_lfs_mount_fn) {
  * VFSLittleFS.prototype.unmount()
  */
 JERRYXX_FUN(vfs_lfs_unmount_fn) {
+  // get native vfs handle
   JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_lfs_handle_t, vfs_handle_info);
-  // km_tty_printf("VFSLittleFS.unmount()");
+
+  // unmount vfs
   int ret = lfs_unmount(&vfs_handle->lfs);
   if (ret < 0) {
     return jerry_create_error_from_value(create_system_error(ret), true);
   }
+
+  // shutdown block device
+  bd_ioctl(vfs_handle->blockdev_js, 2, 0);
   return jerry_create_undefined();
 }
 
@@ -487,10 +496,14 @@ JERRYXX_FUN(vfs_lfs_readdir_fn) {
     if (ret == 0) {
       break;
     }
-    jerry_value_t item = jerry_create_string((jerry_char_t *)info.name);
-    jerryxx_array_push_string(files, item);
+    // add to array except '.', '..'
+    if (strcmp(info.name, ".") != 0 && strcmp(info.name, "..") != 0) {
+      jerry_value_t item = jerry_create_string((jerry_char_t *)info.name);
+      jerryxx_array_push_string(files, item);
+      jerry_release_value(item);
+    }
   }
-  int ret = lfs_dir_close(&vfs_handle->lfs, &dir);
+  ret = lfs_dir_close(&vfs_handle->lfs, &dir);
   if (ret < 0) {
     return jerry_create_error_from_value(create_system_error(ret), true);
   }

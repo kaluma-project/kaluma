@@ -1,4 +1,15 @@
-// const fs_native = process.binding(process.binding.fs);
+// const path_mod = require('path');
+//   delimiter = ':'
+//   sep = '/'
+//   isAbsolute()
+//   resolve(...paths)
+//   join(..paths)
+//   parse(path) -> pathObj
+//   format(pathObj)
+//   basename(path)
+//   dirname(path)
+//   extname(path)
+
 
 class Stats {
   constructor() {
@@ -89,6 +100,12 @@ __files.push({ id: 1, vfs: null }); // fd = 1 (linux stdout)
 __files.push({ id: 2, vfs: null }); // fd = 2 (linux stderr)
 
 /**
+ * Current working directory
+ * @type {string}
+ */
+let __cwd = '/';
+
+/**
  * Lookup VFS with pathout
  * @param {string} path
  * @returns {VFS}
@@ -148,6 +165,22 @@ function mount(path, vfs) {
  */
 function unmount(path) {
   // __vfs.splice(__vfs.indexOf(...))
+}
+
+/**
+ * Return current working directory
+ * @returns {string}
+ */
+function cwd() {
+  return __cwd;
+}
+
+/**
+ * Change current working directory
+ * @param {string} path
+ */
+function chdir(path) {
+  // TODO: ...
 }
 
 function createReadStream(path, options) {
