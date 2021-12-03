@@ -63,12 +63,12 @@ include_directories(${TARGET_INC_DIR} ${BOARD_INC_DIR})
 set(TARGET_HEAPSIZE 196)
 set(JERRY_TOOLCHAIN toolchain_linux_i686.cmake)
 
-set(CMAKE_SYSTEM_PROCESSOR amd64)
-set(CMAKE_C_FLAGS "${OPT} -Wall -fdata-sections -ffunction-sections")
-if(DEBUG EQUAL 1)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -gdwarf-2")
-endif()
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -MMD -MP")
+# set(CMAKE_SYSTEM_PROCESSOR amd64)
+# set(CMAKE_C_FLAGS "${OPT} -Wall -fdata-sections -ffunction-sections")
+# if(DEBUG EQUAL 1)
+#   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -gdwarf-2")
+# endif()
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -MMD -MP")
 
 #set(PREFIX)
 set(CMAKE_ASM_COMPILER ${PREFIX}gcc)
@@ -78,16 +78,16 @@ set(CMAKE_LINKER ${PREFIX}ld)
 set(CMAKE_OBJCOPY ${PREFIX}objcopy)
 
 set(TARGET_LIBS c m)
-set(CMAKE_EXE_LINKER_FLAGS "-u -Wl")
+# set(CMAKE_EXE_LINKER_FLAGS "-u -Wl")
 
 include(${CMAKE_SOURCE_DIR}/tools/kaluma.cmake)
 
-add_executable(${OUTPUT_TARGET}.elf ${SOURCES} ${JERRY_LIBS})
-target_link_libraries(${OUTPUT_TARGET}.elf ${JERRY_LIBS} ${TARGET_LIBS})
+add_executable(${OUTPUT_TARGET} ${SOURCES} ${JERRY_LIBS})
+target_link_libraries(${OUTPUT_TARGET} ${JERRY_LIBS} ${TARGET_LIBS})
 
-add_custom_command(OUTPUT ${OUTPUT_TARGET}.hex ${OUTPUT_TARGET}.bin
-  COMMAND ${CMAKE_OBJCOPY} -O ihex ${OUTPUT_TARGET}.elf ${OUTPUT_TARGET}.hex
-  COMMAND ${CMAKE_OBJCOPY} -O binary -S ${OUTPUT_TARGET}.elf ${OUTPUT_TARGET}.bin
-  DEPENDS ${OUTPUT_TARGET}.elf)
+# add_custom_command(OUTPUT ${OUTPUT_TARGET}.hex ${OUTPUT_TARGET}.bin
+#   COMMAND ${CMAKE_OBJCOPY} -O ihex ${OUTPUT_TARGET}.elf ${OUTPUT_TARGET}.hex
+#   COMMAND ${CMAKE_OBJCOPY} -O binary -S ${OUTPUT_TARGET}.elf ${OUTPUT_TARGET}.bin
+#   DEPENDS ${OUTPUT_TARGET}.elf)
 
-add_custom_target(kaluma ALL DEPENDS ${OUTPUT_TARGET}.hex ${OUTPUT_TARGET}.bin)
+# add_custom_target(kaluma ALL DEPENDS ${OUTPUT_TARGET}.hex ${OUTPUT_TARGET}.bin)

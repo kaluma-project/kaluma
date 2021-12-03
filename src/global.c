@@ -68,7 +68,7 @@ JERRYXX_FUN(pin_mode_fn) {
     uint8_t pin_num = jerry_get_number_value(pin);
     if (km_gpio_set_io_mode(pin_num, mode) == KM_GPIOPORT_ERROR) {
       char errmsg[255];
-      sprintf(errmsg, "The pin \"%ld\" can't be used for GPIO", pin);
+      sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin_num);
       return jerry_create_error(JERRY_ERROR_RANGE,
                                 (const jerry_char_t *)errmsg);
     }
@@ -80,7 +80,7 @@ JERRYXX_FUN(pin_mode_fn) {
         uint8_t p = jerry_get_number_value(item);
         if (km_gpio_set_io_mode(p, mode) == KM_GPIOPORT_ERROR) {
           char errmsg[255];
-          sprintf(errmsg, "The pin \"%ld\" can't be used for GPIO", pin);
+          sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", p);
           return jerry_create_error(JERRY_ERROR_RANGE,
                                     (const jerry_char_t *)errmsg);
         }
