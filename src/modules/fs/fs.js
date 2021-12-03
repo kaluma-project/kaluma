@@ -1,5 +1,3 @@
-// TODO: Do native modules (vfslfs, graphics, ...) need module_<name>_reset() for soft reset.
-
 // const fs_native = process.binding(process.binding.fs);
 
 class Stats {
@@ -57,9 +55,7 @@ interface VFS {
   write(id: number, buffer: Uint8Array, offset: number, length: number, position: number): number (bytes written)
   read(id: number, buffer: Uint8Array, offset: number, length: number, position: number): number (bytes read)
   close(id: number)
-  fstat(id: number) -> {type:, size:, name:, ...}
-  stat(path: string) -> {type:, size:, name:, ...}
-  exists(path: string) -> boolean
+  stat(path: string) -> {type:number (1=file,2=dir), size:number}
   mkdir(path: string)
   rmdir(path: string)
   readdir(path: string) -> string[]
@@ -186,18 +182,6 @@ function existsSync(path) {
   return false;
 }
 
-function fstatSync(fd) {
-  // return fs_native.fstatSync(fd);
-  const fo = __getfo(fd);
-  if (fo) {
-    let ret = fo.vfs.fstat(fo.id);
-    let stats = new Stats();
-    // stats.... = ...
-    return stats;
-  }
-  // unknown fd
-}
-
 function mkdirSync(path, options) {
   options = Object.assign({ mode: 0o777 }, options);
   const vfs = __lookup(path);
@@ -317,7 +301,6 @@ function writeFileSync(path, data) {
 
 // function close(fd[, callback])
 // function exists(path[, callback])
-// function fstat(fd, callback)
 // function mkdir(path[, options], callback)
 // function open(path[, flags[, mode]], callback)
 // function read(fd, buffer, offset, length, position, callback)
@@ -347,7 +330,6 @@ exports.mount = mount;
 exports.unmount = unmount;
 exports.closeSync = closeSync;
 exports.existsSync = existsSync;
-exports.fstatSync = fstatSync;
 exports.mkdirSync = mkdirSync;
 exports.openSync = openSync;
 exports.readSync = readSync;

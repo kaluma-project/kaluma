@@ -158,6 +158,13 @@
     return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *)errmsg); \
   }
 
+#define JERRYXX_CHECK_ARG_TYPEDARRAY(index, argname)                           \
+  if ((args_cnt <= index) || (!jerry_value_is_typedarray(args_p[index]))) {    \
+    char errmsg[255];                                                          \
+    sprintf(errmsg, "\"%s\" argument must be an TypedArray", argname);         \
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *)errmsg); \
+  }
+
 #define JERRYXX_CHECK_INDEX_RANGE(name, lowerbound, upperbound)            \
   if (name < (lowerbound) || name > (upperbound)) {                        \
     return jerry_create_error(JERRY_ERROR_RANGE,                           \
@@ -228,6 +235,8 @@ double jerryxx_get_property_number(jerry_value_t object, const char *name,
                                    double default_value);
 bool jerryxx_get_property_boolean(jerry_value_t object, const char *name,
                                   bool default_value);
+uint8_t *jerryxx_get_property_typedarray_buffer(jerry_value_t object);
+void jerryxx_array_push_string(jerry_value_t array, jerry_value_t item);
 bool jerryxx_delete_property(jerry_value_t object, const char *name);
 
 void jerryxx_print_value(jerry_value_t value);

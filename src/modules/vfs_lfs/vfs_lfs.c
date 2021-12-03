@@ -26,23 +26,23 @@
 #include "lfs.h"
 #include "utils.h"
 
-static vfs_lfs_root_t vfslfs_root;
+static vfs_lfs_root_t vfs_lfs_root;
 
 void vfs_lfs_init() {
-  vfslfs_root.file_id_count = 0;
-  km_list_init(&vfslfs_root.vfslfs_handles);
+  vfs_lfs_root.file_id_count = 0;
+  km_list_init(&vfs_lfs_root.vfs_lfs_handles);
 }
 
 void vfs_lfs_cleanup() {
   vfs_lfs_handle_t *handle =
-      (vfs_lfs_handle_t *)vfslfs_root.vfslfs_handles.head;
+      (vfs_lfs_handle_t *)vfs_lfs_root.vfs_lfs_handles.head;
   while (handle != NULL) {
     vfs_lfs_handle_t *next =
         (vfs_lfs_handle_t *)((km_list_node_t *)handle)->next;
     free(handle);
     handle = next;
   }
-  km_list_init(&vfslfs_root.vfslfs_handles);
+  km_list_init(&vfs_lfs_root.vfs_lfs_handles);
 }
 
 void vfs_lfs_handle_init(vfs_lfs_handle_t *handle) {
@@ -50,16 +50,17 @@ void vfs_lfs_handle_init(vfs_lfs_handle_t *handle) {
 }
 
 void vfs_lfs_handle_add(vfs_lfs_handle_t *handle) {
-  km_list_append(&vfslfs_root.vfslfs_handles, (km_list_node_t *)handle);
+  km_list_append(&vfs_lfs_root.vfs_lfs_handles, (km_list_node_t *)handle);
 }
 
 void vfs_lfs_handle_remove(vfs_lfs_handle_t *handle) {
-  km_list_remove(&vfslfs_root.vfslfs_handles, (km_list_node_t *)handle);
+  km_list_remove(&vfs_lfs_root.vfs_lfs_handles, (km_list_node_t *)handle);
 }
 
 void vfs_lfs_file_add(vfs_lfs_handle_t *handle, vfs_lfs_file_handle_t *file) {
+  vfs_lfs_root.file_id_count++;
+  file->id = vfs_lfs_root.file_id_count;
   km_list_append(&handle->file_handles, (km_list_node_t *)file);
-  file->id = ++vfslfs_root.file_id_count;
 }
 
 void vfs_lfs_file_remove(vfs_lfs_handle_t *handle,
@@ -72,7 +73,7 @@ vfs_lfs_file_handle_t *vfs_lfs_file_get_by_id(vfs_lfs_handle_t *handle,
   vfs_lfs_file_handle_t *file =
       (vfs_lfs_file_handle_t *)handle->file_handles.head;
   while (file != NULL) {
-    if (file->lfs_file.id == file_id) {
+    if (file->id == file_id) {
       return file;
     }
     file = (vfs_lfs_file_handle_t *)((km_list_node_t *)file)->next;

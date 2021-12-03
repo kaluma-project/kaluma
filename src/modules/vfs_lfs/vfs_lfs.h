@@ -26,6 +26,12 @@
 #include "lfs.h"
 #include "utils.h"
 
+#define VFS_LFS_GET_FILE_HANDLE(vfs_handle, file, id)                    \
+  vfs_lfs_file_handle_t *file = vfs_lfs_file_get_by_id(vfs_handle, id);  \
+  if (file == NULL) {                                                    \
+    return jerry_create_error_from_value(create_system_error(-9), true); \
+  }
+
 typedef struct vfs_lfs_root_s vfs_lfs_root_t;
 typedef struct vfs_lfs_handle_s vfs_lfs_handle_t;
 typedef struct vfs_lfs_file_handle_s vfs_lfs_file_handle_t;
@@ -42,7 +48,7 @@ enum vfs_lfs_open_flags {
 
 struct vfs_lfs_root_s {
   uint32_t file_id_count;
-  km_list_t vfslfs_handles;
+  km_list_t vfs_lfs_handles;
 };
 
 struct vfs_lfs_handle_s {

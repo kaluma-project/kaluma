@@ -29,7 +29,7 @@
 #define MSTR_VFS_LFS_WRITE "write"
 #define MSTR_VFS_LFS_READ "read"
 #define MSTR_VFS_LFS_CLOSE "close"
-#define MSTR_VFS_LFS_FSTAT "fstat"
+#define MSTR_VFS_LFS_STAT "stat"
 #define MSTR_VFS_LFS_RENAME "rename"
 #define MSTR_VFS_LFS_UNLINK "unlink"
 #define MSTR_VFS_LFS_MKDIR "mkdir"
