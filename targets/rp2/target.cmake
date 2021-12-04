@@ -62,7 +62,8 @@ set(SOURCES
   ${TARGET_SRC_DIR}/storage.c
   ${TARGET_SRC_DIR}/uart.c
   ${TARGET_SRC_DIR}/i2c.c
-  ${TARGET_SRC_DIR}/spi.c)
+  ${TARGET_SRC_DIR}/spi.c
+  ${TARGET_SRC_DIR}/main.c)
 
 include_directories(${TARGET_INC_DIR} ${BOARD_INC_DIR})
 

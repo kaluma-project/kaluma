@@ -40,7 +40,7 @@ endif()
 
 project(kaluma-project C CXX ASM)
 
-set(OUTPUT_TARGET kaluma-${TARGET}-${BOARD}-${VER})
+set(OUTPUT_TARGET kaluma)
 set(TARGET_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 set(TARGET_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(BOARD_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/boards/${BOARD})
@@ -56,7 +56,8 @@ set(SOURCES
   ${TARGET_SRC_DIR}/storage.c
   ${TARGET_SRC_DIR}/uart.c
   ${TARGET_SRC_DIR}/i2c.c
-  ${TARGET_SRC_DIR}/spi.c)
+  ${TARGET_SRC_DIR}/spi.c
+  ${TARGET_SRC_DIR}/main.c)
 
 include_directories(${TARGET_INC_DIR} ${BOARD_INC_DIR})
 

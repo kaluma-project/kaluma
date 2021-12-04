@@ -18,39 +18,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#include "gpio.h"
+#include "io.h"
+#include "repl.h"
+#include "runtime.h"
+#include "system.h"
 #include "tty.h"
 
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "ringbuffer.h"
-#include "system.h"
-
-void km_tty_init() {}
-
-uint32_t km_tty_available() { return 0; }
-
-uint32_t km_tty_read(uint8_t *buf, size_t len) { return 0; }
-
-uint32_t km_tty_read_sync(uint8_t *buf, size_t len, uint32_t timeout) {
-  return 0;
-}
-
-uint8_t km_tty_getc() { return 0; }
-
-void km_tty_putc(char ch) { printf("%c", ch); }
-
-/**
- * Print formatted string to TTY
- */
-void km_tty_printf(const char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  vprintf(fmt, ap);
-  va_end(ap);
+int main(int argc, char *argv[]) {
+  printf("argc=%d, arg[1]=%s\r\n", argc, argv[1]);
+  bool load = false;
+  km_system_init();
+  load = km_running_script_check();
+  km_tty_init();
+  km_io_init();
+  km_repl_init();
+  km_runtime_init(load, true);
+  km_io_run();
 }
