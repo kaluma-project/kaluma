@@ -34,6 +34,7 @@ if(NOT MODULES)
     http
     url
     rp2
+    path
     fs
     vfs_lfs
     startup)

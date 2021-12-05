@@ -33,9 +33,11 @@ if(NOT MODULES)
     net
     http
     url
+    path
     fs
     vfs_lfs
-    startup)
+    startup
+    __test)
 endif()
 
 project(kaluma-project C CXX ASM)
