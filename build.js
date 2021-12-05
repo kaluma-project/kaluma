@@ -34,7 +34,6 @@ function build() {
   if (argv.target) params.push(`-DTARGET=${argv.target}`);
   if (argv.board) params.push(`-DBOARD=${argv.board}`);
   if (argv.modules) params.push(`-DMODULES=${argv.modules}`);
-  console.log(params);
 
   cmd("cmake", params);
   cmd("make");

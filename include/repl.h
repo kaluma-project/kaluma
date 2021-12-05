@@ -55,7 +55,8 @@ struct km_repl_state_s {
   uint8_t ymodem_state;  // 0=stopped, 1=transfering
 };
 
-void km_repl_init();
+void km_repl_init(bool hi);
+void km_repl_cleanup();
 km_repl_state_t *km_get_repl_state();
 
 void km_repl_set_output(km_repl_output_t output);

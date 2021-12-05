@@ -61,7 +61,7 @@ set(SOURCES
 
 include_directories(${TARGET_INC_DIR} ${BOARD_INC_DIR})
 
-set(TARGET_HEAPSIZE 196)
+set(TARGET_HEAPSIZE 1024)
 set(JERRY_TOOLCHAIN toolchain_linux_i686.cmake)
 
 # set(CMAKE_SYSTEM_PROCESSOR amd64)

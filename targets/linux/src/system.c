@@ -21,6 +21,8 @@
 
 #include "system.h"
 
+#include <time.h>
+
 #include "adc.h"
 #include "gpio.h"
 #include "i2c.h"
@@ -38,16 +40,29 @@ void km_delay(uint32_t msec) {}
 
 /**
  */
-uint64_t km_gettime() { return 0; }
+uint64_t km_gettime() {
+  // struct timeval tval;
+  // gettimeofday(&tval, NULL);
+  struct timespec tval;
+  clock_gettime(CLOCK_MONOTONIC, &tval);
+  long t = (tval.tv_sec * 1000) + (tval.tv_nsec / 1000000);
+  return (uint64_t)t;
+}
 
 /**
  * Return MAX of the micro seconde counter 44739242
  */
-uint64_t km_micro_maxtime() { return 0; }
+uint64_t km_micro_maxtime() { return UINT32_MAX; }
+
 /**
  * Return micro seconde counter
  */
-uint64_t km_micro_gettime() { return 0; }
+uint64_t km_micro_gettime() {
+  struct timespec tval;
+  clock_gettime(CLOCK_MONOTONIC, &tval);
+  long t = (tval.tv_sec * 1000000) + (tval.tv_nsec / 1000);
+  return (uint64_t)t;
+}
 
 /**
  * micro secoded delay

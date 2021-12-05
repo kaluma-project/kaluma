@@ -32,7 +32,7 @@ int main(void) {
   load = km_running_script_check();
   km_tty_init();
   km_io_init();
-  km_repl_init();
+  km_repl_init(true);
   km_runtime_init(load, true);
-  km_io_run();
+  km_io_run(true);
 }

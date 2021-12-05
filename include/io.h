@@ -152,7 +152,7 @@ struct km_io_loop_s {
 
 void km_io_init();
 void km_io_cleanup();
-void km_io_run();
+void km_io_run(bool infinite);
 
 /* general handle functions */
 
