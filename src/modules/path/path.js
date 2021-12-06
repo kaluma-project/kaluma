@@ -1,39 +1,44 @@
-const sep = '/';
-const delimiter = ':';
+const sep = "/";
+const delimiter = ":";
 
 function isAbsolute(path) {
-  return path.startsWith('/');
+  return path.startsWith("/");
 }
 
 function format(pathObj) {
-  let _path = '';
-  return sep;
+  pathObj = Object.assign(
+    {
+      root: "",
+      dir: "",
+      base: "",
+      name: "",
+      ext: "",
+    },
+    pathObj
+  );
+  let _base = pathObj.base ? pathObj.base : pathObj.name + pathObj.ext;
+  return pathObj.dir
+    ? `${pathObj.dir}${sep}${_base}`
+    : `${pathObj.root}${_base}`;
 }
 
 function parse() {
   return sep;
 }
 
-function join() {
-}
+function join() {}
 
-function dirname() {
-}
+function dirname() {}
 
-function extname() {
-}
+function extname() {}
 
-function basename() {
-}
+function basename() {}
 
-function relative() {
-}
+function relative() {}
 
-function resolve() {
-}
+function resolve() {}
 
-function normalize() {
-}
+function normalize() {}
 
 exports.isAbsolute = isAbsolute;
 exports.format = format;
@@ -46,4 +51,4 @@ exports.relative = relative;
 exports.resolve = resolve;
 exports.normalize = normalize;
 exports.sep = sep;
-exoirts.delimiter = delimiter;
+exports.delimiter = delimiter;
