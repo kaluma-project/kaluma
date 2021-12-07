@@ -1,4 +1,5 @@
-// const path_mod = require('path');
+const path_mod = require('path');
+
 //   delimiter = ':'
 //   sep = '/'
 //   isAbsolute()
@@ -13,7 +14,8 @@
 
 class Stats {
   constructor() {
-    this.mode = 0;
+    this.type = 0;
+    this.size = 0;
     /*
     dev: 2114,
     ino: 48064969,
@@ -36,10 +38,10 @@ class Stats {
     */
   }
   isDirectory() {
-    return false;
+    return this.type === 2;
   }
   isFile() {
-    return false;
+    return this.type === 1;
   }
 }
 // class fs.ReadStream
@@ -111,14 +113,22 @@ let __cwd = '/';
  * @returns {VFS}
  */
 function __lookup(path) {
+  const _path = path_mod.resolve(path);
+  let _rootvfs = null;
   for (let i = 0; i < __vfs.length; i++) {
     let vfs = __vfs[i];
-    if (path.startsWith(vfs.path)) {
-      vfs.__pathout = path.substr(vfs.path.length);
+    if (vfs.path === '/') {
+      _rootvfs = vfs;
+    } else if (_path.startsWith(vfs.path)) {
+      vfs.__pathout = _path.substr(vfs.path.length);
       return vfs;
     }
   }
-  return null;
+  if (_rootvfs) {
+    _rootvfs.__pathout = _path;
+    return _rootvfs;
+  }
+  throw new SystemError(-2);
 }
 
 /**
@@ -172,7 +182,7 @@ function unmount(path) {
  * @returns {string}
  */
 function cwd() {
-  return __cwd;
+  return global.__cwd;
 }
 
 /**
@@ -180,7 +190,13 @@ function cwd() {
  * @param {string} path
  */
 function chdir(path) {
-  // TODO: ...
+  const _path = path_mod.resolve(path)
+  const stat = statSync(_path);
+  if (stat && stat.isDirectory()) {
+    global.__cwd = _path;
+  } else {
+    throw new SystemError(-2);
+  }
 }
 
 function createReadStream(path, options) {
@@ -213,17 +229,6 @@ function existsSync(path) {
     return vfs.exists(vfs.__pathout);
   }
   return false;
-}
-
-function mkdirSync(path, options) {
-  options = Object.assign({ mode: 0o777 }, options);
-  const vfs = __lookup(path);
-  if (vfs) {
-    vfs.mkdir(vfs.__pathout);
-  }
-  // TODO: if no vfs found, what error should be thrown?
-  // file not found?
-  return -1;
 }
 
 function openSync(path, flags = "r", mode = 0o666) {
@@ -288,14 +293,6 @@ function readSync(fd, buffer, offset, length, position) {
   // return fs_native.readSync(fd, buffer, offset, length, position);
 }
 
-function readdirSync(path) {
-  const vfs = __lookup(path);
-  if (vfs) {
-    return vfs.readdir(vfs.__pathout);
-  }
-  return null;
-}
-
 function readFileSync(path) {
   // return fs_native.readFileSync(path);
 }
@@ -304,12 +301,28 @@ function renameSync(oldPath, newPath) {
   // return fs_native.renameSync(oldPath, newPath);
 }
 
+function mkdirSync(path) {
+  const vfs = __lookup(path);
+  vfs.mkdir(vfs.__pathout);
+}
+
 function rmdirSync(path) {
-  // return fs_native.rmdirSync(path);
+  const vfs = __lookup(path);
+  vfs.rmdir(vfs.__pathout);
+}
+
+function readdirSync(path) {
+  const vfs = __lookup(path);
+  return vfs.readdir(vfs.__pathout);
 }
 
 function statSync(path) {
-  // return fs_native.statSync(path);
+  const vfs = __lookup(path);
+  const ret = vfs.stat(vfs.__pathout);
+  let stat = new Stats();
+  stat.type = ret.type;
+  stat.size = ret.size;
+  return stat;
 }
 
 function unlinkSync(path) {
@@ -359,6 +372,8 @@ exports.__lookup = __lookup;
 exports.__getfd = __getfd;
 exports.__getfo = __getfo;
 
+exports.chdir = chdir;
+exports.cwd = cwd;
 exports.mount = mount;
 exports.unmount = unmount;
 exports.closeSync = closeSync;
@@ -374,3 +389,5 @@ exports.statSync = statSync;
 exports.unlinkSync = unlinkSync;
 exports.writeSync = writeSync;
 exports.writeFileSync = writeFileSync;
+
+if (!global.__cwd) global.__cwd = '/';
