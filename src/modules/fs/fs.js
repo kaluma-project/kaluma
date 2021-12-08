@@ -1,16 +1,4 @@
-const path_mod = require('path');
-
-//   delimiter = ':'
-//   sep = '/'
-//   isAbsolute()
-//   resolve(...paths)
-//   join(..paths)
-//   parse(path) -> pathObj
-//   format(pathObj)
-//   basename(path)
-//   dirname(path)
-//   extname(path)
-
+const path_mod = require("path");
 
 class Stats {
   constructor() {
@@ -105,38 +93,14 @@ __files.push({ id: 2, vfs: null }); // fd = 2 (linux stderr)
  * Current working directory
  * @type {string}
  */
-let __cwd = '/';
-
-/**
- * Lookup VFS with pathout
- * @param {string} path
- * @returns {VFS}
- */
-function __lookup(path) {
-  const _path = path_mod.resolve(path);
-  let _rootvfs = null;
-  for (let i = 0; i < __vfs.length; i++) {
-    let vfs = __vfs[i];
-    if (vfs.path === '/') {
-      _rootvfs = vfs;
-    } else if (_path.startsWith(vfs.path)) {
-      vfs.__pathout = _path.substr(vfs.path.length);
-      return vfs;
-    }
-  }
-  if (_rootvfs) {
-    _rootvfs.__pathout = _path;
-    return _rootvfs;
-  }
-  throw new SystemError(-2);
-}
+let __cwd = "/";
 
 /**
  * Get file descriptor of file object
  * @param {object} fo
  * @returns {number}
  */
-function __getfd(fo) {
+function __fd(fo) {
   let fd = -1;
   for (let i = 0; i < __files.length; i++) {
     if (__files[i] === null) {
@@ -154,8 +118,31 @@ function __getfd(fo) {
  * @param {number} fd
  * @returns {object}
  */
-function __getfo(fd) {
+function __fobj(fd) {
   return fd < __files.length ? __files[fd] : null;
+}
+
+/**
+ * Lookup VFS with pathout
+ * @param {string} path
+ * @returns {VFS}
+ */
+function __lookup(path) {
+  const _path = path_mod.resolve(path);
+  for (let i = 0; i < __vfs.length; i++) {
+    let vfs = __vfs[i];
+    if (vfs.path === "/") {
+      vfs.__pathout = _path;
+      return vfs;
+    } else if (
+      _path === vfs.path ||
+      _path.startsWith(vfs.path + path_mod.sep)
+    ) {
+      vfs.__pathout = _path.substr(vfs.path.length) || "/";
+      return vfs;
+    }
+  }
+  throw new SystemError(-2);
 }
 
 /**
@@ -164,9 +151,22 @@ function __getfo(fd) {
  * @param {VFS} vfs
  */
 function mount(path, vfs) {
+  path = path_mod.normalize(path);
+  const _parent = path_mod.join(path, "..");
+  if (_parent !== "/") {
+    const _stat = statSync(_parent);
+    if (!_stat.isDirectory()) {
+      throw new SystemError(-2);
+    }
+  }
   vfs.path = path;
   vfs.mount();
   __vfs.push(vfs);
+  __vfs.sort((a, b) => {
+    let ac = a.path.split(path_mod.sep).filter((t) => t.length > 0).length;
+    let bc = b.path.split(path_mod.sep).filter((t) => t.length > 0).length;
+    return bc - ac;
+  });
 }
 
 /**
@@ -174,7 +174,11 @@ function mount(path, vfs) {
  * @param {string} path
  */
 function unmount(path) {
-  // __vfs.splice(__vfs.indexOf(...))
+  path = path_mod.normalize(path);
+  const vfs = __vfs.find((v) => v.path === path);
+  if (vfs) {
+    __vfs.splice(__vfs.indexOf(vfs));
+  }
 }
 
 /**
@@ -182,7 +186,7 @@ function unmount(path) {
  * @returns {string}
  */
 function cwd() {
-  return global.__cwd;
+  return __cwd;
 }
 
 /**
@@ -190,10 +194,10 @@ function cwd() {
  * @param {string} path
  */
 function chdir(path) {
-  const _path = path_mod.resolve(path)
+  const _path = path_mod.resolve(path);
   const stat = statSync(_path);
   if (stat && stat.isDirectory()) {
-    global.__cwd = _path;
+    __cwd = _path;
   } else {
     throw new SystemError(-2);
   }
@@ -212,21 +216,21 @@ function createWriteStream(path, options) {
 // ---------------------------------------------------------------------------
 
 function closeSync(fd) {
-  const fo = __getfo(fd);
+  const fo = __fobj(fd);
   if (fo) {
     let ret = fo.vfs.close(fo.id);
     if (ret > -1) {
       files[fd] = null;
     }
   } else {
-    // unknown fd
+    throw new SystemError(-9);
   }
 }
 
 function existsSync(path) {
   const vfs = __lookup(path);
-  if (vfs) {
-    return vfs.exists(vfs.__pathout);
+  if (vfs && vfs.stat(vfs.__pathout)) {
+    return true;
   }
   return false;
 }
@@ -281,7 +285,7 @@ function openSync(path, flags = "r", mode = 0o666) {
       id: id,
       vfs: vfs,
     };
-    let fd = __getfd(fo);
+    let fd = __fd(fo);
     return fd;
   }
   // TODO: if no vfs found, what error should be thrown?
@@ -312,8 +316,15 @@ function rmdirSync(path) {
 }
 
 function readdirSync(path) {
+  path = path_mod.normalize(path);
   const vfs = __lookup(path);
-  return vfs.readdir(vfs.__pathout);
+  let ls = vfs.readdir(vfs.__pathout);
+  __vfs.forEach((v) => {
+    if (v.path !== "/" && path_mod.join(v.path, "..") === path) {
+      ls.push(v.path.substr(path === "/" ? 1 : path.length + 1));
+    }
+  });
+  return ls;
 }
 
 function statSync(path) {
@@ -369,13 +380,13 @@ exports.createWriteStream = createWriteStream;
 exports.__vfs = __vfs;
 exports.__files = __files;
 exports.__lookup = __lookup;
-exports.__getfd = __getfd;
-exports.__getfo = __getfo;
+exports.__fd = __fd;
+exports.__fobj = __fobj;
 
-exports.chdir = chdir;
-exports.cwd = cwd;
 exports.mount = mount;
 exports.unmount = unmount;
+exports.chdir = chdir;
+exports.cwd = cwd;
 exports.closeSync = closeSync;
 exports.existsSync = existsSync;
 exports.mkdirSync = mkdirSync;
@@ -389,5 +400,3 @@ exports.statSync = statSync;
 exports.unlinkSync = unlinkSync;
 exports.writeSync = writeSync;
 exports.writeFileSync = writeFileSync;
-
-if (!global.__cwd) global.__cwd = '/';

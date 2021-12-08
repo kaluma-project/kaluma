@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-#ifndef ____TEST_MAGIC_STRINGS_H
-#define ____TEST_MAGIC_STRINGS_H
+#ifndef ____TEST_UTILS_MAGIC_STRINGS_H
+#define ____TEST_UTILS_MAGIC_STRINGS_H
 
-#endif /* ____TEST_MAGIC_STRINGS_H */
+#endif /* ____TEST_UTILS_MAGIC_STRINGS_H */

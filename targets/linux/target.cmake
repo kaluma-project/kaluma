@@ -37,7 +37,8 @@ if(NOT MODULES)
     fs
     vfs_lfs
     startup
-    __test)
+    __ujest
+    __test_utils)
 endif()
 
 project(kaluma-project C CXX ASM)

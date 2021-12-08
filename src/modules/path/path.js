@@ -23,18 +23,18 @@ function format(pathObj) {
 }
 
 function parse(path) {
-  const _terms = path.split(sep).filter(t => t.length > 0);
-  const _base = _terms.pop() || '';
-  const _bt = _base.split('.');
-  const _ext = _bt.pop() || '';
-  const _name = _bt.join('.');
+  const _terms = path.split(sep).filter((t) => t.length > 0);
+  const _base = _terms.pop() || "";
+  const _bt = _base.split(".");
+  const _ext = _bt.pop() || "";
+  const _name = _bt.join(".");
   let pathObj = {
-    root: isAbsolute(path) ? sep : '',
+    root: isAbsolute(path) ? sep : "",
     dir: _terms.join(sep),
     base: _base,
     name: _name,
-    ext: '.' + _ext
-  }
+    ext: "." + _ext,
+  };
   return pathObj;
 }
 
@@ -53,34 +53,35 @@ function basename(path, ext) {
 }
 
 function normalize(path) {
-  const _terms = path.split(sep).filter(t => t.length > 0);
+  const _terms = path.split(sep).filter((t) => t.length > 0);
   let _paths = [];
-  if (path.startsWith(sep)) _paths.push('');
+  if (path.startsWith(sep)) _paths.push("");
   for (let i = 0; i < _terms.length; i++) {
     const _t = _terms[i];
-    if (_t === '.') {
+    if (_t === ".") {
       // do nothing
-    } else if (_t === '..') {
+    } else if (_t === "..") {
       _paths.pop();
     } else {
       _paths.push(_t);
     }
   }
-  return _paths.join(sep);
+  return _paths.join(sep) || sep;
 }
 
 function join(...paths) {
   let _terms = [];
-  if (paths.length > 0 && paths[0].startsWith(sep)) _terms.push('');
+  if (paths.length > 0 && paths[0].startsWith(sep)) _terms.push("");
   for (let i = 0; i < paths.length; i++) {
     const _p = paths[i];
-    _terms = _terms.concat(_p.split(sep).filter(t => t.length > 0));
+    _terms = _terms.concat(_p.split(sep).filter((t) => t.length > 0));
   }
   return normalize(_terms.join(sep));
 }
 
 function resolve(...paths) {
-  const _cwd = global.__cwd || sep;
+  const fs = require("fs");
+  const _cwd = fs.cwd() || sep;
   let _dir = _cwd;
   for (let i = 0; i < paths.length; i++) {
     const _path = paths[i];
