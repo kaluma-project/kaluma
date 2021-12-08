@@ -22,23 +22,38 @@
 #ifndef __FS_MAGIC_STRINGS_H
 #define __FS_MAGIC_STRINGS_H
 
+#define MSTR_FS_VFS_FLAG_READ "VFS_FLAG_READ"
+#define MSTR_FS_VFS_FLAG_WRITE "VFS_FLAG_WRITE"
+#define MSTR_FS_VFS_FLAG_CREATE "VFS_FLAG_CREATE"
+#define MSTR_FS_VFS_FLAG_APPEND "VFS_FLAG_APPEND"
+#define MSTR_FS_VFS_FLAG_EXCL "VFS_FLAG_EXCL"
+#define MSTR_FS_VFS_FLAG_TRUNC "VFS_FLAG_TRUNC"
+
+#define MSTR_FS_STATS "Stats"
+#define MSTR_FS_STATS_IS_DIRECTORY "isDirectory"
+#define MSTR_FS_STATS_IS_FILE "isFile"
+
+#define MSTR_FS_CWD "__cwd"
+#define MSTR_FS_LOOKUP "__lookup"
+#define MSTR_FS_VFS "__vfs"
+#define MSTR_FS_FILES "__files"
+
 #define MSTR_FS_MOUNT "mount"
 #define MSTR_FS_UNMOUNT "unmount"
 #define MSTR_FS_CLOSE_SYNC "closeSync"
 #define MSTR_FS_CREATE_READ_STREAM "createReadStream"
 #define MSTR_FS_CREATE_WRITE_STREAM "createWriteStream"
 #define MSTR_FS_EXISTS_SYNC "existsSync"
-#define MSTR_FS_FSTAT_SYNC "fstatSync"
 #define MSTR_FS_MKDIR_SYNC "mkdirSync"
+#define MSTR_FS_RMDIR_SYNC "rmdirSync"
+#define MSTR_FS_READDIR_SYNC "readdirSync"
 #define MSTR_FS_OPEN_SYNC "openSync"
 #define MSTR_FS_READ_SYNC "readSync"
-#define MSTR_FS_READDIR_SYNC "readdirSync"
 #define MSTR_FS_READ_FILE_SYNC "readFileSync"
-#define MSTR_FS_RENAME_SYNC "renameSync"
-#define MSTR_FS_RMDIR_SYNC "rmdirSync"
-#define MSTR_FS_STAT_SYNC "statSync"
-#define MSTR_FS_UNLINK_SYNC "unlinkSync"
 #define MSTR_FS_WRITE_SYNC "writeSync"
 #define MSTR_FS_WRITE_FILE_SYNC "writeFileSync"
+#define MSTR_FS_UNLINK_SYNC "unlinkSync"
+#define MSTR_FS_RENAME_SYNC "renameSync"
+#define MSTR_FS_STAT_SYNC "statSync"
 
 #endif /* __FS_MAGIC_STRINGS_H */

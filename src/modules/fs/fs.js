@@ -301,6 +301,22 @@ function readFileSync(path) {
   // return fs_native.readFileSync(path);
 }
 
+function writeSync(fd, buffer, offset, length, position) {
+  if (fd < files.length) {
+    const fo = files[fd];
+    return fo.vfs.write(fo.id, buffer, offset, length, position);
+  }
+  // if invalid fd is given, what error should be thrown?
+}
+
+function writeFileSync(path, data) {
+  // return fs_native.writeFileSync(path, data);
+}
+
+function unlinkSync(path) {
+  // return fs_native.unlinkSync(path);
+}
+
 function renameSync(oldPath, newPath) {
   // return fs_native.renameSync(oldPath, newPath);
 }
@@ -334,22 +350,6 @@ function statSync(path) {
   stat.type = ret.type;
   stat.size = ret.size;
   return stat;
-}
-
-function unlinkSync(path) {
-  // return fs_native.unlinkSync(path);
-}
-
-function writeSync(fd, buffer, offset, length, position) {
-  if (fd < files.length) {
-    const fo = files[fd];
-    return fo.vfs.write(fo.id, buffer, offset, length, position);
-  }
-  // if invalid fd is given, what error should be thrown?
-}
-
-function writeFileSync(path, data) {
-  // return fs_native.writeFileSync(path, data);
 }
 
 // ---------------------------------------------------------------------------

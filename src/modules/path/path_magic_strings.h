@@ -22,8 +22,14 @@
 #ifndef __PATH_MAGIC_STRINGS_H
 #define __PATH_MAGIC_STRINGS_H
 
-#define MSTR_PATH_SEP "/"
-#define MSTR_PATH_DELIMITER ":"
+#define MSTR_PATH_OBJ_ROOT "root"
+#define MSTR_PATH_OBJ_DIR "dir"
+#define MSTR_PATH_OBJ_BASE "base"
+#define MSTR_PATH_OBJ_NAME "name"
+#define MSTR_PATH_OBJ_EXT "ext"
+
+#define MSTR_PATH_SEP "sep"
+#define MSTR_PATH_DELIMITER "delimiter"
 #define MSTR_PATH_IS_ABSOLUTE "isAbsolute"
 #define MSTR_PATH_FORMAT "format"
 #define MSTR_PATH_PARSE "parse"
