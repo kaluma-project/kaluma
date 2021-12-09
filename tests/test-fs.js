@@ -3,6 +3,8 @@ const { VFSLittleFS } = require("vfs_lfs");
 const { RAMBlockDev } = require("__test_utils");
 const fs = require("fs");
 
+console.log(process.memoryUsage());
+
 const vfs1 = new VFSLittleFS(new RAMBlockDev());
 const vfs2 = new VFSLittleFS(new RAMBlockDev());
 const vfs3 = new VFSLittleFS(new RAMBlockDev());
@@ -174,14 +176,90 @@ test("[fs] mkdirSync() and rmdirSync()", (done) => {
   done();
 });
 
-// existsSync
-// statSync
-// openSync, readSync, writeSync, closeSync
-// unlinkSync
-// renameSync
-// readFileSync
-// writeFileSync
-// createReadStream
-// createWriteStream
+test("[fs] open/write/read/close/unlink/statSync()", (done) => {
+  init_fs();
+  const fname = '/file.txt';
+
+  // file write (create)
+  let fd = fs.openSync(fname, 'w');
+  let buf = new Uint8Array([60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
+  fs.writeSync(fd, buf, 0, buf.length, 0);
+  fs.closeSync(fd);
+
+  // file stat test
+  let stat = fs.statSync(fname);
+  expect(stat.isFile()).toBe(true);
+  expect(stat.size).toBe(buf.length);
+
+  // file read test
+  let fd2 = fs.openSync(fname, 'r');
+  let buf2 = new Uint8Array(10);
+  fs.readSync(fd2, buf2, 0, buf2.length, 0);
+  fs.closeSync(fd2);
+  expect(buf.join(',')).toBe(buf2.join(','));
+
+  fs.unlinkSync(fname);
+  deinit_fs();
+  done();
+});
+
+test("[fs] existsSync()", (done) => {
+  init_fs();
+  const fname = '/exists.txt';
+
+  let fd = fs.openSync(fname, 'w');
+  let buf = new Uint8Array([60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
+  fs.writeSync(fd, buf, 0, buf.length, 0);
+  fs.closeSync(fd);  
+  expect(fs.existsSync(fname)).toBe(true);
+
+  expect(fs.existsSync('/')).toBe(true);
+  expect(fs.existsSync('/flash')).toBe(true);
+  expect(fs.existsSync('/sd')).toBe(true);
+  expect(fs.existsSync('/flash1')).toBe(false);
+
+  fs.unlinkSync(fname);
+  deinit_fs();
+  done();
+});
+
+test("[fs] renameSync()", (done) => {
+  init_fs();
+
+  let fd = fs.openSync('/rename.txt', 'w');
+  let buf = new Uint8Array([60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
+  fs.writeSync(fd, buf, 0, buf.length, 0);
+  fs.closeSync(fd);
+  expect(fs.existsSync('/rename.txt')).toBe(true);
+
+  fs.renameSync('rename.txt', 'newname.txt');
+  expect(fs.existsSync('/rename.txt')).toBe(false);
+  expect(fs.existsSync('/newname.txt')).toBe(true);
+
+  fs.unlinkSync('newname.txt');
+  deinit_fs();
+  done();
+});
+
+test("[fs] write/readFileSync()", (done) => {
+  init_fs();
+
+  const buf = new Uint8Array([60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
+  fs.writeFileSync('/filesync.txt', buf);
+  expect(fs.existsSync('/filesync.txt')).toBe(true);
+
+  const buf2 = fs.readFileSync('/filesync.txt');
+  expect(buf.join(',')).toBe(buf2.join(','));
+
+  fs.unlinkSync('/filesync.txt');
+  deinit_fs();
+  done();
+});
+
+// TODO: test for offset, length, position
+// TODO: test for flags (wx, w+, r+, rs+, a, ax, a+, as, as+, ...)
+// TODO: test for exceptions (e.g. try to read for non-exists file)
+// TODO: createReadStream
+// TODO: createWriteStream
 
 start();

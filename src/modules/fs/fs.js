@@ -142,7 +142,7 @@ function __lookup(path) {
       return vfs;
     }
   }
-  throw new SystemError(-2);
+  throw new SystemError(-2); // ENOENT
 }
 
 /**
@@ -156,7 +156,7 @@ function mount(path, vfs) {
   if (_parent !== "/") {
     const _stat = statSync(_parent);
     if (!_stat.isDirectory()) {
-      throw new SystemError(-2);
+      throw new SystemError(-2); // ENOENT
     }
   }
   vfs.path = path;
@@ -199,7 +199,7 @@ function chdir(path) {
   if (stat && stat.isDirectory()) {
     __cwd = _path;
   } else {
-    throw new SystemError(-2);
+    throw new SystemError(-2); // ENOENT
   }
 }
 
@@ -214,26 +214,6 @@ function createWriteStream(path, options) {
 // ---------------------------------------------------------------------------
 // SYNCHRONOUS FUNCTIONS
 // ---------------------------------------------------------------------------
-
-function closeSync(fd) {
-  const fo = __fobj(fd);
-  if (fo) {
-    let ret = fo.vfs.close(fo.id);
-    if (ret > -1) {
-      files[fd] = null;
-    }
-  } else {
-    throw new SystemError(-9);
-  }
-}
-
-function existsSync(path) {
-  const vfs = __lookup(path);
-  if (vfs && vfs.stat(vfs.__pathout)) {
-    return true;
-  }
-  return false;
-}
 
 function openSync(path, flags = "r", mode = 0o666) {
   const vfs = __lookup(path);
@@ -251,7 +231,7 @@ function openSync(path, flags = "r", mode = 0o666) {
         vfs_flags = VFS_FLAG_READ | VFS_FLAG_WRITE;
         break;
       case "w":
-        vfs_flags = VFS_FLAG_WRITE;
+        vfs_flags = VFS_FLAG_WRITE | VFS_FLAG_CREATE | VFS_FLAG_TRUNC;
         break;
       case "wx":
       case "xw":
@@ -280,7 +260,6 @@ function openSync(path, flags = "r", mode = 0o666) {
         break;
     }
     let id = vfs.open(vfs.__pathout, vfs_flags, mode);
-    // TODO: if id < 0, id is error code
     let fo = {
       id: id,
       vfs: vfs,
@@ -288,37 +267,79 @@ function openSync(path, flags = "r", mode = 0o666) {
     let fd = __fd(fo);
     return fd;
   }
-  // TODO: if no vfs found, what error should be thrown?
-  // file not found?
-  return -1;
+  throw new SystemError(-2); // ENOENT
 }
 
 function readSync(fd, buffer, offset, length, position) {
-  // return fs_native.readSync(fd, buffer, offset, length, position);
+  const fo = __fobj(fd);
+  if (fo) {
+    return fo.vfs.read(fo.id, buffer, offset, length, position);
+  }
+  throw new SystemError(-9); // EBADF
 }
 
 function readFileSync(path) {
-  // return fs_native.readFileSync(path);
+  const _stat = statSync(path);
+  const buf = new Uint8Array(_stat.size);
+  const fd = openSync(path, 'r');
+  readSync(fd, buf, 0, buf.length, 0);
+  closeSync(fd);
+  return buf;
 }
 
 function writeSync(fd, buffer, offset, length, position) {
-  if (fd < files.length) {
-    const fo = files[fd];
+  const fo = __fobj(fd);
+  if (fo) {
     return fo.vfs.write(fo.id, buffer, offset, length, position);
   }
-  // if invalid fd is given, what error should be thrown?
+  throw new SystemError(-9); // EBADF
 }
 
 function writeFileSync(path, data) {
-  // return fs_native.writeFileSync(path, data);
+  const fd = openSync(path, 'w');
+  writeSync(fd, data, 0, data.length, 0);
+  closeSync(fd);
+}
+
+function closeSync(fd) {
+  const fo = __fobj(fd);
+  if (fo) {
+    fo.vfs.close(fo.id);
+    __files[fd] = null;
+  } else {
+    throw new SystemError(-9); // EBADF
+  }
 }
 
 function unlinkSync(path) {
-  // return fs_native.unlinkSync(path);
+  const vfs = __lookup(path);
+  if (vfs) {
+    vfs.unlink(vfs.__pathout);
+  } else {
+    throw new SystemError(-2); // ENOENT
+  }
 }
 
 function renameSync(oldPath, newPath) {
-  // return fs_native.renameSync(oldPath, newPath);
+  const vfs = __lookup(oldPath);
+  if (vfs) {
+    vfs.rename(oldPath, newPath);
+  } else {
+    throw new SystemError(-2); // ENOENT
+  }
+}
+
+function existsSync(path) {
+  const vfs = __lookup(path);
+  if (vfs) {
+    try { 
+      let _stat = vfs.stat(vfs.__pathout)
+      return _stat ? true : false;
+    } catch (err) {
+      return false;
+    }
+  }
+  return false;
 }
 
 function mkdirSync(path) {
