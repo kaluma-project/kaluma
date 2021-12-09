@@ -24,7 +24,10 @@
     "string": "c",
     "clocks.h": "c",
     "jerryscript.h": "c",
-    "lfs.h": "c"
+    "lfs.h": "c",
+    "__hash_table": "c",
+    "memory": "c",
+    "new": "c"
   },
   "cpplint.filters": ["-build/include_subdir", "-build/header_guard"],
   "C_Cpp.clang_format_fallbackStyle": "Google",

@@ -19,29 +19,43 @@
  * SOFTWARE.
  */
 
-#ifndef __LINUX_H
-#define __LINUX_H
+#include "flash2.h"
 
-#include "jerryscript.h"
+#include <stdlib.h>
+#include <string.h>
 
-#define SYSTEM_ARCH "x86"
-#define SYSTEM_PLATFORM "linux"
+#include "hardware/flash.h"
+#include "hardware/sync.h"
+#include "pico/stdlib.h"
 
-#define KALUMA_FLASH_OFFSET 0
-#define KALUMA_FLASH_BASE KALUMA_FLASH_OFFSET
+// #define KALUMA_BINARY_MAX_SIZE 0x100000
+// #define KALUMA_FLASH_OFFSET 0x100000
+#define KALUMA_FLASH_OFFSET 0x180000
+#define KALUMA_FLASH_BASE XIP_BASE + KALUMA_FLASH_OFFSET;
 #define KALUMA_FLASH_SECTOR_SIZE 4096
 #define KALUMA_FLASH_SECTOR_COUNT 64
 #define KALUMA_FLASH_PAGE_SIZE 256
 
-// #define GPIO_NUM 22
-// #define ADC_NUM 6
-// #define PWM_NUM 6
-// #define I2C_NUM 2
-// #define SPI_NUM 2
-// #define UART_NUM 2
-// #define LED_NUM 1
-// #define BUTTON_NUM 1
+const uint8_t *flash_target = (const uint8_t *)(KALUMA_FLASH_BASE);
 
-void board_init();
+int km_flash2_program(uint32_t sector, uint32_t offset, uint8_t *buffer,
+                      size_t size) {
+  const uint32_t _base =
+      KALUMA_FLASH_BASE + (sector * KALUMA_FLASH_SECTOR_SIZE) + offset;
+  if (_base % KALUMA_FLASH_PAGE_SIZE > 0) {
+    // base should be multiple of KALUMA_FLASH_PAGE_SIZE
+    return -1;
+  }
+  if (size % KALUMA_FLASH_PAGE_SIZE > 0) {
+    // size should be multiple of KALUMA_FLASH_PAGE_SIZE
+    return -1;
+  }
+  flash_range_program(_base, buffer, size);
+  return 0;
+}
 
-#endif /* __LINUX_H */
+int km_flash2_erase(uint32_t sector, size_t count) {
+  flash_range_erase(KALUMA_FLASH_BASE + (sector * KALUMA_FLASH_SECTOR_SIZE),
+                    count * KALUMA_FLASH_SECTOR_SIZE);
+  return 0;
+}

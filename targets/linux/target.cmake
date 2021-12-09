@@ -46,7 +46,7 @@ project(kaluma-project C CXX ASM)
 set(OUTPUT_TARGET kaluma)
 set(TARGET_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 set(TARGET_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
-set(BOARD_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/boards/${BOARD})
+set(BOARD_DIR ${CMAKE_CURRENT_LIST_DIR}/boards/${BOARD})
 
 set(SOURCES
   ${SOURCES}
@@ -56,13 +56,15 @@ set(SOURCES
   ${TARGET_SRC_DIR}/pwm.c
   ${TARGET_SRC_DIR}/tty.c
   ${TARGET_SRC_DIR}/flash.c
+  ${TARGET_SRC_DIR}/flash2.c
   ${TARGET_SRC_DIR}/storage.c
   ${TARGET_SRC_DIR}/uart.c
   ${TARGET_SRC_DIR}/i2c.c
   ${TARGET_SRC_DIR}/spi.c
-  ${TARGET_SRC_DIR}/main.c)
+  ${TARGET_SRC_DIR}/main.c
+  ${BOARD_DIR}/board.c)
 
-include_directories(${TARGET_INC_DIR} ${BOARD_INC_DIR})
+include_directories(${TARGET_INC_DIR} ${BOARD_DIR})
 
 set(TARGET_HEAPSIZE 1024)
 set(JERRY_TOOLCHAIN toolchain_linux_i686.cmake)

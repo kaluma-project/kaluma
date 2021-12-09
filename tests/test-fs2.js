@@ -1,11 +1,14 @@
 const { test, start, expect } = require("__ujest");
 const { VFSLittleFS } = require("vfs_lfs");
-const { RAMBlockDev } = require("__test_utils");
+
 const fs = require("fs");
 
-const vfs1 = new VFSLittleFS(new RAMBlockDev());
-const vfs2 = new VFSLittleFS(new RAMBlockDev());
-const vfs3 = new VFSLittleFS(new RAMBlockDev());
+const bd1 = new global.FlashBD(0, 16);
+const bd2 = new global.FlashBD(16, 16);
+const bd3 = new global.FlashBD(32, 16);
+const vfs1 = new VFSLittleFS(bd1);
+const vfs2 = new VFSLittleFS(bd2);
+const vfs3 = new VFSLittleFS(bd3);
 
 function init_fs() {
   fs.__vfs = [];
@@ -129,7 +132,7 @@ test("[fs] chdir()", (done) => {
 
 test("[fs] readdirSync()", (done) => {
   init_fs();
-  const _vfs = new VFSLittleFS(new RAMBlockDev());
+  const _vfs = new VFSLittleFS(new global.FlashBD(48, 16));
   fs.mount("/sd/dev1", _vfs);
   let ls = [];
 

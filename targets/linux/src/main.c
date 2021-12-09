@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "board.h"
 #include "gpio.h"
 #include "io.h"
 #include "jerryscript.h"

@@ -1317,6 +1317,7 @@ static void run_startup_module() {
 }
 
 static void run_board_module() {
+  board_init();
   jerry_value_t res = jerry_exec_snapshot((const uint32_t *)module_board_code,
                                           module_board_size, 0,
                                           JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);

@@ -19,30 +19,18 @@
  * SOFTWARE.
  */
 
-#ifndef __RP2_PICO_H
-#define __RP2_PICO_H
+#include "board.h"
 
+#include <stdlib.h>
+
+#include "err.h"
 #include "jerryscript.h"
 
-#define SYSTEM_ARCH "cortex-m0-plus"
-#define SYSTEM_PLATFORM "rp2"
-
-#define GPIO_NUM 29  // GPIO 0 - 28
-// #define ADC_NUM 3
-#define PWM_NUM 27
-#define I2C_NUM 2
-#define SPI_NUM 2
-#define UART_NUM 2
-// #define LED_NUM 1
-// #define BUTTON_NUM 0
-#define PIO_NUM 2
-#define PIO_SM_NUM 4
-
-#define ADC_RESOLUTION_BIT 12
-#define PWM_CLK_REF 1250
-#define I2C_MAX_CLOCK 1000000
-#define SCR_LOAD_GPIO 22  // GPIO 22
-
-jerry_value_t board_init();
-
-#endif /* __RP2_PICO_H */
+/**
+ * Initialize board
+ */
+jerry_value_t board_init() {
+  ttyp_printf("board_init\r\n");
+  jerry_value_t exports = jerry_create_object();
+  return exports;
+}

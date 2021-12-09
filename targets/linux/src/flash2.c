@@ -19,30 +19,41 @@
  * SOFTWARE.
  */
 
-#ifndef __RP2_PICO_H
-#define __RP2_PICO_H
+#include "flash2.h"
 
-#include "jerryscript.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define SYSTEM_ARCH "cortex-m0-plus"
-#define SYSTEM_PLATFORM "rp2"
+// #define KALUMA_BINARY_MAX_SIZE 0x100000
+// #define KALUMA_FLASH_OFFSET 0x100000
+#define KALUMA_FLASH_OFFSET 0
+#define KALUMA_FLASH_BASE KALUMA_FLASH_OFFSET
+#define KALUMA_FLASH_SECTOR_SIZE 4096
+#define KALUMA_FLASH_SECTOR_COUNT 64
+#define KALUMA_FLASH_PAGE_SIZE 128
 
-#define GPIO_NUM 29  // GPIO 0 - 28
-// #define ADC_NUM 3
-#define PWM_NUM 27
-#define I2C_NUM 2
-#define SPI_NUM 2
-#define UART_NUM 2
-// #define LED_NUM 1
-// #define BUTTON_NUM 0
-#define PIO_NUM 2
-#define PIO_SM_NUM 4
+//  Flash implementation on RAM
 
-#define ADC_RESOLUTION_BIT 12
-#define PWM_CLK_REF 1250
-#define I2C_MAX_CLOCK 1000000
-#define SCR_LOAD_GPIO 22  // GPIO 22
+const size_t __flash_size =
+    KALUMA_FLASH_SECTOR_SIZE * KALUMA_FLASH_SECTOR_COUNT;
+static uint8_t __flash_buffer[__flash_size];
 
-jerry_value_t board_init();
+const uint8_t *flash_target = (const uint8_t *)(__flash_buffer);
 
-#endif /* __RP2_PICO_H */
+int km_flash2_program(uint32_t sector, uint32_t offset, uint8_t *buffer,
+                      size_t size) {
+  const uint32_t _base = (sector * KALUMA_FLASH_SECTOR_SIZE) + offset;
+  for (int i = 0; i < size; i++) {
+    __flash_buffer[_base + i] = buffer[i];
+  }
+  return 0;
+}
+
+int km_flash2_erase(uint32_t sector, size_t count) {
+  const uint32_t _base = sector * KALUMA_FLASH_SECTOR_SIZE;
+  for (int i = 0; i < (count * KALUMA_FLASH_SECTOR_SIZE); i++) {
+    __flash_buffer[_base + i] = 0;
+  }
+  return 0;
+}

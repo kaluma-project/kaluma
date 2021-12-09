@@ -19,30 +19,34 @@
  * SOFTWARE.
  */
 
-#ifndef __RP2_PICO_H
-#define __RP2_PICO_H
+#ifndef __KM_FLASH2_H
+#define __KM_FLASH2_H
 
-#include "jerryscript.h"
+#include <stdint.h>
+#include <stdio.h>
 
-#define SYSTEM_ARCH "cortex-m0-plus"
-#define SYSTEM_PLATFORM "rp2"
+extern const uint8_t *flash_target;
 
-#define GPIO_NUM 29  // GPIO 0 - 28
-// #define ADC_NUM 3
-#define PWM_NUM 27
-#define I2C_NUM 2
-#define SPI_NUM 2
-#define UART_NUM 2
-// #define LED_NUM 1
-// #define BUTTON_NUM 0
-#define PIO_NUM 2
-#define PIO_SM_NUM 4
+/**
+ * @brief Program data to internal flash
+ *
+ * @param sector sector number to program
+ * @param offset offset to the sector
+ * @param buffer buffer to write
+ * @param size size of buffer to write (should be multple of
+ * KALUMA_FLASH_PAGE_SIZE)
+ * @return negative on error
+ */
+int km_flash2_program(uint32_t sector, uint32_t offset, uint8_t *buffer,
+                      size_t size);
 
-#define ADC_RESOLUTION_BIT 12
-#define PWM_CLK_REF 1250
-#define I2C_MAX_CLOCK 1000000
-#define SCR_LOAD_GPIO 22  // GPIO 22
+/**
+ * @brief Erase data in internal flash
+ *
+ * @param sector sector number to erase
+ * @param count how many sectors to erase from the sector number
+ * @return negative on error
+ */
+int km_flash2_erase(uint32_t sector, size_t count);
 
-jerry_value_t board_init();
-
-#endif /* __RP2_PICO_H */
+#endif /* __KM_FLASH2_H */
