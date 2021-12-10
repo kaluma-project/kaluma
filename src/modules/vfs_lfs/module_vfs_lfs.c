@@ -184,6 +184,10 @@ JERRYXX_FUN(vfs_lfs_mount_fn) {
 
   // mount vfs
   int ret = lfs_mount(&vfs_handle->lfs, &vfs_handle->config);
+
+  printf("lfs_mount()-->%d\r\n", ret);
+
+  /*
   if (ret < 0) {
     lfs_format(&vfs_handle->lfs, &vfs_handle->config);
     ret = lfs_mount(&vfs_handle->lfs, &vfs_handle->config);
@@ -191,6 +195,7 @@ JERRYXX_FUN(vfs_lfs_mount_fn) {
       return jerry_create_error_from_value(create_system_error(ret), true);
     }
   }
+  */
   return jerry_create_undefined();
 }
 
@@ -499,7 +504,8 @@ JERRYXX_FUN(vfs_lfs_readdir_fn) {
     }
     // add to array except '.', '..'
     if (strcmp(info.name, ".") != 0 && strcmp(info.name, "..") != 0) {
-      jerry_value_t item = jerry_create_string((jerry_char_t *)info.name);
+      jerry_value_t item =
+          jerry_create_string((const jerry_char_t *)(info.name));
       jerryxx_array_push_string(files, item);
       jerry_release_value(item);
     }

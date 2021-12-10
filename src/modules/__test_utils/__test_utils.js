@@ -4,7 +4,7 @@ class RAMBlockDev {
     this.blockcount = 16;
     this.buffersize = 256;
     this.buf = new Uint8Array(this.blocksize * this.blockcount);
-    this.buf.fill(0);
+    this.buf.fill(255);
   }
 
   read(block, buffer, offset = 0) {
@@ -37,7 +37,7 @@ class RAMBlockDev {
       case 6: // erase block
         let p = arg * this.blocksize;
         for (let i = p; i < p + this.blocksize; i++) {
-          this.buf[i] = 0;
+          this.buf[i] = 255;
         }
         return 0;
       case 7: // buffer size

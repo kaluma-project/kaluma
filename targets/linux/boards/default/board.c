@@ -78,7 +78,7 @@ JERRYXX_FUN(flashbd_read_fn) {
   int base = jerryxx_get_property_number(JERRYXX_GET_THIS, "base", 0);
   int size = jerryxx_get_property_number(JERRYXX_GET_THIS, "size", 0);
   for (int i = 0; i < buffer_length; i++) {
-    buffer_pointer[i] = flash_target[((base + block) * size) + offset + i];
+    buffer_pointer[i] = km_flash_target[((base + block) * size) + offset + i];
   }
   return jerry_create_undefined();
 }

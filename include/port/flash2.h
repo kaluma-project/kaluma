@@ -25,7 +25,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-extern const uint8_t *flash_target;
+extern const uint8_t *km_flash_target;
 
 /**
  * @brief Program data to internal flash

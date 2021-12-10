@@ -29,42 +29,41 @@
 #include "hardware/sync.h"
 #include "pico/stdlib.h"
 
-const uint8_t *flash_target = (const uint8_t *)KALUMA_FLASH_BASE;
+const uint8_t *km_flash_target = (const uint8_t *)KALUMA_FLASH_BASE;
 
 int km_flash2_program(uint32_t sector, uint32_t offset, uint8_t *buffer,
                       size_t size) {
   const uint32_t _base =
-      KALUMA_FLASH_BASE + (sector * KALUMA_FLASH_SECTOR_SIZE) + offset;
+      KALUMA_FLASH_OFFSET + (sector * KALUMA_FLASH_SECTOR_SIZE) + offset;
+
+  // base should be multiple of KALUMA_FLASH_PAGE_SIZE
   if (_base % KALUMA_FLASH_PAGE_SIZE > 0) {
-    // base should be multiple of KALUMA_FLASH_PAGE_SIZE
-    return -1;
-  }
-  if (size % KALUMA_FLASH_PAGE_SIZE > 0) {
-    // size should be multiple of KALUMA_FLASH_PAGE_SIZE
     return -1;
   }
 
-  printf("km_flash2_program: sector=%ld, offset=%ld, size=%d\r\n", sector,
-         offset, size);
-  printf("flash_range_program: base=%ld, size=%d\r\n", _base, size);
+  // size should be multiple of KALUMA_FLASH_PAGE_SIZE
+  if (size % KALUMA_FLASH_PAGE_SIZE > 0) {
+    return -1;
+  }
 
   uint32_t saved_irq = save_and_disable_interrupts();
   flash_range_program(_base, buffer, size);
   restore_interrupts(saved_irq);
-
   return 0;
 }
 
 int km_flash2_erase(uint32_t sector, size_t count) {
   const uint32_t _base =
-      KALUMA_FLASH_BASE + (sector * KALUMA_FLASH_SECTOR_SIZE);
+      KALUMA_FLASH_OFFSET + (sector * KALUMA_FLASH_SECTOR_SIZE);
   const uint32_t _size = count * KALUMA_FLASH_SECTOR_SIZE;
-  if (_base % KALUMA_FLASH_PAGE_SIZE > 0) {
-    // _base should be multiple of KALUMA_FLASH_PAGE_SIZE
+
+  // _base should be multiple of KALUMA_FLASH_PAGE_SIZE
+  if (_base % KALUMA_FLASH_SECTOR_SIZE > 0) {
     return -1;
   }
-  if (_size % KALUMA_FLASH_PAGE_SIZE > 0) {
-    // _size should be multiple of KALUMA_FLASH_PAGE_SIZE
+
+  // _size should be multiple of KALUMA_FLASH_PAGE_SIZE
+  if (_size % KALUMA_FLASH_SECTOR_SIZE > 0) {
     return -1;
   }
 

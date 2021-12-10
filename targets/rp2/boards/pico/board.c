@@ -25,6 +25,8 @@
 
 #include "err.h"
 #include "flash2.h"
+#include "hardware/flash.h"
+#include "hardware/sync.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
 
@@ -73,11 +75,13 @@ JERRYXX_FUN(flashbd_read_fn) {
   uint8_t *buffer_pointer = jerry_get_arraybuffer_pointer(arrbuf);
   jerry_release_value(arrbuf);
 
+  printf("bd.read(%d, %d, %d)\r\n", block, buffer_length, offset);
+
   // read from flash
   int base = jerryxx_get_property_number(JERRYXX_GET_THIS, "base", 0);
   int size = jerryxx_get_property_number(JERRYXX_GET_THIS, "size", 0);
   for (int i = 0; i < buffer_length; i++) {
-    buffer_pointer[i] = flash_target[((base + block) * size) + offset + i];
+    buffer_pointer[i] = km_flash_target[((base + block) * size) + offset + i];
   }
   return jerry_create_undefined();
 }
@@ -106,6 +110,8 @@ JERRYXX_FUN(flashbd_write_fn) {
   uint8_t *buffer_pointer = jerry_get_arraybuffer_pointer(arrbuf);
   jerry_release_value(arrbuf);
 
+  printf("bd.write(%d, %d, %d)\r\n", block, buffer_length, offset);
+
   // write to buffer
   int base = jerryxx_get_property_number(JERRYXX_GET_THIS, "base", 0);
   km_flash2_program(base + block, offset, buffer_pointer, buffer_length);
@@ -126,6 +132,8 @@ JERRYXX_FUN(flashbd_ioctl_fn) {
   int arg = JERRYXX_GET_ARG_NUMBER_OPT(1, 0);
   int base = (int)jerryxx_get_property_number(JERRYXX_GET_THIS, "base", 0);
 
+  printf("bd.ioctl(%d, %d)\r\n", op, arg);
+
   switch (op) {
     case 1:  // init
       return jerry_create_number(0);
@@ -142,8 +150,8 @@ JERRYXX_FUN(flashbd_ioctl_fn) {
     case 6:  // erase block
       km_flash2_erase(base + arg, 1);
       return jerry_create_number(0);
-    case 7:                             // buffer size
-      return jerry_create_number(256);  // flash page size
+    case 7:  // buffer size (= flash page size)
+      return jerry_create_number(256);
     default:
       return jerry_create_number(-1);
   }
