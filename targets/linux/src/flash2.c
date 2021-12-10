@@ -25,13 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// #define KALUMA_BINARY_MAX_SIZE 0x100000
-// #define KALUMA_FLASH_OFFSET 0x100000
-#define KALUMA_FLASH_OFFSET 0
-#define KALUMA_FLASH_BASE KALUMA_FLASH_OFFSET
-#define KALUMA_FLASH_SECTOR_SIZE 4096
-#define KALUMA_FLASH_SECTOR_COUNT 64
-#define KALUMA_FLASH_PAGE_SIZE 128
+#include "board.h"
 
 //  Flash implementation on RAM
 

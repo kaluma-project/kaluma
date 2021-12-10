@@ -150,9 +150,10 @@ JERRYXX_FUN(vfslfs_ctor_fn) {
   vfs_handle->config.prog = bd_prog;
   vfs_handle->config.erase = bd_erase;
   vfs_handle->config.sync = bd_sync;
-  const int unit_size = 16;
   int block_count = bd_ioctl(vfs_handle->blockdev_js, 4, 0);
   int block_size = bd_ioctl(vfs_handle->blockdev_js, 5, 0);
+  int unit_size = bd_ioctl(vfs_handle->blockdev_js, 7, 0);
+  ;
   vfs_handle->config.read_size = unit_size;
   vfs_handle->config.prog_size = unit_size;
   vfs_handle->config.block_size = block_size;

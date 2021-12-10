@@ -8,6 +8,8 @@
         "${workspaceRoot}/src/gen",
         "${workspaceRoot}/src/modules",
         "${workspaceRoot}/targets/stm32/boards/kameleon-core",
+        "${workspaceRoot}/targets/linux/boards/default",
+        "${workspaceRoot}/targets/rp2/boards/pico",
         "${workspaceRoot}/lib/jerryscript/**",
         "${workspaceRoot}/lib/jerryscript/jerry-core/include",
         "${workspaceRoot}/lib/pico-sdk/**",
