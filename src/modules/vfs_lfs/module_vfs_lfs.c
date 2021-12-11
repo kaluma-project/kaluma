@@ -28,7 +28,7 @@
 #include "jerryscript.h"
 #include "jerryxx.h"
 #include "lfs.h"
-#include "tty.h"  // for tty_printf()
+#include "magic_strings.h"
 #include "vfs_lfs.h"
 #include "vfs_lfs_magic_strings.h"
 
@@ -135,15 +135,15 @@ static int bd_sync(const struct lfs_config *c) {
  */
 JERRYXX_FUN(vfslfs_ctor_fn) {
   // check and get args
-  JERRYXX_CHECK_ARG_OBJECT(0, "blockdev")
-  jerry_value_t blockdev = JERRYXX_GET_ARG(0);
+  JERRYXX_CHECK_ARG_OBJECT(0, "blkdev")
+  jerry_value_t blkdev = JERRYXX_GET_ARG(0);
 
   // initialize vfs native handle
   vfs_lfs_handle_t *vfs_handle =
       (vfs_lfs_handle_t *)malloc(sizeof(vfs_lfs_handle_t));
   vfs_lfs_handle_init(vfs_handle);
   vfs_lfs_handle_add(vfs_handle);
-  vfs_handle->blockdev_js = blockdev;
+  vfs_handle->blockdev_js = blkdev;
   jerry_acquire_value(vfs_handle->blockdev_js);
   vfs_handle->config.context = vfs_handle;
   vfs_handle->config.read = bd_read;
@@ -153,7 +153,6 @@ JERRYXX_FUN(vfslfs_ctor_fn) {
   int block_count = bd_ioctl(vfs_handle->blockdev_js, 4, 0);
   int block_size = bd_ioctl(vfs_handle->blockdev_js, 5, 0);
   int unit_size = bd_ioctl(vfs_handle->blockdev_js, 7, 0);
-  ;
   vfs_handle->config.read_size = unit_size;
   vfs_handle->config.prog_size = unit_size;
   vfs_handle->config.block_size = block_size;
@@ -554,7 +553,7 @@ jerry_value_t module_vfs_lfs_init() {
   /* VFSLittleFS class */
   jerry_value_t vfs_lfs_ctor = jerry_create_external_function(vfslfs_ctor_fn);
   jerry_value_t vfs_lfs_prototype = jerry_create_object();
-  jerryxx_set_property(vfs_lfs_ctor, "prototype", vfs_lfs_prototype);
+  jerryxx_set_property(vfs_lfs_ctor, MSTR_PROTOTYPE, vfs_lfs_prototype);
   jerryxx_set_property_function(vfs_lfs_prototype, MSTR_VFS_LFS_MKFS,
                                 vfs_lfs_mkfs_fn);
   jerryxx_set_property_function(vfs_lfs_prototype, MSTR_VFS_LFS_MOUNT,

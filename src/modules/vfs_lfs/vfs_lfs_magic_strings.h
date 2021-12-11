@@ -39,5 +39,18 @@
 #define MSTR_VFS_LFS_BLOCKDEV_READ "read"
 #define MSTR_VFS_LFS_BLOCKDEV_WRITE "write"
 #define MSTR_VFS_LFS_BLOCKDEV_IOCTL "ioctl"
+#define MSTR_VFS_LFS_BLKDEV "blkdev"
+#define MSTR_VFS_LFS_PATH "path"
+#define MSTR_VFS_LFS_OLD_PATH "oldPath"
+#define MSTR_VFS_LFS_NEW_PATH "newPath"
+#define MSTR_VFS_LFS_FLAGS "flags"
+#define MSTR_VFS_LFS_MODE "mode"
+#define MSTR_VFS_LFS_ID "id"
+#define MSTR_VFS_LFS_BUFFER "buffer"
+#define MSTR_VFS_LFS_OFFSET "offset"
+#define MSTR_VFS_LFS_LENGTH "length"
+#define MSTR_VFS_LFS_POSITION "position"
+#define MSTR_VFS_LFS_TYPE "type"
+#define MSTR_VFS_LFS_SIZE "size"
 
 #endif /* __VFS_LFS_MAGIC_STRINGS_H */

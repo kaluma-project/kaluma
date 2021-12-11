@@ -67,8 +67,6 @@ int km_flash2_erase(uint32_t sector, size_t count) {
     return -1;
   }
 
-  printf("flash_range_erase: base=%ld, size=%ld\r\n", _base, _size);
-
   uint32_t saved_irq = save_and_disable_interrupts();
   flash_range_erase(_base, _size);
   restore_interrupts(saved_irq);
