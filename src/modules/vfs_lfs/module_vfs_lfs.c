@@ -173,6 +173,24 @@ JERRYXX_FUN(vfslfs_ctor_fn) {
 }
 
 /**
+ * VFSLittleFS.prototype.mkfs()
+ */
+JERRYXX_FUN(vfs_lfs_mkfs_fn) {
+  // get native vfs handle
+  JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_lfs_handle_t, vfs_handle_info);
+
+  // initialize block device
+  bd_ioctl(vfs_handle->blockdev_js, 1, 0);
+
+  // make fs (format)
+  int ret = lfs_format(&vfs_handle->lfs, &vfs_handle->config);
+  if (ret < 0) {
+    return jerry_create_error_from_value(create_system_error(ret), true);
+  }
+  return jerry_create_undefined();
+}
+
+/**
  * VFSLittleFS.prototype.mount()
  */
 JERRYXX_FUN(vfs_lfs_mount_fn) {
@@ -184,18 +202,9 @@ JERRYXX_FUN(vfs_lfs_mount_fn) {
 
   // mount vfs
   int ret = lfs_mount(&vfs_handle->lfs, &vfs_handle->config);
-
-  printf("lfs_mount()-->%d\r\n", ret);
-
-  /*
   if (ret < 0) {
-    lfs_format(&vfs_handle->lfs, &vfs_handle->config);
-    ret = lfs_mount(&vfs_handle->lfs, &vfs_handle->config);
-    if (ret < 0) {
-      return jerry_create_error_from_value(create_system_error(ret), true);
-    }
+    return jerry_create_error_from_value(create_system_error(ret), true);
   }
-  */
   return jerry_create_undefined();
 }
 
@@ -546,6 +555,8 @@ jerry_value_t module_vfs_lfs_init() {
   jerry_value_t vfs_lfs_ctor = jerry_create_external_function(vfslfs_ctor_fn);
   jerry_value_t vfs_lfs_prototype = jerry_create_object();
   jerryxx_set_property(vfs_lfs_ctor, "prototype", vfs_lfs_prototype);
+  jerryxx_set_property_function(vfs_lfs_prototype, MSTR_VFS_LFS_MKFS,
+                                vfs_lfs_mkfs_fn);
   jerryxx_set_property_function(vfs_lfs_prototype, MSTR_VFS_LFS_MOUNT,
                                 vfs_lfs_mount_fn);
   jerryxx_set_property_function(vfs_lfs_prototype, MSTR_VFS_LFS_UNMOUNT,

@@ -6,6 +6,9 @@ const fs = require("fs");
 const vfs1 = new VFSLittleFS(new RAMBlockDev());
 const vfs2 = new VFSLittleFS(new RAMBlockDev());
 const vfs3 = new VFSLittleFS(new RAMBlockDev());
+vfs1.mkfs();
+vfs2.mkfs();
+vfs3.mkfs();
 
 function init_fs() {
   fs.__vfs = [];
@@ -130,6 +133,7 @@ test("[fs] chdir()", (done) => {
 test("[fs] readdirSync()", (done) => {
   init_fs();
   const _vfs = new VFSLittleFS(new RAMBlockDev());
+  _vfs.mkfs();
   fs.mount("/sd/dev1", _vfs);
   let ls = [];
 

@@ -1323,6 +1323,10 @@ static void run_board_module() {
                                           JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
   jerry_value_t this_val = jerry_create_undefined();
   jerry_value_t ret_val = jerry_call_function(res, this_val, NULL, 0);
+  if (jerry_value_is_error(ret_val)) {
+    // print error
+    jerryxx_print_error(ret_val, true);
+  }
   jerry_release_value(ret_val);
   jerry_release_value(this_val);
   jerry_release_value(res);

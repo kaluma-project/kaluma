@@ -75,7 +75,7 @@ JERRYXX_FUN(flashbd_read_fn) {
   uint8_t *buffer_pointer = jerry_get_arraybuffer_pointer(arrbuf);
   jerry_release_value(arrbuf);
 
-  printf("bd.read(%d, %d, %d)\r\n", block, buffer_length, offset);
+  // printf("bd.read(%d, %d, %d)\r\n", block, buffer_length, offset);
 
   // read from flash
   int base = jerryxx_get_property_number(JERRYXX_GET_THIS, "base", 0);
@@ -110,7 +110,7 @@ JERRYXX_FUN(flashbd_write_fn) {
   uint8_t *buffer_pointer = jerry_get_arraybuffer_pointer(arrbuf);
   jerry_release_value(arrbuf);
 
-  printf("bd.write(%d, %d, %d)\r\n", block, buffer_length, offset);
+  // printf("bd.write(%d, %d, %d)\r\n", block, buffer_length, offset);
 
   // write to buffer
   int base = jerryxx_get_property_number(JERRYXX_GET_THIS, "base", 0);
@@ -132,7 +132,7 @@ JERRYXX_FUN(flashbd_ioctl_fn) {
   int arg = JERRYXX_GET_ARG_NUMBER_OPT(1, 0);
   int base = (int)jerryxx_get_property_number(JERRYXX_GET_THIS, "base", 0);
 
-  printf("bd.ioctl(%d, %d)\r\n", op, arg);
+  // printf("bd.ioctl(%d, %d)\r\n", op, arg);
 
   switch (op) {
     case 1:  // init

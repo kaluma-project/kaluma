@@ -23,6 +23,7 @@
 #define __VFS_LFS_MAGIC_STRINGS_H
 
 #define MSTR_VFS_LFS_VFSLITTLEFS "VFSLittleFS"
+#define MSTR_VFS_LFS_MKFS "mkfs"
 #define MSTR_VFS_LFS_MOUNT "mount"
 #define MSTR_VFS_LFS_UNMOUNT "unmount"
 #define MSTR_VFS_LFS_OPEN "open"

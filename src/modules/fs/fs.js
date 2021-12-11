@@ -50,6 +50,7 @@ interface BlockDev {
 
 interface VFS {
   constructor(blockdev)
+  mkfs()
   mount()
   unmount()
   open(path: string, flags: number, mode: number): number (id)
