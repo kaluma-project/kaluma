@@ -44,8 +44,7 @@ static const jerry_object_native_info_t vfs_handle_info = {
 
 static int blkdev_ioctl(jerry_value_t blkdev_js, int op, int arg) {
   // km_tty_printf("blkdev_ioctl(%d, %d)\r\n", op, arg);
-  jerry_value_t ioctl_js =
-      jerryxx_get_property(blkdev_js, MSTR_VFS_LFS_BLOCKDEV_IOCTL);
+  jerry_value_t ioctl_js = jerryxx_get_property(blkdev_js, "ioctl");
   jerry_value_t op_js = jerry_create_number(op);
   jerry_value_t arg_js = jerry_create_number(arg);
   jerry_value_t args[2] = {op_js, arg_js};
@@ -72,8 +71,7 @@ static int blkdev_read(const struct lfs_config *c, lfs_block_t block,
       jerry_create_arraybuffer_external(size, (uint8_t *)buffer, NULL);
   jerry_value_t buffer_js = jerry_create_typedarray_for_arraybuffer(
       JERRY_TYPEDARRAY_UINT8, arraybuffer);
-  jerry_value_t read_js =
-      jerryxx_get_property(vfs_handle->blkdev_js, MSTR_VFS_LFS_BLOCKDEV_READ);
+  jerry_value_t read_js = jerryxx_get_property(vfs_handle->blkdev_js, "read");
   jerry_value_t block_js = jerry_create_number(block);
   jerry_value_t offset_js = jerry_create_number(off);
   jerry_value_t args[3] = {block_js, buffer_js, offset_js};
@@ -98,8 +96,7 @@ static int blkdev_prog(const struct lfs_config *c, lfs_block_t block,
       jerry_create_arraybuffer_external(size, (uint8_t *)buffer, NULL);
   jerry_value_t buffer_js = jerry_create_typedarray_for_arraybuffer(
       JERRY_TYPEDARRAY_UINT8, arraybuffer);
-  jerry_value_t write_js =
-      jerryxx_get_property(vfs_handle->blkdev_js, MSTR_VFS_LFS_BLOCKDEV_WRITE);
+  jerry_value_t write_js = jerryxx_get_property(vfs_handle->blkdev_js, "write");
   jerry_value_t block_js = jerry_create_number(block);
   jerry_value_t offset_js = jerry_create_number(off);
   jerry_value_t args[3] = {block_js, buffer_js, offset_js};

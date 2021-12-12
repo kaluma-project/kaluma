@@ -31,7 +31,7 @@
 #include "jerryxx.h"
 
 /**
- * FlashBD (block device) constructor
+ * Flash (block device) constructor
  * args:
  *   base {number} base sector number
  *   count (number)
@@ -52,7 +52,7 @@ JERRYXX_FUN(flashbd_ctor_fn) {
 }
 
 /**
- * FlashBD.prototype.read()
+ * Flash.prototype.read()
  * args:
  *   block {number}
  *   buffer {Uint8Array}
@@ -87,7 +87,7 @@ JERRYXX_FUN(flashbd_read_fn) {
 }
 
 /**
- * FlashBD.prototype.write()
+ * Flash.prototype.write()
  * args:
  *   block {number}
  *   buffer {Uint8Array}
@@ -119,7 +119,7 @@ JERRYXX_FUN(flashbd_write_fn) {
 }
 
 /**
- * FlashBD.prototype.ioctl()
+ * Flash.prototype.ioctl()
  * args:
  *   op {number}
  *   arg {number}
@@ -161,7 +161,7 @@ JERRYXX_FUN(flashbd_ioctl_fn) {
  * Initialize board
  */
 void board_init() {
-  /* FlashBD class */
+  /* Flash class */
   jerry_value_t flashbd_ctor = jerry_create_external_function(flashbd_ctor_fn);
   jerry_value_t flashbd_prototype = jerry_create_object();
   jerryxx_set_property(flashbd_ctor, "prototype", flashbd_prototype);
@@ -171,7 +171,7 @@ void board_init() {
   jerry_release_value(flashbd_prototype);
 
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property(global, "FlashBD", flashbd_ctor);
+  jerryxx_set_property(global, "Flash", flashbd_ctor);
   jerry_release_value(global);
   jerry_release_value(flashbd_ctor);
 }

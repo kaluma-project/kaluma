@@ -8,5 +8,5 @@ global.board.LED = 25;
 const fs = global.require('fs');
 const {VFSLittleFS} = global.require('vfs_lfs');
 fs.register('lfs', VFSLittleFS);
-const bd = new global.FlashBD(0, 128);
+const bd = new global.Flash(0, 128);
 fs.mount('/', bd, 'lfs', true);
