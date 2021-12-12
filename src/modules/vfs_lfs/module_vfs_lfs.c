@@ -34,7 +34,7 @@
 
 static void vfs_handle_freecb(void *handle) {
   vfs_lfs_handle_t *vfs_handle = (vfs_lfs_handle_t *)handle;
-  jerry_release_value(vfs_handle->blockdev_js);
+  jerry_release_value(vfs_handle->blkdev_js);
   vfs_lfs_handle_remove(handle);
   free(handle);
 }
@@ -42,14 +42,14 @@ static void vfs_handle_freecb(void *handle) {
 static const jerry_object_native_info_t vfs_handle_info = {
     .free_cb = vfs_handle_freecb};
 
-static int bd_ioctl(jerry_value_t blockdev_js, int op, int arg) {
-  // km_tty_printf("bd_ioctl(%d, %d)\r\n", op, arg);
+static int blkdev_ioctl(jerry_value_t blkdev_js, int op, int arg) {
+  // km_tty_printf("blkdev_ioctl(%d, %d)\r\n", op, arg);
   jerry_value_t ioctl_js =
-      jerryxx_get_property(blockdev_js, MSTR_VFS_LFS_BLOCKDEV_IOCTL);
+      jerryxx_get_property(blkdev_js, MSTR_VFS_LFS_BLOCKDEV_IOCTL);
   jerry_value_t op_js = jerry_create_number(op);
   jerry_value_t arg_js = jerry_create_number(arg);
   jerry_value_t args[2] = {op_js, arg_js};
-  jerry_value_t ret = jerry_call_function(ioctl_js, blockdev_js, args, 2);
+  jerry_value_t ret = jerry_call_function(ioctl_js, blkdev_js, args, 2);
   int ret_value = 0;
   if (jerry_value_is_number(ret)) {
     ret_value = (int)jerry_get_number_value(ret);
@@ -58,27 +58,27 @@ static int bd_ioctl(jerry_value_t blockdev_js, int op, int arg) {
   jerry_release_value(arg_js);
   jerry_release_value(op_js);
   jerry_release_value(ioctl_js);
-  // km_tty_printf("bd_ioctl() ->  %d\r\n", ret_value);
+  // km_tty_printf("blkdev_ioctl() ->  %d\r\n", ret_value);
   return ret_value;
 }
 
-static int bd_read(const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
-                   void *buffer, lfs_size_t size) {
+static int blkdev_read(const struct lfs_config *c, lfs_block_t block,
+                       lfs_off_t off, void *buffer, lfs_size_t size) {
   vfs_lfs_handle_t *vfs_handle = (vfs_lfs_handle_t *)c->context;
   // call blockdev.read(block, buffer, offset)
-  // km_tty_printf("bd_read(lfs_config, %d, %d, buffer, %d)\r\n", block, off,
-  //              size);
+  // km_tty_printf("blkdev_read(lfs_config, %d, %d, buffer, %d)\r\n", block,
+  // off, size);
   jerry_value_t arraybuffer =
       jerry_create_arraybuffer_external(size, (uint8_t *)buffer, NULL);
   jerry_value_t buffer_js = jerry_create_typedarray_for_arraybuffer(
       JERRY_TYPEDARRAY_UINT8, arraybuffer);
   jerry_value_t read_js =
-      jerryxx_get_property(vfs_handle->blockdev_js, MSTR_VFS_LFS_BLOCKDEV_READ);
+      jerryxx_get_property(vfs_handle->blkdev_js, MSTR_VFS_LFS_BLOCKDEV_READ);
   jerry_value_t block_js = jerry_create_number(block);
   jerry_value_t offset_js = jerry_create_number(off);
   jerry_value_t args[3] = {block_js, buffer_js, offset_js};
   jerry_value_t ret =
-      jerry_call_function(read_js, vfs_handle->blockdev_js, args, 3);
+      jerry_call_function(read_js, vfs_handle->blkdev_js, args, 3);
   jerry_release_value(ret);
   jerry_release_value(offset_js);
   jerry_release_value(block_js);
@@ -88,23 +88,23 @@ static int bd_read(const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
   return 0;
 }
 
-static int bd_prog(const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
-                   const void *buffer, lfs_size_t size) {
+static int blkdev_prog(const struct lfs_config *c, lfs_block_t block,
+                       lfs_off_t off, const void *buffer, lfs_size_t size) {
   vfs_lfs_handle_t *vfs_handle = (vfs_lfs_handle_t *)c->context;
   // call blockdev.write(block, buffer, offset)
-  // km_tty_printf("bd_prog(lfs_config, %d, %d, buffer, %d)\r\n", block, off,
-  //               size);
+  // km_tty_printf("blkdev_prog(lfs_config, %d, %d, buffer, %d)\r\n", block,
+  // off, size);
   jerry_value_t arraybuffer =
       jerry_create_arraybuffer_external(size, (uint8_t *)buffer, NULL);
   jerry_value_t buffer_js = jerry_create_typedarray_for_arraybuffer(
       JERRY_TYPEDARRAY_UINT8, arraybuffer);
-  jerry_value_t write_js = jerryxx_get_property(vfs_handle->blockdev_js,
-                                                MSTR_VFS_LFS_BLOCKDEV_WRITE);
+  jerry_value_t write_js =
+      jerryxx_get_property(vfs_handle->blkdev_js, MSTR_VFS_LFS_BLOCKDEV_WRITE);
   jerry_value_t block_js = jerry_create_number(block);
   jerry_value_t offset_js = jerry_create_number(off);
   jerry_value_t args[3] = {block_js, buffer_js, offset_js};
   jerry_value_t ret =
-      jerry_call_function(write_js, vfs_handle->blockdev_js, args, 3);
+      jerry_call_function(write_js, vfs_handle->blkdev_js, args, 3);
   jerry_release_value(ret);
   jerry_release_value(offset_js);
   jerry_release_value(block_js);
@@ -114,17 +114,17 @@ static int bd_prog(const struct lfs_config *c, lfs_block_t block, lfs_off_t off,
   return 0;
 }
 
-static int bd_erase(const struct lfs_config *c, lfs_block_t block) {
+static int blkdev_erase(const struct lfs_config *c, lfs_block_t block) {
   vfs_lfs_handle_t *vfs_handle = (vfs_lfs_handle_t *)c->context;
-  // km_tty_printf("bd_erase(lfs_config, %d)\r\n", block);
-  bd_ioctl(vfs_handle->blockdev_js, 6, block);
+  // km_tty_printf("blkdev_erase(lfs_config, %d)\r\n", block);
+  blkdev_ioctl(vfs_handle->blkdev_js, 6, block);
   return 0;
 }
 
-static int bd_sync(const struct lfs_config *c) {
+static int blkdev_sync(const struct lfs_config *c) {
   vfs_lfs_handle_t *vfs_handle = (vfs_lfs_handle_t *)c->context;
-  // km_tty_printf("bd_sync(lfs_config)\r\n");
-  bd_ioctl(vfs_handle->blockdev_js, 3, 0);
+  // km_tty_printf("blkdev_sync(lfs_config)\r\n");
+  blkdev_ioctl(vfs_handle->blkdev_js, 3, 0);
   return 0;
 }
 
@@ -143,16 +143,16 @@ JERRYXX_FUN(vfslfs_ctor_fn) {
       (vfs_lfs_handle_t *)malloc(sizeof(vfs_lfs_handle_t));
   vfs_lfs_handle_init(vfs_handle);
   vfs_lfs_handle_add(vfs_handle);
-  vfs_handle->blockdev_js = blkdev;
-  jerry_acquire_value(vfs_handle->blockdev_js);
+  vfs_handle->blkdev_js = blkdev;
+  jerry_acquire_value(vfs_handle->blkdev_js);
   vfs_handle->config.context = vfs_handle;
-  vfs_handle->config.read = bd_read;
-  vfs_handle->config.prog = bd_prog;
-  vfs_handle->config.erase = bd_erase;
-  vfs_handle->config.sync = bd_sync;
-  int block_count = bd_ioctl(vfs_handle->blockdev_js, 4, 0);
-  int block_size = bd_ioctl(vfs_handle->blockdev_js, 5, 0);
-  int unit_size = bd_ioctl(vfs_handle->blockdev_js, 7, 0);
+  vfs_handle->config.read = blkdev_read;
+  vfs_handle->config.prog = blkdev_prog;
+  vfs_handle->config.erase = blkdev_erase;
+  vfs_handle->config.sync = blkdev_sync;
+  int block_count = blkdev_ioctl(vfs_handle->blkdev_js, 4, 0);
+  int block_size = blkdev_ioctl(vfs_handle->blkdev_js, 5, 0);
+  int unit_size = blkdev_ioctl(vfs_handle->blkdev_js, 7, 0);
   vfs_handle->config.read_size = unit_size;
   vfs_handle->config.prog_size = unit_size;
   vfs_handle->config.block_size = block_size;
@@ -179,7 +179,7 @@ JERRYXX_FUN(vfs_lfs_mkfs_fn) {
   JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_lfs_handle_t, vfs_handle_info);
 
   // initialize block device
-  bd_ioctl(vfs_handle->blockdev_js, 1, 0);
+  blkdev_ioctl(vfs_handle->blkdev_js, 1, 0);
 
   // make fs (format)
   int ret = lfs_format(&vfs_handle->lfs, &vfs_handle->config);
@@ -197,7 +197,7 @@ JERRYXX_FUN(vfs_lfs_mount_fn) {
   JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_lfs_handle_t, vfs_handle_info);
 
   // initialize block device
-  bd_ioctl(vfs_handle->blockdev_js, 1, 0);
+  blkdev_ioctl(vfs_handle->blkdev_js, 1, 0);
 
   // mount vfs
   int ret = lfs_mount(&vfs_handle->lfs, &vfs_handle->config);
@@ -221,7 +221,7 @@ JERRYXX_FUN(vfs_lfs_unmount_fn) {
   }
 
   // shutdown block device
-  bd_ioctl(vfs_handle->blockdev_js, 2, 0);
+  blkdev_ioctl(vfs_handle->blkdev_js, 2, 0);
   return jerry_create_undefined();
 }
 

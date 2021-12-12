@@ -2,39 +2,67 @@ const { test, start, expect } = require("__ujest");
 const { VFSLittleFS } = require("vfs_lfs");
 const { RAMBlockDev } = require("__test_utils");
 const fs = require("fs");
+fs.register('lfs', VFSLittleFS);
 
-const vfs1 = new VFSLittleFS(new RAMBlockDev());
-const vfs2 = new VFSLittleFS(new RAMBlockDev());
-const vfs3 = new VFSLittleFS(new RAMBlockDev());
-vfs1.mkfs();
-vfs2.mkfs();
-vfs3.mkfs();
+test("[fs] mkfs()", (done) => {
+  const bd1 = new RAMBlockDev();
 
-function init_fs() {
-  fs.__vfs = [];
-  fs.mount("/", vfs1);
-  fs.mount("/flash", vfs2);
-  fs.mount("/sd", vfs3);
-}
+  expect(() => {
+    fs.mount('/', bd1, 'lfs');
+  }).toThrow()
 
-function deinit_fs() {
-  fs.unmount("/");
-  fs.unmount("/flash");
-  fs.unmount("/sd");
-}
+  fs.mkfs(bd1, 'lfs');
+  fs.mount('/', bd1, 'lfs');
 
-test("[fs] mount()", (done) => {
-  init_fs();
+  expect(fs.__lookup("/")).toBeTruthy();
+
+  fs.unmount('/');
+  done();
+});
+
+test("[fs] mount() - with mkfs", (done) => {
+  const bd1 = new RAMBlockDev();
+  fs.mount('/', bd1, 'lfs', true);
+
+  expect(fs.__lookup("/")).toBeTruthy();
+
+  fs.unmount('/');
+  done();
+});
+
+test("[fs] mount() - multiple blkdev", (done) => {
+  const bd1 = new RAMBlockDev();
+  fs.mkfs(bd1, 'lfs');
+  fs.mount('/', bd1, 'lfs');
+
+  const bd2 = new RAMBlockDev();
+  fs.mkfs(bd2, 'lfs');
+  fs.mount('/flash', bd2, 'lfs');
+
+  const bd3 = new RAMBlockDev();
+  fs.mount('/sd', bd3, 'lfs', true);
+
   expect(fs.__lookup("/")).toBeTruthy();
   expect(fs.__lookup("/flash")).toBeTruthy();
   expect(fs.__lookup("/sd")).toBeTruthy();
-  deinit_fs();
+
+  fs.unmount('/');
+  fs.unmount('/flash');
+  fs.unmount('/sd');
   done();
 });
 
 test("[fs] unmount()", (done) => {
-  init_fs();
-  deinit_fs();
+  const bd1 = new RAMBlockDev();
+  const bd2 = new RAMBlockDev();
+  const bd3 = new RAMBlockDev();
+  fs.mount('/', bd1, 'lfs', true);
+  fs.mount('/flash', bd2, 'lfs', true);
+  fs.mount('/sd', bd3, 'lfs', true);
+  fs.unmount('/');
+  fs.unmount('/flash');
+  fs.unmount('/sd');
+
   expect(() => {
     fs.__lookup("/");
   }).toThrow();
@@ -44,46 +72,55 @@ test("[fs] unmount()", (done) => {
   expect(() => {
     fs.__lookup("/sd");
   }).toThrow();
+
   done();
 });
 
 test("[fs] __lookup()", (done) => {
-  init_fs();
+  const bd1 = new RAMBlockDev();
+  const bd2 = new RAMBlockDev();
+  const bd3 = new RAMBlockDev();
+  fs.mount('/', bd1, 'lfs', true);
+  fs.mount('/flash', bd2, 'lfs', true);
+  fs.mount('/sd', bd3, 'lfs', true);
+
   let r = null;
 
   r = fs.__lookup("/");
-  expect(r).toBe(vfs1);
+  expect(r.path).toBe("/");
   expect(r.__pathout).toBe("/");
 
   r = fs.__lookup("/flash");
-  expect(r).toBe(vfs2);
+  expect(r.path).toBe("/flash");
   expect(r.__pathout).toBe("/");
 
   r = fs.__lookup("/sd");
-  expect(r).toBe(vfs3);
+  expect(r.path).toBe("/sd");
   expect(r.__pathout).toBe("/");
 
   r = fs.__lookup("/flash/dir");
-  expect(r).toBe(vfs2);
+  expect(r.path).toBe("/flash");
   expect(r.__pathout).toBe("/dir");
 
   r = fs.__lookup("/flash1");
-  expect(r).toBe(vfs1);
+  expect(r.path).toBe("/");
   expect(r.__pathout).toBe("/flash1");
 
   r = fs.__lookup("/sd/2");
-  expect(r).toBe(vfs3);
+  expect(r.path).toBe("/sd");
   expect(r.__pathout).toBe("/2");
 
   r = fs.__lookup("/flash/1");
-  expect(r).toBe(vfs2);
+  expect(r.path).toBe("/flash");
   expect(r.__pathout).toBe("/1");
 
   r = fs.__lookup("/sd/1/dir");
-  expect(r).toBe(vfs3);
+  expect(r.path).toBe("/sd");
   expect(r.__pathout).toBe("/1/dir");
 
-  deinit_fs();
+  fs.unmount('/');
+  fs.unmount('/flash');
+  fs.unmount('/sd');
   done();
 });
 
@@ -93,7 +130,12 @@ test("[fs] cwd()", (done) => {
 });
 
 test("[fs] chdir()", (done) => {
-  init_fs();
+  const bd1 = new RAMBlockDev();
+  const bd2 = new RAMBlockDev();
+  const bd3 = new RAMBlockDev();
+  fs.mount('/', bd1, 'lfs', true);
+  fs.mount('/flash', bd2, 'lfs', true);
+  fs.mount('/sd', bd3, 'lfs', true);
 
   fs.chdir("/");
   expect(fs.cwd()).toBe("/");
@@ -126,15 +168,23 @@ test("[fs] chdir()", (done) => {
   fs.chdir("..");
   expect(fs.cwd()).toBe("/");
 
-  deinit_fs();
+  fs.unmount('/');
+  fs.unmount('/flash');
+  fs.unmount('/sd');
   done();
 });
 
 test("[fs] readdirSync()", (done) => {
-  init_fs();
-  const _vfs = new VFSLittleFS(new RAMBlockDev());
-  _vfs.mkfs();
-  fs.mount("/sd/dev1", _vfs);
+  const bd1 = new RAMBlockDev();
+  const bd2 = new RAMBlockDev();
+  const bd3 = new RAMBlockDev();
+  fs.mount('/', bd1, 'lfs', true);
+  fs.mount('/flash', bd2, 'lfs', true);
+  fs.mount('/sd', bd3, 'lfs', true);  
+
+  const bd4 = new RAMBlockDev();
+  fs.mount('/sd/dev1', bd4, 'lfs', true);
+
   let ls = [];
 
   ls = fs.readdirSync("/");
@@ -145,12 +195,16 @@ test("[fs] readdirSync()", (done) => {
   expect(ls).toContain("dev1");
 
   fs.unmount("/sd/dev1");
-  deinit_fs();
+  fs.unmount('/');
+  fs.unmount('/flash');
+  fs.unmount('/sd');
   done();
 });
 
 test("[fs] mkdirSync() and rmdirSync()", (done) => {
-  init_fs();
+  const bd1 = new RAMBlockDev();
+  fs.mount('/', bd1, 'lfs', true);
+
   let ls = [];
 
   fs.mkdirSync("/home");
@@ -174,12 +228,14 @@ test("[fs] mkdirSync() and rmdirSync()", (done) => {
   ls = fs.readdirSync("/");
   expect(ls).notToContain("home");
 
-  deinit_fs();
+  fs.unmount('/');
   done();
 });
 
 test("[fs] open/write/read/close/unlink/statSync()", (done) => {
-  init_fs();
+  const bd1 = new RAMBlockDev();
+  fs.mount('/', bd1, 'lfs', true);
+
   const fname = '/file.txt';
 
   // file write (create)
@@ -201,12 +257,19 @@ test("[fs] open/write/read/close/unlink/statSync()", (done) => {
   expect(buf.join(',')).toBe(buf2.join(','));
 
   fs.unlinkSync(fname);
-  deinit_fs();
+
+  fs.unmount('/');
   done();
 });
 
 test("[fs] existsSync()", (done) => {
-  init_fs();
+  const bd1 = new RAMBlockDev();
+  const bd2 = new RAMBlockDev();
+  const bd3 = new RAMBlockDev();
+  fs.mount('/', bd1, 'lfs', true);
+  fs.mount('/flash', bd2, 'lfs', true);
+  fs.mount('/sd', bd3, 'lfs', true);  
+
   const fname = '/exists.txt';
 
   let fd = fs.openSync(fname, 'w');
@@ -221,12 +284,16 @@ test("[fs] existsSync()", (done) => {
   expect(fs.existsSync('/flash1')).toBe(false);
 
   fs.unlinkSync(fname);
-  deinit_fs();
+
+  fs.unmount('/');
+  fs.unmount('/flash');
+  fs.unmount('/sd');
   done();
 });
 
 test("[fs] renameSync()", (done) => {
-  init_fs();
+  const bd1 = new RAMBlockDev();
+  fs.mount('/', bd1, 'lfs', true);  
 
   let fd = fs.openSync('/rename.txt', 'w');
   let buf = new Uint8Array([60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
@@ -239,12 +306,14 @@ test("[fs] renameSync()", (done) => {
   expect(fs.existsSync('/newname.txt')).toBe(true);
 
   fs.unlinkSync('newname.txt');
-  deinit_fs();
+
+  fs.unmount('/');
   done();
 });
 
 test("[fs] write/readFileSync()", (done) => {
-  init_fs();
+  const bd1 = new RAMBlockDev();
+  fs.mount('/', bd1, 'lfs', true);
 
   const buf = new Uint8Array([60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
   fs.writeFileSync('/filesync.txt', buf);
@@ -254,7 +323,8 @@ test("[fs] write/readFileSync()", (done) => {
   expect(buf.join(',')).toBe(buf2.join(','));
 
   fs.unlinkSync('/filesync.txt');
-  deinit_fs();
+
+  fs.unmount('/');
   done();
 });
 

@@ -24,8 +24,8 @@
 
 #include "jerryscript.h"
 
-#define SYSTEM_ARCH "x86"
-#define SYSTEM_PLATFORM "linux"
+#define KALUMA_SYSTEM_ARCH "x86"
+#define KALUMA_SYSTEM_PLATFORM "linux"
 
 #define KALUMA_FLASH_OFFSET 0
 #define KALUMA_FLASH_BASE KALUMA_FLASH_OFFSET

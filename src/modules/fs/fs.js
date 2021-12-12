@@ -4,26 +4,6 @@ class Stats {
   constructor() {
     this.type = 0;
     this.size = 0;
-    /*
-    dev: 2114,
-    ino: 48064969,
-    mode: 33188,
-    nlink: 1,
-    uid: 85,
-    gid: 100,
-    rdev: 0,
-    size: 527,
-    blksize: 4096,
-    blocks: 8,
-    atimeMs: 1318289051000.1,
-    mtimeMs: 1318289051000.1,
-    ctimeMs: 1318289051000.1,
-    birthtimeMs: 1318289051000.1,
-    atime: Mon, 10 Oct 2011 23:24:11 GMT,
-    mtime: Mon, 10 Oct 2011 23:24:11 GMT,
-    ctime: Mon, 10 Oct 2011 23:24:11 GMT,
-    birthtime: Mon, 10 Oct 2011 23:24:11 GMT
-    */
   }
   isDirectory() {
     return this.type === 2;
@@ -32,40 +12,6 @@ class Stats {
     return this.type === 1;
   }
 }
-// class fs.ReadStream
-// class fs.WriteStream
-
-/*
-interface BlockDev {
-  read(bnum, buf, offset);
-  write(bnum, buf, offset);
-  ioctrl(op, arg);
-   - 1: initialize the device
-   - 2: shutdown the device
-   - 3: sync the device
-   - 4: get a count of the number of blocks
-   - 5: get the number of bytes in a block
-   - 6: erase a block (arg = block num)
-}
-
-interface VFS {
-  constructor(blockdev)
-  mkfs()
-  mount()
-  unmount()
-  open(path: string, flags: number, mode: number): number (id)
-  write(id: number, buffer: Uint8Array, offset: number, length: number, position: number): number (bytes written)
-  read(id: number, buffer: Uint8Array, offset: number, length: number, position: number): number (bytes read)
-  close(id: number)
-  stat(path: string) -> {type:number (1=file,2=dir), size:number}
-  mkdir(path: string)
-  rmdir(path: string)
-  readdir(path: string) -> string[]
-  rename(oldPath: string, newPath: string)
-  unlink(path: string)
-}
-(throws SystemError)
-*/
 
 // constants for flags
 const VFS_FLAG_READ = 1;
@@ -76,19 +22,25 @@ const VFS_FLAG_EXCL = 16;
 const VFS_FLAG_TRUNC = 32;
 
 /**
- * VFS mount table
- * @type {Array.<{path: string, vfs:VFS}>}
+ * Filesystem types
+ * @type {Object<string, constructor>}
  */
-const __vfs = [];
+const __fs = {};
 
 /**
- * file objects (array index is file descriptor)
+ * mount table
+ * @type {Array<VFS>}
+ */
+const __mounts = [];
+
+/**
+ * open files (array index is file descriptor)
  * @type {Array.<{id: number, vfs:VFS}>}
  */
-const __files = [];
-__files.push({ id: 0, vfs: null }); // fd = 0 (linux stdin)
-__files.push({ id: 1, vfs: null }); // fd = 1 (linux stdout)
-__files.push({ id: 2, vfs: null }); // fd = 2 (linux stderr)
+const __opens = [];
+__opens.push({ id: 0, vfs: null }); // fd = 0 (linux stdin)
+__opens.push({ id: 1, vfs: null }); // fd = 1 (linux stdout)
+__opens.push({ id: 2, vfs: null }); // fd = 2 (linux stderr)
 
 /**
  * Current working directory
@@ -103,14 +55,14 @@ let __cwd = "/";
  */
 function __fd(fo) {
   let fd = -1;
-  for (let i = 0; i < __files.length; i++) {
-    if (__files[i] === null) {
+  for (let i = 0; i < __opens.length; i++) {
+    if (__opens[i] === null) {
       fd = i;
-      __files[fd] = fo;
+      __opens[fd] = fo;
       return fd;
     }
   }
-  fd = __files.push(fo) - 1;
+  fd = __opens.push(fo) - 1;
   return fd;
 }
 
@@ -120,18 +72,18 @@ function __fd(fo) {
  * @returns {object}
  */
 function __fobj(fd) {
-  return fd < __files.length ? __files[fd] : null;
+  return fd < __opens.length ? __opens[fd] : null;
 }
 
 /**
  * Lookup VFS with pathout
  * @param {string} path
- * @returns {VFS}
+ * @returns {object} mount table entry
  */
 function __lookup(path) {
   const _path = path_mod.resolve(path);
-  for (let i = 0; i < __vfs.length; i++) {
-    let vfs = __vfs[i];
+  for (let i = 0; i < __mounts.length; i++) {
+    let vfs = __mounts[i];
     if (vfs.path === "/") {
       vfs.__pathout = _path;
       return vfs;
@@ -147,11 +99,45 @@ function __lookup(path) {
 }
 
 /**
+ * Register a filesystem
+ * @param {string} fstype 
+ * @param {constructor} fsctr
+ */
+function register(fstype, fsctr) {
+  __fs[fstype] = fsctr;
+}
+
+/**
+ * Unregister a filesystem
+ * @param {string} fstype
+ */
+function unregister(fstype) {
+  delete __fs[fstype];
+}
+
+/**
+ * Make filesystem
+ * @param {BlockDevice} blkdev 
+ * @param {string} fstype 
+ */
+function mkfs(blkdev, fstype) {
+  // create vfs of fstype
+  const fsctr = __fs[fstype];
+  if (!fsctr) {
+    throw new SystemError(-22); // EINVAL (?)
+  }
+  const vfs = new fsctr(blkdev);
+  vfs.mkfs();
+}
+
+/**
  * Mount a VFS with path
  * @param {string} path
- * @param {VFS} vfs
+ * @param {BlockDevice} blkdev
+ * @param {string} fstype
+ * @param {boolean} mkfs
  */
-function mount(path, vfs) {
+function mount(path, blkdev, fstype, mkfs) {
   path = path_mod.normalize(path);
   const _parent = path_mod.join(path, "..");
   if (_parent !== "/") {
@@ -160,10 +146,29 @@ function mount(path, vfs) {
       throw new SystemError(-2); // ENOENT
     }
   }
+
+  // create vfs of fstype
+  const fsctr = __fs[fstype];
+  if (!fsctr) {
+    throw new SystemError(-22); // EINVAL (?)
+  }
+  const vfs = new fsctr(blkdev);
+
+  // try to mount (try mkfs if mount failed)
+  try {
+    vfs.mount();
+  } catch (err) {
+    if (mkfs === true) {
+      vfs.mkfs();
+      vfs.mount();
+    } else {
+      throw err;
+    }
+  }
+
   vfs.path = path;
-  vfs.mount();
-  __vfs.push(vfs);
-  __vfs.sort((a, b) => {
+  __mounts.push(vfs);
+  __mounts.sort((a, b) => {
     let ac = a.path.split(path_mod.sep).filter((t) => t.length > 0).length;
     let bc = b.path.split(path_mod.sep).filter((t) => t.length > 0).length;
     return bc - ac;
@@ -176,9 +181,9 @@ function mount(path, vfs) {
  */
 function unmount(path) {
   path = path_mod.normalize(path);
-  const vfs = __vfs.find((v) => v.path === path);
+  const vfs = __mounts.find((v) => v.path === path);
   if (vfs) {
-    __vfs.splice(__vfs.indexOf(vfs));
+    __mounts.splice(__mounts.indexOf(vfs));
   }
 }
 
@@ -202,14 +207,6 @@ function chdir(path) {
   } else {
     throw new SystemError(-2); // ENOENT
   }
-}
-
-function createReadStream(path, options) {
-  // return fs_native.createReadStream(path, options);
-}
-
-function createWriteStream(path, options) {
-  // return fs_native.createWriteStream(path, options);
 }
 
 // ---------------------------------------------------------------------------
@@ -306,7 +303,7 @@ function closeSync(fd) {
   const fo = __fobj(fd);
   if (fo) {
     fo.vfs.close(fo.id);
-    __files[fd] = null;
+    __opens[fd] = null;
   } else {
     throw new SystemError(-9); // EBADF
   }
@@ -357,7 +354,7 @@ function readdirSync(path) {
   path = path_mod.normalize(path);
   const vfs = __lookup(path);
   let ls = vfs.readdir(vfs.__pathout);
-  __vfs.forEach((v) => {
+  __mounts.forEach((v) => {
     if (v.path !== "/" && path_mod.join(v.path, "..") === path) {
       ls.push(v.path.substr(path === "/" ? 1 : path.length + 1));
     }
@@ -393,18 +390,18 @@ function statSync(path) {
 // function writeFile(path, data, callback)
 
 exports.Stats = Stats;
-// exports.ReadStream = ReadStream
-// exports.WriteStream = WriteStream
-exports.createReadStream = createReadStream;
-exports.createWriteStream = createWriteStream;
 
 // for debugging
-exports.__vfs = __vfs;
-exports.__files = __files;
+exports.__fs = __fs;
+exports.__mounts = __mounts;
+exports.__opens = __opens;
 exports.__lookup = __lookup;
 exports.__fd = __fd;
 exports.__fobj = __fobj;
 
+exports.register = register;
+exports.unregister = unregister;
+exports.mkfs = mkfs;
 exports.mount = mount;
 exports.unmount = unmount;
 exports.chdir = chdir;

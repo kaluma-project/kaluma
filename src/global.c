@@ -872,8 +872,8 @@ JERRYXX_FUN(process_memory_usage_fn) {
 
 static void register_global_process_object() {
   jerry_value_t process = jerry_create_object();
-  jerryxx_set_property_string(process, MSTR_ARCH, SYSTEM_ARCH);
-  jerryxx_set_property_string(process, MSTR_PLATFORM, SYSTEM_PLATFORM);
+  jerryxx_set_property_string(process, MSTR_ARCH, KALUMA_SYSTEM_ARCH);
+  jerryxx_set_property_string(process, MSTR_PLATFORM, KALUMA_SYSTEM_PLATFORM);
   jerryxx_set_property_string(process, MSTR_VERSION, KALUMA_VERSION);
   jerryxx_set_property_function(process, MSTR_MEMORY_USAGE,
                                 process_memory_usage_fn);

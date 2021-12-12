@@ -56,7 +56,7 @@ struct vfs_lfs_handle_s {
   lfs_t lfs;
   struct lfs_config config;
   km_list_t file_handles;
-  jerry_value_t blockdev_js;
+  jerry_value_t blkdev_js;
 };
 
 struct vfs_lfs_file_handle_s {

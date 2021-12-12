@@ -24,8 +24,8 @@
 
 #include "stm32f4xx.h"
 
-#define SYSTEM_ARCH "cortex-m4"
-#define SYSTEM_PLATFORM "stm32"
+#define KALUMA_SYSTEM_ARCH "cortex-m4"
+#define KALUMA_SYSTEM_PLATFORM "stm32"
 
 #define KALUMA_MANUFACTURER_STRING "Kaluma (kaluma.io)"
 #define KALUMA_PRODUCT_STRING "Kameleon Core"

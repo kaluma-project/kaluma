@@ -24,8 +24,8 @@
 
 #include "jerryscript.h"
 
-#define SYSTEM_ARCH "cortex-m0-plus"
-#define SYSTEM_PLATFORM "rp2"
+#define KALUMA_SYSTEM_ARCH "cortex-m0-plus"
+#define KALUMA_SYSTEM_PLATFORM "rp2"
 
 #define KALUMA_FLASH_OFFSET 0x180000
 #define KALUMA_FLASH_BASE (XIP_BASE + KALUMA_FLASH_OFFSET)

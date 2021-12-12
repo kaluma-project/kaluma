@@ -33,11 +33,17 @@
 #define MSTR_FS_STATS_IS_DIRECTORY "isDirectory"
 #define MSTR_FS_STATS_IS_FILE "isFile"
 
+#define MSTR_FS_FS "__fs"
 #define MSTR_FS_CWD "__cwd"
 #define MSTR_FS_LOOKUP "__lookup"
-#define MSTR_FS_VFS "__vfs"
-#define MSTR_FS_FILES "__files"
+#define MSTR_FS_MOUNTS "__mounts"
+#define MSTR_FS_OPENS "__opens"
 
+#define MSTR_FS_FSTYPE_LFS "lfs"
+#define MSTR_FS_FSTYPE_FAT "fat"
+
+#define MSTR_FS_REGISTER "register"
+#define MSTR_FS_UNREGISTER "unregister"
 #define MSTR_FS_MOUNT "mount"
 #define MSTR_FS_UNMOUNT "unmount"
 #define MSTR_FS_CLOSE_SYNC "closeSync"
