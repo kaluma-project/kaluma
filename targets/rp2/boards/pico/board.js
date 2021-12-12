@@ -5,12 +5,8 @@ global.board.name = 'pico';
 global.board.LED = 25;
 
 // mount lfs on "/"
-/*
-setTimeout(() => {
-  const fs = global.require('fs');
-  const {VFSLittleFS} = global.require('vfs_lfs');
-  fs.register('lfs', VFSLittleFS);
-  const bd = new global.FlashBD(0, 64);
-  fs.mount('/', bd, 'lfs', true);
-}, 10000);
-*/
+const fs = global.require('fs');
+const {VFSLittleFS} = global.require('vfs_lfs');
+fs.register('lfs', VFSLittleFS);
+const bd = new global.FlashBD(0, 64);
+fs.mount('/', bd, 'lfs', true);
