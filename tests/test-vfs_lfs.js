@@ -5,13 +5,24 @@ const { VFSLittleFS } = require("vfs_lfs");
 function init_vfs() {
   const bd = new RAMBlockDev();
   const vfs = new VFSLittleFS(bd);
+  vfs.mkfs();
   vfs.mount();
   return vfs;
 }
 
+test("[vfs_lfs] mkfs()", (done) => {
+  const bd = new RAMBlockDev();
+  const vfs = new VFSLittleFS(bd);
+  expect(() => {
+    vfs.mount();
+  }).toThrow();
+  done();
+});
+
 test("[vfs_lfs] mount()", (done) => {
   const bd = new RAMBlockDev();
   const vfs = new VFSLittleFS(bd);
+  vfs.mkfs();
   expect(() => {
     vfs.mount();
   }).notToThrow();
@@ -21,6 +32,7 @@ test("[vfs_lfs] mount()", (done) => {
 test("[vfs_lfs] unmount()", (done) => {
   const bd = new RAMBlockDev();
   const vfs = new VFSLittleFS(bd);
+  vfs.mkfs();
   vfs.mount();
   expect(() => {
     vfs.unmount();
@@ -59,23 +71,5 @@ test("[vfs_lfs] readdir()", (done) => {
   expect(files).toContain("dir3");
   done();
 });
-
-/*
-interface VFS {
-  constructor(blockdev)
-  mount()
-  unmount()
-  open(path: string, flags: number, mode: number): number (id)
-  write(id: number, buffer: Uint8Array, offset: number, length: number, position: number): number (bytes written)
-  read(id: number, buffer: Uint8Array, offset: number, length: number, position: number): number (bytes read)
-  close(id: number)
-  stat(path: string) -> {type:number (1=file,2=dir), size:number}
-  mkdir(path: string)
-  rmdir(path: string)
-  readdir(path: string) -> string[]
-  rename(oldPath: string, newPath: string)
-  unlink(path: string)
-}
-*/
 
 start();

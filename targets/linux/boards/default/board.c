@@ -25,7 +25,6 @@
 
 #include "err.h"
 #include "flash2.h"
-#include "fs_magic_strings.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
 #include "magic_strings.h"
