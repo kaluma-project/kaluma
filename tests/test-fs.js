@@ -30,6 +30,20 @@ test("[fs] mount() - with mkfs", (done) => {
   done();
 });
 
+test("[fs] mount() - already formatted", (done) => {
+  const bd1 = new RAMBlockDev();
+  fs.mount('/', bd1, 'lfs', true);
+  fs.mkdirSync('/dir1');
+  fs.unmount('/');
+
+  fs.mount('/', bd1, 'lfs');
+  expect(fs.__lookup("/")).toBeTruthy();
+  expect(fs.readdirSync('/')).toContain('dir1');
+
+  fs.unmount('/');
+  done();
+});
+
 test("[fs] mount() - multiple blkdev", (done) => {
   const bd1 = new RAMBlockDev();
   fs.mkfs(bd1, 'lfs');

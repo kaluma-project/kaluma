@@ -159,6 +159,9 @@ JERRYXX_FUN(vfslfs_ctor_fn) {
   vfs_handle->config.block_count = block_count;
   vfs_handle->config.cache_size = unit_size;
   vfs_handle->config.lookahead_size = unit_size;
+  vfs_handle->config.name_max = 255;
+  vfs_handle->config.file_max = 1024 * 1024 * 16;  // 16MB
+  vfs_handle->config.attr_max = 512;
   vfs_handle->config.block_cycles = 500;
   vfs_handle->config.read_buffer = malloc(vfs_handle->config.cache_size);
   vfs_handle->config.prog_buffer = malloc(vfs_handle->config.cache_size);

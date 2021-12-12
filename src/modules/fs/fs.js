@@ -149,6 +149,10 @@ function mount(path, blkdev, fstype, mkfs) {
 
   // create vfs of fstype
   const fsctr = __fs[fstype];
+
+  // console.log(fstype);
+  // console.log(fsctr);
+
   if (!fsctr) {
     throw new SystemError(-22); // EINVAL (?)
   }
@@ -158,9 +162,12 @@ function mount(path, blkdev, fstype, mkfs) {
   try {
     vfs.mount();
   } catch (err) {
+    // console.log('mount error', err);
     if (mkfs === true) {
       vfs.mkfs();
+      // console.log('mkfs done');
       vfs.mount();
+      // console.log('second mount done');
     } else {
       throw err;
     }
