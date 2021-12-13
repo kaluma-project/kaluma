@@ -37,7 +37,7 @@
  *   base {number} base sector number
  *   count (number)
  */
-JERRYXX_FUN(flashbd_ctor_fn) {
+JERRYXX_FUN(flash_ctor_fn) {
   // check and get args
   JERRYXX_CHECK_ARG_NUMBER_OPT(0, "base")
   JERRYXX_CHECK_ARG_NUMBER_OPT(1, "count")
@@ -59,7 +59,7 @@ JERRYXX_FUN(flashbd_ctor_fn) {
  *   buffer {Uint8Array}
  *   offset {number}
  */
-JERRYXX_FUN(flashbd_read_fn) {
+JERRYXX_FUN(flash_read_fn) {
   // check and get args
   JERRYXX_CHECK_ARG_NUMBER(0, "block")
   JERRYXX_CHECK_ARG_TYPEDARRAY(1, "buffer")
@@ -91,7 +91,7 @@ JERRYXX_FUN(flashbd_read_fn) {
  *   buffer {Uint8Array}
  *   offset {number}
  */
-JERRYXX_FUN(flashbd_write_fn) {
+JERRYXX_FUN(flash_write_fn) {
   // check and get args
   JERRYXX_CHECK_ARG_NUMBER(0, "block")
   JERRYXX_CHECK_ARG_TYPEDARRAY(1, "buffer")
@@ -119,7 +119,7 @@ JERRYXX_FUN(flashbd_write_fn) {
  *   op {number}
  *   arg {number}
  */
-JERRYXX_FUN(flashbd_ioctl_fn) {
+JERRYXX_FUN(flash_ioctl_fn) {
   // check and get args
   JERRYXX_CHECK_ARG_NUMBER(0, "op")
   JERRYXX_CHECK_ARG_NUMBER_OPT(1, "arg")
@@ -153,16 +153,16 @@ JERRYXX_FUN(flashbd_ioctl_fn) {
  */
 void board_init() {
   /* Flash class */
-  jerry_value_t flashbd_ctor = jerry_create_external_function(flashbd_ctor_fn);
-  jerry_value_t flashbd_prototype = jerry_create_object();
-  jerryxx_set_property(flashbd_ctor, MSTR_PROTOTYPE, flashbd_prototype);
-  jerryxx_set_property_function(flashbd_prototype, "read", flashbd_read_fn);
-  jerryxx_set_property_function(flashbd_prototype, "write", flashbd_write_fn);
-  jerryxx_set_property_function(flashbd_prototype, "ioctl", flashbd_ioctl_fn);
-  jerry_release_value(flashbd_prototype);
+  jerry_value_t flash_ctor = jerry_create_external_function(flash_ctor_fn);
+  jerry_value_t flash_prototype = jerry_create_object();
+  jerryxx_set_property(flash_ctor, MSTR_PROTOTYPE, flash_prototype);
+  jerryxx_set_property_function(flash_prototype, "read", flash_read_fn);
+  jerryxx_set_property_function(flash_prototype, "write", flash_write_fn);
+  jerryxx_set_property_function(flash_prototype, "ioctl", flash_ioctl_fn);
+  jerry_release_value(flash_prototype);
 
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property(global, "Flash", flashbd_ctor);
+  jerryxx_set_property(global, "Flash", flash_ctor);
   jerry_release_value(global);
-  jerry_release_value(flashbd_ctor);
+  jerry_release_value(flash_ctor);
 }

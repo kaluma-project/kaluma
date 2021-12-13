@@ -1,8 +1,18 @@
 ## Flash Memory Map
 
-| Offset   | Area | Size |
-| -------- | ---- | ---- |
-| 0x000000 | Binary | 1008KB (1024KB - 16KB) |
-| 0x0FC000 | Storage | 16KB |
-| 0x100000 | User code | 512KB |
-| 0x180000 | File system (LFS) | 512KB |
+| Offset   | Area              | Size                   |
+| -------- | ----------------- | ---------------------- |
+| 0x000000 | Binary            | 1008KB (1024KB - 16KB) |
+| 0x0FC000 | Storage           | 16KB                   |
+| 0x100000 | User code         | 512KB                  |
+| 0x180000 | File system (LFS) | 512KB                  |
+
+Flash
+bin s user fs
+|----------|--|----------|------------|
+|--------------------------|
+
+stm32
+128kb
+|-|-|-|-|---|---|---------|----------|
+|--------------------|

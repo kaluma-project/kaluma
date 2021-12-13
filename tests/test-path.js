@@ -3,6 +3,7 @@ const { VFSLittleFS } = require("vfs_lfs");
 const { RAMBlockDev } = require("__test_utils");
 const path = require("path");
 const fs = require("fs");
+fs.register("lfs", VFSLittleFS);
 
 test("[path] sep === '/'", (done) => {
   expect(path.sep).toBe("/");
@@ -119,8 +120,8 @@ test("[path] join()", (done) => {
 });
 
 test("[path] resolve()", (done) => {
-  const vfs = new VFSLittleFS(new RAMBlockDev());
-  fs.mount("/", vfs);
+  const bd = new RAMBlockDev();
+  fs.mount("/", bd, "lfs", true);
 
   fs.chdir("/");
   expect(path.resolve("/")).toBe("/");
