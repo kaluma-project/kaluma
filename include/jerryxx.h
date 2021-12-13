@@ -158,6 +158,13 @@
     return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *)errmsg); \
   }
 
+#define JERRYXX_CHECK_ARG_TYPEDARRAY(index, argname)                           \
+  if ((args_cnt <= index) || (!jerry_value_is_typedarray(args_p[index]))) {    \
+    char errmsg[255];                                                          \
+    sprintf(errmsg, "\"%s\" argument must be an TypedArray", argname);         \
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *)errmsg); \
+  }
+
 #define JERRYXX_CHECK_INDEX_RANGE(name, lowerbound, upperbound)            \
   if (name < (lowerbound) || name > (upperbound)) {                        \
     return jerry_create_error(JERRY_ERROR_RANGE,                           \
@@ -165,23 +172,55 @@
   }
 
 #define JERRYXX_GET_THIS this_val
+
 #define JERRYXX_HAS_ARG(index) (args_cnt > index)
+
 #define JERRYXX_GET_ARG_COUNT args_cnt
+
 #define JERRYXX_GET_ARG(index) args_p[index]
+
 #define JERRYXX_GET_ARG_NUMBER(index) jerry_get_number_value(args_p[index])
+
 #define JERRYXX_GET_ARG_NUMBER_OPT(index, default) \
   (args_cnt > index ? jerry_get_number_value(args_p[index]) : default)
+
 #define JERRYXX_GET_ARG_BOOLEAN(index) jerry_get_boolean_value(args_p[index])
+
 #define JERRYXX_GET_ARG_BOOLEAN_OPT(index, default) \
   (args_cnt > index ? jerry_get_boolean_value(args_p[index]) : default)
+
 #define JERRYXX_GET_ARG_STRING_AS_CHAR(index, name)                            \
   jerry_size_t name##_sz = jerry_get_string_size(args_p[index]);               \
   char name[name##_sz + 1];                                                    \
   jerry_string_to_char_buffer(args_p[index], (jerry_char_t *)name, name##_sz); \
   name[name##_sz] = '\0';
 
+#define JERRYXX_GET_ARG_STRING_AS_CHAR_OPT(index, name, default)      \
+  jerry_size_t name##_sz = (args_cnt > index)                         \
+                               ? jerry_get_string_size(args_p[index]) \
+                               : (sizeof(default) - 1);               \
+  char name[name##_sz + 1];                                           \
+  if (args_cnt > index) {                                             \
+    jerry_string_to_char_buffer(args_p[index], (jerry_char_t *)name,  \
+                                name##_sz);                           \
+    name[name##_sz] = '\0';                                           \
+  } else {                                                            \
+    strcpy(name, default);                                            \
+  }
+
 #define JERRYXX_CREATE_ERROR(errmsg) \
   jerry_create_error(JERRY_ERROR_COMMON, (const jerry_char_t *)errmsg)
+
+#define JERRYXX_GET_NATIVE_HANDLE(name, handle_type, handle_info)         \
+  void *native_pointer;                                                   \
+  bool has_p = jerry_get_object_native_pointer(this_val, &native_pointer, \
+                                               &handle_info);             \
+  if (!has_p) {                                                           \
+    return jerry_create_error(                                            \
+        JERRY_ERROR_REFERENCE,                                            \
+        (const jerry_char_t *)"Failed to get native handle");             \
+  }                                                                       \
+  handle_type *name = (handle_type *)native_pointer;
 
 void jerryxx_set_property(jerry_value_t object, const char *name,
                           jerry_value_t value);
@@ -196,6 +235,8 @@ double jerryxx_get_property_number(jerry_value_t object, const char *name,
                                    double default_value);
 bool jerryxx_get_property_boolean(jerry_value_t object, const char *name,
                                   bool default_value);
+uint8_t *jerryxx_get_property_typedarray_buffer(jerry_value_t object);
+void jerryxx_array_push_string(jerry_value_t array, jerry_value_t item);
 bool jerryxx_delete_property(jerry_value_t object, const char *name);
 
 void jerryxx_print_value(jerry_value_t value);

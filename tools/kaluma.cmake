@@ -43,7 +43,7 @@ set(KALUMA_GENERATED_H
 file(GLOB_RECURSE KALUMA_MODULE_SRC ${SRC_DIR}/modules/*)
 set(KALUMA_GENERATED ${KALUMA_GENERATED_C} ${KALUMA_GENERATED_H})
 
-string (REPLACE ";" " " KALUMA_MODULE_LIST "${KALUMA_MODULES}")
+string (REPLACE ";" " " MODULE_LIST "${MODULES}")
 
 set(JERRY_LIBS
   ${JERRY_ROOT}/build/lib/libjerry-core.a
@@ -57,14 +57,14 @@ add_custom_command(OUTPUT ${JERRY_LIBS}
 add_custom_command(OUTPUT ${KALUMA_GENERATED_C}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   COMMAND python ${JERRY_ROOT}/tools/build.py --clean --jerry-cmdline-snapshot=ON --snapshot-save=ON --snapshot-exec=ON --profile=es.next #es2015-subset
-  COMMAND node tools/js2c.js --modules=${KALUMA_MODULE_LIST} --target=${TARGET} --board=${BOARD}
+  COMMAND node tools/js2c.js --modules=${MODULE_LIST} --target=${TARGET} --board=${BOARD}
   COMMAND rm -rf lib/jerryscript/build)
 
 set(KALUMA_INC ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/port ${SRC_DIR}/gen ${SRC_DIR}/modules)
 include_directories(${KALUMA_INC} ${JERRY_INC})
 
 list(APPEND SOURCES
-  ${SRC_DIR}/main.c
+  ${SRC_DIR}/err.c
   ${SRC_DIR}/utils.c
   ${SRC_DIR}/base64.c
   ${SRC_DIR}/io.c
@@ -77,45 +77,8 @@ list(APPEND SOURCES
   ${SRC_DIR}/ringbuffer.c
   ${KALUMA_GENERATED_C})
 
-# KALUMA MODULES -------------------------------------------------------------
-
-if("pwm" IN_LIST KALUMA_MODULES)
-  list(APPEND SOURCES ${SRC_DIR}/modules/pwm/module_pwm.c)
-  include_directories(${SRC_DIR}/modules/pwm)
-endif()
-
-if("i2c" IN_LIST KALUMA_MODULES)
-  list(APPEND SOURCES ${SRC_DIR}/modules/i2c/module_i2c.c)
-  include_directories(${SRC_DIR}/modules/i2c)
-endif()
-
-if("spi" IN_LIST KALUMA_MODULES)
-  list(APPEND SOURCES ${SRC_DIR}/modules/spi/module_spi.c)
-  include_directories(${SRC_DIR}/modules/spi)
-endif()
-
-if("storage" IN_LIST KALUMA_MODULES)
-  list(APPEND SOURCES ${SRC_DIR}/modules/storage/module_storage.c)
-  include_directories(${SRC_DIR}/modules/storage)
-endif()
-
-if("uart" IN_LIST KALUMA_MODULES)
-  list(APPEND SOURCES ${SRC_DIR}/modules/uart/module_uart.c)
-  include_directories(${SRC_DIR}/modules/uart)
-endif()
-
-if("graphics" IN_LIST KALUMA_MODULES)
-  list(APPEND SOURCES
-    ${SRC_DIR}/modules/graphics/gc_cb_prims.c
-    ${SRC_DIR}/modules/graphics/gc_1bit_prims.c
-    ${SRC_DIR}/modules/graphics/gc_16bit_prims.c
-    ${SRC_DIR}/modules/graphics/gc.c
-    ${SRC_DIR}/modules/graphics/font_default.c
-    ${SRC_DIR}/modules/graphics/module_graphics.c)
-  include_directories(${SRC_DIR}/modules/graphics)
-endif()
-
-if("rp2" IN_LIST KALUMA_MODULES)
-  list(APPEND SOURCES ${SRC_DIR}/modules/rp2/module_rp2.c)
-  include_directories(${SRC_DIR}/modules/rp2)
-endif()
+FOREACH(MOD ${MODULES})
+  if(EXISTS "${SRC_DIR}/modules/${MOD}/module.cmake")
+    include(${SRC_DIR}/modules/${MOD}/module.cmake)
+  endif()
+ENDFOREACH()

@@ -30,6 +30,5 @@
 #define MSTR_STARTUP_REGISTER "register"
 #define MSTR_STARTUP_UNREGISTER "unregister"
 #define MSTR_STARTUP_GET "get"
-#define MSTR_STARTUP_SYSTEM_ERROR "SystemError"
 
 #endif /* __STARTUP_MAGIC_STRINGS_H */

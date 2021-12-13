@@ -30,5 +30,8 @@
 #define MSTR_EVENTS_ADD_LISTENER "addListener"
 #define MSTR_EVENTS_REMOVE_LISTENER "removeListener"
 #define MSTR_EVENTS_REMOVE_ALL_LISTENERS "removeAllListeners"
+#define MSTR_EVENTS_LISTENERS "listeners"
+#define MSTR_EVENTS_LISTENER_COUNT "listenerCount"
+#define MSTR_EVENTS_TYPE_ERROR_1 "listener must be a function"
 
 #endif /* __EVENTS_MAGIC_STRINGS_H */

@@ -4,19 +4,53 @@
 
 # debug build?
 set(DEBUG 1)
+
 # optimization
 set(OPT -Og)
+
+# default board: pico
+if(NOT BOARD)
+  set(BOARD "pico")
+endif()
+
+# default modules
+if(NOT MODULES)
+  set(MODULES 
+    events
+    gpio
+    led
+    button
+    pwm
+    adc
+    i2c
+    spi
+    uart
+    graphics
+    at
+    storage
+    wifi
+    stream
+    net
+    http
+    url
+    rp2
+    path
+    fs
+    vfs_lfs
+    startup)
+endif()
 
 set(PICO_SDK_PATH ${CMAKE_SOURCE_DIR}/lib/pico-sdk)
 include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
 
 project(kaluma-project C CXX ASM)
+
 # initialize the Pico SDK
 pico_sdk_init()
 set(OUTPUT_TARGET kaluma-${TARGET}-${BOARD}-${VER})
 set(TARGET_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 set(TARGET_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
-set(BOARD_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/boards/${BOARD})
+set(BOARD_DIR ${CMAKE_CURRENT_LIST_DIR}/boards/${BOARD})
 
 set(SOURCES
   ${SOURCES}
@@ -26,17 +60,18 @@ set(SOURCES
   ${TARGET_SRC_DIR}/pwm.c
   ${TARGET_SRC_DIR}/tty.c
   ${TARGET_SRC_DIR}/flash.c
+  ${TARGET_SRC_DIR}/flash2.c
   ${TARGET_SRC_DIR}/storage.c
   ${TARGET_SRC_DIR}/uart.c
   ${TARGET_SRC_DIR}/i2c.c
-  ${TARGET_SRC_DIR}/spi.c)
+  ${TARGET_SRC_DIR}/spi.c
+  ${TARGET_SRC_DIR}/main.c
+  ${BOARD_DIR}/board.c)
 
-include_directories(${TARGET_INC_DIR} ${BOARD_INC_DIR})
+include_directories(${TARGET_INC_DIR} ${BOARD_DIR})
 
 set(TARGET_HEAPSIZE 196)
 set(JERRY_TOOLCHAIN toolchain_mcu_cortexm0plus.cmake)
-
-set(KALUMA_MODULES events gpio led button pwm adc i2c spi uart graphics at storage wifi stream net http url rp2 startup)
 
 set(CMAKE_SYSTEM_PROCESSOR cortex-m0plus)
 set(CMAKE_C_FLAGS "-march=armv6-m -mcpu=cortex-m0plus -mthumb ${OPT} -Wall -fdata-sections -ffunction-sections")

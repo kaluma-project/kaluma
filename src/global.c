@@ -27,6 +27,7 @@
 #include "adc.h"
 #include "base64.h"
 #include "board.h"
+#include "err.h"
 #include "gpio.h"
 #include "io.h"
 #include "jerryscript-ext/handler.h"
@@ -67,7 +68,7 @@ JERRYXX_FUN(pin_mode_fn) {
     uint8_t pin_num = jerry_get_number_value(pin);
     if (km_gpio_set_io_mode(pin_num, mode) == KM_GPIOPORT_ERROR) {
       char errmsg[255];
-      sprintf(errmsg, "The pin \"%ld\" can't be used for GPIO", pin);
+      sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin_num);
       return jerry_create_error(JERRY_ERROR_RANGE,
                                 (const jerry_char_t *)errmsg);
     }
@@ -79,7 +80,7 @@ JERRYXX_FUN(pin_mode_fn) {
         uint8_t p = jerry_get_number_value(item);
         if (km_gpio_set_io_mode(p, mode) == KM_GPIOPORT_ERROR) {
           char errmsg[255];
-          sprintf(errmsg, "The pin \"%ld\" can't be used for GPIO", pin);
+          sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", p);
           return jerry_create_error(JERRY_ERROR_RANGE,
                                     (const jerry_char_t *)errmsg);
         }
@@ -871,8 +872,8 @@ JERRYXX_FUN(process_memory_usage_fn) {
 
 static void register_global_process_object() {
   jerry_value_t process = jerry_create_object();
-  jerryxx_set_property_string(process, MSTR_ARCH, SYSTEM_ARCH);
-  jerryxx_set_property_string(process, MSTR_PLATFORM, SYSTEM_PLATFORM);
+  jerryxx_set_property_string(process, MSTR_ARCH, KALUMA_SYSTEM_ARCH);
+  jerryxx_set_property_string(process, MSTR_PLATFORM, KALUMA_SYSTEM_PLATFORM);
   jerryxx_set_property_string(process, MSTR_VERSION, KALUMA_VERSION);
   jerryxx_set_property_function(process, MSTR_MEMORY_USAGE,
                                 process_memory_usage_fn);
@@ -980,7 +981,7 @@ JERRYXX_FUN(textencoder_encode_fn) {
   }
 }
 
-static void register_global_textencoder() {
+static void register_global_text_encoder() {
   /* TextEncoder class */
   jerry_value_t textencoder_ctor =
       jerry_create_external_function(textencoder_ctor_fn);
@@ -991,7 +992,7 @@ static void register_global_textencoder() {
   jerry_release_value(textencoder_prototype);
 
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property(global, MSTR_TEXTENCODER, textencoder_ctor);
+  jerryxx_set_property(global, MSTR_TEXT_ENCODER, textencoder_ctor);
   jerry_release_value(global);
 }
 
@@ -1064,7 +1065,7 @@ JERRYXX_FUN(textdecoder_decode_fn) {
   }
 }
 
-static void register_global_textdecoder() {
+static void register_global_text_decoder() {
   /* TextDecoder class */
   jerry_value_t textdecoder_ctor =
       jerry_create_external_function(textdecoder_ctor_fn);
@@ -1075,7 +1076,7 @@ static void register_global_textdecoder() {
   jerry_release_value(textdecoder_prototype);
 
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property(global, MSTR_TEXTDECODER, textdecoder_ctor);
+  jerryxx_set_property(global, MSTR_TEXT_DECODER, textdecoder_ctor);
   jerry_release_value(global);
 }
 
@@ -1215,6 +1216,55 @@ static void register_global_encoders() {
 
 /****************************************************************************/
 /*                                                                          */
+/*                                SYSTEM ERROR                              */
+/*                                                                          */
+/****************************************************************************/
+
+/**
+ * SystemError() constructor
+ */
+JERRYXX_FUN(system_error_ctor_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "errno")
+  int errno = JERRYXX_GET_ARG_NUMBER(0);
+  if (errno > 0) errno = -errno;
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_ERRNO, errno);
+  jerryxx_set_property_string(JERRYXX_GET_THIS, MSTR_MESSAGE,
+                              (char *)errmsg[-errno]);
+  return jerry_create_undefined();
+}
+
+static void register_global_system_error() {
+  jerry_value_t global = jerry_get_global_object();
+  /* SystemError class */
+  jerry_value_t system_error_ctor =
+      jerry_create_external_function(system_error_ctor_fn);
+  // SystemError.prototype = Object.create(Error.prototype);
+  jerry_value_t global_object = jerryxx_get_property(global, MSTR_OBJECT);
+  jerry_value_t global_object_create =
+      jerryxx_get_property(global_object, "create");
+  jerry_value_t global_error = jerryxx_get_property(global, MSTR_ERROR_CLASS);
+  jerry_value_t global_error_prototype =
+      jerryxx_get_property(global_error, MSTR_PROTOTYPE);
+  jerry_value_t _args[1] = {global_error_prototype};
+  jerry_value_t system_error_prototype =
+      jerry_call_function(global_object_create, global_object, _args, 1);
+  jerryxx_set_property(system_error_ctor, MSTR_PROTOTYPE,
+                       system_error_prototype);
+  jerry_release_value(system_error_prototype);
+  // SystemError.prototype.constructor = SystemError
+  jerryxx_set_property(system_error_prototype, MSTR_CONSTRUCTOR,
+                       system_error_ctor);
+  // global.SystemError = SystemError
+  jerryxx_set_property(global, MSTR_SYSTEM_ERROR, system_error_ctor);
+  jerry_release_value(global_error_prototype);
+  jerry_release_value(global_error);
+  jerry_release_value(global_object_create);
+  jerry_release_value(global_object);
+  jerry_release_value(global);
+}
+
+/****************************************************************************/
+/*                                                                          */
 /*                                ETC FUNCTIONS                             */
 /*                                                                          */
 /****************************************************************************/
@@ -1267,11 +1317,16 @@ static void run_startup_module() {
 }
 
 static void run_board_module() {
+  board_init();
   jerry_value_t res = jerry_exec_snapshot((const uint32_t *)module_board_code,
                                           module_board_size, 0,
                                           JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
   jerry_value_t this_val = jerry_create_undefined();
   jerry_value_t ret_val = jerry_call_function(res, this_val, NULL, 0);
+  if (jerry_value_is_error(ret_val)) {
+    // print error
+    jerryxx_print_error(ret_val, true);
+  }
   jerry_release_value(ret_val);
   jerry_release_value(this_val);
   jerry_release_value(res);
@@ -1285,9 +1340,10 @@ void km_global_init() {
   register_global_timers();
   register_global_console_object();
   register_global_process_object();
-  register_global_textencoder();
-  register_global_textdecoder();
+  register_global_text_encoder();
+  register_global_text_decoder();
   register_global_encoders();
+  register_global_system_error();
   register_global_etc();
   run_startup_module();
   run_board_module();

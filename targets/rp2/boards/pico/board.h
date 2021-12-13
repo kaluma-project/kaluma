@@ -22,8 +22,16 @@
 #ifndef __RP2_PICO_H
 #define __RP2_PICO_H
 
-#define SYSTEM_ARCH "cortex-m0-plus"
-#define SYSTEM_PLATFORM "rp2"
+#include "jerryscript.h"
+
+#define KALUMA_SYSTEM_ARCH "cortex-m0-plus"
+#define KALUMA_SYSTEM_PLATFORM "rp2"
+
+#define KALUMA_FLASH_OFFSET 0x180000
+#define KALUMA_FLASH_BASE (XIP_BASE + KALUMA_FLASH_OFFSET)
+#define KALUMA_FLASH_SECTOR_SIZE 4096
+#define KALUMA_FLASH_SECTOR_COUNT 64
+#define KALUMA_FLASH_PAGE_SIZE 256
 
 #define GPIO_NUM 29  // GPIO 0 - 28
 // #define ADC_NUM 3
@@ -40,5 +48,7 @@
 #define PWM_CLK_REF 1250
 #define I2C_MAX_CLOCK 1000000
 #define SCR_LOAD_GPIO 22  // GPIO 22
+
+void board_init();
 
 #endif /* __RP2_PICO_H */

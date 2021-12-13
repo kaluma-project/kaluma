@@ -40,17 +40,6 @@ static void gc_handle_freecb(void *handle) { free(handle); }
 static const jerry_object_native_info_t gc_handle_info = {.free_cb =
                                                               gc_handle_freecb};
 
-#define JERRYXX_GET_NATIVE_HANDLE(name, handle_type, handle_info)         \
-  void *native_pointer;                                                   \
-  bool has_p = jerry_get_object_native_pointer(this_val, &native_pointer, \
-                                               &handle_info);             \
-  if (!has_p) {                                                           \
-    return jerry_create_error(                                            \
-        JERRY_ERROR_REFERENCE,                                            \
-        (const jerry_char_t *)"Failed to get native handle");             \
-  }                                                                       \
-  handle_type *name = (handle_type *)native_pointer;
-
 /* ************************************************************************** */
 /*                            GRAPHIC CONTEXT CLASS                           */
 /* ************************************************************************** */

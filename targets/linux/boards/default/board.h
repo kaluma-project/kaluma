@@ -22,8 +22,16 @@
 #ifndef __LINUX_H
 #define __LINUX_H
 
-#define SYSTEM_ARCH "x86"
-#define SYSTEM_PLATFORM "linux"
+#include "jerryscript.h"
+
+#define KALUMA_SYSTEM_ARCH "x86"
+#define KALUMA_SYSTEM_PLATFORM "linux"
+
+#define KALUMA_FLASH_OFFSET 0
+#define KALUMA_FLASH_BASE KALUMA_FLASH_OFFSET
+#define KALUMA_FLASH_SECTOR_SIZE 4096
+#define KALUMA_FLASH_SECTOR_COUNT 64
+#define KALUMA_FLASH_PAGE_SIZE 256
 
 // #define GPIO_NUM 22
 // #define ADC_NUM 6
@@ -33,5 +41,7 @@
 // #define UART_NUM 2
 // #define LED_NUM 1
 // #define BUTTON_NUM 1
+
+void board_init();
 
 #endif /* __LINUX_H */

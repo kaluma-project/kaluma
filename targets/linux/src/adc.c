@@ -23,8 +23,6 @@
 
 #include <stdint.h>
 
-#include "linux.h"
-
 /**
  * Get ADC index
  *
@@ -57,7 +55,7 @@ void km_adc_cleanup() {}
  * @param {uint8_t} adcIndex
  * @return {double}
  */
-double km_adc_read(uint8_t adcIndex) { return 0.0d; }
+double km_adc_read(uint8_t adcIndex) { return 0.0; }
 
 int km_adc_setup(uint8_t pin) { return 0; }
 

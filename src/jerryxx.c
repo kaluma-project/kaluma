@@ -100,11 +100,27 @@ bool jerryxx_get_property_boolean(jerry_value_t object, const char *name,
   return value;
 }
 
+uint8_t *jerryxx_get_property_typedarray_buffer(jerry_value_t object) {
+  jerry_length_t length = 0;
+  jerry_length_t offset = 0;
+  jerry_value_t arrbuf = jerry_get_typedarray_buffer(object, &offset, &length);
+  uint8_t *buffer_pointer = jerry_get_arraybuffer_pointer(arrbuf);
+  jerry_release_value(arrbuf);
+  return buffer_pointer;
+}
+
 bool jerryxx_delete_property(jerry_value_t object, const char *name) {
   jerry_value_t prop = jerry_create_string((const jerry_char_t *)name);
   bool ret = jerry_delete_property(object, prop);
   jerry_release_value(prop);
   return ret;
+}
+
+void jerryxx_array_push_string(jerry_value_t array, jerry_value_t item) {
+  jerry_value_t push = jerryxx_get_property(array, "push");
+  jerry_value_t _args[] = {item};
+  jerry_call_function(push, array, _args, 1);
+  jerry_release_value(push);
 }
 
 void jerryxx_print_value(jerry_value_t value) {

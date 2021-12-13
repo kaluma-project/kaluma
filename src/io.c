@@ -69,7 +69,7 @@ km_io_handle_t *km_io_handle_get_by_id(uint32_t id, km_list_t *handle_list) {
   return NULL;
 }
 
-static void io_update_time() { loop.time = km_gettime(); }
+static void km_io_update_time() { loop.time = km_gettime(); }
 
 static void km_io_handle_closing() {
   while (loop.closing_handles.head != NULL) {
@@ -85,6 +85,7 @@ static void km_io_handle_closing() {
 
 void km_io_init() {
   loop.stop_flag = false;
+  km_io_update_time();
   km_list_init(&loop.tty_handles);
   km_list_init(&loop.timer_handles);
   km_list_init(&loop.watch_handles);
@@ -92,15 +93,31 @@ void km_io_init() {
   km_list_init(&loop.closing_handles);
 }
 
-void km_io_run() {
+void km_io_cleanup() {
+  km_io_timer_cleanup();
+  km_io_watch_cleanup();
+  km_io_uart_cleanup();
+  // km_io_idle_cleanup();
+  // Do not cleanup tty I/O to keep terminal communication
+}
+
+void km_io_run(bool infinite) {
   while (loop.stop_flag == false) {
-    io_update_time();
+    km_io_update_time();
     km_io_timer_run();
     km_io_tty_run();
     km_io_watch_run();
     km_io_uart_run();
     km_io_idle_run();
     km_io_handle_closing();
+
+    // quite if there no IO handles
+    if (!infinite) {
+      if (loop.timer_handles.head == NULL && loop.watch_handles.head == NULL &&
+          loop.uart_handles.head == NULL && loop.closing_handles.head == NULL) {
+        loop.stop_flag = true;
+      }
+    }
   }
 }
 

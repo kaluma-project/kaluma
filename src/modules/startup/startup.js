@@ -7,7 +7,7 @@ function Module(id) {
   this.exports = {};
 }
 
-Module.cache = {}
+Module.cache = {};
 
 Module.require = function (id) {
   if (Module.cache[id]) {
@@ -19,33 +19,22 @@ Module.require = function (id) {
     Module.cache[id] = mod;
     return mod.exports;
   }
-  throw new Error('Failed to load module: ' + id);
-}
+  throw new Error("Failed to load module: " + id);
+};
 
 Module.prototype.loadBuiltin = function () {
   var fn = process.getBuiltinModule(this.id);
   fn(this.exports, Module.require, this);
-}
-
-class SystemError extends Error {
-  constructor(errno, code, message) {
-    super(message);
-    this.name = 'SystemError';
-    this.errno = errno;
-    this.code = code;
-    this.message = `(errno:${this.errno})`;
-  }
-}
+};
 
 global.require = Module.require;
-global.SystemError = SystemError;
 
 /**
  * Storage object
  */
 
-if (process.builtin_modules.indexOf('storage') > -1) {
-  var Storage = Module.require('storage').Storage;
+if (process.builtin_modules.indexOf("storage") > -1) {
+  var Storage = Module.require("storage").Storage;
   global.storage = new Storage();
 }
 
@@ -55,35 +44,35 @@ if (process.builtin_modules.indexOf('storage') > -1) {
 
 global.board = {
   gpio: function (...args) {
-    var GPIO = global.require('gpio').GPIO;
+    var GPIO = global.require("gpio").GPIO;
     return new GPIO(...args);
   },
   led: function (...args) {
-    var LED = global.require('led').LED;
+    var LED = global.require("led").LED;
     return new LED(...args);
   },
   button: function (...args) {
-    var Button = global.require('button').Button;
+    var Button = global.require("button").Button;
     return new Button(...args);
   },
   pwm: function (...args) {
-    var PWM = global.require('pwm').PWM;
+    var PWM = global.require("pwm").PWM;
     return new PWM(...args);
   },
   adc: function (...args) {
-    var ADC = global.require('adc').ADC;
+    var ADC = global.require("adc").ADC;
     return new ADC(...args);
   },
   i2c: function (...args) {
-    var I2C = global.require('i2c').I2C;
+    var I2C = global.require("i2c").I2C;
     return new I2C(...args);
   },
   spi: function (...args) {
-    var SPI = global.require('spi').SPI;
+    var SPI = global.require("spi").SPI;
     return new SPI(...args);
   },
   uart: function (...args) {
-    var UART = global.require('uart').UART;
+    var UART = global.require("uart").UART;
     return new UART(...args);
-  }
-}
+  },
+};

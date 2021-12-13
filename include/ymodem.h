@@ -2,6 +2,7 @@
 #define __KM_YMODEM_H_
 
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 
 typedef enum {

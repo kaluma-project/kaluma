@@ -43,7 +43,7 @@ uint32_t km_tty_read_sync(uint8_t *buf, size_t len, uint32_t timeout) {
 
 uint8_t km_tty_getc() { return 0; }
 
-void km_tty_putc(char ch) { putchar(ch); }
+void km_tty_putc(char ch) { printf("%c", ch); }
 
 /**
  * Print formatted string to TTY

@@ -595,7 +595,7 @@ static void cmd_help(km_repl_state_t *state) {
 /**
  * Initialize the REPL
  */
-void km_repl_init() {
+void km_repl_init(bool hi) {
   km_io_tty_init(&tty);
   km_io_tty_read_start(&tty, tty_read_cb);
   state.mode = KM_REPL_MODE_NORMAL;
@@ -608,8 +608,12 @@ void km_repl_init() {
   state.history_position = 0;
   state.handler = &default_handler;
   state.ymodem_state = 0;
-  cmd_hi(NULL);
+  if (hi) {
+    cmd_hi(NULL);
+  }
 }
+
+void km_repl_cleanup() { km_io_tty_cleanup(); }
 
 km_repl_state_t *km_get_repl_state() { return &state; }
 

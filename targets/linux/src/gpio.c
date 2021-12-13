@@ -35,8 +35,12 @@ int km_gpio_read(uint8_t pin) { return 0; }
 
 int km_gpio_toggle(uint8_t pin) { return 0; }
 
-void km_gpio_intr_en(bool en, km_gpio_callback_t call_back) {}
+void km_gpio_irq_set_callback(km_gpio_irq_callback_t cb) {}
 
-int km_gpio_set_interrupt(bool en, uint8_t pin, uint8_t events) {
-  return KM_GPIOPORT_ERROR;
-}
+int km_gpio_irq_attach(uint8_t pin, uint8_t events) { return 0; }
+
+int km_gpio_irq_detach(uint8_t pin) { return 0; }
+
+void km_gpio_irq_enable() {}
+
+void km_gpio_irq_disable() {}
