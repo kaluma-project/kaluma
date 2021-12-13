@@ -73,7 +73,7 @@ list(APPEND SOURCES
   ${SRC_DIR}/jerry_port.c
   ${SRC_DIR}/jerryxx.c
   ${SRC_DIR}/global.c
-  ${SRC_DIR}/program.c
+  ${SRC_DIR}/prog.c
   ${SRC_DIR}/ymodem.c
   ${SRC_DIR}/ringbuffer.c
   ${KALUMA_GENERATED_C})

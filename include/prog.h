@@ -19,20 +19,20 @@
  * SOFTWARE.
  */
 
-#ifndef __KM_PROGRAM_H
-#define __KM_PROGRAM_H
+#ifndef __KM_PROG_H
+#define __KM_PROG_H
 
 #include <stdint.h>
 
 #include "board.h"
 #include "flash2.h"
 
-int km_program_clear();
-int km_program_begin();
-int km_program_write(int8_t *buffer, int size);
-int km_program_end();
-int km_program_get_size();
-int km_program_max_size();
-uint8_t *km_program_addr();
+int km_prog_clear();
+int km_prog_begin();
+int km_prog_write(int8_t *buffer, int size);
+int km_prog_end();
+int km_prog_get_size();
+int km_prog_max_size();
+uint8_t *km_prog_addr();
 
-#endif /* __KM_PROGRAM_H */
+#endif /* __KM_PROG_H */

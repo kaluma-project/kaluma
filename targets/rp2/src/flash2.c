@@ -29,6 +29,9 @@
 #include "hardware/sync.h"
 #include "pico/stdlib.h"
 
+const uint8_t *km_flash_addr =
+    (const uint8_t *)(XIP_BASE + KALUMA_FLASH_OFFSET);
+
 int km_flash2_program(uint32_t sector, uint32_t offset, uint8_t *buffer,
                       size_t size) {
   const uint32_t _base =

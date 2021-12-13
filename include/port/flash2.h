@@ -25,6 +25,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+extern const uint8_t *km_flash_addr;
+
 /**
  * @brief Program data to internal flash
  *
