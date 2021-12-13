@@ -29,8 +29,6 @@
 #include "hardware/sync.h"
 #include "pico/stdlib.h"
 
-const uint8_t *km_flash_target = (const uint8_t *)KALUMA_FLASH_BASE;
-
 int km_flash2_program(uint32_t sector, uint32_t offset, uint8_t *buffer,
                       size_t size) {
   const uint32_t _base =
@@ -72,3 +70,5 @@ int km_flash2_erase(uint32_t sector, size_t count) {
   restore_interrupts(saved_irq);
   return 0;
 }
+
+uint8_t *km_flash2_addr() { return ((uint8_t *)KALUMA_FLASH_ADDR); }

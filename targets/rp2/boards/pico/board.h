@@ -27,11 +27,44 @@
 #define KALUMA_SYSTEM_ARCH "cortex-m0-plus"
 #define KALUMA_SYSTEM_PLATFORM "rp2"
 
-#define KALUMA_FLASH_OFFSET 0x180000
-#define KALUMA_FLASH_BASE (XIP_BASE + KALUMA_FLASH_OFFSET)
+// Flash allocation map
+//
+// |         A        | B |     C     |     D     |
+// |------------------|---|-----------|-----------|
+// |      1008K       |16K|   512K    |   512K    |
+//
+// - A : binary (firmware)
+// - B : storage (key-value database)
+// - C : user program (js)
+// - D : file system (lfs)
+// (Total : 2MB)
+
+// binary (1008KB)
+#define KALUMA_BINARY_MAX 0xFC000
+
+// flash (B + C + D = 1040KB (=16KB + 1024KB))
+#define KALUMA_FLASH_MAX 0x104000
 #define KALUMA_FLASH_SECTOR_SIZE 4096
-#define KALUMA_FLASH_SECTOR_COUNT 128
+#define KALUMA_FLASH_SECTOR_COUNT 260
 #define KALUMA_FLASH_PAGE_SIZE 256
+#define KALUMA_FLASH_OFFSET KALUMA_BINARY_MAX
+#define KALUMA_FLASH_ADDR (XIP_BASE + KALUMA_FLASH_OFFSET)
+
+// user program on flash (512KB)
+#define KALUMA_PROGRAM_SECTOR_BASE 4
+#define KALUMA_PROGRAM_SECTOR_COUNT 128
+
+// storage on flash (16KB)
+// - sector base : 0
+// - sector count : 4
+// - use block device : new Flash(0, 4);
+
+// file system on flash (512K)
+// - sector base : 132
+// - sector count : 128
+// - use block device : new Flash(132, 128)
+
+// -----------------------------------------------------------------
 
 #define GPIO_NUM 29  // GPIO 0 - 28
 // #define ADC_NUM 3

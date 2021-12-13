@@ -33,8 +33,6 @@ const size_t __flash_size =
     KALUMA_FLASH_SECTOR_SIZE * KALUMA_FLASH_SECTOR_COUNT;
 static uint8_t __flash_buffer[__flash_size];
 
-const uint8_t *km_flash_target = (const uint8_t *)(__flash_buffer);
-
 int km_flash2_program(uint32_t sector, uint32_t offset, uint8_t *buffer,
                       size_t size) {
   const uint32_t _base = (sector * KALUMA_FLASH_SECTOR_SIZE) + offset;
@@ -51,3 +49,5 @@ int km_flash2_erase(uint32_t sector, size_t count) {
   }
   return 0;
 }
+
+uint8_t *km_flash2_addr() { return (const uint8_t *)(__flash_buffer); }

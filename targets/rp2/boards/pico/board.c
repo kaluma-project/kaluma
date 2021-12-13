@@ -80,8 +80,9 @@ JERRYXX_FUN(flash_read_fn) {
   // read from flash
   int base = jerryxx_get_property_number(JERRYXX_GET_THIS, "base", 0);
   int size = jerryxx_get_property_number(JERRYXX_GET_THIS, "size", 0);
+  const uint8_t *addr = km_flash2_addr();
   for (int i = 0; i < buffer_length; i++) {
-    buffer_pointer[i] = km_flash_target[((base + block) * size) + offset + i];
+    buffer_pointer[i] = addr[((base + block) * size) + offset + i];
   }
   return jerry_create_undefined();
 }
