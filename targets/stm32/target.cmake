@@ -32,7 +32,6 @@ set(SOURCES
   ${TARGET_SRC_DIR}/usbd_cdc_if.c
   ${TARGET_SRC_DIR}/system_stm32f4xx.c
   ${TARGET_SRC_DIR}/stm32f4xx_hal_msp.c
-  ${TARGET_SRC_DIR}/flash.c
   ${TARGET_SRC_DIR}/storage.c
   ${TARGET_SRC_DIR}/uart.c
   ${TARGET_SRC_DIR}/i2c.c

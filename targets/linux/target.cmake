@@ -56,7 +56,6 @@ set(SOURCES
   ${TARGET_SRC_DIR}/pwm.c
   ${TARGET_SRC_DIR}/tty.c
   ${TARGET_SRC_DIR}/flash.c
-  ${TARGET_SRC_DIR}/flash2.c
   ${TARGET_SRC_DIR}/storage.c
   ${TARGET_SRC_DIR}/uart.c
   ${TARGET_SRC_DIR}/i2c.c

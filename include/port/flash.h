@@ -23,55 +23,29 @@
 #define __KM_FLASH_H
 
 #include <stdint.h>
+#include <stdio.h>
 
-typedef enum {
-  KM_FLASH_SUCCESS = 0x00U,
-  KM_FLASH_FAIL = 0x01U,
-  KM_FLASH_TIMEOUT = 0x02U,
-} km_flash_status_t;
+extern const uint8_t *km_flash_addr;
 
 /**
- * Erase all the data in the flash and set the data size to zero
+ * @brief Program data to internal flash
+ *
+ * @param sector sector number to program
+ * @param offset offset to the sector (multiple of KALUMA_FLASH_PAGE_SIZE)
+ * @param buffer buffer to write
+ * @param size size of buffer to write (multiple of KALUMA_FLASH_PAGE_SIZE)
+ * @return negative on error
  */
-void km_flash_clear();
+int km_flash_program(uint32_t sector, uint32_t offset, uint8_t *buffer,
+                     size_t size);
 
 /**
- * Return total size of flash
+ * @brief Erase data in internal flash
+ *
+ * @param sector sector number to erase
+ * @param count how many sectors to erase from the sector number
+ * @return negative on error
  */
-uint32_t km_flash_size();
-
-/**
- * Return a pointer to the data stored in the flash
- */
-uint8_t *km_flash_get_data();
-
-/**
- * Free memory that's allocated in km_flash_get_data()
- */
-void km_flash_free_data(uint8_t *data);
-/**
- * Return the size of the data stored in the flash
- */
-uint32_t km_flash_get_data_size();
-
-/**
- * Begin to write data to the flash
- */
-void km_flash_program_begin();
-
-/**
- * Program data to the flash
- */
-km_flash_status_t km_flash_program(uint8_t *buf, uint32_t size);
-
-/**
- * Finish to write data to the flash
- */
-void km_flash_program_end();
-
-/**
- * Calcurate the checksum value for the written data in flash
- */
-uint32_t km_flash_get_checksum();
+int km_flash_erase(uint32_t sector, size_t count);
 
 #endif /* __KM_FLASH_H */

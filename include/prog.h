@@ -25,14 +25,14 @@
 #include <stdint.h>
 
 #include "board.h"
-#include "flash2.h"
+#include "flash.h"
 
-int km_prog_clear();
-int km_prog_begin();
-int km_prog_write(int8_t *buffer, int size);
+void km_prog_clear();
+void km_prog_begin();
+int km_prog_write(uint8_t *buffer, int size);
 int km_prog_end();
-int km_prog_get_size();
-int km_prog_max_size();
+uint32_t km_prog_get_size();
+uint32_t km_prog_max_size();
 uint8_t *km_prog_addr();
 
 #endif /* __KM_PROG_H */

@@ -19,15 +19,11 @@
  * SOFTWARE.
  */
 
-#ifdef _TARGET_FREERTOS_
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#endif
+#include "runtime.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-#include "flash.h"
 #include "global.h"
 #include "gpio.h"
 #include "io.h"
@@ -36,8 +32,8 @@
 #include "jerryscript.h"
 #include "jerryxx.h"
 #include "kaluma_magic_strings.h"
+#include "prog.h"
 #include "repl.h"
-#include "runtime.h"
 #include "system.h"
 #include "tty.h"
 
@@ -110,12 +106,11 @@ void km_runtime_cleanup() {
 }
 
 void km_runtime_load() {
-  uint32_t size = km_flash_get_data_size();
+  uint32_t size = km_prog_get_size();
   if (size > 0) {
-    uint8_t *script = km_flash_get_data();
+    uint8_t *script = km_prog_addr();
     jerry_value_t parsed_code =
         jerry_parse(NULL, 0, script, size, JERRY_PARSE_STRICT_MODE);
-    km_flash_free_data(script);
     if (!jerry_value_is_error(parsed_code)) {
       jerry_value_t ret_value = jerry_run(parsed_code);
       if (jerry_value_is_error(ret_value)) {

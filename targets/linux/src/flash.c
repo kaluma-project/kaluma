@@ -19,29 +19,34 @@
  * SOFTWARE.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "board.h"
 #include "flash.h"
 
-#include "tty.h"
+//  Flash implementation on RAM
 
-void km_flash_clear() {}
+const size_t __flash_size =
+    KALUMA_FLASH_SECTOR_SIZE * KALUMA_FLASH_SECTOR_COUNT;
+static uint8_t __flash_buffer[__flash_size];
 
-uint8_t *km_flash_get_data() { return NULL; }
+const uint8_t *km_flash_addr = (const uint8_t *)(__flash_buffer);
 
-void km_flash_free_data(uint8_t *data) {
-  (void)data;  // Avoiding warning
+int km_flash_program(uint32_t sector, uint32_t offset, uint8_t *buffer,
+                     size_t size) {
+  const uint32_t _base = (sector * KALUMA_FLASH_SECTOR_SIZE) + offset;
+  for (int i = 0; i < size; i++) {
+    __flash_buffer[_base + i] = buffer[i];
+  }
+  return 0;
 }
 
-uint32_t km_flash_size() { return 0; }
-
-uint32_t km_flash_get_data_size() { return 0; }
-
-void km_flash_program_begin() {}
-
-km_flash_status_t km_flash_program(uint8_t *buf, uint32_t size) {
-  km_flash_status_t status = KM_FLASH_SUCCESS;
-  return status;
+int km_flash_erase(uint32_t sector, size_t count) {
+  const uint32_t _base = sector * KALUMA_FLASH_SECTOR_SIZE;
+  for (int i = 0; i < (count * KALUMA_FLASH_SECTOR_SIZE); i++) {
+    __flash_buffer[_base + i] = 0;
+  }
+  return 0;
 }
-
-void km_flash_program_end() {}
-
-uint32_t km_flash_get_checksum() { return 0; }

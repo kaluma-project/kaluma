@@ -24,10 +24,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "flash.h"
 #include "io.h"
 #include "jerryscript.h"
 #include "kaluma_config.h"
+#include "prog.h"
 #include "runtime.h"
 #include "system.h"
 #include "tty.h"
@@ -436,7 +436,7 @@ static void cmd_reset(km_repl_state_t *state) {
 static size_t bytes_remained = 0;
 
 static int header_cb(uint8_t *file_name, size_t file_size) {
-  km_flash_program_begin();
+  km_prog_begin();
   bytes_remained = file_size;
   return 0;
 }
@@ -448,17 +448,15 @@ static int packet_cb(uint8_t *data, size_t len) {
   } else {
     bytes_remained = bytes_remained - len;
   }
-  km_flash_status_t status = km_flash_program(data, len);
-  if (status == KM_FLASH_SUCCESS) {
-    return 0;
-  } else {
+  int ret = km_prog_write(data, len);
+  if (ret < 0) {
     return -1;
   }
   return 0;
 }
 
 static void footer_cb() {
-  km_flash_program_end();
+  km_prog_end();
   bytes_remained = 0;
 }
 
@@ -468,23 +466,23 @@ static void footer_cb() {
 static void cmd_flash(km_repl_state_t *state, char *arg) {
   /* erase flash */
   if (strcmp(arg, "-e") == 0) {
-    km_flash_clear();
+    km_prog_clear();
     km_repl_printf("Flash has erased\r\n");
 
     /* get total size of flash */
   } else if (strcmp(arg, "-t") == 0) {
-    uint32_t size = km_flash_size();
+    uint32_t size = km_prog_max_size();
     km_repl_printf("%u\r\n", size);
 
     /* get data size in flash */
   } else if (strcmp(arg, "-s") == 0) {
-    uint32_t data_size = km_flash_get_data_size();
+    uint32_t data_size = km_prog_get_size();
     km_repl_printf("%u\r\n", data_size);
 
     /* read data from flash */
   } else if (strcmp(arg, "-r") == 0) {
-    uint32_t sz = km_flash_get_data_size();
-    uint8_t *ptr = km_flash_get_data();
+    uint32_t sz = km_prog_get_size();
+    uint8_t *ptr = km_prog_addr();
     for (int i = 0; i < sz; i++) {
       if (ptr[i] == '\n') { /* convert "\n" to "\r\n" */
         km_repl_putc('\r');
@@ -492,7 +490,6 @@ static void cmd_flash(km_repl_state_t *state, char *arg) {
       km_repl_putc(ptr[i]);
     }
     km_repl_println();
-    km_flash_free_data(ptr);
     /* write a file to flash via Ymodem */
   } else if (strcmp(arg, "-w") == 0) {
     state->ymodem_state = 1;  // transfering
