@@ -24,7 +24,7 @@
 #include <stdlib.h>
 
 #include "err.h"
-#include "flash2.h"
+#include "flash.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
 #include "magic_strings.h"
@@ -78,8 +78,9 @@ JERRYXX_FUN(flash_read_fn) {
   // read from flash
   int base = jerryxx_get_property_number(JERRYXX_GET_THIS, "base", 0);
   int size = jerryxx_get_property_number(JERRYXX_GET_THIS, "size", 0);
+  const uint8_t *addr = km_flash_addr;
   for (int i = 0; i < buffer_length; i++) {
-    buffer_pointer[i] = km_flash_target[((base + block) * size) + offset + i];
+    buffer_pointer[i] = addr[((base + block) * size) + offset + i];
   }
   return jerry_create_undefined();
 }
@@ -109,7 +110,7 @@ JERRYXX_FUN(flash_write_fn) {
 
   // write to buffer
   int base = jerryxx_get_property_number(JERRYXX_GET_THIS, "base", 0);
-  km_flash2_program(base + block, offset, buffer_pointer, buffer_length);
+  km_flash_program(base + block, offset, buffer_pointer, buffer_length);
   return jerry_create_undefined();
 }
 
@@ -141,7 +142,7 @@ JERRYXX_FUN(flash_ioctl_fn) {
       return jerry_create_number(
           jerryxx_get_property_number(JERRYXX_GET_THIS, "size", 0));
     case 6:  // erase block
-      km_flash2_erase(base + arg, 1);
+      km_flash_erase(base + arg, 1);
       return jerry_create_number(0);
     default:
       return jerry_create_number(-1);

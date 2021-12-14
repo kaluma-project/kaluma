@@ -19,110 +19,56 @@
  * SOFTWARE.
  */
 
-#include "flash.h"
-
 #include <stdlib.h>
 #include <string.h>
-//#include "tty.h"
+
+#include "board.h"
+#include "flash.h"
 #include "hardware/flash.h"
 #include "hardware/sync.h"
 #include "pico/stdlib.h"
 
-#define HEADER_FLASH_OFFSET 0x100000
-#define HEADER_FLASH_SIZE FLASH_PAGE_SIZE  // One page
-#define CODE_FLASH_OFFSET HEADER_FLASH_OFFSET + HEADER_FLASH_SIZE
-#define CODE_FLASH_SIZE 0x100000 - HEADER_FLASH_SIZE
+const uint8_t *km_flash_addr =
+    (const uint8_t *)(XIP_BASE + KALUMA_FLASH_OFFSET);
 
-#define ADDR_FLASH_USER_CODE_SIZE XIP_BASE + HEADER_FLASH_OFFSET
-#define ADDR_FLASH_USER_CODE_CHECKSUM XIP_BASE + HEADER_FLASH_OFFSET + 4
-#define ADDR_FLASH_USER_CODE XIP_BASE + CODE_FLASH_OFFSET
+int km_flash_program(uint32_t sector, uint32_t offset, uint8_t *buffer,
+                     size_t size) {
+  const uint32_t _base =
+      KALUMA_FLASH_OFFSET + (sector * KALUMA_FLASH_SECTOR_SIZE) + offset;
 
-static uint32_t __code_offset;
-static uint32_t __remaining_data_size;
-static uint8_t *__buff;
-static uint32_t __calculate_checksum(uint8_t *pbuf, uint32_t size) {
-  uint32_t calcurated_checksum = 0;
-
-  for (int k = 0; k < size; k++) {
-    calcurated_checksum = calcurated_checksum + pbuf[k];
+  // base should be multiple of KALUMA_FLASH_PAGE_SIZE
+  if (_base % KALUMA_FLASH_PAGE_SIZE > 0) {
+    return -1;
   }
-  return (calcurated_checksum ^ (uint32_t)-1) + 1;
-}
 
-void km_flash_clear() {
+  // size should be multiple of KALUMA_FLASH_PAGE_SIZE
+  if (size % KALUMA_FLASH_PAGE_SIZE > 0) {
+    return -1;
+  }
+
   uint32_t saved_irq = save_and_disable_interrupts();
-  flash_range_erase(HEADER_FLASH_OFFSET, HEADER_FLASH_SIZE + CODE_FLASH_SIZE);
+  flash_range_program(_base, buffer, size);
   restore_interrupts(saved_irq);
+  return 0;
 }
 
-uint8_t *km_flash_get_data() { return (uint8_t *)ADDR_FLASH_USER_CODE; }
+int km_flash_erase(uint32_t sector, size_t count) {
+  const uint32_t _base =
+      KALUMA_FLASH_OFFSET + (sector * KALUMA_FLASH_SECTOR_SIZE);
+  const uint32_t _size = count * KALUMA_FLASH_SECTOR_SIZE;
 
-void km_flash_free_data(uint8_t *data) {
-  (void)data;  // Avoiding warning
-}
-
-uint32_t km_flash_size() { return CODE_FLASH_SIZE; }
-
-uint32_t km_flash_get_data_size() {
-  uint8_t *size = (uint8_t *)ADDR_FLASH_USER_CODE_SIZE;
-  if (*(uint32_t *)size == 0xFFFFFFFF) {
-    return 0;
+  // _base should be multiple of KALUMA_FLASH_PAGE_SIZE
+  if (_base % KALUMA_FLASH_SECTOR_SIZE > 0) {
+    return -1;
   }
-  return *(uint32_t *)size;
-}
 
-void km_flash_program_begin() {
-  __code_offset = 0;
-  __remaining_data_size = 0;
-  km_flash_clear();
-  __buff = (uint8_t *)malloc(FLASH_PAGE_SIZE * sizeof(uint8_t));  // 256 byte
-}
-
-km_flash_status_t km_flash_program(uint8_t *buf, uint32_t size) {
-  uint32_t page_offset = 0;
-  if (__buff == NULL) {
-    return KM_FLASH_FAIL;
+  // _size should be multiple of KALUMA_FLASH_PAGE_SIZE
+  if (_size % KALUMA_FLASH_SECTOR_SIZE > 0) {
+    return -1;
   }
+
   uint32_t saved_irq = save_and_disable_interrupts();
-  while (size >= FLASH_PAGE_SIZE) {
-    memset(__buff, 0, FLASH_PAGE_SIZE);
-    memcpy(__buff + __remaining_data_size, buf + page_offset,
-           FLASH_PAGE_SIZE - __remaining_data_size);
-    flash_range_program(CODE_FLASH_OFFSET + __code_offset, (uint8_t *)__buff,
-                        FLASH_PAGE_SIZE);
-    page_offset += FLASH_PAGE_SIZE;
-    __code_offset += FLASH_PAGE_SIZE;
-    size -= FLASH_PAGE_SIZE;
-  }
-  if (size) {
-    memset(__buff, 0, FLASH_PAGE_SIZE);
-    memcpy(__buff, buf + page_offset, size);
-    __remaining_data_size = size;
-  }
+  flash_range_erase(_base, _size);
   restore_interrupts(saved_irq);
-  return KM_FLASH_SUCCESS;
-}
-
-void km_flash_program_end() {
-  uint32_t saved_irq = save_and_disable_interrupts();
-  if (__remaining_data_size) {
-    flash_range_program(CODE_FLASH_OFFSET + __code_offset, (uint8_t *)__buff,
-                        FLASH_PAGE_SIZE);
-    __code_offset += __remaining_data_size;
-  }
-  free(__buff);
-  uint32_t *buff =
-      (uint32_t *)calloc(HEADER_FLASH_SIZE / 4, sizeof(uint32_t));  // 256 byte
-  uint32_t checksum =
-      __calculate_checksum((uint8_t *)ADDR_FLASH_USER_CODE, __code_offset);
-  *buff = __code_offset;
-  *(buff + 1) = checksum;
-  flash_range_program(HEADER_FLASH_OFFSET, (uint8_t *)buff, HEADER_FLASH_SIZE);
-  free(buff);
-  restore_interrupts(saved_irq);
-}
-
-uint32_t km_flash_get_checksum() {
-  uint8_t *cs = (uint8_t *)ADDR_FLASH_USER_CODE_CHECKSUM;
-  return *(uint32_t *)cs;
+  return 0;
 }

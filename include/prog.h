@@ -19,34 +19,20 @@
  * SOFTWARE.
  */
 
-#ifndef __KM_FLASH2_H
-#define __KM_FLASH2_H
+#ifndef __KM_PROG_H
+#define __KM_PROG_H
 
 #include <stdint.h>
-#include <stdio.h>
 
-extern const uint8_t *km_flash_target;
+#include "board.h"
+#include "flash.h"
 
-/**
- * @brief Program data to internal flash
- *
- * @param sector sector number to program
- * @param offset offset to the sector
- * @param buffer buffer to write
- * @param size size of buffer to write (should be multple of
- * KALUMA_FLASH_PAGE_SIZE)
- * @return negative on error
- */
-int km_flash2_program(uint32_t sector, uint32_t offset, uint8_t *buffer,
-                      size_t size);
+void km_prog_clear();
+void km_prog_begin();
+int km_prog_write(uint8_t *buffer, int size);
+int km_prog_end();
+uint32_t km_prog_get_size();
+uint32_t km_prog_max_size();
+uint8_t *km_prog_addr();
 
-/**
- * @brief Erase data in internal flash
- *
- * @param sector sector number to erase
- * @param count how many sectors to erase from the sector number
- * @return negative on error
- */
-int km_flash2_erase(uint32_t sector, size_t count);
-
-#endif /* __KM_FLASH2_H */
+#endif /* __KM_PROG_H */
