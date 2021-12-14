@@ -25,6 +25,7 @@
 /* global */
 #define MSTR_PROTOTYPE "prototype"
 #define MSTR_GLOBAL "global"
+#define MSTR_REQUIRE "require"
 #define MSTR_HIGH "HIGH"
 #define MSTR_LOW "LOW"
 #define MSTR_INPUT "INPUT"

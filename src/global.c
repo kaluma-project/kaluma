@@ -1318,18 +1318,27 @@ static void run_startup_module() {
 
 static void run_board_module() {
   board_init();
-  jerry_value_t res = jerry_exec_snapshot((const uint32_t *)module_board_code,
-                                          module_board_size, 0,
-                                          JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
+  jerry_value_t board_js = jerry_exec_snapshot(
+      (const uint32_t *)module_board_code, module_board_size, 0,
+      JERRY_SNAPSHOT_EXEC_ALLOW_STATIC);
   jerry_value_t this_val = jerry_create_undefined();
-  jerry_value_t ret_val = jerry_call_function(res, this_val, NULL, 0);
+  jerry_value_t global = jerry_get_global_object();
+  jerry_value_t require = jerryxx_get_property(global, MSTR_REQUIRE);
+  jerry_value_t exports = jerry_create_object();
+  jerry_value_t module = jerry_create_object();
+  jerry_value_t args[3] = {exports, require, module};
+  jerry_value_t ret_val = jerry_call_function(board_js, this_val, args, 3);
   if (jerry_value_is_error(ret_val)) {
     // print error
     jerryxx_print_error(ret_val, true);
   }
   jerry_release_value(ret_val);
+  jerry_release_value(module);
+  jerry_release_value(exports);
+  jerry_release_value(require);
+  jerry_release_value(global);
   jerry_release_value(this_val);
-  jerry_release_value(res);
+  jerry_release_value(board_js);
 }
 
 void km_global_init() {
