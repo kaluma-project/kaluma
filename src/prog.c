@@ -68,10 +68,15 @@ int km_prog_write(uint8_t *buffer, int size) {
 }
 
 int km_prog_end() {
+  // push end of string
+  page_buffer_push(0);
+
+  // flush if buffer has data
   if (page_written > 0) {
     int ret = page_buffer_flush();
     if (ret < 0) return -1;
   }
+
   if (page_buffer != NULL) {
     free(page_buffer);
   }
