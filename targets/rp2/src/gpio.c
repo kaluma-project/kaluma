@@ -24,12 +24,13 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "board.h"
 #include "hardware/gpio.h"
 #include "hardware/irq.h"
 #include "pico/stdlib.h"
 
 static int __check_gpio(uint8_t pin) {
-  if (pin <= 29) {
+  if (pin <= KALUMA_GPIO_COUNT) {
     return 0;
   } else {
     return KM_GPIOPORT_ERROR;  // Not a GPIO pins

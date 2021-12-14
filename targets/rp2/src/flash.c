@@ -19,11 +19,12 @@
  * SOFTWARE.
  */
 
+#include "flash.h"
+
 #include <stdlib.h>
 #include <string.h>
 
 #include "board.h"
-#include "flash.h"
 #include "hardware/flash.h"
 #include "hardware/sync.h"
 #include "pico/stdlib.h"
@@ -38,12 +39,12 @@ int km_flash_program(uint32_t sector, uint32_t offset, uint8_t *buffer,
 
   // base should be multiple of KALUMA_FLASH_PAGE_SIZE
   if (_base % KALUMA_FLASH_PAGE_SIZE > 0) {
-    return -1;
+    return -22;  // EINVAL
   }
 
   // size should be multiple of KALUMA_FLASH_PAGE_SIZE
   if (size % KALUMA_FLASH_PAGE_SIZE > 0) {
-    return -1;
+    return -22;  // EINVAL
   }
 
   uint32_t saved_irq = save_and_disable_interrupts();
@@ -59,12 +60,12 @@ int km_flash_erase(uint32_t sector, size_t count) {
 
   // _base should be multiple of KALUMA_FLASH_PAGE_SIZE
   if (_base % KALUMA_FLASH_SECTOR_SIZE > 0) {
-    return -1;
+    return -22;  // EINVAL
   }
 
   // _size should be multiple of KALUMA_FLASH_PAGE_SIZE
   if (_size % KALUMA_FLASH_SECTOR_SIZE > 0) {
-    return -1;
+    return -22;  // EINVAL
   }
 
   uint32_t saved_irq = save_and_disable_interrupts();

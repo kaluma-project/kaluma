@@ -52,15 +52,15 @@ int km_i2c_setup_slave(uint8_t bus, uint8_t address, km_i2c_pins_t pins) {
   return 0;
 }
 
-int km_i2c_memWrite_master(uint8_t bus, uint8_t address, uint16_t memAddress,
-                           uint8_t memAdd16bit, uint8_t *buf, size_t len,
-                           uint32_t timeout) {
+int km_i2c_mem_write_master(uint8_t bus, uint8_t address, uint16_t memAddress,
+                            uint8_t memAdd16bit, uint8_t *buf, size_t len,
+                            uint32_t timeout) {
   return 0;
 }
 
-int km_i2c_memRead_master(uint8_t bus, uint8_t address, uint16_t memAddress,
-                          uint8_t memAdd16bit, uint8_t *buf, size_t len,
-                          uint32_t timeout) {
+int km_i2c_mem_read_master(uint8_t bus, uint8_t address, uint16_t memAddress,
+                           uint8_t memAdd16bit, uint8_t *buf, size_t len,
+                           uint32_t timeout) {
   return 0;
 }
 

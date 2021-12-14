@@ -40,7 +40,7 @@
 #define KALUMA_PROG_SECTOR_BASE 4
 #define KALUMA_PROG_SECTOR_COUNT 128
 
-// #define GPIO_NUM 22
+// #define KALUMA_GPIO_COUNT 22
 // #define ADC_NUM 6
 // #define PWM_NUM 6
 // #define I2C_NUM 2

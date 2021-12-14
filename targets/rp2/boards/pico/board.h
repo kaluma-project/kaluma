@@ -64,7 +64,7 @@
 
 // -----------------------------------------------------------------
 
-#define GPIO_NUM 29  // GPIO 0 - 28
+#define KALUMA_GPIO_COUNT 29
 // #define ADC_NUM 3
 #define PWM_NUM 27
 #define I2C_NUM 2

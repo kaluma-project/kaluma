@@ -282,8 +282,8 @@ JERRYXX_FUN(i2c_memwrite_fn) {
     size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
     uint8_t *buf = jerry_get_arraybuffer_pointer(array_buffer);
     for (int c = 0; c < count; c++) {
-      ret = km_i2c_memWrite_master(bus, address, memAddress, memAddr16, buf,
-                                   len, timeout);
+      ret = km_i2c_mem_write_master(bus, address, memAddress, memAddr16, buf,
+                                    len, timeout);
       if (ret < 0) break;
     }
     jerry_release_value(array_buffer);
@@ -292,8 +292,8 @@ JERRYXX_FUN(i2c_memwrite_fn) {
     uint8_t buf[len];
     jerryxx_string_to_ascii_char_buffer(data, buf, len);
     for (int c = 0; c < count; c++) {
-      ret = km_i2c_memWrite_master(bus, address, memAddress, memAddr16, buf,
-                                   len, timeout);
+      ret = km_i2c_mem_write_master(bus, address, memAddress, memAddr16, buf,
+                                    len, timeout);
       if (ret < 0) break;
     }
   } else {
@@ -344,8 +344,8 @@ JERRYXX_FUN(i2c_memread_fn) {
   uint16_t memAddr16 = (uint16_t)JERRYXX_GET_ARG_NUMBER_OPT(3, 0);
   uint32_t timeout = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(4, 5000);
 
-  int ret = km_i2c_memRead_master(bus, address, memAddress, memAddr16, buf,
-                                  length, timeout);
+  int ret = km_i2c_mem_read_master(bus, address, memAddress, memAddr16, buf,
+                                   length, timeout);
 
   // return an Uint8Array
   if (ret == KM_I2CPORT_ERROR) {

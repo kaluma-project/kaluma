@@ -41,7 +41,7 @@
 #define SRAM_SIZE (128 * 1024)
 #define SRAM_BASE_ADDR (0x20000000)
 
-#define GPIO_NUM 22
+#define KALUMA_GPIO_COUNT 22
 #define ADC_NUM 6
 #define PWM_NUM 6
 #define I2C_NUM 2
