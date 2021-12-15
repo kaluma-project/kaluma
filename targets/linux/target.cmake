@@ -60,6 +60,7 @@ set(SOURCES
   ${TARGET_SRC_DIR}/uart.c
   ${TARGET_SRC_DIR}/i2c.c
   ${TARGET_SRC_DIR}/spi.c
+  ${TARGET_SRC_DIR}/rtc.c
   ${TARGET_SRC_DIR}/main.c
   ${BOARD_DIR}/board.c)
 

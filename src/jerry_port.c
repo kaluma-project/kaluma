@@ -23,11 +23,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "jerryscript-ext/handler.h"
 #include "jerryscript-port.h"
 #include "jerryscript.h"
+#include "rtc.h"
 #include "tty.h"
+
 /**
  * Aborts the program.
  */
@@ -55,13 +58,22 @@ double jerry_port_get_local_time_zone_adjustment(double unix_ms, bool is_utc) {
 }
 
 /**
- * Dummy function to get the current time.
- *
- * @return 0
+ * function to get the current time.
+ * Ref:https://stackoverflow.com/questions/9542278/how-do-i-convert-2012-03-02-into-unix-epoch-time-in-c
  */
 double jerry_port_get_current_time(void) {
-  return 0;
-} /* jerry_port_get_current_time */
+  km_rtc_datetime_t t;
+  km_rtc_get_datetime(&t);
+  struct tm ts;
+  ts.tm_sec = t.sec;
+  ts.tm_min = t.min;
+  ts.tm_hour = t.hour;
+  ts.tm_mday = t.day;
+  ts.tm_mon = t.month - 1;
+  ts.tm_year = t.year - 1900;
+  time_t tsec = mktime(&ts);
+  return (double)(tsec * 1000);
+}
 
 /**
  * Opens file with the given path and reads its source.

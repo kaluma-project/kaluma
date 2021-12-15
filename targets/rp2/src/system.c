@@ -33,6 +33,7 @@
 #include "io.h"
 #include "pico/stdlib.h"
 #include "pwm.h"
+#include "rtc.h"
 #include "spi.h"
 #include "tty.h"
 #include "tusb.h"
@@ -69,12 +70,14 @@ void km_micro_delay(uint32_t usec) { sleep_us(usec); }
  * Kaluma Hardware System Initializations
  */
 void km_system_init() {
+  stdio_init_all();
   km_gpio_init();
   km_adc_init();
   km_pwm_init();
   km_i2c_init();
   km_spi_init();
   km_uart_init();
+  km_rtc_init();
 }
 
 void km_system_cleanup() {
@@ -84,6 +87,7 @@ void km_system_cleanup() {
   km_spi_cleanup();
   km_uart_cleanup();
   km_gpio_cleanup();
+  km_rtc_cleanup();
 }
 
 uint8_t km_running_script_check() {

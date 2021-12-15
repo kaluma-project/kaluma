@@ -36,7 +36,6 @@ static unsigned char __tty_rx_buffer[TTY_RX_RINGBUFFER_SIZE];
 static ringbuffer_t __tty_rx_ringbuffer;
 
 void km_tty_init() {
-  stdio_init_all();
   ringbuffer_init(&__tty_rx_ringbuffer, __tty_rx_buffer,
                   sizeof(__tty_rx_buffer));
   tud_cdc_set_wanted_char(ETX);  // Crtl + C
