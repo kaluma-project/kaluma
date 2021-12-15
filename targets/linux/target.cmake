@@ -33,6 +33,7 @@ if(NOT MODULES)
     net
     http
     url
+    rtc
     path
     fs
     vfs_lfs

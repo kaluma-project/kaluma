@@ -25,19 +25,17 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef struct {
-  uint16_t year;  // 0 ~ ...
-  uint8_t month;  // 1 ~ 12 (0 = january)
-  uint8_t day;    // 1 ~ 31
-  uint8_t dotw;   // 0 ~ 6 (0 = sunday)
-  uint8_t hour;   // 0 ~ 23
-  uint8_t min;    // 0 ~ 59
-  uint8_t sec;    // 0 ~ 59
-} km_rtc_datetime_t;
-
 void km_rtc_init();
 void km_rtc_cleanup();
-void km_rtc_set_datetime(km_rtc_datetime_t *datetime);
-void km_rtc_get_datetime(km_rtc_datetime_t *datetime);
+
+/**
+ * Set RTC to the number of milliseconds since the Unix Epoch
+ */
+void km_rtc_set_time(uint64_t time);
+
+/**
+ * Returns the number of milliseconds since the Unix Epoch
+ */
+uint64_t km_rtc_get_time();
 
 #endif /* __KM_RTC_H */

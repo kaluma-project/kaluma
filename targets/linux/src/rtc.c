@@ -23,6 +23,8 @@
 
 void km_rtc_init() {}
 
-void km_rtc_set_datetime(km_rtc_datetime_t *datetime) {}
+void km_rtc_cleanup() {}
 
-void km_rtc_get_datetime(km_rtc_datetime_t *datetime) {}
+void km_rtc_set_time(uint64_t time) {}
+
+uint64_t km_rtc_get_time() { return (uint64_t)0; }
