@@ -23,11 +23,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "jerryscript-ext/handler.h"
 #include "jerryscript-port.h"
 #include "jerryscript.h"
+#include "rtc.h"
 #include "tty.h"
+
 /**
  * Aborts the program.
  */
@@ -55,13 +58,9 @@ double jerry_port_get_local_time_zone_adjustment(double unix_ms, bool is_utc) {
 }
 
 /**
- * Dummy function to get the current time.
- *
- * @return 0
+ * function to get the current time.
  */
-double jerry_port_get_current_time(void) {
-  return 0;
-} /* jerry_port_get_current_time */
+double jerry_port_get_current_time(void) { return (double)km_rtc_get_time(); }
 
 /**
  * Opens file with the given path and reads its source.

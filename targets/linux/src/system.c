@@ -27,6 +27,7 @@
 #include "gpio.h"
 #include "i2c.h"
 #include "pwm.h"
+#include "rtc.h"
 #include "spi.h"
 #include "tty.h"
 #include "uart.h"
@@ -79,6 +80,7 @@ void km_system_init() {
   km_i2c_init();
   km_spi_init();
   km_uart_init();
+  km_rtc_init();
 }
 
 void km_system_cleanup() {
@@ -88,6 +90,7 @@ void km_system_cleanup() {
   km_spi_cleanup();
   km_uart_cleanup();
   km_gpio_cleanup();
+  km_rtc_cleanup();
 }
 
 uint8_t km_running_script_check() { return false; }
