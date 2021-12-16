@@ -25,6 +25,7 @@
 #include <stdlib.h>
 
 #include "board.h"
+#include "err.h"
 #include "hardware/gpio.h"
 #include "hardware/irq.h"
 #include "pico/stdlib.h"
@@ -33,7 +34,7 @@ static int __check_gpio(uint8_t pin) {
   if (pin <= KALUMA_GPIO_COUNT) {
     return 0;
   } else {
-    return KM_GPIOPORT_ERROR;  // Not a GPIO pins
+    return EINVPIN;
   }
 }
 
@@ -48,7 +49,7 @@ void km_gpio_cleanup() { km_gpio_init(); }
 
 int km_gpio_set_io_mode(uint8_t pin, km_gpio_io_mode_t mode) {
   if (__check_gpio(pin) < 0) {
-    return KM_GPIOPORT_ERROR;
+    return EINVPIN;
   }
   if (mode == KM_GPIO_IO_MODE_OUTPUT) {
     gpio_set_dir(pin, true);  // Set OUTPUT
@@ -65,7 +66,7 @@ int km_gpio_set_io_mode(uint8_t pin, km_gpio_io_mode_t mode) {
 
 int km_gpio_write(uint8_t pin, uint8_t value) {
   if (__check_gpio(pin) < 0) {
-    return KM_GPIOPORT_ERROR;
+    return EINVPIN;
   }
   gpio_put(pin, value);
   return 0;
@@ -73,14 +74,14 @@ int km_gpio_write(uint8_t pin, uint8_t value) {
 
 int km_gpio_read(uint8_t pin) {
   if (__check_gpio(pin) < 0) {
-    return KM_GPIOPORT_ERROR;
+    return EINVPIN;
   }
   return gpio_get(pin);
 }
 
 int km_gpio_toggle(uint8_t pin) {
   if (__check_gpio(pin) < 0) {
-    return KM_GPIOPORT_ERROR;
+    return EINVPIN;
   }
   bool out = gpio_get(pin);
   gpio_put(pin, !out);

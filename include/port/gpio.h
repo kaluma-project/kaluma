@@ -38,8 +38,6 @@ typedef enum {
 #define KM_GPIO_PULL_UP 0
 #define KM_GPIO_PULL_DOWN 1
 
-#define KM_GPIOPORT_ERROR -1
-
 typedef void (*km_gpio_irq_callback_t)(uint8_t);
 
 /**

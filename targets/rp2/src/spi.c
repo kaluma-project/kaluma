@@ -22,6 +22,7 @@
 #include "spi.h"
 
 #include "board.h"
+#include "err.h"
 #include "hardware/spi.h"
 #include "pico/stdlib.h"
 
@@ -115,7 +116,7 @@ int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
   spi_inst_t *spi = __get_spi_no(bus);
   if ((spi == NULL) || (__spi_status[bus].enabled) ||
       (__check_spi_pins(bus, pins) == false)) {
-    return KM_SPIPORT_ERROR;
+    return ENOPHRPL;
   }
   spi_cpol_t pol = SPI_CPOL_0;
   spi_cpha_t pha = SPI_CPHA_0;
@@ -156,7 +157,7 @@ int km_spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len,
                     uint32_t timeout) {
   spi_inst_t *spi = __get_spi_no(bus);
   if ((spi == NULL) || (__spi_status[bus].enabled == false)) {
-    return KM_SPIPORT_ERROR;
+    return ENOPHRPL;
   }
   (void)timeout;  // timeout is not supported.
   return spi_write_read_blocking(spi, tx_buf, rx_buf, len);
@@ -165,7 +166,7 @@ int km_spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len,
 int km_spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   spi_inst_t *spi = __get_spi_no(bus);
   if ((spi == NULL) || (__spi_status[bus].enabled == false)) {
-    return KM_SPIPORT_ERROR;
+    return ENOPHRPL;
   }
   (void)timeout;  // timeout is not supported.
   return spi_write_blocking(spi, buf, len);
@@ -174,7 +175,7 @@ int km_spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
 int km_spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   spi_inst_t *spi = __get_spi_no(bus);
   if ((spi == NULL) || (__spi_status[bus].enabled == false)) {
-    return KM_SPIPORT_ERROR;
+    return ENOPHRPL;
   }
   (void)timeout;  // timeout is not supported.
   return spi_read_blocking(spi, 0, buf, len);
@@ -183,7 +184,7 @@ int km_spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
 int km_spi_close(uint8_t bus) {
   spi_inst_t *spi = __get_spi_no(bus);
   if ((spi == NULL) || (__spi_status[bus].enabled == false)) {
-    return KM_SPIPORT_ERROR;
+    return ENOPHRPL;
   }
   spi_deinit(spi);
   __spi_status[bus].enabled = false;

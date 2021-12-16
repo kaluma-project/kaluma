@@ -24,6 +24,7 @@
 #include <stdint.h>
 
 #include "board.h"
+#include "err.h"
 #include "hardware/adc.h"
 #include "hardware/gpio.h"
 #include "pico/stdlib.h"
@@ -32,13 +33,13 @@
  * Get ADC index
  *
  * @param pin Pin number.
- * @return Returns index on success or KM_ADCPORT_ERRROR(-1) on failure.
+ * @return Returns index on success or EINVPIN on failure.
  */
 static int __get_adc_index(uint8_t pin) {
   if ((pin >= 26) && (pin <= 28)) {
     return pin - 26;  // GPIO 26 is channel 0
   }
-  return KM_ADCPORT_ERRROR;  // Error
+  return EINVPIN;
 }
 
 /**
@@ -66,7 +67,7 @@ double km_adc_read(uint8_t adcIndex) {
 int km_adc_setup(uint8_t pin) {
   int ch = __get_adc_index(pin);
   if (ch < 0) {
-    return KM_ADCPORT_ERRROR;
+    return EINVPIN;
   }
   adc_gpio_init(pin);
   adc_select_input(ch);
@@ -75,7 +76,7 @@ int km_adc_setup(uint8_t pin) {
 
 int km_adc_close(uint8_t pin) {
   if (__get_adc_index(pin) < 0) {
-    return KM_ADCPORT_ERRROR;
+    return EINVPIN;
   }
   return 0;
 }

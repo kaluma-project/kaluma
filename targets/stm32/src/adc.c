@@ -24,6 +24,7 @@
 #include <stdint.h>
 
 #include "board.h"
+#include "err.h"
 
 DMA_HandleTypeDef hdma_adc1;
 static uint16_t adc_buf[ADC_NUM];
@@ -58,7 +59,7 @@ static const struct __adc_config {
  */
 static int get_adc_index(uint8_t pin) {
   uint32_t n = sizeof(adc_config) / sizeof(struct __adc_config);
-  int index = KM_ADCPORT_ERRROR;
+  int index = ENOPHRPL;
 
   for (int k = 0; k < n; k++) {
     if (adc_config[k].pin_number == pin) {
@@ -153,7 +154,7 @@ double km_adc_read(uint8_t adcIndex) {
 
 int km_adc_setup(uint8_t pin) {
   int n = get_adc_index(pin);
-  if (n == KM_ADCPORT_ERRROR) return KM_ADCPORT_ERRROR;
+  if (n < 0) return ENOPHRPL;
 
   uint8_t adc_need_init = 1;
   for (int k = 0; k < ADC_NUM; k++) {
@@ -178,7 +179,7 @@ int km_adc_setup(uint8_t pin) {
 
 int km_adc_close(uint8_t pin) {
   int n = get_adc_index(pin);
-  if (n == KM_ADCPORT_ERRROR) return KM_ADCPORT_ERRROR;
+  if (n < 0) return ENOPHRPL;
   HAL_GPIO_DeInit(adc_config[n].port, adc_config[n].pin);
   adc_configured[n] = 0;
 

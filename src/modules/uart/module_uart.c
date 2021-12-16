@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 
+#include "err.h"
 #include "io.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
@@ -105,9 +106,8 @@ JERRYXX_FUN(uart_ctor_fn) {
   // initialize the port
   int ret = km_uart_setup(port, baudrate, bits, parity, stop, flow, buffer_size,
                           pins);
-  if (ret == KM_UARTPORT_ERROR) {
-    return jerry_create_error(JERRY_ERROR_REFERENCE,
-                              (const jerry_char_t *)"UART port setup error.");
+  if (ret < 0) {
+    return create_system_error(ret);
   }
 
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PORT, port);
@@ -153,7 +153,7 @@ JERRYXX_FUN(uart_write_fn) {
   jerry_release_value(port_value);
 
   // write data to the port
-  int ret = KM_UARTPORT_ERROR;
+  int ret = 0;
   if (jerry_value_is_typedarray(data) &&
       jerry_get_typedarray_type(data) ==
           JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
@@ -182,10 +182,8 @@ JERRYXX_FUN(uart_write_fn) {
         (const jerry_char_t
              *)"The data argument must be Uint8Array or string.");
   }
-  if (ret == KM_UARTPORT_ERROR)
-    return jerry_create_error(
-        JERRY_ERROR_REFERENCE,
-        (const jerry_char_t *)"Failed to write data to UART port.");
+  if (ret < 0)
+    return create_system_error(ret);
   else
     return jerry_create_number(ret);
 }
@@ -207,10 +205,8 @@ JERRYXX_FUN(uart_close_fn) {
 
   // close the port
   int ret = km_uart_close(port);
-  if (ret == KM_UARTPORT_ERROR) {
-    return jerry_create_error(
-        JERRY_ERROR_REFERENCE,
-        (const jerry_char_t *)"Failed to close UART port.");
+  if (ret < 0) {
+    return create_system_error(ret);
   }
 
   // delete this.port

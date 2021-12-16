@@ -24,12 +24,14 @@
 
 #include <stdint.h>
 
+#include "err.h"
+
 #define KM_STORAGE_OK 0
-#define KM_STORAGE_ERROR -1
-#define KM_STORAGE_SWEEPREQ -2
-#define KM_STORAGE_FULL -3
-#define KM_STORAGE_OVERLENGTH -4
-#define KM_STORAGE_FATAL -10 /* internal use */
+#define KM_STORAGE_ERROR -1       // TODO: USE DETAILED ERROR CODE in err.h
+#define KM_STORAGE_SWEEPREQ -2    // TODO: DO NOT USE THIS ERROR CODE
+#define KM_STORAGE_FULL -3        // TODO: USE ERROR CODE: EDQUOT -122
+#define KM_STORAGE_OVERLENGTH -4  // TODO: USE ERROR CODE: EOVERFLOW -75
+#define KM_STORAGE_FATAL -10      // TODO: DO NOT USE THIS ERROR CODE
 
 /**
  * Erase all items in the storage

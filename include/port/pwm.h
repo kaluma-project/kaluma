@@ -23,7 +23,6 @@
 #define __KM_PWM_H
 
 #include <stdint.h>
-#define KM_PWMPORT_ERROR -1
 #define KM_PWM_DEFAULT_FREQUENCY 490
 #define KM_PWM_DEFAULT_DUTY 1.0
 #define KM_PWM_DUTY_MIN 0
@@ -46,7 +45,7 @@ void km_pwm_cleanup();
  * @param {uint8_t} inv_pin
  * @return result status code
  */
-int8_t km_pwm_set_inversion(uint8_t pin, uint8_t inv_pin);
+int km_pwm_set_inversion(uint8_t pin, uint8_t inv_pin);
 
 /**
  * Setup a PWM channel

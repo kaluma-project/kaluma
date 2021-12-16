@@ -25,8 +25,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define KM_UARTPORT_ERROR -1
-
 typedef enum {
   KM_UART_PARITY_TYPE_NONE = 0,
   KM_UART_PARITY_TYPE_ODD,

@@ -25,8 +25,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define KM_SPIPORT_ERROR -1
-
 typedef enum {
   KM_SPI_MODE_0,  // (CPOL=0/CPHA=0)
   KM_SPI_MODE_1,  // (CPOL=0/CPHA=1)

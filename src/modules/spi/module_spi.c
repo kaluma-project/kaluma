@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 
+#include "err.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
 #include "spi.h"
@@ -71,10 +72,10 @@ JERRYXX_FUN(spi_ctor_fn) {
     return jerry_create_error(JERRY_ERROR_RANGE,
                               (const jerry_char_t *)"SPI mode error.");
   // initialize the bus
-  if (km_spi_setup(bus, (km_spi_mode_t)mode, baudrate,
-                   (km_spi_bitorder_t)bitorder, pins) == KM_SPIPORT_ERROR) {
-    return jerry_create_error(JERRY_ERROR_REFERENCE,
-                              (const jerry_char_t *)"SPI port setup fail.");
+  int ret = km_spi_setup(bus, (km_spi_mode_t)mode, baudrate,
+                         (km_spi_bitorder_t)bitorder, pins);
+  if (ret < 0) {
+    return create_system_error(ret);
   } else {
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BUS, bus);
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_MODE, mode);
@@ -119,11 +120,9 @@ JERRYXX_FUN(spi_transfer_fn) {
     uint8_t *tx_buf = jerry_get_arraybuffer_pointer(array_buffer);
     uint8_t *rx_buf = malloc(len);
     int ret = km_spi_sendrecv(bus, tx_buf, rx_buf, len, timeout);
-    if (ret == KM_SPIPORT_ERROR) {
+    if (ret < 0) {
       free(rx_buf);
-      return jerry_create_error(
-          JERRY_ERROR_REFERENCE,
-          (const jerry_char_t *)"Failed to transfer data via SPI bus.");
+      return create_system_error(ret);
     } else {
       jerry_value_t buffer =
           jerry_create_arraybuffer_external(len, rx_buf, buffer_free_cb);
@@ -139,11 +138,9 @@ JERRYXX_FUN(spi_transfer_fn) {
     uint8_t *rx_buf = malloc(len);
     jerryxx_string_to_ascii_char_buffer(data, tx_buf, len);
     int ret = km_spi_sendrecv(bus, tx_buf, rx_buf, len, timeout);
-    if (ret == KM_SPIPORT_ERROR) {
+    if (ret < 0) {
       free(rx_buf);
-      return jerry_create_error(
-          JERRY_ERROR_REFERENCE,
-          (const jerry_char_t *)"Failed to transfer data via SPI bus.");
+      return create_system_error(ret);
     } else {
       jerry_value_t buffer =
           jerry_create_arraybuffer_external(len, rx_buf, buffer_free_cb);
@@ -182,7 +179,7 @@ JERRYXX_FUN(spi_send_fn) {
   jerry_release_value(bus_value);
 
   // write data to the bus
-  int ret = KM_SPIPORT_ERROR;
+  int ret = 0;
   if (jerry_value_is_typedarray(data) &&
       jerry_get_typedarray_type(data) ==
           JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
@@ -211,10 +208,8 @@ JERRYXX_FUN(spi_send_fn) {
         (const jerry_char_t
              *)"The data argument must be Uint8Array or string.");
   }
-  if (ret == KM_SPIPORT_ERROR)
-    return jerry_create_error(
-        JERRY_ERROR_REFERENCE,
-        (const jerry_char_t *)"Failed to send data via SPI bus.");
+  if (ret < 0)
+    return create_system_error(ret);
   else
     return jerry_create_number(ret);
 }
@@ -243,11 +238,9 @@ JERRYXX_FUN(spi_recv_fn) {
   int ret = km_spi_recv(bus, buf, length, timeout);
 
   // return an Uin8Array
-  if (ret == KM_SPIPORT_ERROR) {
+  if (ret < 0) {
     free(buf);
-    return jerry_create_error(
-        JERRY_ERROR_REFERENCE,
-        (const jerry_char_t *)"Failed to receive data via SPI bus.");
+    return create_system_error(ret);
   } else {
     jerry_value_t array_buffer =
         jerry_create_arraybuffer_external(length, buf, buffer_free_cb);
@@ -275,9 +268,8 @@ JERRYXX_FUN(spi_close_fn) {
 
   // close the bus
   int ret = km_spi_close(bus);
-  if (ret == KM_SPIPORT_ERROR) {
-    return jerry_create_error(JERRY_ERROR_REFERENCE,
-                              (const jerry_char_t *)"Failed to close SPI bus.");
+  if (ret < 0) {
+    return create_system_error(ret);
   }
 
   // delete this.bus property

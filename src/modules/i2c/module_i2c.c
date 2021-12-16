@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 
+#include "err.h"
 #include "i2c.h"
 #include "i2c_magic_strings.h"
 #include "jerryscript.h"
@@ -71,16 +72,12 @@ JERRYXX_FUN(i2c_ctor_fn) {
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_ADDRESS, address);
     int ret = km_i2c_setup_slave(bus, address, pins);
     if (ret < 0) {
-      return jerry_create_error(
-          JERRY_ERROR_REFERENCE,
-          (const jerry_char_t *)"Failed to initialize I2C bus.");
+      return create_system_error(ret);
     }
   } else { /* master mode */
     int ret = km_i2c_setup_master(bus, baudrate, pins);
-    if (ret == KM_I2CPORT_ERROR) {
-      return jerry_create_error(
-          JERRY_ERROR_REFERENCE,
-          (const jerry_char_t *)"Failed to initialize I2C bus.");
+    if (ret < 0) {
+      return create_system_error(ret);
     }
   }
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_I2C_MODE, mode);
@@ -130,7 +127,7 @@ JERRYXX_FUN(i2c_write_fn) {
   }
 
   // write data to the bus
-  int ret = KM_I2CPORT_ERROR;
+  int ret = 0;
   if (jerry_value_is_typedarray(data) &&
       jerry_get_typedarray_type(data) ==
           JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
@@ -173,10 +170,8 @@ JERRYXX_FUN(i2c_write_fn) {
         (const jerry_char_t
              *)"The data argument must be Uint8Array or string.");
   }
-  if (ret == KM_I2CPORT_ERROR)
-    return jerry_create_error(
-        JERRY_ERROR_REFERENCE,
-        (const jerry_char_t *)"Failed to write data via I2C bus.");
+  if (ret < 0)
+    return create_system_error(ret);
   else
     return jerry_create_number(ret);
 }
@@ -205,7 +200,7 @@ JERRYXX_FUN(i2c_read_fn) {
   uint8_t address = 0;
   uint32_t timeout = 5000;
   uint8_t *buf = malloc(length);
-  int ret = KM_I2CPORT_ERROR;
+  int ret = 0;
   if (i2cmode == KM_I2C_SLAVE) {
     JERRYXX_CHECK_ARG_NUMBER_OPT(1, "timeout");
     timeout = (uint8_t)JERRYXX_GET_ARG_NUMBER_OPT(1, 5000);
@@ -219,11 +214,9 @@ JERRYXX_FUN(i2c_read_fn) {
   }
 
   // return an Uint8Array
-  if (ret == KM_I2CPORT_ERROR) {
+  if (ret < 0) {
     free(buf);
-    return jerry_create_error(
-        JERRY_ERROR_REFERENCE,
-        (const jerry_char_t *)"Failed to read data via I2C bus.");
+    return create_system_error(ret);
   } else {
     jerry_value_t array_buffer =
         jerry_create_arraybuffer_external(length, buf, buffer_free_cb);
@@ -271,7 +264,7 @@ JERRYXX_FUN(i2c_memwrite_fn) {
   uint32_t count = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(5, 1);
 
   // write data to the bus
-  int ret = KM_I2CPORT_ERROR;
+  int ret = 0;
   if (jerry_value_is_typedarray(data) &&
       jerry_get_typedarray_type(data) ==
           JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
@@ -302,10 +295,8 @@ JERRYXX_FUN(i2c_memwrite_fn) {
         (const jerry_char_t
              *)"The data argument must be Uint8Array or string.");
   }
-  if (ret == KM_I2CPORT_ERROR)
-    return jerry_create_error(
-        JERRY_ERROR_REFERENCE,
-        (const jerry_char_t *)"Failed to write data via I2C bus.");
+  if (ret < 0)
+    return create_system_error(ret);
   else
     return jerry_create_number(ret);
 }
@@ -348,11 +339,9 @@ JERRYXX_FUN(i2c_memread_fn) {
                                    length, timeout);
 
   // return an Uint8Array
-  if (ret == KM_I2CPORT_ERROR) {
+  if (ret < 0) {
     free(buf);
-    return jerry_create_error(
-        JERRY_ERROR_REFERENCE,
-        (const jerry_char_t *)"Failed to read data via I2C bus.");
+    return create_system_error(ret);
   } else {
     jerry_value_t array_buffer =
         jerry_create_arraybuffer_external(length, buf, buffer_free_cb);
@@ -379,9 +368,8 @@ JERRYXX_FUN(i2c_close_fn) {
 
   // close the bus
   int ret = km_i2c_close(bus);
-  if (ret == KM_I2CPORT_ERROR) {
-    return jerry_create_error(JERRY_ERROR_REFERENCE,
-                              (const jerry_char_t *)"Failed to close I2C bus.");
+  if (ret < 0) {
+    return create_system_error(ret);
   }
 
   // delete this.bus property

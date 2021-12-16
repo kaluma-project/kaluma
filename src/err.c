@@ -161,6 +161,14 @@ const char* errmsg[] = {
     "State not recoverable",
     "Operation not possible due to RF-kill",
     "Memory page has hardware error",
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    "Invalid pin number",
+    "No such pheriperal",
 };
 
 jerry_value_t create_system_error(const int errno) {

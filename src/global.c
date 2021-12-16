@@ -66,11 +66,9 @@ JERRYXX_FUN(pin_mode_fn) {
       (km_gpio_io_mode_t)JERRYXX_GET_ARG_NUMBER_OPT(1, KM_GPIO_IO_MODE_INPUT);
   if (jerry_value_is_number(pin)) {
     uint8_t pin_num = jerry_get_number_value(pin);
-    if (km_gpio_set_io_mode(pin_num, mode) == KM_GPIOPORT_ERROR) {
-      char errmsg[255];
-      sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin_num);
-      return jerry_create_error(JERRY_ERROR_RANGE,
-                                (const jerry_char_t *)errmsg);
+    int ret = km_gpio_set_io_mode(pin_num, mode);
+    if (ret < 0) {
+      return create_system_error(ret);
     }
   } else if (jerry_value_is_array(pin)) {
     int pin_len = jerry_get_array_length(pin);
@@ -78,11 +76,9 @@ JERRYXX_FUN(pin_mode_fn) {
       jerry_value_t item = jerry_get_property_by_index(pin, i);
       if (jerry_value_is_number(item)) {
         uint8_t p = jerry_get_number_value(item);
-        if (km_gpio_set_io_mode(p, mode) == KM_GPIOPORT_ERROR) {
-          char errmsg[255];
-          sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", p);
-          return jerry_create_error(JERRY_ERROR_RANGE,
-                                    (const jerry_char_t *)errmsg);
+        int ret = km_gpio_set_io_mode(p, mode);
+        if (ret < 0) {
+          return create_system_error(ret);
         }
       } else {
         return jerry_create_error(
@@ -104,10 +100,8 @@ JERRYXX_FUN(digital_read_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
   int value = km_gpio_read(pin);
-  if (value == KM_GPIOPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  if (value < 0) {
+    return create_system_error(value);
   }
   return jerry_create_number(value);
 }
@@ -119,11 +113,9 @@ JERRYXX_FUN(digital_write_fn) {
   uint32_t value = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(1, KM_GPIO_LOW);
   if (jerry_value_is_number(pin)) {
     uint8_t pin_num = jerry_get_number_value(pin);
-    if (km_gpio_write(pin_num, value) == KM_GPIOPORT_ERROR) {
-      char errmsg[255];
-      sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin_num);
-      return jerry_create_error(JERRY_ERROR_RANGE,
-                                (const jerry_char_t *)errmsg);
+    int ret = km_gpio_write(pin_num, value);
+    if (ret < 0) {
+      return create_system_error(ret);
     }
   } else if (jerry_value_is_array(pin)) {
     int pin_len = jerry_get_array_length(pin);
@@ -132,11 +124,9 @@ JERRYXX_FUN(digital_write_fn) {
       if (jerry_value_is_number(item)) {
         uint8_t p = jerry_get_number_value(item);
         uint32_t v = ((value >> i) & 0x01);
-        if (km_gpio_write(p, v) == KM_GPIOPORT_ERROR) {
-          char errmsg[255];
-          sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", p);
-          return jerry_create_error(JERRY_ERROR_RANGE,
-                                    (const jerry_char_t *)errmsg);
+        int ret = km_gpio_write(p, v);
+        if (ret < 0) {
+          return create_system_error(ret);
         }
       } else {
         return jerry_create_error(
@@ -157,10 +147,9 @@ JERRYXX_FUN(digital_write_fn) {
 JERRYXX_FUN(digital_toggle_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  if (km_gpio_toggle(pin) == KM_GPIOPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for GPIO", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  int ret = km_gpio_toggle(pin);
+  if (ret < 0) {
+    return create_system_error(ret);
   }
   return jerry_create_undefined();
 }
@@ -624,14 +613,12 @@ static void register_global_timers() {
 JERRYXX_FUN(analog_read_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  int adcIndex = km_adc_setup(pin);
-  if (adcIndex == KM_ADCPORT_ERRROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for ADC channel", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  int ret = km_adc_setup(pin);
+  if (ret < 0) {
+    return create_system_error(ret);
   }
   km_delay(1);  // To prevent issue #55
-  double value = km_adc_read((uint8_t)adcIndex);
+  double value = km_adc_read((uint8_t)ret);
   return jerry_create_number(value);
 }
 
@@ -646,10 +633,9 @@ JERRYXX_FUN(analog_write_fn) {
   else if (value > KM_PWM_DUTY_MAX)
     value = KM_PWM_DUTY_MAX;
   double frequency = JERRYXX_GET_ARG_NUMBER_OPT(2, 490);  // Default 490Hz
-  if (km_pwm_setup(pin, frequency, value) == KM_PWMPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for analog out (PWM)", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  int ret = km_pwm_setup(pin, frequency, value);
+  if (ret < 0) {
+    return create_system_error(ret);
   } else {
     km_pwm_start(pin);
     return jerry_create_undefined();
@@ -689,10 +675,9 @@ JERRYXX_FUN(tone_fn) {
     duty = KM_PWM_DUTY_MIN;
   else if (duty > KM_PWM_DUTY_MAX)
     duty = KM_PWM_DUTY_MAX;
-  if (km_pwm_setup(pin, frequency, duty) == KM_PWMPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for tone", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  int ret = km_pwm_setup(pin, frequency, duty);
+  if (ret < 0) {
+    return create_system_error(ret);
   } else {
     if (inversion >= 0) {
       if (km_pwm_set_inversion(pin, inversion) < 0) {
@@ -721,10 +706,9 @@ JERRYXX_FUN(tone_fn) {
 JERRYXX_FUN(no_tone_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "pin");
   uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
-  if (km_pwm_stop(pin) == KM_PWMPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  int ret = km_pwm_stop(pin);
+  if (ret < 0) {
+    return create_system_error(ret);
   }
   return jerry_create_undefined();
 }

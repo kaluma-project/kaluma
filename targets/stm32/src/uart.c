@@ -23,6 +23,7 @@
 #include <stdlib.h>
 
 #include "board.h"
+#include "err.h"
 #include "ringbuffer.h"
 
 UART_HandleTypeDef huart1;
@@ -84,7 +85,7 @@ int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
                   km_uart_parity_type_t parity, uint8_t stop,
                   km_uart_flow_control_t flow, size_t buffer_size,
                   km_uart_pins_t pins) {
-  if ((port != 0) && (port != 1)) return KM_UARTPORT_ERROR;
+  if ((port != 0) && (port != 1)) return ENOPHRPL;
   UART_HandleTypeDef *puart = uart_handle[port];
 
   /* UART Configuration  */
@@ -100,7 +101,7 @@ int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
 
   read_buffer[port] = (uint8_t *)malloc(buffer_size);
   if (read_buffer[port] == NULL) {
-    return KM_UARTPORT_ERROR;
+    return ENOPHRPL;
   } else {
     ringbuffer_init(&uart_rx_ringbuffer[port], read_buffer[port], buffer_size);
   }
@@ -110,17 +111,17 @@ int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
     __HAL_UART_ENABLE_IT(puart, UART_IT_RXNE);
     return port;
   }
-  return KM_UARTPORT_ERROR;
+  return ENOPHRPL;
 }
 
 int km_uart_write(uint8_t port, uint8_t *buf, size_t len) {
-  if ((port != 0) && (port != 1)) return KM_UARTPORT_ERROR;
+  if ((port != 0) && (port != 1)) return ENOPHRPL;
   HAL_StatusTypeDef hal_status =
       HAL_UART_Transmit(uart_handle[port], buf, len, (uint32_t)-1);
   if (hal_status == HAL_OK) {
     return len;
   }
-  return KM_UARTPORT_ERROR;
+  return ENOPHRPL;
 }
 
 uint32_t km_uart_available(uint8_t port) {
@@ -139,7 +140,7 @@ uint32_t km_uart_read(uint8_t port, uint8_t *buf, size_t len) {
 }
 
 int km_uart_close(uint8_t port) {
-  if ((port != 0) && (port != 1)) return KM_UARTPORT_ERROR;
+  if ((port != 0) && (port != 1)) return ENOPHRPL;
 
   if (read_buffer[port]) {
     free(read_buffer[port]);
@@ -152,6 +153,6 @@ int km_uart_close(uint8_t port) {
     __HAL_UART_DISABLE_IT(puart, UART_IT_RXNE);
     return port;
   } else {
-    return KM_UARTPORT_ERROR;
+    return ENOPHRPL;
   }
 }

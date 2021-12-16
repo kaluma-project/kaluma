@@ -22,6 +22,7 @@
 #include "spi.h"
 
 #include "board.h"
+#include "err.h"
 #include "gpio.h"
 
 SPI_HandleTypeDef hspi1;
@@ -102,7 +103,7 @@ void km_spi_cleanup() {
  */
 int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
                  km_spi_bitorder_t bitorder, km_spi_pins_t pins) {
-  if ((bus != 0) && (bus != 1)) return KM_SPIPORT_ERROR;
+  if ((bus != 0) && (bus != 1)) return ENOPHRPL;
 
   SPI_HandleTypeDef *pspi = spi_handle[bus];
 
@@ -138,12 +139,12 @@ int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
   if (HAL_SPI_Init(pspi) == HAL_OK) {
     return 0;
   }
-  return KM_SPIPORT_ERROR;
+  return ENOPHRPL;
 }
 
 int km_spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len,
                     uint32_t timeout) {
-  if ((bus != 0) && (bus != 1)) return KM_SPIPORT_ERROR;
+  if ((bus != 0) && (bus != 1)) return ENOPHRPL;
 
   SPI_HandleTypeDef *hspi = spi_handle[bus];
   HAL_StatusTypeDef status =
@@ -152,11 +153,11 @@ int km_spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len,
   if (status == HAL_OK) {
     return (len - hspi->RxXferCount);
   }
-  return KM_SPIPORT_ERROR;
+  return ENOPHRPL;
 }
 
 int km_spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
-  if ((bus != 0) && (bus != 1)) return KM_SPIPORT_ERROR;
+  if ((bus != 0) && (bus != 1)) return ENOPHRPL;
 
   SPI_HandleTypeDef *hspi = spi_handle[bus];
   HAL_StatusTypeDef status =
@@ -165,12 +166,12 @@ int km_spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   if (status == HAL_OK) {
     return len;
   }
-  return KM_SPIPORT_ERROR;
+  return ENOPHRPL;
 }
 
 int km_spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   uint8_t emptyBuf[len];
-  if ((bus != 0) && (bus != 1)) return KM_SPIPORT_ERROR;
+  if ((bus != 0) && (bus != 1)) return ENOPHRPL;
 
   SPI_HandleTypeDef *hspi = spi_handle[bus];
   // I think SPI_Receive function has a bug (sending garbage data)
@@ -182,15 +183,15 @@ int km_spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   if (status == HAL_OK) {
     return (len - hspi->RxXferCount);
   }
-  return KM_SPIPORT_ERROR;
+  return ENOPHRPL;
 }
 
 int km_spi_close(uint8_t bus) {
-  if ((bus != 0) && (bus != 1)) return KM_SPIPORT_ERROR;
+  if ((bus != 0) && (bus != 1)) return ENOPHRPL;
 
   HAL_StatusTypeDef hal_status = HAL_SPI_DeInit(spi_handle[bus]);
   if (hal_status == HAL_OK) {
     return bus;
   }
-  return KM_SPIPORT_ERROR;
+  return ENOPHRPL;
 }

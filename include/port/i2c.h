@@ -31,8 +31,6 @@ typedef enum {
   KM_I2C_NONE,
 } km_i2c_mode_t;
 
-#define KM_I2CPORT_ERROR -1
-
 typedef struct {
   int8_t sda;
   int8_t scl;

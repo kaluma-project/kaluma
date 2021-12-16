@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 
+#include "err.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
 #include "pwm.h"
@@ -39,10 +40,9 @@ JERRYXX_FUN(pwm_ctor_fn) {
     duty = KM_PWM_DUTY_MAX;
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PWM_PIN, pin);
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PWM_INV_PIN, -1);
-  if (km_pwm_setup(pin, frequency, duty) == KM_PWMPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  int ret = km_pwm_setup(pin, frequency, duty);
+  if (ret < 0) {
+    return create_system_error(ret);
   } else {
     return jerry_create_undefined();
   }
@@ -65,10 +65,9 @@ JERRYXX_FUN(pwm_set_inversion_fn) {
             inv_pin);
     return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
   }
-  if (km_pwm_set_inversion(pin, inv_pin) == KM_PWMPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for PWM invresion", inv_pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  int ret = km_pwm_set_inversion(pin, inv_pin);
+  if (ret < 0) {
+    return create_system_error(ret);
   }
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PWM_INV_PIN, inv_pin);
   return jerry_create_undefined();
@@ -99,10 +98,9 @@ JERRYXX_FUN(pwm_start_fn) {
   uint8_t pin = (uint8_t)jerry_get_number_value(pin_value);
   jerry_release_value(pin_value);
 
-  if (km_pwm_start(pin) == KM_PWMPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  int ret = km_pwm_start(pin);
+  if (ret < 0) {
+    return create_system_error(ret);
   }
   return jerry_create_undefined();
 }
@@ -117,10 +115,9 @@ JERRYXX_FUN(pwm_stop_fn) {
   uint8_t pin = (uint8_t)jerry_get_number_value(pin_value);
   jerry_release_value(pin_value);
 
-  if (km_pwm_stop(pin) == KM_PWMPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  int ret = km_pwm_stop(pin);
+  if (ret < 0) {
+    return create_system_error(ret);
   }
   return jerry_create_undefined();
 }
@@ -136,10 +133,8 @@ JERRYXX_FUN(pwm_get_frequency_fn) {
   jerry_release_value(pin_value);
 
   double frequency = km_pwm_get_frequency(pin);
-  if (frequency == KM_PWMPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  if (frequency < 0) {
+    return create_system_error(frequency);
   }
   return jerry_create_number(frequency);
 }
@@ -157,10 +152,9 @@ JERRYXX_FUN(pwm_set_frequency_fn) {
   uint8_t pin = (uint8_t)jerry_get_number_value(pin_value);
   jerry_release_value(pin_value);
 
-  if (km_pwm_set_frequency(pin, frequency) == KM_PWMPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  int ret = km_pwm_set_frequency(pin, frequency);
+  if (ret < 0) {
+    return create_system_error(ret);
   }
   return jerry_create_undefined();
 }
@@ -176,10 +170,8 @@ JERRYXX_FUN(pwm_get_duty_fn) {
   jerry_release_value(pin_value);
 
   double duty = km_pwm_get_duty(pin);
-  if (duty == KM_PWMPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  if (duty < 0) {
+    return create_system_error(duty);
   }
   return jerry_create_number(duty);
 }
@@ -201,10 +193,9 @@ JERRYXX_FUN(pwm_set_duty_fn) {
   uint8_t pin = (uint8_t)jerry_get_number_value(pin_value);
   jerry_release_value(pin_value);
 
-  if (km_pwm_set_duty(pin, duty) == KM_PWMPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  int ret = km_pwm_set_duty(pin, duty);
+  if (ret < 0) {
+    return create_system_error(ret);
   }
   return jerry_create_undefined();
 }
@@ -219,10 +210,9 @@ JERRYXX_FUN(pwm_close_fn) {
   uint8_t pin = (uint8_t)jerry_get_number_value(pin_value);
   jerry_release_value(pin_value);
 
-  if (km_pwm_close(pin) == KM_PWMPORT_ERROR) {
-    char errmsg[255];
-    sprintf(errmsg, "The pin \"%d\" can't be used for PWM", pin);
-    return jerry_create_error(JERRY_ERROR_RANGE, (const jerry_char_t *)errmsg);
+  int ret = km_pwm_close(pin);
+  if (ret < 0) {
+    return create_system_error(ret);
   }
   return jerry_create_undefined();
 }

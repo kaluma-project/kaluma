@@ -24,6 +24,7 @@
 #include <stdint.h>
 
 #include "board.h"
+#include "err.h"
 #include "stm32f4xx.h"
 
 const struct {
@@ -77,7 +78,7 @@ void km_gpio_cleanup() { km_gpio_init(); }
 /**
  */
 int km_gpio_set_io_mode(uint8_t pin, km_gpio_io_mode_t mode) {
-  if (pin >= KALUMA_GPIO_COUNT) return KM_GPIOPORT_ERROR;
+  if (pin >= KALUMA_GPIO_COUNT) return EINVPIN;
   if ((mode != KM_GPIO_IO_MODE_INPUT) && (mode != KM_GPIO_IO_MODE_INPUT_PULLUP))
     mode = KM_GPIO_IO_MODE_OUTPUT;
   GPIO_InitTypeDef GPIO_InitStruct;
@@ -97,7 +98,7 @@ int km_gpio_set_io_mode(uint8_t pin, km_gpio_io_mode_t mode) {
 /**
  */
 int km_gpio_write(uint8_t pin, uint8_t value) {
-  if (pin >= KALUMA_GPIO_COUNT) return KM_GPIOPORT_ERROR;
+  if (pin >= KALUMA_GPIO_COUNT) return EINVPIN;
   if (value != KM_GPIO_LOW) value = KM_GPIO_HIGH;
   GPIO_PinState pin_state =
       (value == KM_GPIO_LOW) ? GPIO_PIN_RESET : GPIO_PIN_SET;
@@ -108,7 +109,7 @@ int km_gpio_write(uint8_t pin, uint8_t value) {
 /**
  */
 int km_gpio_read(uint8_t pin) {
-  if (pin >= KALUMA_GPIO_COUNT) return KM_GPIOPORT_ERROR;
+  if (pin >= KALUMA_GPIO_COUNT) return EINVPIN;
   GPIO_PinState pin_state =
       HAL_GPIO_ReadPin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
   return (pin_state == GPIO_PIN_RESET) ? KM_GPIO_LOW : KM_GPIO_HIGH;
@@ -117,7 +118,7 @@ int km_gpio_read(uint8_t pin) {
 /**
  */
 int km_gpio_toggle(uint8_t pin) {
-  if (pin >= KALUMA_GPIO_COUNT) return KM_GPIOPORT_ERROR;
+  if (pin >= KALUMA_GPIO_COUNT) return EINVPIN;
   HAL_GPIO_TogglePin(gpio_port_pin[pin].port, gpio_port_pin[pin].pin);
   return 0;
 }
@@ -125,5 +126,5 @@ int km_gpio_toggle(uint8_t pin) {
 void km_gpio_intr_en(bool en, km_gpio_callback_t call_back) {}
 
 int km_gpio_set_interrupt(bool en, uint8_t pin, uint8_t events) {
-  return KM_GPIOPORT_ERROR;
+  return EINVPIN;
 }
