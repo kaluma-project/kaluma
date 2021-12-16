@@ -78,7 +78,7 @@ static void tty_read_cb(uint8_t *buf, size_t len) {
  * Push a command to history
  */
 static void history_push(char *cmd) {
-  if (state.history_size < MAX_COMMAND_HISTORY) {
+  if (state.history_size < KALUMA_REPL_HISTORY_SIZE) {
     state.history[state.history_size] = cmd;
     state.history_size++;
   } else {
@@ -255,7 +255,7 @@ static void handle_normal(char ch) {
       break;
     default:
       // check buffer overflow
-      if (state.buffer_length < (MAX_BUFFER_LENGTH - 1)) {
+      if (state.buffer_length < (KALUMA_REPL_BUFFER_SIZE - 1)) {
         if (state.position == state.buffer_length) {
           state.buffer[state.position] = ch;
           state.buffer_length++;

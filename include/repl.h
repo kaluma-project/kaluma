@@ -22,11 +22,9 @@
 #ifndef __KM_REPL_H
 #define __KM_REPL_H
 
+#include "board.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
-
-#define MAX_BUFFER_LENGTH 1024
-#define MAX_COMMAND_HISTORY 10
 
 typedef enum { KM_REPL_MODE_NORMAL, KM_REPL_MODE_ESCAPE } km_repl_mode_t;
 
@@ -43,13 +41,13 @@ struct km_repl_state_s {
   km_repl_mode_t mode;
   bool echo;
   repl_handler_t handler;
-  char buffer[MAX_BUFFER_LENGTH + 1];
+  char buffer[KALUMA_REPL_BUFFER_SIZE + 1];
   unsigned int buffer_length;
   unsigned int position;
   unsigned int width;
   char escape[16];
   unsigned int escape_length;
-  char *history[MAX_COMMAND_HISTORY];
+  char *history[KALUMA_REPL_HISTORY_SIZE];
   unsigned int history_size;
   unsigned int history_position;
   uint8_t ymodem_state;  // 0=stopped, 1=transfering

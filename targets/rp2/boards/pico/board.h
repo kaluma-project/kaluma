@@ -24,8 +24,13 @@
 
 #include "jerryscript.h"
 
+// system
 #define KALUMA_SYSTEM_ARCH "cortex-m0-plus"
 #define KALUMA_SYSTEM_PLATFORM "rp2"
+
+// repl
+#define KALUMA_REPL_BUFFER_SIZE 1024
+#define KALUMA_REPL_HISTORY_SIZE 10
 
 // Flash allocation map
 //

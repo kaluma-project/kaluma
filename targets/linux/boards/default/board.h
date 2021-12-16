@@ -24,8 +24,13 @@
 
 #include "jerryscript.h"
 
+// system
 #define KALUMA_SYSTEM_ARCH "x86"
 #define KALUMA_SYSTEM_PLATFORM "linux"
+
+// repl
+#define KALUMA_REPL_BUFFER_SIZE 1024
+#define KALUMA_REPL_HISTORY_SIZE 10
 
 // binary (1008KB)
 #define KALUMA_BINARY_MAX 0x100000
