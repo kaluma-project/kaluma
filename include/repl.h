@@ -35,12 +35,12 @@ typedef enum {
 } km_repl_output_t;
 
 typedef struct km_repl_state_s km_repl_state_t;
-typedef void (*repl_handler_t)(km_repl_state_t *, uint8_t *, size_t);
+typedef void (*km_repl_handler_t)(km_repl_state_t *, uint8_t *, size_t);
 
 struct km_repl_state_s {
   km_repl_mode_t mode;
   bool echo;
-  repl_handler_t handler;
+  km_repl_handler_t handler;
   char buffer[KALUMA_REPL_BUFFER_SIZE + 1];
   unsigned int buffer_length;
   unsigned int position;

@@ -401,11 +401,12 @@ static void default_handler(km_repl_state_t *state, uint8_t *buf, size_t len) {
     }
   }
 }
+
 #if 0  // Never used.
 /**
  * Change handler
  */
-static void set_handler(repl_handler_t handler) {
+static void set_handler(km_repl_handler_t handler) {
   if (handler != NULL) {
     state.handler = handler;
   } else {
@@ -413,6 +414,7 @@ static void set_handler(repl_handler_t handler) {
   }
 }
 #endif
+
 /**
  * .echo command
  */
