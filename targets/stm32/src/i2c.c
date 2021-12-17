@@ -104,18 +104,18 @@ int km_i2c_setup_slave(uint8_t bus, uint8_t address, km_i2c_pins_t pins) {
   return -1;
 }
 
-int km_i2c_mem_write_master(uint8_t bus, uint8_t address, uint16_t memAddress,
-                            uint8_t memAdd16bit, uint8_t *buf, size_t len,
+int km_i2c_mem_write_master(uint8_t bus, uint8_t address, uint16_t mem_addr,
+                            uint8_t mem_addr_size, uint8_t *buf, size_t len,
                             uint32_t timeout) {
   uint16_t memAddSize;
   HAL_StatusTypeDef hal_status;
 
   if ((bus != 0) && (bus != 1)) return ENOPHRPL;
-  if (memAdd16bit == 0)
-    memAddSize = I2C_MEMADD_SIZE_8BIT;
-  else
+  if (mem_addr_size == 16)
     memAddSize = I2C_MEMADD_SIZE_16BIT;
-  hal_status = HAL_I2C_Mem_Write(handle[bus], address << 1, memAddress,
+  else
+    memAddSize = I2C_MEMADD_SIZE_8BIT;
+  hal_status = HAL_I2C_Mem_Write(handle[bus], address << 1, mem_addr,
                                  memAddSize, buf, len, timeout);
 
   if (hal_status == HAL_OK) {
@@ -124,20 +124,18 @@ int km_i2c_mem_write_master(uint8_t bus, uint8_t address, uint16_t memAddress,
   return -1;
 }
 
-int km_i2c_mem_read_master(uint8_t bus, uint8_t address, uint16_t memAddress,
-                           uint8_t memAdd16bit, uint8_t *buf, size_t len,
+int km_i2c_mem_read_master(uint8_t bus, uint8_t address, uint16_t mem_addr,
+                           uint8_t mem_addr_size, uint8_t *buf, size_t len,
                            uint32_t timeout) {
   uint16_t memAddSize;
   HAL_StatusTypeDef hal_status;
-
   if ((bus != 0) && (bus != 1)) return ENOPHRPL;
-  if (memAdd16bit == 0)
-    memAddSize = I2C_MEMADD_SIZE_8BIT;
-  else
+  if (mem_addr_size == 16)
     memAddSize = I2C_MEMADD_SIZE_16BIT;
-  hal_status = HAL_I2C_Mem_Read(handle[bus], address << 1, memAddress,
-                                memAddSize, buf, len, timeout);
-
+  else
+    memAddSize = I2C_MEMADD_SIZE_8BIT;
+  hal_status = HAL_I2C_Mem_Read(handle[bus], address << 1, mem_addr, memAddSize,
+                                buf, len, timeout);
   if (hal_status == HAL_OK) {
     return len;
   }

@@ -231,11 +231,19 @@ JERRYXX_FUN(i2c_read_fn) {
  * I2C.prototype.memWrite() function
  */
 JERRYXX_FUN(i2c_memwrite_fn) {
-  JERRYXX_CHECK_ARG(0, "memAddr");
-  uint16_t memAddress = (uint16_t)JERRYXX_GET_ARG_NUMBER(0);
-
-  JERRYXX_CHECK_ARG(1, "data");
-  jerry_value_t data = JERRYXX_GET_ARG(1);
+  // check and get args
+  JERRYXX_CHECK_ARG(0, "data");
+  JERRYXX_CHECK_ARG_NUMBER(1, "address");
+  JERRYXX_CHECK_ARG_NUMBER(2, "memAddress");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(3, "memAddressSize");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(4, "timeout");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(5, "count");
+  jerry_value_t data = JERRYXX_GET_ARG(0);
+  uint8_t address = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
+  uint16_t memAddress = (uint16_t)JERRYXX_GET_ARG_NUMBER(2);
+  uint16_t memAddressSize = (uint16_t)JERRYXX_GET_ARG_NUMBER_OPT(3, 8);
+  uint32_t timeout = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(4, 5000);
+  uint32_t count = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(5, 1);
 
   // check this.bus number
   jerry_value_t bus_value =
@@ -254,15 +262,6 @@ JERRYXX_FUN(i2c_memwrite_fn) {
         JERRY_ERROR_RANGE,
         (const jerry_char_t *)"This function runs in master mode only.");
 
-  JERRYXX_CHECK_ARG_NUMBER(2, "slaveaddr");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(3, "memAddr16bit");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(4, "timeout");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(5, "count");
-  uint8_t address = (uint8_t)JERRYXX_GET_ARG_NUMBER(2);
-  uint16_t memAddr16 = (uint16_t)JERRYXX_GET_ARG_NUMBER_OPT(3, 0);
-  uint32_t timeout = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(4, 5000);
-  uint32_t count = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(5, 1);
-
   // write data to the bus
   int ret = 0;
   if (jerry_value_is_typedarray(data) &&
@@ -275,8 +274,8 @@ JERRYXX_FUN(i2c_memwrite_fn) {
     size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
     uint8_t *buf = jerry_get_arraybuffer_pointer(array_buffer);
     for (int c = 0; c < count; c++) {
-      ret = km_i2c_mem_write_master(bus, address, memAddress, memAddr16, buf,
-                                    len, timeout);
+      ret = km_i2c_mem_write_master(bus, address, memAddress, memAddressSize,
+                                    buf, len, timeout);
       if (ret < 0) break;
     }
     jerry_release_value(array_buffer);
@@ -285,8 +284,8 @@ JERRYXX_FUN(i2c_memwrite_fn) {
     uint8_t buf[len];
     jerryxx_string_to_ascii_char_buffer(data, buf, len);
     for (int c = 0; c < count; c++) {
-      ret = km_i2c_mem_write_master(bus, address, memAddress, memAddr16, buf,
-                                    len, timeout);
+      ret = km_i2c_mem_write_master(bus, address, memAddress, memAddressSize,
+                                    buf, len, timeout);
       if (ret < 0) break;
     }
   } else {
@@ -305,10 +304,18 @@ JERRYXX_FUN(i2c_memwrite_fn) {
  * I2C.prototype.memRead() function
  */
 JERRYXX_FUN(i2c_memread_fn) {
-  JERRYXX_CHECK_ARG(0, "memAddr");
-  uint16_t memAddress = (uint16_t)JERRYXX_GET_ARG_NUMBER(0);
-  JERRYXX_CHECK_ARG_NUMBER(1, "length");
-  jerry_length_t length = (jerry_length_t)JERRYXX_GET_ARG_NUMBER(1);
+  // check and get args
+  JERRYXX_CHECK_ARG_NUMBER(0, "length");
+  JERRYXX_CHECK_ARG_NUMBER(1, "address");
+  JERRYXX_CHECK_ARG_NUMBER(2, "memAddress");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(3, "memAddressSize");
+  JERRYXX_CHECK_ARG_NUMBER_OPT(4, "timeout");
+  jerry_length_t length = (jerry_length_t)JERRYXX_GET_ARG_NUMBER(0);
+  uint8_t address = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
+  uint16_t memAddress = (uint16_t)JERRYXX_GET_ARG_NUMBER(2);
+  uint16_t memAddressSize = (uint16_t)JERRYXX_GET_ARG_NUMBER_OPT(3, 8);
+  uint32_t timeout = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(4, 5000);
+
   uint8_t *buf = malloc(length);
 
   // check this.bus number
@@ -328,15 +335,8 @@ JERRYXX_FUN(i2c_memread_fn) {
         JERRY_ERROR_RANGE,
         (const jerry_char_t *)"This function runs in master mode only.");
 
-  JERRYXX_CHECK_ARG_NUMBER(2, "slaveaddr");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(3, "memAddr16bit");
-  JERRYXX_CHECK_ARG_NUMBER_OPT(4, "timeout");
-  uint8_t address = (uint8_t)JERRYXX_GET_ARG_NUMBER(2);
-  uint16_t memAddr16 = (uint16_t)JERRYXX_GET_ARG_NUMBER_OPT(3, 0);
-  uint32_t timeout = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(4, 5000);
-
-  int ret = km_i2c_mem_read_master(bus, address, memAddress, memAddr16, buf,
-                                   length, timeout);
+  int ret = km_i2c_mem_read_master(bus, address, memAddress, memAddressSize,
+                                   buf, length, timeout);
 
   // return an Uint8Array
   if (ret < 0) {

@@ -127,24 +127,22 @@ int km_i2c_setup_slave(uint8_t bus, uint8_t address, km_i2c_pins_t pins) {
   return 0;
 }
 
-int km_i2c_mem_write_master(uint8_t bus, uint8_t address, uint16_t memAddress,
-                            uint8_t memAdd16bit, uint8_t *buf, size_t len,
+int km_i2c_mem_write_master(uint8_t bus, uint8_t address, uint16_t mem_addr,
+                            uint8_t mem_addr_size, uint8_t *buf, size_t len,
                             uint32_t timeout) {
   i2c_inst_t *i2c = __get_i2c_no(bus);
   int ret;
-  uint8_t mem_addr[2];
+  uint8_t __memaddr[2];
   if ((i2c == NULL) || (__i2c_status[bus].mode != KM_I2C_MASTER)) {
     return ENOPHRPL;
   }
-  if (memAdd16bit == 0) {  // 8bit mem address
-    mem_addr[0] = (memAddress & 0xFF);
-    ret = i2c_write_blocking(i2c, address, mem_addr, 1,
-                             true);  // true to keep master control of bus
-  } else {                           // 16 bit mem address
-    mem_addr[0] = ((memAddress >> 8) & 0xFF);
-    mem_addr[1] = (memAddress & 0xFF);
-    ret = i2c_write_blocking(i2c, address, mem_addr, 2,
-                             true);  // true to keep master control of bus
+  if (mem_addr_size == 16) {  // 16 bit mem address
+    __memaddr[0] = ((mem_addr >> 8) & 0xFF);
+    __memaddr[1] = (mem_addr & 0xFF);
+    ret = i2c_write_blocking(i2c, address, __memaddr, 2, true);
+  } else {  // 8 bit mem address
+    __memaddr[0] = (mem_addr & 0xFF);
+    ret = i2c_write_blocking(i2c, address, __memaddr, 1, true);
   }
   if (ret >= 0) {
     ret = i2c_write_timeout_us(i2c, address, buf, len, false, timeout * 1000);
@@ -155,24 +153,22 @@ int km_i2c_mem_write_master(uint8_t bus, uint8_t address, uint16_t memAddress,
   return ret;
 }
 
-int km_i2c_mem_read_master(uint8_t bus, uint8_t address, uint16_t memAddress,
-                           uint8_t memAdd16bit, uint8_t *buf, size_t len,
+int km_i2c_mem_read_master(uint8_t bus, uint8_t address, uint16_t mem_addr,
+                           uint8_t mem_addr_size, uint8_t *buf, size_t len,
                            uint32_t timeout) {
   i2c_inst_t *i2c = __get_i2c_no(bus);
   int ret;
-  uint8_t mem_addr[2];
+  uint8_t __memaddr[2];
   if ((i2c == NULL) || (__i2c_status[bus].mode != KM_I2C_MASTER)) {
     return ENOPHRPL;
   }
-  if (memAdd16bit == 0) {  // 8bit mem address
-    mem_addr[0] = (memAddress & 0xFF);
-    ret = i2c_write_blocking(i2c, address, mem_addr, 1,
-                             true);  // true to keep master control of bus
-  } else {                           // 16 bit mem address
-    mem_addr[0] = ((memAddress >> 8) & 0xFF);
-    mem_addr[1] = (memAddress & 0xFF);
-    ret = i2c_write_blocking(i2c, address, mem_addr, 2,
-                             true);  // true to keep master control of bus
+  if (mem_addr_size == 16) {  // 16 bit mem address
+    __memaddr[0] = ((mem_addr >> 8) & 0xFF);
+    __memaddr[1] = (mem_addr & 0xFF);
+    ret = i2c_write_blocking(i2c, address, __memaddr, 2, true);
+  } else {  // 8 bit mem address
+    __memaddr[0] = (mem_addr & 0xFF);
+    ret = i2c_write_blocking(i2c, address, __memaddr, 1, true);
   }
   if (ret >= 0) {
     ret = i2c_read_timeout_us(i2c, address, buf, len, false, timeout * 1000);
