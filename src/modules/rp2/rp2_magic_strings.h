@@ -42,11 +42,23 @@
 #define MSTR_RP2_ASM_IRQ "irq"
 #define MSTR_RP2_ASM_SET "set"
 #define MSTR_RP2_ASM_NOP "nop"
+#define MSTR_RP2_ASM_LABEL "label"
 #define MSTR_RP2_ASM_WRAP_TARGET "wrap_target"
 #define MSTR_RP2_ASM_WRAP "wrap"
 #define MSTR_RP2_ASM_SIDE "side"
 #define MSTR_RP2_ASM_DELAY "delay"
+#define MSTR_RP2_ASM__UPDATE_JMPS "_updateJmps"
 #define MSTR_RP2_ASM_TO_BINARY "toBinary"
+#define MSTR_RP2_ASM_TO_INST "toInst"
+#define MSTR_RP2_ASM_INST_JMP "JMP"
+#define MSTR_RP2_ASM_INST_WAIT "WAIT"
+#define MSTR_RP2_ASM_INST_IN "IN"
+#define MSTR_RP2_ASM_INST_OUT "OUT"
+#define MSTR_RP2_ASM_INST_PUSH "PUSH"
+#define MSTR_RP2_ASM_INST_PULL "PULL"
+#define MSTR_RP2_ASM_INST_MOV "MOV"
+#define MSTR_RP2_ASM_INST_IRQ "IRQ"
+#define MSTR_RP2_ASM_INST_SET "SET"
 
 #define MSTR_RP2_STATE_MACHINE "StateMachine"
 #define MSTR_RP2_STATE_MACHINE_GET_AVAILABLE_ID "getAvailableId"
@@ -56,6 +68,11 @@
 #define MSTR_RP2_STATE_MACHINE_GET "get"
 #define MSTR_RP2_STATE_MACHINE_PUT "put"
 #define MSTR_RP2_STATE_MACHINE_SET_PINS "setPins"
+#define MSTR_RP2_STATE_MACHINE_RXFIFO "rxfifo"
+#define MSTR_RP2_STATE_MACHINE_TXFIFO "txfifo"
+#define MSTR_RP2_STATE_MACHINE_CLEAR_FIFOS "clearFIFOs"
+#define MSTR_RP2_STATE_MACHINE_DRAIN_TXFIFO "drainTXFIFO"
+#define MSTR_RP2_STATE_MACHINE_IRQ "irq"
 
 #define MSTR_RP2_PIO_ADD_PROGRAM "pio_add_program"
 #define MSTR_RP2_PIO_SM_INIT "pio_sm_init"
@@ -97,5 +114,7 @@
 #define MSTR_RP2_PIO_SM_CLEAR_FIFOS "pio_sm_clear_fifos"
 #define MSTR_RP2_PIO_SM_DRAIN_TXFIFO "pio_sm_drain_txfifo"
 #define MSTR_RP2_PIO_SM_IRQ "pio_sm_irq"
+
 #define MSTR_RP2_DORMANT "dormant"
+
 #endif /* __PIO_MAGIC_STRINGS_H */
