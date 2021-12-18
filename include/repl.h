@@ -25,6 +25,7 @@
 #include "board.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
+#include "utils.h"
 
 typedef enum { KM_REPL_MODE_NORMAL, KM_REPL_MODE_ESCAPE } km_repl_mode_t;
 
@@ -35,7 +36,10 @@ typedef enum {
 } km_repl_output_t;
 
 typedef struct km_repl_state_s km_repl_state_t;
+typedef struct km_repl_command_s km_repl_command_t;
 typedef void (*km_repl_handler_t)(km_repl_state_t *, uint8_t *, size_t);
+
+// repl state
 
 struct km_repl_state_s {
   km_repl_mode_t mode;
@@ -51,6 +55,18 @@ struct km_repl_state_s {
   unsigned int history_size;
   unsigned int history_position;
   uint8_t ymodem_state;  // 0=stopped, 1=transfering
+  km_list_t commands;
+};
+
+// repl commands
+
+typedef void (*km_repl_command_cb)(km_repl_state_t *state, char *arg);
+
+struct km_repl_command_s {
+  km_list_node_t base;
+  char name[8];   // max name is 7.
+  char desc[32];  // max desc is 31.
+  km_repl_command_cb cb;
 };
 
 void km_repl_init(bool hi);
@@ -64,5 +80,9 @@ void km_repl_print_prompt();
 #define km_repl_putc(ch) km_tty_putc(ch)
 void km_repl_pretty_print(uint8_t indent, uint8_t depth, jerry_value_t value);
 void km_repl_println();
+
+void km_repl_register_command(char *name, char *desc, km_repl_command_cb cb);
+void km_repl_unregister_command(char *name);
+void km_repl_clear_commands();
 
 #endif /* __KM_REPL_H */

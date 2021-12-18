@@ -1,3 +1,4 @@
+process.binding(process.binding.fs); // init native fs
 const path_mod = require("path");
 
 class Stats {
