@@ -372,6 +372,15 @@ function statSync(path) {
   return stat;
 }
 
+function rmSync(path) {
+  const stat = statSync(path);
+  if (stat.isDirectory()) {
+    rmdirSync(path);
+  } else if (stat.isFile()) {
+    unlinkSync(path);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // ASYNCHRONOUS CALLBACK FUNCTIONS
 // ---------------------------------------------------------------------------
@@ -389,6 +398,7 @@ function statSync(path) {
 // function unlink(path, callback)
 // function write(fd, buffer[, offset[, length[, position]]], callback)
 // function writeFile(path, data, callback)
+// function rm(path)
 
 exports.Stats = Stats;
 
@@ -420,3 +430,4 @@ exports.statSync = statSync;
 exports.unlinkSync = unlinkSync;
 exports.writeSync = writeSync;
 exports.writeFileSync = writeFileSync;
+exports.rmSync = rmSync;

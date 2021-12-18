@@ -72,6 +72,8 @@
 #define MSTR_FS_UNLINK_SYNC "unlinkSync"
 #define MSTR_FS_RENAME_SYNC "renameSync"
 #define MSTR_FS_STAT_SYNC "statSync"
+#define MSTR_FS_RM_SYNC "rmSync"
+
 #define MSTR_FS_BLKDEV "blkdev"
 #define MSTR_FS_BLKDEV_READ "read"
 #define MSTR_FS_BLKDEV_WRITE "write"
