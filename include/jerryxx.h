@@ -222,6 +222,23 @@
   }                                                                       \
   handle_type *name = (handle_type *)native_pointer;
 
+#define JERRYXX_GET_STRING_AS_CHAR(name_js, name)                        \
+  jerry_size_t name##_sz = jerry_get_string_size(name_js);               \
+  char name[name##_sz + 1];                                              \
+  jerry_string_to_char_buffer(name_js, (jerry_char_t *)name, name##_sz); \
+  name[name##_sz] = '\0';
+
+#define JERRYXX_GET_PROPERTY_STRING_AS_CHAR(obj, name)                    \
+  jerry_value_t name##_n = jerry_create_string((jerry_char_t *)#name);    \
+  jerry_value_t name##_p = jerry_get_property(obj, name##_n);             \
+  jerry_size_t name##_sz = jerry_get_string_size(name##_p);               \
+  jerry_char_t name[name##_sz + 1];                                       \
+  jerry_string_to_char_buffer(name##_p, (jerry_char_t *)name, name##_sz); \
+  name[name##_sz] = '\0';                                                 \
+  jerry_release_value(name##_p);                                          \
+  jerry_release_value(name##_n);
+
+// functions for getting property
 void jerryxx_set_property(jerry_value_t object, const char *name,
                           jerry_value_t value);
 void jerryxx_set_property_number(jerry_value_t object, const char *name,
@@ -235,27 +252,26 @@ double jerryxx_get_property_number(jerry_value_t object, const char *name,
                                    double default_value);
 bool jerryxx_get_property_boolean(jerry_value_t object, const char *name,
                                   bool default_value);
+
+// array functions
 uint8_t *jerryxx_get_property_typedarray_buffer(jerry_value_t object);
 void jerryxx_array_push_string(jerry_value_t array, jerry_value_t item);
 bool jerryxx_delete_property(jerry_value_t object, const char *name);
 
+// print functions
 void jerryxx_print_value(jerry_value_t value);
 void jerryxx_print_error(jerry_value_t value, bool print_stacktrace);
 
+// string functions
 jerry_size_t jerryxx_get_ascii_string_size(const jerry_value_t value);
 jerry_size_t jerryxx_get_ascii_string_length(const jerry_value_t value);
 jerry_size_t jerryxx_string_to_ascii_char_buffer(const jerry_value_t value,
                                                  jerry_char_t *buf,
                                                  jerry_size_t len);
 
-#define JERRYXX_GET_PROPERTY_STRING_AS_CHAR(obj, name)                    \
-  jerry_value_t name##_n = jerry_create_string((jerry_char_t *)#name);    \
-  jerry_value_t name##_p = jerry_get_property(obj, name##_n);             \
-  jerry_size_t name##_sz = jerry_get_string_size(name##_p);               \
-  jerry_char_t name[name##_sz + 1];                                       \
-  jerry_string_to_char_buffer(name##_p, (jerry_char_t *)name, name##_sz); \
-  name[name##_sz] = '\0';                                                 \
-  jerry_release_value(name##_p);                                          \
-  jerry_release_value(name##_n);
+// function call
+jerry_value_t jerryxx_call_require(const char *name);
+jerry_value_t jerryxx_call_method(jerry_value_t obj, char *name,
+                                  jerry_value_t *args, int args_count);
 
 #endif /* __JERRYXX_H */

@@ -1,5 +1,5 @@
 process.binding(process.binding.fs); // init native fs
-const path_mod = require("path");
+const __path = require("path");
 
 class Stats {
   constructor() {
@@ -82,7 +82,7 @@ function __fobj(fd) {
  * @returns {object} mount table entry
  */
 function __lookup(path) {
-  const _path = path_mod.resolve(path);
+  const _path = __path.resolve(path);
   for (let i = 0; i < __mounts.length; i++) {
     let vfs = __mounts[i];
     if (vfs.path === "/") {
@@ -90,7 +90,7 @@ function __lookup(path) {
       return vfs;
     } else if (
       _path === vfs.path ||
-      _path.startsWith(vfs.path + path_mod.sep)
+      _path.startsWith(vfs.path + __path.sep)
     ) {
       vfs.__pathout = _path.substr(vfs.path.length) || "/";
       return vfs;
@@ -139,8 +139,8 @@ function mkfs(blkdev, fstype) {
  * @param {boolean} mkfs
  */
 function mount(path, blkdev, fstype, mkfs) {
-  path = path_mod.normalize(path);
-  const _parent = path_mod.join(path, "..");
+  path = __path.normalize(path);
+  const _parent = __path.join(path, "..");
   if (_parent !== "/") {
     const _stat = statSync(_parent);
     if (!_stat.isDirectory()) {
@@ -170,8 +170,8 @@ function mount(path, blkdev, fstype, mkfs) {
   vfs.path = path;
   __mounts.push(vfs);
   __mounts.sort((a, b) => {
-    let ac = a.path.split(path_mod.sep).filter((t) => t.length > 0).length;
-    let bc = b.path.split(path_mod.sep).filter((t) => t.length > 0).length;
+    let ac = a.path.split(__path.sep).filter((t) => t.length > 0).length;
+    let bc = b.path.split(__path.sep).filter((t) => t.length > 0).length;
     return bc - ac;
   });
 }
@@ -181,7 +181,7 @@ function mount(path, blkdev, fstype, mkfs) {
  * @param {string} path
  */
 function unmount(path) {
-  path = path_mod.normalize(path);
+  path = __path.normalize(path);
   const vfs = __mounts.find((v) => v.path === path);
   if (vfs) {
     __mounts.splice(__mounts.indexOf(vfs));
@@ -201,7 +201,7 @@ function cwd() {
  * @param {string} path
  */
 function chdir(path) {
-  const _path = path_mod.resolve(path);
+  const _path = __path.resolve(path);
   const stat = statSync(_path);
   if (stat && stat.isDirectory()) {
     __cwd = _path;
@@ -352,11 +352,11 @@ function rmdirSync(path) {
 }
 
 function readdirSync(path) {
-  path = path_mod.normalize(path);
+  path = __path.normalize(path);
   const vfs = __lookup(path);
   let ls = vfs.readdir(vfs.__pathout);
   __mounts.forEach((v) => {
-    if (v.path !== "/" && path_mod.join(v.path, "..") === path) {
+    if (v.path !== "/" && __path.join(v.path, "..") === path) {
       ls.push(v.path.substr(path === "/" ? 1 : path.length + 1));
     }
   });
