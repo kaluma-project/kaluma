@@ -34,4 +34,8 @@
 #define MSTR_EVENTS_LISTENER_COUNT "listenerCount"
 #define MSTR_EVENTS_TYPE_ERROR_1 "listener must be a function"
 
+#define MSTR_EVENTS__EVENTS "_events"
+#define MSTR_EVENTS_TYPE "type"
+#define MSTR_EVENTS_ERROR "error"
+
 #endif /* __EVENTS_MAGIC_STRINGS_H */

@@ -1276,10 +1276,35 @@ JERRYXX_FUN(seed_fn) {
   return jerry_create_undefined();
 }
 
+// for TEST
+JERRYXX_FUN(__available_fn) {
+  int len = km_tty_available();
+  return jerry_create_number(len);
+}
+
+// for TEST
+JERRYXX_FUN(__read_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "len")
+  int len = (int)JERRYXX_GET_ARG_NUMBER(0);
+  jerry_value_t array = jerry_create_typedarray(JERRY_TYPEDARRAY_UINT8, len);
+  jerry_length_t byteOffset = 0;
+  jerry_length_t byteLength = 0;
+  jerry_value_t buffer =
+      jerry_get_typedarray_buffer(array, &byteOffset, &byteLength);
+  uint8_t *buf = jerry_get_arraybuffer_pointer(buffer);
+  km_tty_read(buf, len);
+  jerry_release_value(buffer);
+  return array;
+}
+
 static void register_global_etc() {
   jerry_value_t global = jerry_get_global_object();
   jerryxx_set_property_function(global, MSTR_PRINT, print_fn);
   jerryxx_set_property_function(global, MSTR_SEED, seed_fn);
+  // for TEST
+  jerryxx_set_property_function(global, "__available", __available_fn);
+  jerryxx_set_property_function(global, "__read", __read_fn);
+  // for TEST
   jerry_release_value(global);
 }
 
