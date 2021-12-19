@@ -517,8 +517,8 @@ JERRYXX_FUN(gc_draw_bitmap_fn) {
   uint16_t color = bpp == 1 ? 1 : 0xffff;
   bool transparent = false;
   uint16_t transparent_color = 0;
-  uint8_t scale_x = 1;
-  uint8_t scale_y = 1;
+  int8_t scale_x = 1;
+  int8_t scale_y = 1;
 
   if (JERRYXX_HAS_ARG(2)) {
     jerry_value_t bitmap = JERRYXX_GET_ARG(2);
