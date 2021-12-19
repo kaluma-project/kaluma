@@ -21,27 +21,72 @@
 #include "tty.h"
 
 #include <ctype.h>
+#include <fcntl.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "ringbuffer.h"
 #include "system.h"
 
-void km_tty_init() {}
+#define TTY_RX_RINGBUFFER_SIZE 2048
 
-uint32_t km_tty_available() { return 0; }
+static unsigned char __tty_rx_buffer[TTY_RX_RINGBUFFER_SIZE];
+static ringbuffer_t __tty_rx_ringbuffer;
 
-uint32_t km_tty_read(uint8_t *buf, size_t len) { return 0; }
+void km_tty_init() {
+  ringbuffer_init(&__tty_rx_ringbuffer, __tty_rx_buffer,
+                  sizeof(__tty_rx_buffer));
 
-uint32_t km_tty_read_sync(uint8_t *buf, size_t len, uint32_t timeout) {
-  return 0;
+  int fd = STDIN_FILENO;  // stdin
+  int flags = fcntl(fd, F_GETFL, 0);
+  fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
-uint8_t km_tty_getc() { return 0; }
+uint32_t km_tty_available() {
+  unsigned char ch[1];
+  int sz = read(STDIN_FILENO, ch, 1);
+  // printf("sz=%d\r\n", sz);
+  while (sz > 0) {
+    ringbuffer_write(&__tty_rx_ringbuffer, ch, 1);
+  }
+  return ringbuffer_length(&__tty_rx_ringbuffer);
+}
+
+uint32_t km_tty_read(uint8_t *buf, size_t len) {
+  if (km_tty_available() >= len) {
+    ringbuffer_read(&__tty_rx_ringbuffer, buf, len);
+    return len;
+  } else {
+    return 0;
+  }
+}
+
+uint32_t km_tty_read_sync(uint8_t *buf, size_t len, uint32_t timeout) {
+  uint32_t sz;
+  uint64_t to = km_gettime() + timeout;
+  do {
+    sz = km_tty_available();
+  } while (km_gettime() < to && sz < len);
+  if (sz >= len) {
+    ringbuffer_read(&__tty_rx_ringbuffer, buf, len);
+    return len;
+  } else {
+    return 0;
+  }
+}
+
+uint8_t km_tty_getc() {
+  uint8_t c = 0;
+  if (km_tty_available()) {
+    ringbuffer_read(&__tty_rx_ringbuffer, &c, 1);
+  }
+  return c;
+}
 
 void km_tty_putc(char ch) { printf("%c", ch); }
 
