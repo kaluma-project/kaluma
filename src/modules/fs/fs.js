@@ -279,11 +279,11 @@ function readSync(fd, buffer, offset, length, position) {
 
 function readFileSync(path) {
   const _stat = statSync(path);
-  const buf = new Uint8Array(_stat.size);
+  const buffer = new Uint8Array(_stat.size);
   const fd = openSync(path, 'r');
-  readSync(fd, buf, 0, buf.length, 0);
+  readSync(fd, buffer, 0, buffer.length, 0);
   closeSync(fd);
-  return buf;
+  return buffer;
 }
 
 function writeSync(fd, buffer, offset, length, position) {
@@ -365,10 +365,10 @@ function readdirSync(path) {
 
 function statSync(path) {
   const vfs = __lookup(path);
-  const ret = vfs.stat(vfs.__pathout);
+  const _stat = vfs.stat(vfs.__pathout);
   let stat = new Stats();
-  stat.type = ret.type;
-  stat.size = ret.size;
+  stat.type = _stat.type;
+  stat.size = _stat.size;
   return stat;
 }
 
