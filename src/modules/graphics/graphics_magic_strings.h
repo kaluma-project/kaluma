@@ -72,4 +72,6 @@
 #define MSTR_GRAPHICS_MEASURE_TEXT "measureText"
 #define MSTR_GRAPHICS_DRAW_BITMAP "drawBitmap"
 #define MSTR_GRAPHICS_DISPLAY "display"
+#define MSTR_GRAPHICS_FLIP_X "flipX"
+#define MSTR_GRAPHICS_FLIP_Y "flipY"
 #endif /* __GRAPHICS_MAGIC_STRINGS_H */

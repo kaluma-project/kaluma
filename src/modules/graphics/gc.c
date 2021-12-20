@@ -582,25 +582,28 @@ void gc_measure_text(gc_handle_t *handle, const char *text, uint16_t *w,
   *h = _h * handle->font_scale_y;
 }
 
-static void gc_draw_bitmap_helper(gc_handle_t *handle, int16_t x, int16_t y, int16_t w, int16_t h, 
-                                  int16_t xx, int16_t yy, int8_t scale_x, int8_t scale_y, uint16_t color) {
-  if (abs(scale_x) == 1 && abs(scale_y) == 1) {
-    int16_t px = x + (scale_x > 0 ? xx : w - xx);
-    int16_t py = y + (scale_y > 0 ? yy : w - yy);
+static void gc_draw_bitmap_helper(gc_handle_t *handle, int16_t x, int16_t y,
+                                  int16_t w, int16_t h, int16_t xx, int16_t yy,
+                                  int8_t scale_x, int8_t scale_y, bool flip_x,
+                                  bool flip_y, uint16_t color) {
+  if (scale_x == 1 && scale_y == 1) {
+    int16_t px = x + (flip_x ? w - xx : xx);
+    int16_t py = y + (flip_y ? h - yy : yy);
     handle->set_pixel_cb(handle, px, py, color);
   } else {
-    int16_t px = x + (scale_x > 0 ? xx * scale_x : (w - xx) * -scale_x);
-    int16_t py = y + (scale_y > 0 ? yy * scale_y : (h - yy) * -scale_y);
-    handle->fill_rect_cb(handle, px, py, abs(scale_x), abs(scale_y), color);
+    int16_t px = x + (flip_x ? (w - xx) * -scale_x : xx * scale_x);
+    int16_t py = y + (flip_y ? (h - yy) * -scale_y : yy * scale_y);
+    handle->fill_rect_cb(handle, px, py, scale_x, scale_y, color);
   }
 }
 
 void gc_draw_bitmap(gc_handle_t *handle, int16_t x, int16_t y, uint8_t *bitmap,
                     int16_t w, int16_t h, uint8_t bpp, uint16_t color,
                     bool transparent, uint16_t transparent_color,
-                    int8_t scale_x, int8_t scale_y) {
+                    uint8_t scale_x, uint8_t scale_y, bool flip_x,
+                    bool flip_y) {
   if ((x >= handle->width) || (y >= handle->height) ||
-      ((x + (w * abs(scale_x)) - 1) < 0) || ((y + (h * abs(scale_y)) - 1) < 0))
+      ((x + (w * scale_x) - 1) < 0) || ((y + (h * scale_y) - 1) < 0))
     return;
   if (bpp == 1) {
     uint16_t offset = 0;
@@ -614,7 +617,8 @@ void gc_draw_bitmap(gc_handle_t *handle, int16_t x, int16_t y, uint8_t *bitmap,
           bits = bitmap[offset];
         }
         if (bits & 0x80) {
-          gc_draw_bitmap_helper(handle, x, y, w, h, xx, yy, scale_x, scale_y, color);
+          gc_draw_bitmap_helper(handle, x, y, w, h, xx, yy, scale_x, scale_y,
+                                flip_x, flip_y, color);
         }
         bits <<= 1;
         bit++;
@@ -630,10 +634,12 @@ void gc_draw_bitmap(gc_handle_t *handle, int16_t x, int16_t y, uint8_t *bitmap,
         color = bitmap[idx] << 8 | bitmap[idx + 1];
         if (transparent) {
           if (color != transparent_color) {
-            gc_draw_bitmap_helper(handle, x, y, w, h, xx, yy, scale_x, scale_y, color);
+            gc_draw_bitmap_helper(handle, x, y, w, h, xx, yy, scale_x, scale_y,
+                                  flip_x, flip_y, color);
           }
         } else {
-          gc_draw_bitmap_helper(handle, x, y, w, h, xx, yy, scale_x, scale_y, color);
+          gc_draw_bitmap_helper(handle, x, y, w, h, xx, yy, scale_x, scale_y,
+                                flip_x, flip_y, color);
         }
       }
     }

@@ -517,8 +517,10 @@ JERRYXX_FUN(gc_draw_bitmap_fn) {
   uint16_t color = bpp == 1 ? 1 : 0xffff;
   bool transparent = false;
   uint16_t transparent_color = 0;
-  int8_t scale_x = 1;
-  int8_t scale_y = 1;
+  uint8_t scale_x = 1;
+  uint8_t scale_y = 1;
+  bool flip_x = false;
+  bool flip_y = false;
 
   if (JERRYXX_HAS_ARG(2)) {
     jerry_value_t bitmap = JERRYXX_GET_ARG(2);
@@ -546,6 +548,10 @@ JERRYXX_FUN(gc_draw_bitmap_fn) {
                                                 scale_x);
           scale_y = jerryxx_get_property_number(options, MSTR_GRAPHICS_SCALE_Y,
                                                 scale_y);
+          flip_x = jerryxx_get_property_boolean(options, MSTR_GRAPHICS_FLIP_X,
+                                                flip_x);
+          flip_y = jerryxx_get_property_boolean(options, MSTR_GRAPHICS_FLIP_Y,
+                                                flip_y);
         }
       }
 
@@ -561,7 +567,7 @@ JERRYXX_FUN(gc_draw_bitmap_fn) {
             jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
         uint8_t *buf = jerry_get_arraybuffer_pointer(buffer);
         gc_draw_bitmap(gc_handle, x, y, buf, w, h, bpp, color, transparent,
-                       transparent_color, scale_x, scale_y);
+                       transparent_color, scale_x, scale_y, flip_x, flip_y);
         jerry_release_value(buffer);
       } else if (jerry_value_is_string(data)) { /* decode base64 string */
         jerry_value_t global = jerry_get_global_object();
@@ -575,7 +581,7 @@ JERRYXX_FUN(gc_draw_bitmap_fn) {
             jerry_get_typedarray_buffer(decoded, &byteOffset, &byteLength);
         uint8_t *buf = jerry_get_arraybuffer_pointer(buffer);
         gc_draw_bitmap(gc_handle, x, y, buf, w, h, bpp, color, transparent,
-                       transparent_color, scale_x, scale_y);
+                       transparent_color, scale_x, scale_y, flip_x, flip_y);
         jerry_release_value(buffer);
         jerry_release_value(decoded);
         jerry_release_value(this_val);
