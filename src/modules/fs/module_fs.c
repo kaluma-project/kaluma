@@ -37,7 +37,7 @@ static void cmd_ls(km_repl_state_t *state, char *arg) {
   } else {
     jerry_value_t args_js[1] = {cwd_js};
     jerry_value_t file_array_js =
-        jerryxx_call_method(fs, MSTR_FS_READDIR_SYNC, args_js, 1);
+        jerryxx_call_method(fs, MSTR_FS_READDIR, args_js, 1);
     if (jerry_value_is_error(file_array_js)) {
       jerryxx_print_error(file_array_js, true);
     } else {
@@ -49,7 +49,7 @@ static void cmd_ls(km_repl_state_t *state, char *arg) {
             jerryxx_call_method(path, "join", join_args, 2);
         jerry_value_t stat_args[1] = {file_path_js};
         jerry_value_t file_stat_js =
-            jerryxx_call_method(fs, MSTR_FS_STAT_SYNC, stat_args, 1);
+            jerryxx_call_method(fs, MSTR_FS_STAT, stat_args, 1);
         jerry_value_t is_dir_js = jerryxx_call_method(
             file_stat_js, MSTR_FS_STATS_IS_DIRECTORY, NULL, 0);
         bool is_dir = jerry_get_boolean_value(is_dir_js);
@@ -104,7 +104,7 @@ static void cmd_mkdir(km_repl_state_t *state, char *arg) {
   jerry_value_t fs = jerryxx_call_require("fs");
   jerry_value_t path_js = jerry_create_string((const jerry_char_t *)arg);
   jerry_value_t args_js[1] = {path_js};
-  jerry_value_t ret = jerryxx_call_method(fs, MSTR_FS_MKDIR_SYNC, args_js, 1);
+  jerry_value_t ret = jerryxx_call_method(fs, MSTR_FS_MKDIR, args_js, 1);
   if (jerry_value_is_error(ret)) {
     jerryxx_print_error(ret, true);
   }
@@ -117,7 +117,7 @@ static void cmd_rm(km_repl_state_t *state, char *arg) {
   jerry_value_t fs = jerryxx_call_require("fs");
   jerry_value_t path_js = jerry_create_string((const jerry_char_t *)arg);
   jerry_value_t args_js[1] = {path_js};
-  jerry_value_t ret = jerryxx_call_method(fs, MSTR_FS_RM_SYNC, args_js, 1);
+  jerry_value_t ret = jerryxx_call_method(fs, MSTR_FS_RM, args_js, 1);
   if (jerry_value_is_error(ret)) {
     jerryxx_print_error(ret, true);
   }

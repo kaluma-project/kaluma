@@ -7,7 +7,7 @@ Kaluma is a tiny and efficient JavaScript runtime for microcontrollers. The main
 - Small footprint (Run minimally on 300KB ROM, 64KB RAM)
 - ECMAScript 5/6/6+ (subset) standard compliant (Powered by [JerryScript](http://jerryscript.net/))
 - Easy to port
-- Non-blocking I/O
+- Event loop for Asynchronous
 - [API](https://docs.kaluma.io/) similar with Node.js and Arduino
 - REPL mode
 - File systems (LittleFS)

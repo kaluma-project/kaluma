@@ -33,12 +33,12 @@ test("[fs] mount() - with mkfs", (done) => {
 test("[fs] mount() - already formatted", (done) => {
   const bd1 = new RAMBlockDev();
   fs.mount('/', bd1, 'lfs', true);
-  fs.mkdirSync('/dir1');
+  fs.mkdir('/dir1');
   fs.unmount('/');
 
   fs.mount('/', bd1, 'lfs');
   expect(fs.__lookup("/")).toBeTruthy();
-  expect(fs.readdirSync('/')).toContain('dir1');
+  expect(fs.readdir('/')).toContain('dir1');
 
   fs.unmount('/');
   done();
@@ -164,8 +164,8 @@ test("[fs] chdir()", (done) => {
     fs.chdir("/unknown");
   }).toThrow();
 
-  fs.mkdirSync("/usr");
-  fs.mkdirSync("/usr/dir");
+  fs.mkdir("/usr");
+  fs.mkdir("/usr/dir");
 
   fs.chdir("/");
   expect(fs.cwd()).toBe("/");
@@ -188,7 +188,7 @@ test("[fs] chdir()", (done) => {
   done();
 });
 
-test("[fs] readdirSync()", (done) => {
+test("[fs] readdir()", (done) => {
   const bd1 = new RAMBlockDev();
   const bd2 = new RAMBlockDev();
   const bd3 = new RAMBlockDev();
@@ -201,11 +201,11 @@ test("[fs] readdirSync()", (done) => {
 
   let ls = [];
 
-  ls = fs.readdirSync("/");
+  ls = fs.readdir("/");
   expect(ls).toContain("flash");
   expect(ls).toContain("sd");
 
-  ls = fs.readdirSync("/sd");
+  ls = fs.readdir("/sd");
   expect(ls).toContain("dev1");
 
   fs.unmount("/sd/dev1");
@@ -215,68 +215,68 @@ test("[fs] readdirSync()", (done) => {
   done();
 });
 
-test("[fs] mkdirSync() and rmdirSync()", (done) => {
+test("[fs] mkdir() and rmdir()", (done) => {
   const bd1 = new RAMBlockDev();
   fs.mount('/', bd1, 'lfs', true);
 
   let ls = [];
 
-  fs.mkdirSync("/home");
-  ls = fs.readdirSync("/");
+  fs.mkdir("/home");
+  ls = fs.readdir("/");
   expect(ls).toContain("home");
 
-  fs.mkdirSync("/home/usr");
-  ls = fs.readdirSync("/home");
+  fs.mkdir("/home/usr");
+  ls = fs.readdir("/home");
   expect(ls).toContain("usr");
 
-  expect(fs.statSync("/home").isDirectory()).toBe(true);
-  expect(fs.statSync("/home").isFile()).toBe(false);
-  expect(fs.statSync("/home/usr").isDirectory()).toBe(true);
-  expect(fs.statSync("/home/usr").isFile()).toBe(false);
+  expect(fs.stat("/home").isDirectory()).toBe(true);
+  expect(fs.stat("/home").isFile()).toBe(false);
+  expect(fs.stat("/home/usr").isDirectory()).toBe(true);
+  expect(fs.stat("/home/usr").isFile()).toBe(false);
 
-  fs.rmdirSync("/home/usr");
-  ls = fs.readdirSync("/home");
+  fs.rmdir("/home/usr");
+  ls = fs.readdir("/home");
   expect(ls).notToContain("usr");
 
-  fs.rmdirSync("/home");
-  ls = fs.readdirSync("/");
+  fs.rmdir("/home");
+  ls = fs.readdir("/");
   expect(ls).notToContain("home");
 
   fs.unmount('/');
   done();
 });
 
-test("[fs] open/write/read/close/unlink/statSync()", (done) => {
+test("[fs] open/write/read/close/unlink/stat()", (done) => {
   const bd1 = new RAMBlockDev();
   fs.mount('/', bd1, 'lfs', true);
 
   const fname = '/file.txt';
 
   // file write (create)
-  let fd = fs.openSync(fname, 'w');
+  let fd = fs.open(fname, 'w');
   let buf = new Uint8Array([60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
-  fs.writeSync(fd, buf, 0, buf.length, 0);
-  fs.closeSync(fd);
+  fs.write(fd, buf, 0, buf.length, 0);
+  fs.close(fd);
 
   // file stat test
-  let stat = fs.statSync(fname);
+  let stat = fs.stat(fname);
   expect(stat.isFile()).toBe(true);
   expect(stat.size).toBe(buf.length);
 
   // file read test
-  let fd2 = fs.openSync(fname, 'r');
+  let fd2 = fs.open(fname, 'r');
   let buf2 = new Uint8Array(10);
-  fs.readSync(fd2, buf2, 0, buf2.length, 0);
-  fs.closeSync(fd2);
+  fs.read(fd2, buf2, 0, buf2.length, 0);
+  fs.close(fd2);
   expect(buf.join(',')).toBe(buf2.join(','));
 
-  fs.unlinkSync(fname);
+  fs.unlink(fname);
 
   fs.unmount('/');
   done();
 });
 
-test("[fs] existsSync()", (done) => {
+test("[fs] exists()", (done) => {
   const bd1 = new RAMBlockDev();
   const bd2 = new RAMBlockDev();
   const bd3 = new RAMBlockDev();
@@ -286,18 +286,18 @@ test("[fs] existsSync()", (done) => {
 
   const fname = '/exists.txt';
 
-  let fd = fs.openSync(fname, 'w');
+  let fd = fs.open(fname, 'w');
   let buf = new Uint8Array([60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
-  fs.writeSync(fd, buf, 0, buf.length, 0);
-  fs.closeSync(fd);  
-  expect(fs.existsSync(fname)).toBe(true);
+  fs.write(fd, buf, 0, buf.length, 0);
+  fs.close(fd);  
+  expect(fs.exists(fname)).toBe(true);
 
-  expect(fs.existsSync('/')).toBe(true);
-  expect(fs.existsSync('/flash')).toBe(true);
-  expect(fs.existsSync('/sd')).toBe(true);
-  expect(fs.existsSync('/flash1')).toBe(false);
+  expect(fs.exists('/')).toBe(true);
+  expect(fs.exists('/flash')).toBe(true);
+  expect(fs.exists('/sd')).toBe(true);
+  expect(fs.exists('/flash1')).toBe(false);
 
-  fs.unlinkSync(fname);
+  fs.unlink(fname);
 
   fs.unmount('/');
   fs.unmount('/flash');
@@ -305,38 +305,38 @@ test("[fs] existsSync()", (done) => {
   done();
 });
 
-test("[fs] renameSync()", (done) => {
+test("[fs] rename()", (done) => {
   const bd1 = new RAMBlockDev();
   fs.mount('/', bd1, 'lfs', true);  
 
-  let fd = fs.openSync('/rename.txt', 'w');
+  let fd = fs.open('/rename.txt', 'w');
   let buf = new Uint8Array([60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
-  fs.writeSync(fd, buf, 0, buf.length, 0);
-  fs.closeSync(fd);
-  expect(fs.existsSync('/rename.txt')).toBe(true);
+  fs.write(fd, buf, 0, buf.length, 0);
+  fs.close(fd);
+  expect(fs.exists('/rename.txt')).toBe(true);
 
-  fs.renameSync('rename.txt', 'newname.txt');
-  expect(fs.existsSync('/rename.txt')).toBe(false);
-  expect(fs.existsSync('/newname.txt')).toBe(true);
+  fs.rename('rename.txt', 'newname.txt');
+  expect(fs.exists('/rename.txt')).toBe(false);
+  expect(fs.exists('/newname.txt')).toBe(true);
 
-  fs.unlinkSync('newname.txt');
+  fs.unlink('newname.txt');
 
   fs.unmount('/');
   done();
 });
 
-test("[fs] write/readFileSync()", (done) => {
+test("[fs] write/readFile()", (done) => {
   const bd1 = new RAMBlockDev();
   fs.mount('/', bd1, 'lfs', true);
 
   const buf = new Uint8Array([60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
-  fs.writeFileSync('/filesync.txt', buf);
-  expect(fs.existsSync('/filesync.txt')).toBe(true);
+  fs.writeFile('/filesync.txt', buf);
+  expect(fs.exists('/filesync.txt')).toBe(true);
 
-  const buf2 = fs.readFileSync('/filesync.txt');
+  const buf2 = fs.readFile('/filesync.txt');
   expect(buf.join(',')).toBe(buf2.join(','));
 
-  fs.unlinkSync('/filesync.txt');
+  fs.unlink('/filesync.txt');
 
   fs.unmount('/');
   done();
