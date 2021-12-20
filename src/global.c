@@ -1222,28 +1222,12 @@ static void register_global_system_error() {
   /* SystemError class */
   jerry_value_t system_error_ctor =
       jerry_create_external_function(system_error_ctor_fn);
-  // SystemError.prototype = Object.create(Error.prototype);
-  jerry_value_t global_object = jerryxx_get_property(global, MSTR_OBJECT);
-  jerry_value_t global_object_create =
-      jerryxx_get_property(global_object, "create");
   jerry_value_t global_error = jerryxx_get_property(global, MSTR_ERROR_CLASS);
-  jerry_value_t global_error_prototype =
-      jerryxx_get_property(global_error, MSTR_PROTOTYPE);
-  jerry_value_t _args[1] = {global_error_prototype};
-  jerry_value_t system_error_prototype =
-      jerry_call_function(global_object_create, global_object, _args, 1);
-  jerryxx_set_property(system_error_ctor, MSTR_PROTOTYPE,
-                       system_error_prototype);
-  jerry_release_value(system_error_prototype);
-  // SystemError.prototype.constructor = SystemError
-  jerryxx_set_property(system_error_prototype, MSTR_CONSTRUCTOR,
-                       system_error_ctor);
+  // SystemError extends Error
+  jerryxx_inherit(global_error, system_error_ctor);
   // global.SystemError = SystemError
   jerryxx_set_property(global, MSTR_SYSTEM_ERROR, system_error_ctor);
-  jerry_release_value(global_error_prototype);
   jerry_release_value(global_error);
-  jerry_release_value(global_object_create);
-  jerry_release_value(global_object);
   jerry_release_value(global);
 }
 

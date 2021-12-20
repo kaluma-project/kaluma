@@ -22,10 +22,13 @@
 #ifndef __MAGIC_STRINGS_H
 #define __MAGIC_STRINGS_H
 
-/* global */
+/* default */
 #define MSTR_PROTOTYPE "prototype"
-#define MSTR_GLOBAL "global"
 #define MSTR_REQUIRE "require"
+#define MSTR_CREATE "create"
+
+/* global */
+#define MSTR_GLOBAL "global"
 #define MSTR_HIGH "HIGH"
 #define MSTR_LOW "LOW"
 #define MSTR_INPUT "INPUT"
