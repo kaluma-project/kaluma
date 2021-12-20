@@ -591,8 +591,8 @@ static void gc_draw_bitmap_helper(gc_handle_t *handle, int16_t x, int16_t y,
     int16_t py = y + (flip_y ? h - yy : yy);
     handle->set_pixel_cb(handle, px, py, color);
   } else {
-    int16_t px = x + (flip_x ? (w - xx) * -scale_x : xx * scale_x);
-    int16_t py = y + (flip_y ? (h - yy) * -scale_y : yy * scale_y);
+    int16_t px = x + (flip_x ? (w - xx) * scale_x : xx * scale_x);
+    int16_t py = y + (flip_y ? (h - yy) * scale_y : yy * scale_y);
     handle->fill_rect_cb(handle, px, py, scale_x, scale_y, color);
   }
 }
