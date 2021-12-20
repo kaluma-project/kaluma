@@ -99,9 +99,9 @@ test("[path] resolve()", (done) => {
   expect(path.resolve("/foo/bar", "./baz")).toBe("/foo/bar/baz");
   expect(path.resolve("/foo/bar", "/tmp/file/")).toBe("/tmp/file");
 
-  fs.mkdirSync("/home");
-  fs.mkdirSync("/home/myself");
-  fs.mkdirSync("/home/myself/node");
+  fs.mkdir("/home");
+  fs.mkdir("/home/myself");
+  fs.mkdir("/home/myself/node");
   fs.chdir("/home/myself/node");
   expect(path.resolve("wwwroot", "static_files/png/", "../gif/image.gif")).toBe(
     "/home/myself/node/wwwroot/static_files/gif/image.gif"

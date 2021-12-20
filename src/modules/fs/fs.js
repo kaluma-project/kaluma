@@ -139,7 +139,7 @@ function mount(path, blkdev, fstype, mkfs) {
   path = __path.normalize(path);
   const _parent = __path.join(path, "..");
   if (_parent !== "/") {
-    const _stat = statSync(_parent);
+    const _stat = stat(_parent);
     if (!_stat.isDirectory()) {
       throw new SystemError(-2); // ENOENT
     }
@@ -199,8 +199,8 @@ function cwd() {
  */
 function chdir(path) {
   const _path = __path.resolve(path);
-  const stat = statSync(_path);
-  if (stat && stat.isDirectory()) {
+  const _stat = stat(_path);
+  if (_stat && _stat.isDirectory()) {
     __cwd = _path;
   } else {
     throw new SystemError(-2); // ENOENT
@@ -211,7 +211,7 @@ function chdir(path) {
 // SYNCHRONOUS FUNCTIONS
 // ---------------------------------------------------------------------------
 
-function openSync(path, flags = "r", mode = 0o666) {
+function open(path, flags = "r", mode = 0o666) {
   const vfs = __lookup(path);
   if (vfs) {
     let vfs_flags = 0;
@@ -266,7 +266,7 @@ function openSync(path, flags = "r", mode = 0o666) {
   throw new SystemError(-2); // ENOENT
 }
 
-function readSync(fd, buffer, offset, length, position) {
+function read(fd, buffer, offset, length, position) {
   const fo = __fobj(fd);
   if (fo) {
     return fo.vfs.read(fo.id, buffer, offset, length, position);
@@ -274,16 +274,16 @@ function readSync(fd, buffer, offset, length, position) {
   throw new SystemError(-9); // EBADF
 }
 
-function readFileSync(path) {
-  const _stat = statSync(path);
+function readFile(path) {
+  const _stat = stat(path);
   const buffer = new Uint8Array(_stat.size);
-  const fd = openSync(path, 'r');
-  readSync(fd, buffer, 0, buffer.length, 0);
-  closeSync(fd);
+  const fd = open(path, 'r');
+  read(fd, buffer, 0, buffer.length, 0);
+  close(fd);
   return buffer;
 }
 
-function writeSync(fd, buffer, offset, length, position) {
+function write(fd, buffer, offset, length, position) {
   const fo = __fobj(fd);
   if (fo) {
     return fo.vfs.write(fo.id, buffer, offset, length, position);
@@ -291,13 +291,13 @@ function writeSync(fd, buffer, offset, length, position) {
   throw new SystemError(-9); // EBADF
 }
 
-function writeFileSync(path, data) {
-  const fd = openSync(path, 'w');
-  writeSync(fd, data, 0, data.length, 0);
-  closeSync(fd);
+function writeFile(path, data) {
+  const fd = open(path, 'w');
+  write(fd, data, 0, data.length, 0);
+  close(fd);
 }
 
-function closeSync(fd) {
+function close(fd) {
   const fo = __fobj(fd);
   if (fo) {
     fo.vfs.close(fo.id);
@@ -307,7 +307,7 @@ function closeSync(fd) {
   }
 }
 
-function unlinkSync(path) {
+function unlink(path) {
   const vfs = __lookup(path);
   if (vfs) {
     vfs.unlink(vfs.__pathout);
@@ -316,7 +316,7 @@ function unlinkSync(path) {
   }
 }
 
-function renameSync(oldPath, newPath) {
+function rename(oldPath, newPath) {
   const vfs = __lookup(oldPath);
   if (vfs) {
     vfs.rename(oldPath, newPath);
@@ -325,7 +325,7 @@ function renameSync(oldPath, newPath) {
   }
 }
 
-function existsSync(path) {
+function exists(path) {
   const vfs = __lookup(path);
   if (vfs) {
     try { 
@@ -338,17 +338,17 @@ function existsSync(path) {
   return false;
 }
 
-function mkdirSync(path) {
+function mkdir(path) {
   const vfs = __lookup(path);
   vfs.mkdir(vfs.__pathout);
 }
 
-function rmdirSync(path) {
+function rmdir(path) {
   const vfs = __lookup(path);
   vfs.rmdir(vfs.__pathout);
 }
 
-function readdirSync(path) {
+function readdir(path) {
   path = __path.normalize(path);
   const vfs = __lookup(path);
   let ls = vfs.readdir(vfs.__pathout);
@@ -360,42 +360,23 @@ function readdirSync(path) {
   return ls;
 }
 
-function statSync(path) {
+function stat(path) {
   const vfs = __lookup(path);
   const _stat = vfs.stat(vfs.__pathout);
-  let stat = new Stats();
-  stat.type = _stat.type;
-  stat.size = _stat.size;
-  return stat;
+  let statObj = new Stats();
+  statObj.type = _stat.type;
+  statObj.size = _stat.size;
+  return statObj;
 }
 
-function rmSync(path) {
-  const stat = statSync(path);
-  if (stat.isDirectory()) {
-    rmdirSync(path);
-  } else if (stat.isFile()) {
-    unlinkSync(path);
+function rm(path) {
+  const _stat = stat(path);
+  if (_stat.isDirectory()) {
+    rmdir(path);
+  } else if (_stat.isFile()) {
+    unlink(path);
   }
 }
-
-// ---------------------------------------------------------------------------
-// ASYNCHRONOUS CALLBACK FUNCTIONS
-// ---------------------------------------------------------------------------
-
-// function close(fd[, callback])
-// function exists(path[, callback])
-// function mkdir(path[, options], callback)
-// function open(path[, flags[, mode]], callback)
-// function read(fd, buffer, offset, length, position, callback)
-// function readdir(path, callback)
-// function readFile(path, callback)
-// function rename(oldPath, newPath, callback)
-// function rmdir(path, callback)
-// function stat(path, callback)
-// function unlink(path, callback)
-// function write(fd, buffer[, offset[, length[, position]]], callback)
-// function writeFile(path, data, callback)
-// function rm(path)
 
 exports.Stats = Stats;
 
@@ -414,17 +395,17 @@ exports.mount = mount;
 exports.unmount = unmount;
 exports.chdir = chdir;
 exports.cwd = cwd;
-exports.closeSync = closeSync;
-exports.existsSync = existsSync;
-exports.mkdirSync = mkdirSync;
-exports.openSync = openSync;
-exports.readSync = readSync;
-exports.readdirSync = readdirSync;
-exports.readFileSync = readFileSync;
-exports.renameSync = renameSync;
-exports.rmdirSync = rmdirSync;
-exports.statSync = statSync;
-exports.unlinkSync = unlinkSync;
-exports.writeSync = writeSync;
-exports.writeFileSync = writeFileSync;
-exports.rmSync = rmSync;
+exports.close = close;
+exports.exists = exists;
+exports.mkdir = mkdir;
+exports.open = open;
+exports.read = read;
+exports.readdir = readdir;
+exports.readFile = readFile;
+exports.rename = rename;
+exports.rmdir = rmdir;
+exports.stat = stat;
+exports.unlink = unlink;
+exports.write = write;
+exports.writeFile = writeFile;
+exports.rm = rm;
