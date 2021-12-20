@@ -10,11 +10,6 @@ test("[path] sep === '/'", (done) => {
   done();
 });
 
-test("[path] delimiter === ':'", (done) => {
-  expect(path.sep).toBe("/");
-  done();
-});
-
 test("[path] format() - 'root' ignored if 'dir' provided", (done) => {
   const pathObj = {
     root: "/ignored",
@@ -74,30 +69,6 @@ test("[path] parse()", (done) => {
   expect(_pathObj.base).toBe("file.ext");
   expect(_pathObj.name).toBe("file");
   expect(_pathObj.ext).toBe(".ext");
-  done();
-});
-
-test("[path] dirname()", (done) => {
-  expect(path.dirname("/home/user/dir/file.ext")).toBe("/home/user/dir");
-  expect(path.dirname("home/user/dir/file")).toBe("home/user/dir");
-  done();
-});
-
-test("[path] extname()", (done) => {
-  expect(path.extname("/home/user/dir/file.ext")).toBe(".ext");
-  expect(path.extname("/home/user/dir/file.bmp.json")).toBe(".json");
-  done();
-});
-
-test("[path] extname()", (done) => {
-  expect(path.extname("/home/user/dir/file.ext")).toBe(".ext");
-  expect(path.extname("/home/user/dir/file.bmp.json")).toBe(".json");
-  done();
-});
-
-test("[path] basename()", (done) => {
-  expect(path.basename("/home/user/dir/file.ext")).toBe("file.ext");
-  expect(path.basename("/home/user/dir/file.ext", ".ext")).toBe("file");
   done();
 });
 

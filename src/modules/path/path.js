@@ -1,5 +1,4 @@
 const sep = "/";
-const delimiter = ":";
 
 function isAbsolute(path) {
   return path.startsWith(sep);
@@ -36,20 +35,6 @@ function parse(path) {
     ext: "." + ext,
   };
   return pathObj;
-}
-
-function dirname(path) {
-  const pathObj = parse(path);
-  return pathObj.root + pathObj.dir;
-}
-
-function extname(path) {
-  return parse(path).ext;
-}
-
-function basename(path, ext) {
-  const pathObj = parse(path);
-  return pathObj.ext === ext ? pathObj.name : pathObj.base;
 }
 
 function normalize(path) {
@@ -98,10 +83,6 @@ exports.isAbsolute = isAbsolute;
 exports.format = format;
 exports.parse = parse;
 exports.join = join;
-exports.dirname = dirname;
-exports.extname = extname;
-exports.basename = basename;
 exports.resolve = resolve;
 exports.normalize = normalize;
 exports.sep = sep;
-exports.delimiter = delimiter;
