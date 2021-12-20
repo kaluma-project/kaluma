@@ -23,5 +23,11 @@
 #define __STREAM2_MAGIC_STRINGS_H
 
 #define MSTR_STREAM2_STREAM "Stream"
+#define MSTR_STREAM2_READABLE "readable"
+#define MSTR_STREAM2_READ "read"
+#define MSTR_STREAM2_WRITABLE "writable"
+#define MSTR_STREAM2_WRITE "write"
+#define MSTR_STREAM2_END "end"
+#define MSTR_STREAM2_DESTROY "destroy"
 
 #endif /* __STREAM2_MAGIC_STRINGS_H */

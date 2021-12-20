@@ -40,6 +40,20 @@ JERRYXX_FUN(stream_ctor_fn) {
 JERRYXX_FUN(stream_method_fn) {}
 
 /**
+ * StdIn() constructor
+ */
+JERRYXX_FUN(stdin_ctor_fn) {
+  // Stream.call(this)
+  jerry_value_t stream2 = jerryxx_call_require("stream2");
+  jerry_value_t stream_ctor = jerryxx_get_property(stream2, "Stream");
+  jerry_value_t args[1] = {JERRYXX_GET_THIS};
+  jerryxx_call_method(stream_ctor, "call", args, 1);
+  jerry_release_value(stream_ctor);
+  jerry_release_value(stream2);
+  return jerry_create_undefined();
+}
+
+/**
  * Initialize 'stream2' module
  */
 jerry_value_t module_stream2_init() {

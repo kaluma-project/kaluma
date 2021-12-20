@@ -1276,13 +1276,24 @@ JERRYXX_FUN(seed_fn) {
   return jerry_create_undefined();
 }
 
-// for TEST
+static void register_global_etc() {
+  jerry_value_t global = jerry_get_global_object();
+  jerryxx_set_property_function(global, MSTR_PRINT, print_fn);
+  jerryxx_set_property_function(global, MSTR_SEED, seed_fn);
+  jerry_release_value(global);
+}
+
+/****************************************************************************/
+/*                                                                          */
+/*                          STDIN AND STDOOUT (TEST)                        */
+/*                                                                          */
+/****************************************************************************/
+
 JERRYXX_FUN(__available_fn) {
   int len = km_tty_available();
   return jerry_create_number(len);
 }
 
-// for TEST
 JERRYXX_FUN(__read_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "len")
   int len = (int)JERRYXX_GET_ARG_NUMBER(0);
@@ -1297,14 +1308,51 @@ JERRYXX_FUN(__read_fn) {
   return array;
 }
 
-static void register_global_etc() {
+/**
+ * StdIn() constructor
+ */
+JERRYXX_FUN(stdin_ctor_fn) {
+  // Stream.call(this)
+  jerry_value_t stream2 = jerryxx_call_require("stream2");
+  jerry_value_t stream_ctor = jerryxx_get_property(stream2, "Stream");
+  jerry_value_t args[1] = {JERRYXX_GET_THIS};
+  jerryxx_call_method(stream_ctor, "call", args, 1);
+  jerry_release_value(stream_ctor);
+  jerry_release_value(stream2);
+  return jerry_create_undefined();
+}
+
+/**
+ * StdIn.prototype.readable() constructor
+ * returns {boolean}
+ */
+JERRYXX_FUN(stdin_readable_fn) { return jerry_create_undefined(); }
+
+/**
+ * StdIn.prototype.read() constructor
+ * args
+ *   - length {number}
+ * returns {Uint8Array|null}
+ */
+JERRYXX_FUN(stdin_read_fn) { return jerry_create_undefined(); }
+
+static void register_global_stdio() {
+  // StdIn class (extends Stream)
+  jerry_value_t stdin_ctor = jerry_create_external_function(stdin_ctor_fn);
+  jerry_value_t stream2 = jerryxx_call_require("stream2");
+  jerry_value_t stream_ctor = jerryxx_get_property(stream2, "Stream");
+  jerryxx_inherit(stream_ctor, stdin_ctor);
+  jerry_value_t stdin_prototype =
+      jerryxx_get_property(stdin_ctor, MSTR_PROTOTYPE);
+  jerryxx_set_property_function(stdin_prototype, "readable", stdin_readable_fn);
+  jerry_release_value(stdin_prototype);
+  jerry_release_value(stream_ctor);
+  jerry_release_value(stream2);
+
   jerry_value_t global = jerry_get_global_object();
-  jerryxx_set_property_function(global, MSTR_PRINT, print_fn);
-  jerryxx_set_property_function(global, MSTR_SEED, seed_fn);
-  // for TEST
   jerryxx_set_property_function(global, "__available", __available_fn);
   jerryxx_set_property_function(global, "__read", __read_fn);
-  // for TEST
+  jerryxx_set_property(global, "StdIn", stdin_ctor);
   jerry_release_value(global);
 }
 
@@ -1363,6 +1411,7 @@ void km_global_init() {
   register_global_encoders();
   register_global_system_error();
   register_global_etc();
+  register_global_stdio();
   run_startup_module();
   run_board_module();
 }

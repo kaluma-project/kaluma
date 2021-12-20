@@ -30,6 +30,7 @@ if(NOT MODULES)
     storage
     wifi
     stream
+    stream2
     net
     http
     url
