@@ -238,8 +238,23 @@ jerry_value_t jerryxx_call_method(jerry_value_t obj, char *name,
 }
 
 void jerryxx_inherit(jerry_value_t super_ctor, jerry_value_t sub_ctor) {
-  jerry_value_t super_obj = jerry_construct_object(super_ctor, NULL, 0);
-  jerryxx_set_property(sub_ctor, MSTR_PROTOTYPE, super_obj);
-  jerryxx_set_property(super_obj, MSTR_CONSTRUCTOR, sub_ctor);
-  jerry_release_value(super_obj);
+  // Subclass.prototype = Object.create(Superclass.prototype);
+  jerry_value_t global = jerry_get_global_object();
+  jerry_value_t global_object = jerryxx_get_property(global, MSTR_OBJECT);
+  jerry_value_t global_object_create =
+      jerryxx_get_property(global_object, MSTR_CREATE);
+  jerry_value_t super_ctor_prototype =
+      jerryxx_get_property(super_ctor, MSTR_PROTOTYPE);
+  jerry_value_t _args[1] = {super_ctor_prototype};
+  jerry_value_t sub_ctor_prototype =
+      jerry_call_function(global_object_create, global_object, _args, 1);
+  jerryxx_set_property(sub_ctor, MSTR_PROTOTYPE, sub_ctor_prototype);
+  jerry_release_value(sub_ctor_prototype);
+  jerry_release_value(super_ctor_prototype);
+  jerry_release_value(global_object_create);
+  jerry_release_value(global_object);
+  jerry_release_value(global);
+
+  // Subclass.prototype.constructor = Subclass
+  jerryxx_set_property(sub_ctor_prototype, MSTR_CONSTRUCTOR, sub_ctor);
 }
