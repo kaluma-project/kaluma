@@ -29,7 +29,6 @@
 #define MSTR_PATH_OBJ_EXT "ext"
 
 #define MSTR_PATH_SEP "sep"
-#define MSTR_PATH_DELIMITER "delimiter"
 
 #define MSTR_PATH_IS_ABSOLUTE "isAbsolute"
 #define MSTR_PATH_FORMAT "format"

@@ -39,9 +39,6 @@ const __mounts = [];
  * @type {Array.<{id: number, vfs:VFS}>}
  */
 const __opens = [];
-__opens.push({ id: 0, vfs: null }); // fd = 0 (linux stdin)
-__opens.push({ id: 1, vfs: null }); // fd = 1 (linux stdout)
-__opens.push({ id: 2, vfs: null }); // fd = 2 (linux stderr)
 
 /**
  * Current working directory
