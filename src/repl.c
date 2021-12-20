@@ -39,13 +39,13 @@
 // --------------------------------------------------------------------------
 
 static void cmd_echo(km_repl_state_t *state, char *arg);
-static void cmd_reset(km_repl_state_t *state);
+static void cmd_reset(km_repl_state_t *state, char *arg);
 static void cmd_flash(km_repl_state_t *state, char *arg);
-static void cmd_load(km_repl_state_t *state);
-static void cmd_mem(km_repl_state_t *state);
-static void cmd_gc(km_repl_state_t *state);
-static void cmd_hi(km_repl_state_t *state);
-static void cmd_help(km_repl_state_t *state);
+static void cmd_load(km_repl_state_t *state, char *arg);
+static void cmd_mem(km_repl_state_t *state, char *arg);
+static void cmd_gc(km_repl_state_t *state, char *arg);
+static void cmd_hi(km_repl_state_t *state, char *arg);
+static void cmd_help(km_repl_state_t *state, char *arg);
 
 // --------------------------------------------------------------------------
 // PRIVATE VARIABLES
@@ -117,29 +117,19 @@ static void run_command() {
       tokenc++;
       tokenv[tokenc] = strtok(NULL, " ");
     }
+
     /* run command */
-    if (strcmp(tokenv[0], ".echo") == 0) {
-      if (tokenv[1] != NULL) {
-        cmd_echo(&state, tokenv[1]);
+    km_repl_command_t *cmd = (km_repl_command_t *)state.commands.head;
+    while (cmd != NULL) {
+      km_repl_command_t *next =
+          (km_repl_command_t *)((km_list_node_t *)cmd)->next;
+      if (strcmp(tokenv[0], cmd->name) == 0) {
+        cmd->cb(&state, tokenv[1]);
+        break;
       }
-    } else if (strcmp(tokenv[0], ".reset") == 0) {
-      cmd_reset(&state);
-    } else if (strcmp(tokenv[0], ".flash") == 0) {
-      if (tokenv[1] == NULL) {
-        tokenv[1] = "";
-      }
-      cmd_flash(&state, tokenv[1]);
-    } else if (strcmp(tokenv[0], ".load") == 0) {
-      cmd_load(&state);
-    } else if (strcmp(tokenv[0], ".mem") == 0) {
-      cmd_mem(&state);
-    } else if (strcmp(tokenv[0], ".gc") == 0) {
-      cmd_gc(&state);
-    } else if (strcmp(tokenv[0], ".hi") == 0) {
-      cmd_hi(&state);
-    } else if (strcmp(tokenv[0], ".help") == 0) {
-      cmd_help(&state);
-    } else { /* unknown command */
+      cmd = next;
+    }
+    if (cmd == NULL) {  // unknown command
       km_repl_set_output(KM_REPL_OUTPUT_ERROR);
       km_repl_printf("Unknown command: %s\r\n", tokenv[0]);
       km_repl_set_output(KM_REPL_OUTPUT_NORMAL);
@@ -226,7 +216,7 @@ static void handle_normal(char ch) {
       set_cursor_to_position();
       break;
     case 0x04: /* Ctrl + D */
-      cmd_reset(&state);
+      cmd_reset(&state, NULL);
       km_repl_print_prompt();
       break;
     case 0x05: /* Ctrl + E */
@@ -429,7 +419,7 @@ static void cmd_echo(km_repl_state_t *state, char *arg) {
 /**
  * .reset command
  */
-static void cmd_reset(km_repl_state_t *state) {
+static void cmd_reset(km_repl_state_t *state, char *arg) {
   km_runtime_cleanup();
   km_runtime_init(false, false);
   km_repl_printf("\r\nsoft reset\r\n");
@@ -533,7 +523,7 @@ static void cmd_flash(km_repl_state_t *state, char *arg) {
 /**
  * .load command
  */
-static void cmd_load(km_repl_state_t *state) {
+static void cmd_load(km_repl_state_t *state, char *arg) {
   km_runtime_cleanup();
   km_runtime_init(true, false);
 }
@@ -541,7 +531,7 @@ static void cmd_load(km_repl_state_t *state) {
 /**
  * .mem command
  */
-static void cmd_mem(km_repl_state_t *state) {
+static void cmd_mem(km_repl_state_t *state, char *arg) {
   jerry_heap_stats_t stats = {0};
   bool stats_ret = jerry_get_memory_stats(&stats);
   if (stats_ret) {
@@ -555,12 +545,14 @@ static void cmd_mem(km_repl_state_t *state) {
 /**
  * .gc command
  */
-static void cmd_gc(km_repl_state_t *state) { jerry_gc(JERRY_GC_PRESSURE_HIGH); }
+static void cmd_gc(km_repl_state_t *state, char *arg) {
+  jerry_gc(JERRY_GC_PRESSURE_HIGH);
+}
 
 /**
  * .hi command
  */
-static void cmd_hi(km_repl_state_t *state) {
+static void cmd_hi(km_repl_state_t *state, char *arg) {
   km_repl_printf("         ___\r\n");
   km_repl_printf("   _____/ . \\   Welcome to Kaluma v%s\r\n", KALUMA_VERSION);
   km_repl_printf("  /        __>  https://kaluma.io\r\n");
@@ -573,15 +565,17 @@ static void cmd_hi(km_repl_state_t *state) {
 /**
  * .help command
  */
-static void cmd_help(km_repl_state_t *state) {
-  km_repl_printf(".echo\tEcho on/off\r\n");
-  km_repl_printf(".reset\tSoft reset\r\n");
-  km_repl_printf(".flash\tCommands for the internal flash\r\n");
-  km_repl_printf(".load\tLoad code from the internal flash\r\n");
-  km_repl_printf(".mem\tHeap memory status\r\n");
-  km_repl_printf(".gc\tPerform garbage collection\r\n");
-  km_repl_printf(".hi\tPrint welcome message\r\n");
-  km_repl_printf(".help\tPrint this help message\r\n");
+static void cmd_help(km_repl_state_t *state, char *arg) {
+  // print commands
+  km_repl_command_t *cmd = (km_repl_command_t *)state->commands.head;
+  while (cmd != NULL) {
+    km_repl_command_t *next =
+        (km_repl_command_t *)((km_list_node_t *)cmd)->next;
+    km_repl_printf("%s\t%s\r\n", cmd->name, cmd->desc);
+    cmd = next;
+  }
+
+  // print shortcuts
   km_repl_printf("\r\n");
   km_repl_printf("CTRL+C\tAbort running code\r\n");
   km_repl_printf("CTRL+D\tSoft reset\r\n");
@@ -595,8 +589,11 @@ static void cmd_help(km_repl_state_t *state) {
  * Initialize the REPL
  */
 void km_repl_init(bool hi) {
+  // initialize tty
   km_io_tty_init(&tty);
   km_io_tty_read_start(&tty, tty_read_cb);
+
+  // initialize repl states
   state.mode = KM_REPL_MODE_NORMAL;
   state.echo = true;
   state.buffer_length = 0;
@@ -607,8 +604,21 @@ void km_repl_init(bool hi) {
   state.history_position = 0;
   state.handler = &default_handler;
   state.ymodem_state = 0;
+
+  // register commands
+  km_repl_clear_commands();
+  km_repl_register_command(".help", "Print this help message", cmd_help);
+  km_repl_register_command(".hi", "Print welcome message", cmd_hi);
+  km_repl_register_command(".echo", "Echo on/off", cmd_echo);
+  km_repl_register_command(".reset", "Soft reset", cmd_reset);
+  km_repl_register_command(".flash", "Commands for flash", cmd_flash);
+  km_repl_register_command(".load", "Load code from flash", cmd_load);
+  km_repl_register_command(".mem", "Heap memory status", cmd_mem);
+  km_repl_register_command(".gc", "Perform garbage collection", cmd_gc);
+
+  // print welcome
   if (hi) {
-    cmd_hi(NULL);
+    cmd_hi(&state, NULL);
   }
 }
 
@@ -918,4 +928,34 @@ void km_repl_print_prompt() {
         "\33[H\33[900C\33[6n\033[u\033[2C");  // query terminal screen width and
                                               // restore cursor position
   }
+}
+
+void km_repl_register_command(char *name, char *desc, km_repl_command_cb cb) {
+  km_repl_command_t *cmd = malloc(sizeof(km_repl_command_t));
+  strcpy(cmd->name, name);
+  strcpy(cmd->desc, desc);
+  cmd->cb = cb;
+  km_list_append(&state.commands, (km_list_node_t *)cmd);
+}
+
+void km_repl_unregister_command(char *name) {
+  km_repl_command_t *cmd = (km_repl_command_t *)state.commands.head;
+  while (strcmp(cmd->name, name) == 0) {
+    km_repl_command_t *next =
+        (km_repl_command_t *)((km_list_node_t *)cmd)->next;
+    km_list_remove(&state.commands, (km_list_node_t *)cmd);
+    free(cmd);
+    cmd = next;
+  }
+}
+
+void km_repl_clear_commands() {
+  km_repl_command_t *cmd = (km_repl_command_t *)state.commands.head;
+  while (cmd != NULL) {
+    km_repl_command_t *next =
+        (km_repl_command_t *)((km_list_node_t *)cmd)->next;
+    free(cmd);
+    cmd = next;
+  }
+  km_list_init(&state.commands);
 }

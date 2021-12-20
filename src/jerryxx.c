@@ -213,3 +213,25 @@ jerry_size_t jerryxx_string_to_ascii_char_buffer(const jerry_value_t value,
   }
   return ascii_p;
 }
+
+jerry_value_t jerryxx_call_require(const char *name) {
+  jerry_value_t global_js = jerry_get_global_object();
+  jerry_value_t require_js = jerryxx_get_property(global_js, "require");
+  jerry_value_t this_js = jerry_create_undefined();
+  jerry_value_t name_js = jerry_create_string((const jerry_char_t *)name);
+  jerry_value_t args_js[1] = {name_js};
+  jerry_value_t ret = jerry_call_function(require_js, this_js, args_js, 1);
+  jerry_release_value(name_js);
+  jerry_release_value(this_js);
+  jerry_release_value(require_js);
+  jerry_release_value(global_js);
+  return ret;
+}
+
+jerry_value_t jerryxx_call_method(jerry_value_t obj, char *name,
+                                  jerry_value_t *args, int args_count) {
+  jerry_value_t method = jerryxx_get_property(obj, name);
+  jerry_value_t ret = jerry_call_function(method, obj, args, args_count);
+  return ret;
+  jerry_release_value(method);
+}

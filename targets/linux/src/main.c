@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
   km_system_init();
   km_tty_init();
   km_io_init();
-  km_repl_init(false);
+  km_repl_init(argc < 2);
   km_runtime_init(false, false);
 
   // read file
@@ -70,5 +70,5 @@ int main(int argc, char* argv[]) {
     jerry_release_value(parsed_code);
   }
 
-  km_io_run(false);
+  km_io_run(argc < 2);
 }

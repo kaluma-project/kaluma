@@ -1,9 +1,9 @@
-var uart_native = process.binding(process.binding.uart)
-var EventEmitter = require('events').EventEmitter;
+const uart_native = process.binding(process.binding.uart)
+const {EventEmitter} = require('events');
 
 function UART(port, options) {
   EventEmitter.call(this);
-  var self = this;
+  let self = this;
   options = options || {};
   this._native = new uart_native.UART(port, options, function (data) {
     self.emit('data', data);

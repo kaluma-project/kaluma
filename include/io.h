@@ -36,6 +36,7 @@ typedef struct km_io_tty_handle_s km_io_tty_handle_t;
 typedef struct km_io_watch_handle_s km_io_watch_handle_t;
 typedef struct km_io_uart_handle_s km_io_uart_handle_t;
 typedef struct km_io_idle_handle_s km_io_idle_handle_t;
+typedef struct km_io_stream_handle_s km_io_stream_handle_t;
 
 /* handle flags */
 
@@ -53,7 +54,8 @@ typedef enum km_io_type {
   KM_IO_TTY,
   KM_IO_WATCH,
   KM_IO_UART,
-  KM_IO_IDLE
+  KM_IO_IDLE,
+  KM_IO_STREAM
 } km_io_type_t;
 
 typedef void (*km_io_close_cb)(km_io_handle_t *);
@@ -135,6 +137,19 @@ struct km_io_idle_handle_s {
   km_io_idle_cb idle_cb;
 };
 
+/* stream handle type */
+
+typedef int (*km_io_stream_available_cb)(km_io_stream_handle_t *);
+typedef void (*km_io_stream_read_cb)(km_io_stream_handle_t *, uint8_t *,
+                                     size_t);
+
+struct km_io_stream_handle_s {
+  km_io_handle_t base;
+  bool blocking;
+  km_io_stream_available_cb available_cb;
+  km_io_stream_read_cb read_cb;
+};
+
 /* loop type */
 
 struct km_io_loop_s {
@@ -145,6 +160,7 @@ struct km_io_loop_s {
   km_list_t watch_handles;
   km_list_t uart_handles;
   km_list_t idle_handles;
+  km_list_t stream_handles;
   km_list_t closing_handles;
 };
 
@@ -202,5 +218,19 @@ void km_io_idle_start(km_io_idle_handle_t *idle, km_io_idle_cb idle_cb);
 void km_io_idle_stop(km_io_idle_handle_t *idle);
 km_io_idle_handle_t *km_io_idle_get_by_id(uint32_t id);
 void km_io_idle_cleanup();
+
+/* stream functions */
+
+void km_io_stream_init(km_io_stream_handle_t *stream);
+void km_io_stream_set_blocking(km_io_stream_handle_t *stream, bool blocking);
+void km_io_stream_read_start(km_io_stream_handle_t *stream,
+                             km_io_stream_available_cb available_cb,
+                             km_io_stream_read_cb read_cb);
+void km_io_stream_read_stop(km_io_stream_handle_t *stream);
+void km_io_stream_cleanup();
+// int km_io_stream_is_readable(km_io_stream_handle_t *stream);
+// int km_io_stream_read(km_io_stream_handle_t *stream);
+// void km_io_stream_push(km_io_stream_handle_t *stream, uint8_t *buffer, size_t
+// size); // push to read buffer
 
 #endif /* ___KM_IO_H */

@@ -70,13 +70,13 @@ EventEmitter.prototype.removeListener = function (type, listener) {
     throw new TypeError('listener must be a function');
   }
 
-  var list = this._events[type];
-  if (Array.isArray(list)) {
-    for (var i = list.length - 1; i >= 0; --i) {
-      if (list[i] == listener ||
-        (list[i].listener && list[i].listener == listener)) {
-        list.splice(i, 1);
-        if (!list.length) {
+  var listeners = this._events[type];
+  if (Array.isArray(listeners)) {
+    for (var i = listeners.length - 1; i >= 0; --i) {
+      if (listeners[i] == listener ||
+        (listeners[i].listener && listeners[i].listener == listener)) {
+        listeners.splice(i, 1);
+        if (!listeners.length) {
           delete this._events[type];
         }
         break;

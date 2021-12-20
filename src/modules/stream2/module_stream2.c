@@ -19,33 +19,42 @@
  * SOFTWARE.
  */
 
-#ifndef __UART_MAGIC_STRINGS_H
-#define __UART_MAGIC_STRINGS_H
+#include <stdlib.h>
 
-#define MSTR_UART_UART "UART"
-#define MSTR_UART_PORT "port"
-#define MSTR_UART_BAUDRATE "baudrate"
-#define MSTR_UART_BITS "bits"
-#define MSTR_UART_PARITY "parity"
-#define MSTR_UART_STOP "stop"
-#define MSTR_UART_FLOW "flow"
-#define MSTR_UART_BUFFERSIZE "bufferSize"
-#define MSTR_UART_DATAEVENT "dataEvent"
-#define MSTR_UART_TX "tx"
-#define MSTR_UART_RX "rx"
-#define MSTR_UART_CTS "cts"
-#define MSTR_UART_RTS "rts"
-#define MSTR_UART_WRITE "write"
-#define MSTR_UART_CLOSE "close"
-#define MSTR_UART_PARITY_NONE "PARITY_NONE"
-#define MSTR_UART_PARITY_ODD "PARITY_ODD"
-#define MSTR_UART_PARITY_EVEN "PARITY_EVEN"
-#define MSTR_UART_FLOW_NONE "FLOW_NONE"
-#define MSTR_UART_FLOW_RTS "FLOW_RTS"
-#define MSTR_UART_FLOW_CTS "FLOW_CTS"
-#define MSTR_UART_FLOW_RTS_CTS "FLOW_RTS_CTS"
+#include "err.h"
+#include "jerryscript.h"
+#include "jerryxx.h"
+#include "stream2_magic_strings.h"
 
-#define MSTR_UART_UART_NATIVE "uart_native"
-#define MSTR_UART__NATIVE "_native"
+/**
+ * Stream() constructor
+ */
+JERRYXX_FUN(stream_ctor_fn) {
+  JERRYXX_CHECK_ARG_NUMBER(0, "bus");
+  JERRYXX_CHECK_ARG_OBJECT_OPT(1, "options");
+}
 
-#endif /* __UART_MAGIC_STRINGS_H */
+/**
+ * Stream.prototype.method()
+ */
+JERRYXX_FUN(stream_method_fn) {}
+
+/**
+ * Initialize 'stream2' module
+ */
+jerry_value_t module_stream2_init() {
+  /* Stream class */
+  jerry_value_t stream_ctor = jerry_create_external_function(stream_ctor_fn);
+  jerry_value_t stream_prototype = jerry_create_object();
+  jerryxx_set_property(stream_ctor, "prototype", stream_prototype);
+  jerryxx_set_property_function(stream_prototype, "method", stream_method_fn);
+  // ...
+  jerry_release_value(stream_prototype);
+  // TODO: extends EventEmitter -- jerryxx_extends(subclass, superclass))
+
+  /* stream module exports */
+  jerry_value_t exports = jerry_create_object();
+  jerryxx_set_property(exports, MSTR_STREAM2_STREAM, stream_ctor);
+  jerry_release_value(stream_ctor);
+  return exports;
+}

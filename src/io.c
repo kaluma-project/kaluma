@@ -90,6 +90,8 @@ void km_io_init() {
   km_list_init(&loop.timer_handles);
   km_list_init(&loop.watch_handles);
   km_list_init(&loop.uart_handles);
+  km_list_init(&loop.idle_handles);
+  km_list_init(&loop.stream_handles);
   km_list_init(&loop.closing_handles);
 }
 
@@ -99,6 +101,7 @@ void km_io_cleanup() {
   km_io_uart_cleanup();
   // km_io_idle_cleanup();
   // Do not cleanup tty I/O to keep terminal communication
+  km_io_stream_cleanup();
 }
 
 void km_io_run(bool infinite) {
@@ -414,5 +417,61 @@ static void km_io_idle_run() {
       }
     }
     handle = (km_io_idle_handle_t *)((km_list_node_t *)handle)->next;
+  }
+}
+
+/* stream function */
+
+void km_io_stream_init(km_io_stream_handle_t *stream) {
+  km_io_handle_init((km_io_handle_t *)stream, KM_IO_STREAM);
+}
+
+void km_io_stream_set_blocking(km_io_stream_handle_t *stream, bool blocking) {
+  stream->blocking = blocking;
+}
+
+void km_io_stream_read_start(km_io_stream_handle_t *stream,
+                             km_io_stream_available_cb available_cb,
+                             km_io_stream_read_cb read_cb) {
+  KM_IO_SET_FLAG_ON(stream->base.flags, KM_IO_FLAG_ACTIVE);
+  stream->blocking = false;  // non-blocking
+  stream->available_cb = available_cb;
+  stream->read_cb = read_cb;
+  km_list_append(&loop.stream_handles, (km_list_node_t *)stream);
+}
+
+void km_io_stream_read_stop(km_io_stream_handle_t *stream) {
+  KM_IO_SET_FLAG_OFF(stream->base.flags, KM_IO_FLAG_ACTIVE);
+  km_list_remove(&loop.stream_handles, (km_list_node_t *)stream);
+}
+
+void km_io_stream_cleanup() {
+  km_io_stream_handle_t *handle =
+      (km_io_stream_handle_t *)loop.stream_handles.head;
+  while (handle != NULL) {
+    km_io_stream_handle_t *next =
+        (km_io_stream_handle_t *)((km_list_node_t *)handle)->next;
+    free(handle);
+    handle = next;
+  }
+  km_list_init(&loop.stream_handles);
+}
+
+static void km_io_stream_run() {
+  km_io_stream_handle_t *handle =
+      (km_io_stream_handle_t *)loop.stream_handles.head;
+  while (handle != NULL) {
+    if (KM_IO_HAS_FLAG(handle->base.flags, KM_IO_FLAG_ACTIVE)) {
+      if (!handle->blocking && handle->available_cb != NULL &&
+          handle->read_cb != NULL) {
+        int len = handle->available_cb(handle);
+        if (len > 0) {
+          uint8_t buf[len];
+          // km_stream_read(handle->port, buf, len);
+          handle->read_cb(handle, buf, len);
+        }
+      }
+    }
+    handle = (km_io_stream_handle_t *)((km_list_node_t *)handle)->next;
   }
 }

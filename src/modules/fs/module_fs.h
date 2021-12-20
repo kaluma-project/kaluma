@@ -19,33 +19,6 @@
  * SOFTWARE.
  */
 
-#ifndef __UART_MAGIC_STRINGS_H
-#define __UART_MAGIC_STRINGS_H
+#include "jerryscript.h"
 
-#define MSTR_UART_UART "UART"
-#define MSTR_UART_PORT "port"
-#define MSTR_UART_BAUDRATE "baudrate"
-#define MSTR_UART_BITS "bits"
-#define MSTR_UART_PARITY "parity"
-#define MSTR_UART_STOP "stop"
-#define MSTR_UART_FLOW "flow"
-#define MSTR_UART_BUFFERSIZE "bufferSize"
-#define MSTR_UART_DATAEVENT "dataEvent"
-#define MSTR_UART_TX "tx"
-#define MSTR_UART_RX "rx"
-#define MSTR_UART_CTS "cts"
-#define MSTR_UART_RTS "rts"
-#define MSTR_UART_WRITE "write"
-#define MSTR_UART_CLOSE "close"
-#define MSTR_UART_PARITY_NONE "PARITY_NONE"
-#define MSTR_UART_PARITY_ODD "PARITY_ODD"
-#define MSTR_UART_PARITY_EVEN "PARITY_EVEN"
-#define MSTR_UART_FLOW_NONE "FLOW_NONE"
-#define MSTR_UART_FLOW_RTS "FLOW_RTS"
-#define MSTR_UART_FLOW_CTS "FLOW_CTS"
-#define MSTR_UART_FLOW_RTS_CTS "FLOW_RTS_CTS"
-
-#define MSTR_UART_UART_NATIVE "uart_native"
-#define MSTR_UART__NATIVE "_native"
-
-#endif /* __UART_MAGIC_STRINGS_H */
+jerry_value_t module_fs_init();
