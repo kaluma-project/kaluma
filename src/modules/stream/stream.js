@@ -1,9 +1,10 @@
-var EventEmitter = require('events').EventEmitter;
+const {StdInNative, StdOutNative} = process.binding(process.binding.stream);
+const {EventEmitter} = require('events');
 
 /**
  * Astract stream class
  */
-class Stream extends EventEmitter {
+class __Stream extends EventEmitter {
   constructor() {
     super();
     this.destroyed = false;
@@ -48,7 +49,7 @@ class Stream extends EventEmitter {
 /**
  * Readable class
  */
-class Readable extends Stream {
+class Readable extends __Stream {
   constructor() {
     super();
     this.readableEnded = false;
@@ -80,7 +81,7 @@ class Readable extends Stream {
 /**
  * Writable class
  */
-class Writable extends Stream {
+class Writable extends __Stream {
   constructor() {
     super();
     this._wbuf = '';
@@ -247,7 +248,62 @@ class Duplex extends Writable /*, Readable */ {
     return this;
   }
 }
-
 exports.Readable = Readable;
 exports.Writable = Writable;
 exports.Duplex = Duplex;
+
+// ---------------- NEW IMPLEMENTATIONS --------------------- //
+
+/**
+ * Stream class
+ */
+ class Stream extends EventEmitter {
+  constructor() {
+    super();
+    this.destroyed = false;
+    this.readable = false;
+    this.readableFlowing = false;
+    this.readableEnded = false;
+    this.writable = false;
+    this.writableEnded = false;
+    this.writableFinished = false;
+  }
+  read(length) {
+    return null;
+  }
+  write(chunk) {
+    return true;
+  }
+  end() {
+    return this;
+  }
+  destroy() {
+    return this;
+  }
+}
+
+class StdIn extends Stream {
+  constructor() {
+    super();
+    this.readable = true;
+    this._native = new StdInNative();
+  }
+  read () {
+    return this._native.read();
+  }
+}
+
+class StdOut extends Stream {
+  constructor() {
+    super();
+    this.writable = true;
+    this._native = new StdOutNative();
+  }
+  write (data) {
+    return this._native.write(data);
+  }
+}
+
+exports.Stream = Stream;
+exports.StdIn = StdIn;
+exports.StdOut = StdOut;

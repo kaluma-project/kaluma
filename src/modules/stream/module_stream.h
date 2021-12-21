@@ -21,4 +21,4 @@
 
 #include "jerryscript.h"
 
-jerry_value_t module_stream2_init();
+jerry_value_t module_stream_init();
