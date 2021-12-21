@@ -80,6 +80,8 @@
 #define MSTR_PRINT "print"
 #define MSTR_SEED "seed"
 #define MSTR_PROCESS "process"
+#define MSTR_STDIN "stdin"
+#define MSTR_STDOUT "stdout"
 #define MSTR_ATOB "atob"
 #define MSTR_BTOA "btoa"
 #define MSTR_ENCODE_URI_COMPONENT "encodeURIComponent"
@@ -163,5 +165,11 @@
 #define MSTR_SECURITY "security"
 #define MSTR_RSSI "rssi"
 #define MSTR_CHANNEL "channel"
+
+#define MSTR_HEAP___STDIN "__stdin"
+#define MSTR_HEAP___STDOUT "__stdout"
+#define MSTR_HEAP_TOTAL "heapTotal"
+#define MSTR_HEAP_PEAK "heapPeak"
+#define MSTR_HEAP_USED "heapUsed"
 
 #endif /* __MAGIC_STRINGS_H */

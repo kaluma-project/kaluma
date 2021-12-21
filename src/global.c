@@ -854,12 +854,43 @@ JERRYXX_FUN(process_memory_usage_fn) {
   return jerry_create_undefined();
 }
 
-JERRYXX_FUN(process_stdin_fn) {
-  // jerry_value_t stream = jerryxx_call_require('stream');
-  return jerry_create_undefined();
+// process.stdin getter
+JERRYXX_FUN(process_stdin_getter_fn) {
+  jerry_value_t stream = jerryxx_call_require("stream");
+  // use stream.__stdin for singleton
+  jerry_value_t __stdin = jerryxx_get_property(stream, "__stdin");
+  if (jerry_value_is_undefined(__stdin)) {
+    jerry_release_value(__stdin);
+    jerry_value_t stdin_ctor = jerryxx_get_property(stream, "StdIn");
+    jerry_value_t stdin_obj = jerry_construct_object(stdin_ctor, NULL, 0);
+    jerryxx_set_property(stream, "__stdin", stdin_obj);
+    jerry_release_value(stdin_ctor);
+    jerry_release_value(stream);
+    return stdin_obj;
+  } else {
+    jerry_release_value(stream);
+    return __stdin;
+  }
 }
 
-JERRYXX_FUN(process_stdout_fn) { return jerry_create_undefined(); }
+// process.stdout getter
+JERRYXX_FUN(process_stdout_getter_fn) {
+  jerry_value_t stream = jerryxx_call_require("stream");
+  // use stream.__stdout for singleton
+  jerry_value_t __stdout = jerryxx_get_property(stream, "__stdout");
+  if (jerry_value_is_undefined(__stdout)) {
+    jerry_release_value(__stdout);
+    jerry_value_t stdout_ctor = jerryxx_get_property(stream, "StdOut");
+    jerry_value_t stdout_obj = jerry_construct_object(stdout_ctor, NULL, 0);
+    jerryxx_set_property(stream, "__stdout", stdout_obj);
+    jerry_release_value(stdout_ctor);
+    jerry_release_value(stream);
+    return stdout_obj;
+  } else {
+    jerry_release_value(stream);
+    return __stdout;
+  }
+}
 
 static void register_global_process_object() {
   jerry_value_t process = jerry_create_object();
@@ -904,6 +935,30 @@ static void register_global_process_object() {
   /* Add `process.getBuiltinModule` function */
   jerryxx_set_property_function(process, MSTR_GET_BUILTIN_MODULE,
                                 process_get_builtin_module_fn);
+
+  // process.stdin readonly property
+  jerry_property_descriptor_t stdin_prop;
+  jerry_init_property_descriptor_fields(&stdin_prop);
+  stdin_prop.is_get_defined = true;
+  stdin_prop.is_writable = false;
+  stdin_prop.getter = jerry_create_external_function(process_stdin_getter_fn);
+  jerry_value_t stdin_prop_name =
+      jerry_create_string((const jerry_char_t *)MSTR_STDIN);
+  jerry_define_own_property(process, stdin_prop_name, &stdin_prop);
+  jerry_release_value(stdin_prop_name);
+  jerry_free_property_descriptor_fields(&stdin_prop);
+
+  // process.stdout readonly property
+  jerry_property_descriptor_t stdout_prop;
+  jerry_init_property_descriptor_fields(&stdout_prop);
+  stdout_prop.is_get_defined = true;
+  stdout_prop.is_writable = false;
+  stdout_prop.getter = jerry_create_external_function(process_stdout_getter_fn);
+  jerry_value_t stdout_prop_name =
+      jerry_create_string((const jerry_char_t *)MSTR_STDOUT);
+  jerry_define_own_property(process, stdout_prop_name, &stdout_prop);
+  jerry_release_value(stdout_prop_name);
+  jerry_free_property_descriptor_fields(&stdout_prop);
 
   /* Register 'process' object to global */
   jerry_value_t global = jerry_get_global_object();
