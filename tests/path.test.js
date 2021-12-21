@@ -10,11 +10,6 @@ test("[path] sep === '/'", (done) => {
   done();
 });
 
-test("[path] delimiter === ':'", (done) => {
-  expect(path.sep).toBe("/");
-  done();
-});
-
 test("[path] format() - 'root' ignored if 'dir' provided", (done) => {
   const pathObj = {
     root: "/ignored",
@@ -77,30 +72,6 @@ test("[path] parse()", (done) => {
   done();
 });
 
-test("[path] dirname()", (done) => {
-  expect(path.dirname("/home/user/dir/file.ext")).toBe("/home/user/dir");
-  expect(path.dirname("home/user/dir/file")).toBe("home/user/dir");
-  done();
-});
-
-test("[path] extname()", (done) => {
-  expect(path.extname("/home/user/dir/file.ext")).toBe(".ext");
-  expect(path.extname("/home/user/dir/file.bmp.json")).toBe(".json");
-  done();
-});
-
-test("[path] extname()", (done) => {
-  expect(path.extname("/home/user/dir/file.ext")).toBe(".ext");
-  expect(path.extname("/home/user/dir/file.bmp.json")).toBe(".json");
-  done();
-});
-
-test("[path] basename()", (done) => {
-  expect(path.basename("/home/user/dir/file.ext")).toBe("file.ext");
-  expect(path.basename("/home/user/dir/file.ext", ".ext")).toBe("file");
-  done();
-});
-
 test("[path] normalize()", (done) => {
   expect(path.normalize("/home/user/../file.ext")).toBe("/home/file.ext");
   expect(path.normalize("/home/user/./file.ext")).toBe("/home/user/file.ext");
@@ -128,9 +99,9 @@ test("[path] resolve()", (done) => {
   expect(path.resolve("/foo/bar", "./baz")).toBe("/foo/bar/baz");
   expect(path.resolve("/foo/bar", "/tmp/file/")).toBe("/tmp/file");
 
-  fs.mkdirSync("/home");
-  fs.mkdirSync("/home/myself");
-  fs.mkdirSync("/home/myself/node");
+  fs.mkdir("/home");
+  fs.mkdir("/home/myself");
+  fs.mkdir("/home/myself/node");
   fs.chdir("/home/myself/node");
   expect(path.resolve("wwwroot", "static_files/png/", "../gif/image.gif")).toBe(
     "/home/myself/node/wwwroot/static_files/gif/image.gif"

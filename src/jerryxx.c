@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "jerryscript.h"
+#include "magic_strings.h"
 #include "repl.h"
 #include "tty.h"
 
@@ -216,7 +217,7 @@ jerry_size_t jerryxx_string_to_ascii_char_buffer(const jerry_value_t value,
 
 jerry_value_t jerryxx_call_require(const char *name) {
   jerry_value_t global_js = jerry_get_global_object();
-  jerry_value_t require_js = jerryxx_get_property(global_js, "require");
+  jerry_value_t require_js = jerryxx_get_property(global_js, MSTR_REQUIRE);
   jerry_value_t this_js = jerry_create_undefined();
   jerry_value_t name_js = jerry_create_string((const jerry_char_t *)name);
   jerry_value_t args_js[1] = {name_js};
@@ -234,4 +235,26 @@ jerry_value_t jerryxx_call_method(jerry_value_t obj, char *name,
   jerry_value_t ret = jerry_call_function(method, obj, args, args_count);
   return ret;
   jerry_release_value(method);
+}
+
+void jerryxx_inherit(jerry_value_t super_ctor, jerry_value_t sub_ctor) {
+  // Subclass.prototype = Object.create(Superclass.prototype);
+  jerry_value_t global = jerry_get_global_object();
+  jerry_value_t global_object = jerryxx_get_property(global, MSTR_OBJECT);
+  jerry_value_t global_object_create =
+      jerryxx_get_property(global_object, MSTR_CREATE);
+  jerry_value_t super_ctor_prototype =
+      jerryxx_get_property(super_ctor, MSTR_PROTOTYPE);
+  jerry_value_t _args[1] = {super_ctor_prototype};
+  jerry_value_t sub_ctor_prototype =
+      jerry_call_function(global_object_create, global_object, _args, 1);
+  jerryxx_set_property(sub_ctor, MSTR_PROTOTYPE, sub_ctor_prototype);
+  jerry_release_value(sub_ctor_prototype);
+  jerry_release_value(super_ctor_prototype);
+  jerry_release_value(global_object_create);
+  jerry_release_value(global_object);
+  jerry_release_value(global);
+
+  // Subclass.prototype.constructor = Subclass
+  jerryxx_set_property(sub_ctor_prototype, MSTR_CONSTRUCTOR, sub_ctor);
 }

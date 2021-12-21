@@ -854,6 +854,44 @@ JERRYXX_FUN(process_memory_usage_fn) {
   return jerry_create_undefined();
 }
 
+// process.stdin getter
+JERRYXX_FUN(process_stdin_getter_fn) {
+  jerry_value_t stream = jerryxx_call_require("stream");
+  // use stream.__stdin for singleton
+  jerry_value_t __stdin = jerryxx_get_property(stream, "__stdin");
+  if (jerry_value_is_undefined(__stdin)) {
+    jerry_release_value(__stdin);
+    jerry_value_t stdin_ctor = jerryxx_get_property(stream, "StdIn");
+    jerry_value_t stdin_obj = jerry_construct_object(stdin_ctor, NULL, 0);
+    jerryxx_set_property(stream, "__stdin", stdin_obj);
+    jerry_release_value(stdin_ctor);
+    jerry_release_value(stream);
+    return stdin_obj;
+  } else {
+    jerry_release_value(stream);
+    return __stdin;
+  }
+}
+
+// process.stdout getter
+JERRYXX_FUN(process_stdout_getter_fn) {
+  jerry_value_t stream = jerryxx_call_require("stream");
+  // use stream.__stdout for singleton
+  jerry_value_t __stdout = jerryxx_get_property(stream, "__stdout");
+  if (jerry_value_is_undefined(__stdout)) {
+    jerry_release_value(__stdout);
+    jerry_value_t stdout_ctor = jerryxx_get_property(stream, "StdOut");
+    jerry_value_t stdout_obj = jerry_construct_object(stdout_ctor, NULL, 0);
+    jerryxx_set_property(stream, "__stdout", stdout_obj);
+    jerry_release_value(stdout_ctor);
+    jerry_release_value(stream);
+    return stdout_obj;
+  } else {
+    jerry_release_value(stream);
+    return __stdout;
+  }
+}
+
 static void register_global_process_object() {
   jerry_value_t process = jerry_create_object();
   jerryxx_set_property_string(process, MSTR_ARCH, KALUMA_SYSTEM_ARCH);
@@ -897,6 +935,30 @@ static void register_global_process_object() {
   /* Add `process.getBuiltinModule` function */
   jerryxx_set_property_function(process, MSTR_GET_BUILTIN_MODULE,
                                 process_get_builtin_module_fn);
+
+  // process.stdin readonly property
+  jerry_property_descriptor_t stdin_prop;
+  jerry_init_property_descriptor_fields(&stdin_prop);
+  stdin_prop.is_get_defined = true;
+  stdin_prop.is_writable = false;
+  stdin_prop.getter = jerry_create_external_function(process_stdin_getter_fn);
+  jerry_value_t stdin_prop_name =
+      jerry_create_string((const jerry_char_t *)MSTR_STDIN);
+  jerry_define_own_property(process, stdin_prop_name, &stdin_prop);
+  jerry_release_value(stdin_prop_name);
+  jerry_free_property_descriptor_fields(&stdin_prop);
+
+  // process.stdout readonly property
+  jerry_property_descriptor_t stdout_prop;
+  jerry_init_property_descriptor_fields(&stdout_prop);
+  stdout_prop.is_get_defined = true;
+  stdout_prop.is_writable = false;
+  stdout_prop.getter = jerry_create_external_function(process_stdout_getter_fn);
+  jerry_value_t stdout_prop_name =
+      jerry_create_string((const jerry_char_t *)MSTR_STDOUT);
+  jerry_define_own_property(process, stdout_prop_name, &stdout_prop);
+  jerry_release_value(stdout_prop_name);
+  jerry_free_property_descriptor_fields(&stdout_prop);
 
   /* Register 'process' object to global */
   jerry_value_t global = jerry_get_global_object();
@@ -1222,28 +1284,12 @@ static void register_global_system_error() {
   /* SystemError class */
   jerry_value_t system_error_ctor =
       jerry_create_external_function(system_error_ctor_fn);
-  // SystemError.prototype = Object.create(Error.prototype);
-  jerry_value_t global_object = jerryxx_get_property(global, MSTR_OBJECT);
-  jerry_value_t global_object_create =
-      jerryxx_get_property(global_object, "create");
   jerry_value_t global_error = jerryxx_get_property(global, MSTR_ERROR_CLASS);
-  jerry_value_t global_error_prototype =
-      jerryxx_get_property(global_error, MSTR_PROTOTYPE);
-  jerry_value_t _args[1] = {global_error_prototype};
-  jerry_value_t system_error_prototype =
-      jerry_call_function(global_object_create, global_object, _args, 1);
-  jerryxx_set_property(system_error_ctor, MSTR_PROTOTYPE,
-                       system_error_prototype);
-  jerry_release_value(system_error_prototype);
-  // SystemError.prototype.constructor = SystemError
-  jerryxx_set_property(system_error_prototype, MSTR_CONSTRUCTOR,
-                       system_error_ctor);
+  // SystemError extends Error
+  jerryxx_inherit(global_error, system_error_ctor);
   // global.SystemError = SystemError
   jerryxx_set_property(global, MSTR_SYSTEM_ERROR, system_error_ctor);
-  jerry_release_value(global_error_prototype);
   jerry_release_value(global_error);
-  jerry_release_value(global_object_create);
-  jerry_release_value(global_object);
   jerry_release_value(global);
 }
 
@@ -1276,35 +1322,10 @@ JERRYXX_FUN(seed_fn) {
   return jerry_create_undefined();
 }
 
-// for TEST
-JERRYXX_FUN(__available_fn) {
-  int len = km_tty_available();
-  return jerry_create_number(len);
-}
-
-// for TEST
-JERRYXX_FUN(__read_fn) {
-  JERRYXX_CHECK_ARG_NUMBER(0, "len")
-  int len = (int)JERRYXX_GET_ARG_NUMBER(0);
-  jerry_value_t array = jerry_create_typedarray(JERRY_TYPEDARRAY_UINT8, len);
-  jerry_length_t byteOffset = 0;
-  jerry_length_t byteLength = 0;
-  jerry_value_t buffer =
-      jerry_get_typedarray_buffer(array, &byteOffset, &byteLength);
-  uint8_t *buf = jerry_get_arraybuffer_pointer(buffer);
-  km_tty_read(buf, len);
-  jerry_release_value(buffer);
-  return array;
-}
-
 static void register_global_etc() {
   jerry_value_t global = jerry_get_global_object();
   jerryxx_set_property_function(global, MSTR_PRINT, print_fn);
   jerryxx_set_property_function(global, MSTR_SEED, seed_fn);
-  // for TEST
-  jerryxx_set_property_function(global, "__available", __available_fn);
-  jerryxx_set_property_function(global, "__read", __read_fn);
-  // for TEST
   jerry_release_value(global);
 }
 

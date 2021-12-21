@@ -23,30 +23,24 @@
 #define __STREAM_MAGIC_STRINGS_H
 
 #define MSTR_STREAM_STREAM_ "stream"
+
 #define MSTR_STREAM_STREAM "Stream"
-#define MSTR_STREAM_DESTROYED "destroyed"
-#define MSTR_STREAM__DESTROY "_destroy"
-#define MSTR_STREAM__AFTER_DESTROY "_afterDestroy"
-#define MSTR_STREAM_DESTROY "destroy"
-#define MSTR_STREAM_READABLE "Readable"
+#define MSTR_STREAM_READABLE "readable"
 #define MSTR_STREAM_READABLE_ENDED "readableEnded"
-#define MSTR_STREAM__AFTER_END "_afterEnd"
-#define MSTR_STREAM_PUSH "push"
-#define MSTR_STREAM_WRITABLE "Writable"
-#define MSTR_STREAM__WBUF "_wbuf"
+#define MSTR_STREAM_READABLE_FLOWING "readableFlowing"
+#define MSTR_STREAM_READ "read"
+#define MSTR_STREAM_WRITABLE "writable"
 #define MSTR_STREAM_WRITABLE_ENDED "writableEnded"
 #define MSTR_STREAM_WRITABLE_FINISHED "writableFinished"
-#define MSTR_STREAM__WRITE "_write"
-#define MSTR_STREAM__FINAL "_final"
-#define MSTR_STREAM__AFTER_FINISH "_afterFinish"
 #define MSTR_STREAM_WRITE "write"
 #define MSTR_STREAM_END "end"
-#define MSTR_STREAM_FLUSH "flush"
-#define MSTR_STREAM_FINISH "finish"
-#define MSTR_STREAM_DUPLEX "Duplex"
-#define MSTR_STREAM_ERROR "error"
-#define MSTR_STREAM_DATA "data"
-#define MSTR_STREAM_CLOSE "close"
-#define MSTR_STREAM_DRAIN "drain"
+#define MSTR_STREAM_DESTROY "destroy"
+
+#define MSTR_STREAM_STDIN_NATIVE "StdInNative"
+#define MSTR_STREAM_STDOUT_NATIVE "StdOutNative"
+
+#define MSTR_STREAM_LENGTH "length"
+#define MSTR_STREAM_CHUNK "chunk"
+#define MSTR_STREAM__NATIVE "_native"
 
 #endif /* __STREAM_MAGIC_STRINGS_H */

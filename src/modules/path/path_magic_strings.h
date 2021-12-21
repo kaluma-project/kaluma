@@ -29,7 +29,7 @@
 #define MSTR_PATH_OBJ_EXT "ext"
 
 #define MSTR_PATH_SEP "sep"
-#define MSTR_PATH_DELIMITER "delimiter"
+
 #define MSTR_PATH_IS_ABSOLUTE "isAbsolute"
 #define MSTR_PATH_FORMAT "format"
 #define MSTR_PATH_PARSE "parse"
@@ -40,5 +40,18 @@
 #define MSTR_PATH_RELATIVE "relative"
 #define MSTR_PATH_RESOLVE "resolve"
 #define MSTR_PATH_NORMALIZE "normalize"
+
+#define MSTR_PATH_DOT "."
+#define MSTR_PATH_DOT_DOT ".."
+#define MSTR_PATH_SLASH "/"
+#define MSTR_PATH_COLON ":"
+#define MSTR_PATH_PATH_OBJ "pathObj"
+#define MSTR_PATH_BASE_TERMS "baseTerms"
+#define MSTR_PATH_PATHS "paths"
+#define MSTR_PATH_TERMS "terms"
+#define MSTR_PATH_TERM "term"
+#define MSTR_PATH__PATH "_path"
+#define MSTR_PATH__CWD "_cwd"
+#define MSTR_PATH__DIR "_dir"
 
 #endif /* __PATH_MAGIC_STRINGS_H */
