@@ -11,3 +11,4 @@ include_directories(
   ${SRC_DIR}/modules/vfs_lfs)
 
 add_compile_definitions(LFS_NO_ERROR)
+add_compile_definitions(LFS_NO_ASSERT)
