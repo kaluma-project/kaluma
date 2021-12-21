@@ -34,14 +34,20 @@ test("[process] process.binding", (done) => {
 });
 
 test("[process] process.stdin", (done) => {
-  const stdin = process.stdin;
-  expect(stdin).toBeTruthy();
+  const stdin1 = process.stdin;
+  const stdin2 = process.stdin;
+  expect(stdin1).toBeTruthy();
+  expect(stdin2).toBeTruthy();
+  expect(stdin1).toBe(stdin2);
   done();
 });
 
 test("[process] process.stdout", (done) => {
-  const stdout = process.stdout;
-  expect(stdout).toBeTruthy();
+  const stdout1 = process.stdout;
+  const stdout2 = process.stdout;
+  expect(stdout1).toBeTruthy();
+  expect(stdout2).toBeTruthy();
+  expect(stdout1).toBe(stdout2);
   done();
 });
 
