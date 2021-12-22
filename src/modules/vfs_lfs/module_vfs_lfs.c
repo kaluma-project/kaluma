@@ -283,26 +283,35 @@ JERRYXX_FUN(vfs_lfs_write_fn) {
   // check and get args
   JERRYXX_CHECK_ARG_NUMBER(0, "id")
   JERRYXX_CHECK_ARG_TYPEDARRAY(1, "buffer")
-  JERRYXX_CHECK_ARG_NUMBER(2, "offset")
-  JERRYXX_CHECK_ARG_NUMBER(3, "length")
+  JERRYXX_CHECK_ARG_NUMBER_OPT(2, "offset")
+  JERRYXX_CHECK_ARG_NUMBER_OPT(3, "length")
   JERRYXX_CHECK_ARG_NUMBER_OPT(4, "position")
   uint32_t id = (uint32_t)JERRYXX_GET_ARG_NUMBER(0);
   jerry_value_t buffer = JERRYXX_GET_ARG(1);
-  uint8_t *buffer_p = jerryxx_get_typedarray_buffer(buffer);
-  uint32_t offset = (uint32_t)JERRYXX_GET_ARG_NUMBER(2);
-  uint32_t length = (uint32_t)JERRYXX_GET_ARG_NUMBER(3);
-  uint32_t position = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(4, 0);
+  jerry_length_t buf_length = 0;
+  jerry_length_t buf_offset = 0;
+  jerry_value_t arrbuf =
+      jerry_get_typedarray_buffer(buffer, &buf_offset, &buf_length);
+  uint8_t *buffer_p = jerry_get_arraybuffer_pointer(arrbuf);
+  jerry_release_value(arrbuf);
+  int offset = (int)JERRYXX_GET_ARG_NUMBER_OPT(2, 0);
+  int length = (int)JERRYXX_GET_ARG_NUMBER_OPT(3, buf_length);
+  int position = (int)JERRYXX_GET_ARG_NUMBER_OPT(4, -1);
 
   // get native file handle
   JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_lfs_handle_t, vfs_handle_info);
   VFS_LFS_GET_FILE_HANDLE(vfs_handle, file, id)
 
-  // file write
-  int pos =
-      lfs_file_seek(&vfs_handle->lfs, &file->lfs_file, position, LFS_SEEK_SET);
-  if (pos < 0) {
-    return jerry_create_error_from_value(create_system_error(pos), true);
+  // set position
+  if (position > -1) {
+    int pos = lfs_file_seek(&vfs_handle->lfs, &file->lfs_file, position,
+                            LFS_SEEK_SET);
+    if (pos < 0) {
+      return jerry_create_error_from_value(create_system_error(pos), true);
+    }
   }
+
+  // file write
   int ret = lfs_file_write(&vfs_handle->lfs, &file->lfs_file,
                            (void *)(buffer_p + offset), length);
   if (ret < 0) {
@@ -327,26 +336,35 @@ JERRYXX_FUN(vfs_lfs_read_fn) {
   // check and get args
   JERRYXX_CHECK_ARG_NUMBER(0, "id")
   JERRYXX_CHECK_ARG_TYPEDARRAY(1, "buffer")
-  JERRYXX_CHECK_ARG_NUMBER(2, "offset")
-  JERRYXX_CHECK_ARG_NUMBER(3, "length")
-  JERRYXX_CHECK_ARG_NUMBER(4, "position")
+  JERRYXX_CHECK_ARG_NUMBER_OPT(2, "offset")
+  JERRYXX_CHECK_ARG_NUMBER_OPT(3, "length")
+  JERRYXX_CHECK_ARG_NUMBER_OPT(4, "position")
   uint32_t id = (uint32_t)JERRYXX_GET_ARG_NUMBER(0);
   jerry_value_t buffer = JERRYXX_GET_ARG(1);
-  uint8_t *buffer_p = jerryxx_get_typedarray_buffer(buffer);
-  uint32_t offset = (uint32_t)JERRYXX_GET_ARG_NUMBER(2);
-  uint32_t length = (uint32_t)JERRYXX_GET_ARG_NUMBER(3);
-  uint32_t position = (uint32_t)JERRYXX_GET_ARG_NUMBER(4);
+  jerry_length_t buf_length = 0;
+  jerry_length_t buf_offset = 0;
+  jerry_value_t arrbuf =
+      jerry_get_typedarray_buffer(buffer, &buf_offset, &buf_length);
+  uint8_t *buffer_p = jerry_get_arraybuffer_pointer(arrbuf);
+  jerry_release_value(arrbuf);
+  int offset = (int)JERRYXX_GET_ARG_NUMBER_OPT(2, 0);
+  int length = (int)JERRYXX_GET_ARG_NUMBER_OPT(3, buf_length);
+  int position = (int)JERRYXX_GET_ARG_NUMBER_OPT(4, -1);
 
   // get native file handle
   JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_lfs_handle_t, vfs_handle_info);
   VFS_LFS_GET_FILE_HANDLE(vfs_handle, file, id)
 
-  // file read
-  int pos =
-      lfs_file_seek(&vfs_handle->lfs, &file->lfs_file, position, LFS_SEEK_SET);
-  if (pos < 0) {
-    return jerry_create_error_from_value(create_system_error(pos), true);
+  // set position
+  if (position > -1) {
+    int pos = lfs_file_seek(&vfs_handle->lfs, &file->lfs_file, position,
+                            LFS_SEEK_SET);
+    if (pos < 0) {
+      return jerry_create_error_from_value(create_system_error(pos), true);
+    }
   }
+
+  // file read
   int ret = lfs_file_read(&vfs_handle->lfs, &file->lfs_file,
                           (uint8_t *)(buffer_p + offset), length);
   if (ret < 0) {

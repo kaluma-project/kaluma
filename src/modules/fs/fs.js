@@ -266,10 +266,10 @@ function open(path, flags = "r", mode = 0o666) {
   throw new SystemError(-2); // ENOENT
 }
 
-function read(fd, buffer, offset, length, position) {
+function read(fd, ...args) {
   const fo = __fobj(fd);
   if (fo) {
-    return fo.vfs.read(fo.id, buffer, offset, length, position);
+    return fo.vfs.read(fo.id, ...args);
   }
   throw new SystemError(-9); // EBADF
 }
@@ -283,10 +283,10 @@ function readFile(path) {
   return buffer;
 }
 
-function write(fd, buffer, offset, length, position) {
+function write(fd, ...args) {
   const fo = __fobj(fd);
   if (fo) {
-    return fo.vfs.write(fo.id, buffer, offset, length, position);
+    return fo.vfs.write(fo.id, ...args);
   }
   throw new SystemError(-9); // EBADF
 }

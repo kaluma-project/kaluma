@@ -276,6 +276,49 @@ test("[fs] open/write/read/close/unlink/stat()", (done) => {
   done();
 });
 
+test("[fs] write(fd, buffer) - without offset, length, position", (done) => {
+  const bd1 = new RAMBlockDev();
+  fs.mount('/', bd1, 'lfs', true);
+
+  const fname = '/written.txt';
+
+  // file write sequentially
+  let fd = fs.open(fname, 'w');
+  let wbuf1 = new Uint8Array([60, 61, 62, 63, 64]);
+  let wbuf2 = new Uint8Array([65, 66, 67, 68, 69]);
+  let wbuf3 = new Uint8Array([70, 71, 72, 73, 74]);
+  fs.write(fd, wbuf1);
+  fs.write(fd, wbuf2);
+  fs.write(fd, wbuf3);
+  fs.close(fd);
+
+  // file size
+  let stat = fs.stat(fname);
+  expect(stat.isFile()).toBe(true);
+  expect(stat.size).toBe(wbuf1.length + wbuf2.length + wbuf3.length);
+
+  // file read sequentially
+  let fd2 = fs.open(fname, 'r');
+  let rbuf1 = new Uint8Array(wbuf1.length);
+  let rbuf2 = new Uint8Array(wbuf2.length);
+  let rbuf3 = new Uint8Array(wbuf3.length);
+  fs.read(fd2, rbuf1);
+  fs.read(fd2, rbuf2);
+  fs.read(fd2, rbuf3);
+  fs.close(fd2);
+  expect(wbuf1.join(',')).toBe(rbuf1.join(','));
+  expect(wbuf2.join(',')).toBe(rbuf2.join(','));
+  expect(wbuf3.join(',')).toBe(rbuf3.join(','));
+
+  // remove file
+  fs.unlink(fname);
+
+  // unmount
+  fs.unmount('/');
+  done();
+});
+
+
 test("[fs] exists()", (done) => {
   const bd1 = new RAMBlockDev();
   const bd2 = new RAMBlockDev();
