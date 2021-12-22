@@ -288,7 +288,7 @@ JERRYXX_FUN(vfs_lfs_write_fn) {
   JERRYXX_CHECK_ARG_NUMBER_OPT(4, "position")
   uint32_t id = (uint32_t)JERRYXX_GET_ARG_NUMBER(0);
   jerry_value_t buffer = JERRYXX_GET_ARG(1);
-  uint8_t *buffer_p = jerryxx_get_property_typedarray_buffer(buffer);
+  uint8_t *buffer_p = jerryxx_get_typedarray_buffer(buffer);
   uint32_t offset = (uint32_t)JERRYXX_GET_ARG_NUMBER(2);
   uint32_t length = (uint32_t)JERRYXX_GET_ARG_NUMBER(3);
   uint32_t position = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(4, 0);
@@ -332,7 +332,7 @@ JERRYXX_FUN(vfs_lfs_read_fn) {
   JERRYXX_CHECK_ARG_NUMBER(4, "position")
   uint32_t id = (uint32_t)JERRYXX_GET_ARG_NUMBER(0);
   jerry_value_t buffer = JERRYXX_GET_ARG(1);
-  uint8_t *buffer_p = jerryxx_get_property_typedarray_buffer(buffer);
+  uint8_t *buffer_p = jerryxx_get_typedarray_buffer(buffer);
   uint32_t offset = (uint32_t)JERRYXX_GET_ARG_NUMBER(2);
   uint32_t length = (uint32_t)JERRYXX_GET_ARG_NUMBER(3);
   uint32_t position = (uint32_t)JERRYXX_GET_ARG_NUMBER(4);

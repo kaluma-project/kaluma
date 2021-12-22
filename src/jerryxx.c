@@ -101,7 +101,7 @@ bool jerryxx_get_property_boolean(jerry_value_t object, const char *name,
   return value;
 }
 
-uint8_t *jerryxx_get_property_typedarray_buffer(jerry_value_t object) {
+uint8_t *jerryxx_get_typedarray_buffer(jerry_value_t object) {
   jerry_length_t length = 0;
   jerry_length_t offset = 0;
   jerry_value_t arrbuf = jerry_get_typedarray_buffer(object, &offset, &length);

@@ -254,7 +254,7 @@ bool jerryxx_get_property_boolean(jerry_value_t object, const char *name,
                                   bool default_value);
 
 // array functions
-uint8_t *jerryxx_get_property_typedarray_buffer(jerry_value_t object);
+uint8_t *jerryxx_get_typedarray_buffer(jerry_value_t object);
 void jerryxx_array_push_string(jerry_value_t array, jerry_value_t item);
 bool jerryxx_delete_property(jerry_value_t object, const char *name);
 
