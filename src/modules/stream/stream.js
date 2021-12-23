@@ -288,8 +288,8 @@ class StdIn extends Stream {
     this.readable = true;
     this._native = new StdInNative();
   }
-  read () {
-    return this._native.read();
+  read (...args) {
+    return this._native.read(...args);
   }
 }
 
@@ -299,8 +299,8 @@ class StdOut extends Stream {
     this.writable = true;
     this._native = new StdOutNative();
   }
-  write (data) {
-    return this._native.write(data);
+  write (...args) {
+    return this._native.write(...args);
   }
 }
 
