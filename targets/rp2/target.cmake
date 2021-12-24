@@ -109,3 +109,6 @@ pico_enable_stdio_usb(${OUTPUT_TARGET} 1)
 pico_enable_stdio_uart(${OUTPUT_TARGET} 0)
 
 pico_add_extra_outputs(${OUTPUT_TARGET})
+
+# Turn off PICO_STDIO_DEFAULT_CRLF
+add_compile_definitions(PICO_STDIO_DEFAULT_CRLF=0)
