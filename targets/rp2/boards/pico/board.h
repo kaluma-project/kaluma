@@ -58,9 +58,8 @@
 #define KALUMA_PROG_SECTOR_COUNT 128
 
 // storage on flash (16KB)
-// - sector base : 0
-// - sector count : 4
-// - use block device : new Flash(0, 4);
+#define KALUMA_STORAGE_SECTOR_BASE 0
+#define KALUMA_STORAGE_SECTOR_COUNT 4
 
 // file system on flash (512K)
 // - sector base : 132

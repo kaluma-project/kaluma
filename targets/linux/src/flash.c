@@ -19,20 +19,29 @@
  * SOFTWARE.
  */
 
+#include "flash.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "board.h"
-#include "flash.h"
 
 //  Flash implementation on RAM
 
 const size_t __flash_size =
     KALUMA_FLASH_SECTOR_SIZE * KALUMA_FLASH_SECTOR_COUNT;
-static uint8_t __flash_buffer[__flash_size];
+uint8_t __flash_buffer[__flash_size];
 
 const uint8_t *km_flash_addr = (const uint8_t *)(__flash_buffer);
+
+void km_flash_init() {
+  for (int i = 0; i < __flash_size; i++) {
+    __flash_buffer[i] = 0xFF;
+  }
+}
+
+void km_flash_cleanup() {}
 
 int km_flash_program(uint32_t sector, uint32_t offset, uint8_t *buffer,
                      size_t size) {
@@ -46,7 +55,7 @@ int km_flash_program(uint32_t sector, uint32_t offset, uint8_t *buffer,
 int km_flash_erase(uint32_t sector, size_t count) {
   const uint32_t _base = sector * KALUMA_FLASH_SECTOR_SIZE;
   for (int i = 0; i < (count * KALUMA_FLASH_SECTOR_SIZE); i++) {
-    __flash_buffer[_base + i] = 0;
+    __flash_buffer[_base + i] = 0xFF;
   }
   return 0;
 }

@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 
+#include "err.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
 #include "storage.h"
@@ -34,8 +35,12 @@ JERRYXX_FUN(storage_set_item_fn) {
   JERRYXX_CHECK_ARG_STRING(1, "value")
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
   JERRYXX_GET_ARG_STRING_AS_CHAR(1, value)
-  int res = km_storage_set_item(key, value);
-  return jerry_create_number(res);
+  // int res = km_storage_set_item(key, value);
+  int ret = storage_set_item(key, value);
+  if (ret < 0) {
+    return create_system_error(ret);
+  }
+  return jerry_create_undefined();
 }
 
 /**
@@ -44,54 +49,52 @@ JERRYXX_FUN(storage_set_item_fn) {
 JERRYXX_FUN(storage_get_item_fn) {
   JERRYXX_CHECK_ARG_STRING(0, "key")
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
-  char *buf = (char *)malloc(256);
-  int res = km_storage_get_item(key, buf);
-  if (res >= KM_STORAGE_OK) {
-    jerry_value_t ret = jerry_create_string((const jerry_char_t *)buf);
-    free(buf);
-    return ret;
-  } else {  // key not found
-    free(buf);
-    return jerry_create_null();
+  int len = storage_get_item_value_length(key);
+  char *buf = (char *)malloc(len + 1);
+  int ret = storage_get_item(key, buf);
+  if (ret < 0) {
+    return create_system_error(ret);
   }
+  jerry_value_t value = jerry_create_string((const jerry_char_t *)buf);
+  free(buf);
+  return value;
 }
 
 /**
  * exports.removeItem function
  */
-JERRYXX_FUN(storage_remove_item_fn) {
-  JERRYXX_CHECK_ARG_STRING(0, "key")
-  JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
-  int res = km_storage_remove_item(key);
-  if (res > -1) {
-    return jerry_create_undefined();
-  } else {  // failure
-    return jerry_create_undefined();
-  }
+JERRYXX_FUN(storage_remove_item_fn){
+    JERRYXX_CHECK_ARG_STRING(0, "key") JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
+    /*
+    int res = km_storage_remove_item(key);
+    if (res > -1) {
+      return jerry_create_undefined();
+    } else {  // failure
+      return jerry_create_undefined();
+    }
+    */
 }
 
 /**
  * exports.clear function
  */
 JERRYXX_FUN(storage_clear_fn) {
-  int res = km_storage_clear();
-  if (res > -1) {
-    return jerry_create_undefined();
-  } else {  // failure
-    return jerry_create_undefined();
+  int ret = storage_clear();
+  if (ret < 0) {
+    return create_system_error(ret);
   }
+  return jerry_create_undefined();
 }
 
 /**
  * exports.length function
  */
 JERRYXX_FUN(storage_length_fn) {
-  int len = km_storage_length();
-  if (len > -1) {
-    return jerry_create_number(len);
-  } else {  // failure
-    return jerry_create_undefined();
+  int ret = storage_get_item_count();
+  if (ret < 0) {
+    return create_system_error(ret);
   }
+  return jerry_create_number(ret);
 }
 
 /**
@@ -100,6 +103,7 @@ JERRYXX_FUN(storage_length_fn) {
 JERRYXX_FUN(storage_key_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "index")
   int index = (int)JERRYXX_GET_ARG_NUMBER(0);
+  /*
   char *buf = (char *)malloc(256);
   int res = km_storage_key(index, buf);
   if (res >= KM_STORAGE_OK) {
@@ -110,6 +114,7 @@ JERRYXX_FUN(storage_key_fn) {
     free(buf);
     return jerry_create_null();
   }
+  */
 }
 
 /**

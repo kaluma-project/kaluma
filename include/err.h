@@ -160,8 +160,11 @@
 #define EHWPOISON -133       /* Memory page has hardware error */
 
 // Kaluma Errors
-#define EINVPIN -140  /* Invalid pin number */
-#define ENOPHRPL -141 /* No such pheriperal */
+#define EINVPIN -140   /* Invalid pin number */
+#define ENOPHRPL -141  /* No such pheriperal */
+#define ESTGFULL -142  /* Storage full */
+#define ESTGNOKEY -143 /* Key not found */
+#define ESTGSIZE -144  /* Data too long */
 
 extern const char* errmsg[];
 

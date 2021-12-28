@@ -34,8 +34,7 @@ global.require = Module.require;
  */
 
 if (process.builtin_modules.indexOf("storage") > -1) {
-  var Storage = Module.require("storage").Storage;
-  global.storage = new Storage();
+  global.storage = Module.require("storage");
 }
 
 /**

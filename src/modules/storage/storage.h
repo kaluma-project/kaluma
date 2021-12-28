@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Kaluma
+/* Copyright (c) 2017-2020 Kaluma
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,43 +19,34 @@
  * SOFTWARE.
  */
 
-#ifndef __KM_FLASH_H
-#define __KM_FLASH_H
-
 #include <stdint.h>
-#include <stdio.h>
 
-extern const uint8_t *km_flash_addr;
+#include "board.h"
+#include "flash.h"
 
-/**
- * @brief Initialize flash
- */
-void km_flash_init();
+#define SECTOR_BASE KALUMA_STORAGE_SECTOR_BASE
+#define SECTOR_COUNT KALUMA_STORAGE_SECTOR_COUNT
+#define SLOT_SIZE KALUMA_FLASH_PAGE_SIZE
+#define SLOT_DATA_MAX (SLOT_SIZE - 3)
+#define SLOT_COUNT ((SECTOR_COUNT * KALUMA_FLASH_SECTOR_SIZE) / SLOT_SIZE)
 
-/**
- * @brief Cleanup flash
- */
-void km_flash_cleanup();
+typedef enum {
+  SS_REMOVED = 0x00,
+  SS_USE = 0xF0,
+  SS_EMPTY = 0xFF,
+} storage_slot_status_t;
 
-/**
- * @brief Program data to internal flash
- *
- * @param sector sector number to program
- * @param offset offset to the sector (multiple of KALUMA_FLASH_PAGE_SIZE)
- * @param buffer buffer to write
- * @param size size of buffer to write (multiple of KALUMA_FLASH_PAGE_SIZE)
- * @return negative on error
- */
-int km_flash_program(uint32_t sector, uint32_t offset, uint8_t *buffer,
-                     size_t size);
+typedef struct {
+  uint8_t status;
+  uint8_t key_length;
+  uint8_t value_length;
+  char buffer[SLOT_DATA_MAX];
+} storage_slot_data_t;
 
-/**
- * @brief Erase data in internal flash
- *
- * @param sector sector number to erase
- * @param count how many sectors to erase from the sector number
- * @return negative on error
- */
-int km_flash_erase(uint32_t sector, size_t count);
-
-#endif /* __KM_FLASH_H */
+int storage_set_item(char *key, char *value);
+int storage_get_item_value_length(char *key);
+int storage_get_item(char *key, char *value);
+int storage_remove_item(char *key);
+int storage_clear();
+int storage_get_item_count();
+char *storage_get_key(int index);
