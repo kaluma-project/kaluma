@@ -6,7 +6,10 @@
     {
       "label": "make",
       "type": "shell",
-      "command": "make",
+      "command": "node build --target=linux",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "group": {
         "kind": "build",
         "isDefault": true
@@ -21,7 +24,10 @@
     {
       "label": "make clean",
       "type": "shell",
-      "command": "make clean",
+      "command": "node build --clean",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "group": "build",
       "presentation": {
         "reveal": "always",
