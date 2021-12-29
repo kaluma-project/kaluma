@@ -171,14 +171,44 @@ test("[storage] length - max overflow", (done) => {
   // push to max
   storage.clear();
   for (let i = 0; i < MAX; i++) {
-    storage.setItem(`key-${i}`, "value data...");
+    try {
+      storage.setItem(`key-${i}`, "value data...");
+    } catch (err) {
+      console.log(err);
+    }
   }
+  // console.log(storage.length);
+  // console.log(storage.key(0));
+  expect(storage.length).toBe(MAX);
 
   // now, overflow
   expect(() => {
     storage.setItem("key", "value");
   }).toThrow();
 
+  done();
+});
+
+test("[storage] length - sweeping", (done) => {
+  const MAX = 64;
+
+  // push to max
+  storage.clear();
+  for (let i = 0; i < MAX; i++) {
+    try {
+      storage.setItem(`key-${i}`, "value data...");
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  expect(storage.length).toBe(MAX);
+
+  // remove one
+  storage.removeItem("key-0");
+
+  // add one
+  storage.setItem("new-key", "new-value");
+  expect(storage.getItem("new-key")).toBe("new-value");
   done();
 });
 

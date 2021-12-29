@@ -76,7 +76,7 @@ static int slot_find(char *key, int len) {
   for (int i = 0; i < SLOT_COUNT; i++) {
     storage_slot_data_t *slot_data =
         (storage_slot_data_t *)(STORAGE_ADDR + i * SLOT_SIZE);
-    if (slot_data->status == SS_USE &&
+    if (slot_data->status == SS_USE && slot_data->key_length == len &&
         strncmp(slot_data->buffer, key, len) == 0) {
       return i;
     }

@@ -30,5 +30,6 @@
 #define MSTR_STORAGE_CLEAR "clear"
 #define MSTR_STORAGE_LENGTH "length"
 #define MSTR_STORAGE_KEY "key"
+#define MSTR_STORAGE_STORAGE_NATIVE "storage_native"
 
 #endif /* __STORAGE_MAGIC_STRINGS_H */

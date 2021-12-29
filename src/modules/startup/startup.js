@@ -35,6 +35,7 @@ global.require = Module.require;
 
 if (process.builtin_modules.indexOf("storage") > -1) {
   Object.defineProperty(global, "storage", {
+    writable: false,
     get: function () {
       return Module.require("storage");
     },

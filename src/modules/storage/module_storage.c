@@ -122,7 +122,9 @@ jerry_value_t module_storage_init() {
                                 storage_remove_item_fn);
   jerryxx_set_property_function(exports, MSTR_STORAGE_CLEAR, storage_clear_fn);
   jerryxx_set_property_function(exports, MSTR_STORAGE_KEY, storage_key_fn);
-  jerryxx_define_own_property(exports, MSTR_STORAGE_LENGTH, storage_length_fn,
-                              NULL);
+  jerryxx_set_property_function(exports, MSTR_STORAGE_LENGTH,
+                                storage_length_fn);
+  // jerryxx_define_own_property(exports, MSTR_STORAGE_LENGTH,
+  // storage_length_fn, NULL);
   return exports;
 }
