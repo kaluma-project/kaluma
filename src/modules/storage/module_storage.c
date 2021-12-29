@@ -49,11 +49,11 @@ JERRYXX_FUN(storage_get_item_fn) {
   JERRYXX_CHECK_ARG_STRING(0, "key")
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
   int len = storage_get_value_length(key);
-  char *buf = (char *)malloc(len);
-  int ret = storage_get_value(key, buf);
-  if (ret < 0) {
+  if (len < 0) {
     return jerry_create_null();
   }
+  char *buf = (char *)malloc(len);
+  storage_get_value(key, buf);
   jerry_value_t value = jerry_create_string_sz((const jerry_char_t *)buf, len);
   free(buf);
   return value;
@@ -62,16 +62,11 @@ JERRYXX_FUN(storage_get_item_fn) {
 /**
  * exports.removeItem function
  */
-JERRYXX_FUN(storage_remove_item_fn){
-    JERRYXX_CHECK_ARG_STRING(0, "key") JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
-    /*
-    int res = km_storage_remove_item(key);
-    if (res > -1) {
-      return jerry_create_undefined();
-    } else {  // failure
-      return jerry_create_undefined();
-    }
-    */
+JERRYXX_FUN(storage_remove_item_fn) {
+  JERRYXX_CHECK_ARG_STRING(0, "key")
+  JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
+  storage_remove_item(key);
+  return jerry_create_undefined();
 }
 
 /**
@@ -102,18 +97,15 @@ JERRYXX_FUN(storage_length_fn) {
 JERRYXX_FUN(storage_key_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "index")
   int index = (int)JERRYXX_GET_ARG_NUMBER(0);
-  /*
-  char *buf = (char *)malloc(256);
-  int res = km_storage_key(index, buf);
-  if (res >= KM_STORAGE_OK) {
-    jerry_value_t ret = jerry_create_string((const jerry_char_t *)buf);
-    free(buf);
-    return ret;
-  } else {  // key not found
-    free(buf);
+  int len = storage_get_key_length(index);
+  if (len < 0) {
     return jerry_create_null();
   }
-  */
+  char *buf = (char *)malloc(len);
+  storage_get_key(index, buf);
+  jerry_value_t ret = jerry_create_string_sz((const jerry_char_t *)buf, len);
+  free(buf);
+  return ret;
 }
 
 /**

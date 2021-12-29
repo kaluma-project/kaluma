@@ -23,6 +23,7 @@
 
 #include "adc.h"
 #include "board.h"
+#include "flash.h"
 #include "gpio.h"
 #include "hardware/clocks.h"
 #include "hardware/gpio.h"

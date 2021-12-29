@@ -457,6 +457,7 @@ void km_io_stream_cleanup() {
   km_list_init(&loop.stream_handles);
 }
 
+/*
 static void km_io_stream_run() {
   km_io_stream_handle_t *handle =
       (km_io_stream_handle_t *)loop.stream_handles.head;
@@ -475,3 +476,4 @@ static void km_io_stream_run() {
     handle = (km_io_stream_handle_t *)((km_list_node_t *)handle)->next;
   }
 }
+*/

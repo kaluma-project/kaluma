@@ -95,10 +95,10 @@ static int slot_find_by_index(int index) {
     storage_slot_data_t *slot =
         (storage_slot_data_t *)(STORAGE_ADDR + (i * SLOT_SIZE));
     if (slot->status == SS_USE) {
+      if (pos == index) {
+        return i;
+      }
       pos++;
-    }
-    if (pos == index) {
-      return i;
     }
   }
   return -1;

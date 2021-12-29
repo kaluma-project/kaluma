@@ -45,6 +45,13 @@ test("[storage] setItem() - overwrite", (done) => {
   let v1 = "value1";
   storage.setItem(k1, v1);
   expect(storage.getItem(k1)).toBe(v1);
+  expect(storage.length).toBe(1);
+
+  // overwrite
+  let v2 = "value2";
+  storage.setItem(k1, v2);
+  expect(storage.getItem(k1)).toBe(v2);
+  expect(storage.length).toBe(1);
   done();
 });
 
@@ -63,9 +70,115 @@ test("[storage] getItem()", (done) => {
   done();
 });
 
+test("[storage] getItem() - key not found", (done) => {
+  storage.clear();
+  storage.setItem("key1", "value1");
+  storage.setItem("key2", "value2");
+  storage.setItem("key3", "value3");
+
+  // key not found, returns null
+  expect(storage.getItem("key4")).toBe(null);
+  expect(storage.length).toBe(3);
+  done();
+});
+
 test("[storage] removeItem()", (done) => {
   storage.clear();
-  // ...
+  storage.setItem("key1", "value1");
+  storage.setItem("key2", "value2");
+  storage.setItem("key3", "value3");
+  expect(storage.length).toBe(3);
+
+  // remove "key1"
+  storage.removeItem("key1");
+  expect(storage.getItem("key1")).toBe(null);
+  expect(storage.length).toBe(2);
+
+  // remove "key2"
+  storage.removeItem("key2");
+  expect(storage.getItem("key2")).toBe(null);
+  expect(storage.length).toBe(1);
+
+  // remove "key3"
+  storage.removeItem("key3");
+  expect(storage.getItem("key3")).toBe(null);
+  expect(storage.length).toBe(0);
+  done();
+});
+
+test("[storage] removeItem() - key not existed", (done) => {
+  storage.clear();
+  storage.setItem("key1", "value1");
+  storage.setItem("key2", "value2");
+  storage.setItem("key3", "value3");
+  expect(storage.length).toBe(3);
+
+  // try to remove "key0" not existed (nothing happen)
+  storage.removeItem("key0");
+  expect(storage.length).toBe(3);
+  done();
+});
+
+test("[storage] key()", (done) => {
+  storage.clear();
+  storage.setItem("key1", "value1");
+  storage.setItem("key2", "value2");
+  storage.setItem("key3", "value3");
+  expect(storage.length).toBe(3);
+
+  let keys = ["key1", "key2", "key3"];
+  expect(keys.length).toBe(3);
+
+  // key(0)
+  keys.splice(keys.indexOf(storage.key(0)), 1);
+  expect(keys.length).toBe(2);
+
+  // key(1)
+  keys.splice(keys.indexOf(storage.key(1)), 1);
+  expect(keys.length).toBe(1);
+
+  // key(2)
+  keys.splice(keys.indexOf(storage.key(2)), 1);
+  expect(keys.length).toBe(0);
+  done();
+});
+
+test("[storage] key() - range overflow", (done) => {
+  storage.clear();
+  storage.setItem("key1", "value1");
+  storage.setItem("key2", "value2");
+  storage.setItem("key3", "value3");
+  expect(storage.length).toBe(3);
+
+  expect(storage.key(100)).toBe(null);
+  done();
+});
+
+test("[storage] length", (done) => {
+  storage.clear();
+  storage.setItem("key1", "value1");
+  expect(storage.length).toBe(1);
+  storage.setItem("key2", "value2");
+  expect(storage.length).toBe(2);
+  storage.setItem("key3", "value3");
+  expect(storage.length).toBe(3);
+  done();
+});
+
+test("[storage] length - max overflow", (done) => {
+  const MAX = 64;
+
+  // push to max
+  storage.clear();
+  for (let i = 0; i < MAX; i++) {
+    storage.setItem(`key-${i}`, "value data...");
+  }
+
+  // now, overflow
+  expect(() => {
+    storage.setItem("key", "value");
+  }).toThrow();
+
   done();
 });
 
