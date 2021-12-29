@@ -13,9 +13,10 @@ function init_vfs() {
 test("[vfs_lfs] mkfs()", (done) => {
   const bd = new RAMBlockDev();
   const vfs = new VFSLittleFS(bd);
+  vfs.mkfs();
   expect(() => {
     vfs.mount();
-  }).toThrow();
+  }).notToThrow();
   done();
 });
 
@@ -26,6 +27,15 @@ test("[vfs_lfs] mount()", (done) => {
   expect(() => {
     vfs.mount();
   }).notToThrow();
+  done();
+});
+
+test("[vfs_lfs] mount() - not formatted", (done) => {
+  const bd = new RAMBlockDev();
+  const vfs = new VFSLittleFS(bd);
+  expect(() => {
+    vfs.mount();
+  }).toThrow();
   done();
 });
 
