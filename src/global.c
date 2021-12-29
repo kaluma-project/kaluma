@@ -68,7 +68,7 @@ JERRYXX_FUN(pin_mode_fn) {
     uint8_t pin_num = jerry_get_number_value(pin);
     int ret = km_gpio_set_io_mode(pin_num, mode);
     if (ret < 0) {
-      return create_system_error(ret);
+      return jerry_create_error_from_value(create_system_error(ret), true);
     }
   } else if (jerry_value_is_array(pin)) {
     int pin_len = jerry_get_array_length(pin);
@@ -78,7 +78,7 @@ JERRYXX_FUN(pin_mode_fn) {
         uint8_t p = jerry_get_number_value(item);
         int ret = km_gpio_set_io_mode(p, mode);
         if (ret < 0) {
-          return create_system_error(ret);
+          return jerry_create_error_from_value(create_system_error(ret), true);
         }
       } else {
         return jerry_create_error(
@@ -101,7 +101,7 @@ JERRYXX_FUN(digital_read_fn) {
   uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
   int value = km_gpio_read(pin);
   if (value < 0) {
-    return create_system_error(value);
+    return jerry_create_error_from_value(create_system_error(value), true);
   }
   return jerry_create_number(value);
 }
@@ -115,7 +115,7 @@ JERRYXX_FUN(digital_write_fn) {
     uint8_t pin_num = jerry_get_number_value(pin);
     int ret = km_gpio_write(pin_num, value);
     if (ret < 0) {
-      return create_system_error(ret);
+      return jerry_create_error_from_value(create_system_error(ret), true);
     }
   } else if (jerry_value_is_array(pin)) {
     int pin_len = jerry_get_array_length(pin);
@@ -126,7 +126,7 @@ JERRYXX_FUN(digital_write_fn) {
         uint32_t v = ((value >> i) & 0x01);
         int ret = km_gpio_write(p, v);
         if (ret < 0) {
-          return create_system_error(ret);
+          return jerry_create_error_from_value(create_system_error(ret), true);
         }
       } else {
         return jerry_create_error(
@@ -149,7 +149,7 @@ JERRYXX_FUN(digital_toggle_fn) {
   uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
   int ret = km_gpio_toggle(pin);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   }
   return jerry_create_undefined();
 }
@@ -615,7 +615,7 @@ JERRYXX_FUN(analog_read_fn) {
   uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
   int ret = km_adc_setup(pin);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   }
   km_delay(1);  // To prevent issue #55
   double value = km_adc_read((uint8_t)ret);
@@ -635,7 +635,7 @@ JERRYXX_FUN(analog_write_fn) {
   double frequency = JERRYXX_GET_ARG_NUMBER_OPT(2, 490);  // Default 490Hz
   int ret = km_pwm_setup(pin, frequency, value);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   } else {
     km_pwm_start(pin);
     return jerry_create_undefined();
@@ -677,7 +677,7 @@ JERRYXX_FUN(tone_fn) {
     duty = KM_PWM_DUTY_MAX;
   int ret = km_pwm_setup(pin, frequency, duty);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   } else {
     if (inversion >= 0) {
       if (km_pwm_set_inversion(pin, inversion) < 0) {
@@ -708,7 +708,7 @@ JERRYXX_FUN(no_tone_fn) {
   uint8_t pin = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
   int ret = km_pwm_stop(pin);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   }
   return jerry_create_undefined();
 }
@@ -900,7 +900,7 @@ static void register_global_process_object() {
   jerryxx_set_property_function(process, MSTR_MEMORY_USAGE,
                                 process_memory_usage_fn);
 
-  /* Add `process.binding` function and it's properties */
+  // add `process.binding` function and it's properties
   jerry_value_t binding_fn = jerry_create_external_function(process_binding_fn);
   jerry_value_t binding_prop =
       jerry_create_string((const jerry_char_t *)MSTR_BINDING);
@@ -917,7 +917,7 @@ static void register_global_process_object() {
   }
   jerry_release_value(binding_fn);
 
-  /* Add `process.buildin_modules` array property */
+  // add `process.buildin_modules` array property
   jerry_value_t array_modules = jerry_create_array(builtin_modules_length);
   for (int i = 0; i < builtin_modules_length; i++) {
     jerry_value_t value =
@@ -932,35 +932,17 @@ static void register_global_process_object() {
   jerry_release_value(prop_buildin_modules);
   jerry_release_value(array_modules);
 
-  /* Add `process.getBuiltinModule` function */
+  // add `process.getBuiltinModule` function
   jerryxx_set_property_function(process, MSTR_GET_BUILTIN_MODULE,
                                 process_get_builtin_module_fn);
 
-  // process.stdin readonly property
-  jerry_property_descriptor_t stdin_prop;
-  jerry_init_property_descriptor_fields(&stdin_prop);
-  stdin_prop.is_get_defined = true;
-  stdin_prop.is_writable = false;
-  stdin_prop.getter = jerry_create_external_function(process_stdin_getter_fn);
-  jerry_value_t stdin_prop_name =
-      jerry_create_string((const jerry_char_t *)MSTR_STDIN);
-  jerry_define_own_property(process, stdin_prop_name, &stdin_prop);
-  jerry_release_value(stdin_prop_name);
-  jerry_free_property_descriptor_fields(&stdin_prop);
+  // add stdin and stdout readonly properties
+  jerryxx_define_own_property(process, MSTR_STDIN, process_stdin_getter_fn,
+                              NULL);
+  jerryxx_define_own_property(process, MSTR_STDOUT, process_stdout_getter_fn,
+                              NULL);
 
-  // process.stdout readonly property
-  jerry_property_descriptor_t stdout_prop;
-  jerry_init_property_descriptor_fields(&stdout_prop);
-  stdout_prop.is_get_defined = true;
-  stdout_prop.is_writable = false;
-  stdout_prop.getter = jerry_create_external_function(process_stdout_getter_fn);
-  jerry_value_t stdout_prop_name =
-      jerry_create_string((const jerry_char_t *)MSTR_STDOUT);
-  jerry_define_own_property(process, stdout_prop_name, &stdout_prop);
-  jerry_release_value(stdout_prop_name);
-  jerry_free_property_descriptor_fields(&stdout_prop);
-
-  /* Register 'process' object to global */
+  // register 'process' object to global
   jerry_value_t global = jerry_get_global_object();
   jerryxx_set_property(global, MSTR_PROCESS, process);
 

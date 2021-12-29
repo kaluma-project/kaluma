@@ -44,9 +44,10 @@ typedef struct {
 } storage_slot_data_t;
 
 int storage_set_item(char *key, char *value);
-int storage_get_item_value_length(char *key);
-int storage_get_item(char *key, char *value);
+int storage_get_value_length(char *key);
+int storage_get_value(char *key, char *value);
+int storage_get_key_length(int index);
+int storage_get_key(int index, char *key);
 int storage_remove_item(char *key);
 int storage_clear();
 int storage_get_item_count();
-char *storage_get_key(int index);

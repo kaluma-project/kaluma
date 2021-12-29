@@ -35,10 +35,9 @@ JERRYXX_FUN(storage_set_item_fn) {
   JERRYXX_CHECK_ARG_STRING(1, "value")
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
   JERRYXX_GET_ARG_STRING_AS_CHAR(1, value)
-  // int res = km_storage_set_item(key, value);
   int ret = storage_set_item(key, value);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   }
   return jerry_create_undefined();
 }
@@ -49,13 +48,13 @@ JERRYXX_FUN(storage_set_item_fn) {
 JERRYXX_FUN(storage_get_item_fn) {
   JERRYXX_CHECK_ARG_STRING(0, "key")
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
-  int len = storage_get_item_value_length(key);
-  char *buf = (char *)malloc(len + 1);
-  int ret = storage_get_item(key, buf);
+  int len = storage_get_value_length(key);
+  char *buf = (char *)malloc(len);
+  int ret = storage_get_value(key, buf);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_null();
   }
-  jerry_value_t value = jerry_create_string((const jerry_char_t *)buf);
+  jerry_value_t value = jerry_create_string_sz((const jerry_char_t *)buf, len);
   free(buf);
   return value;
 }
@@ -81,7 +80,7 @@ JERRYXX_FUN(storage_remove_item_fn){
 JERRYXX_FUN(storage_clear_fn) {
   int ret = storage_clear();
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   }
   return jerry_create_undefined();
 }
@@ -92,7 +91,7 @@ JERRYXX_FUN(storage_clear_fn) {
 JERRYXX_FUN(storage_length_fn) {
   int ret = storage_get_item_count();
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   }
   return jerry_create_number(ret);
 }
@@ -130,8 +129,8 @@ jerry_value_t module_storage_init() {
   jerryxx_set_property_function(exports, MSTR_STORAGE_REMOVE_ITEM,
                                 storage_remove_item_fn);
   jerryxx_set_property_function(exports, MSTR_STORAGE_CLEAR, storage_clear_fn);
-  jerryxx_set_property_function(exports, MSTR_STORAGE_LENGTH,
-                                storage_length_fn);
   jerryxx_set_property_function(exports, MSTR_STORAGE_KEY, storage_key_fn);
+  jerryxx_define_own_property(exports, MSTR_STORAGE_LENGTH, storage_length_fn,
+                              NULL);
   return exports;
 }

@@ -68,6 +68,28 @@ void jerryxx_set_property_function(jerry_value_t object, const char *name,
   jerry_release_value(ext_fn);
 }
 
+void jerryxx_define_own_property(jerry_value_t object, const char *name,
+                                 jerry_external_handler_t getter,
+                                 jerry_external_handler_t setter) {
+  // storage.length readonly property
+  jerry_property_descriptor_t prop;
+  jerry_init_property_descriptor_fields(&prop);
+  prop.is_writable = false;
+  if (getter != NULL) {
+    prop.is_get_defined = true;
+    prop.getter = jerry_create_external_function(getter);
+  }
+  if (setter != NULL) {
+    prop.is_set_defined = true;
+    prop.setter = jerry_create_external_function(setter);
+    prop.is_writable = true;
+  }
+  jerry_value_t prop_name = jerry_create_string((const jerry_char_t *)name);
+  jerry_define_own_property(object, prop_name, &prop);
+  jerry_release_value(prop_name);
+  jerry_free_property_descriptor_fields(&prop);
+}
+
 jerry_value_t jerryxx_get_property(jerry_value_t object, const char *name) {
   jerry_value_t prop = jerry_create_string((const jerry_char_t *)name);
   jerry_value_t ret = jerry_get_property(object, prop);

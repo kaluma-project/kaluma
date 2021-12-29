@@ -107,7 +107,7 @@ JERRYXX_FUN(uart_ctor_fn) {
   int ret = km_uart_setup(port, baudrate, bits, parity, stop, flow, buffer_size,
                           pins);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   }
 
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PORT, port);
@@ -183,7 +183,7 @@ JERRYXX_FUN(uart_write_fn) {
              *)"The data argument must be Uint8Array or string.");
   }
   if (ret < 0)
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   else
     return jerry_create_number(ret);
 }
@@ -206,7 +206,7 @@ JERRYXX_FUN(uart_close_fn) {
   // close the port
   int ret = km_uart_close(port);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   }
 
   // delete this.port

@@ -33,7 +33,7 @@
 // int slot_write(slot, slot_data);
 // int slot_find(char *key);
 
-static int get_available_slot() {
+static int slot_new() {
   const uint8_t *STORAGE_ADDR =
       (uint8_t *)(km_flash_addr + (SECTOR_BASE * KALUMA_FLASH_SECTOR_SIZE));
   for (int i = 0; i < SLOT_COUNT; i++) {
@@ -57,9 +57,7 @@ static void slot_set_data(storage_slot_data_t *slot_data, char *key,
   size_t key_length = strlen(key);
   size_t value_length = strlen(value);
   memcpy(slot_data->buffer, key, key_length);
-  slot_data->buffer[key_length] = '\0';
-  memcpy(slot_data->buffer + key_length + 1, value, value_length);
-  slot_data->buffer[key_length + value_length + 1] = '\0';
+  memcpy(slot_data->buffer + key_length, value, value_length);
   slot_data->status = SS_USE;
   slot_data->key_length = key_length;
   slot_data->value_length = value_length;
@@ -72,26 +70,46 @@ static void slot_write(int slot, storage_slot_data_t *slot_data) {
                    SLOT_SIZE);
 }
 
-static int slot_find(char *key) {
+static int slot_find(char *key, int len) {
   const uint8_t *STORAGE_ADDR =
       (uint8_t *)(km_flash_addr + (SECTOR_BASE * KALUMA_FLASH_SECTOR_SIZE));
   for (int i = 0; i < SLOT_COUNT; i++) {
     storage_slot_data_t *slot_data =
         (storage_slot_data_t *)(STORAGE_ADDR + i * SLOT_SIZE);
     if (slot_data->status == SS_USE &&
-        strncmp(slot_data->buffer, key, slot_data->key_length) == 0) {
+        strncmp(slot_data->buffer, key, len) == 0) {
       return i;
     }
   }
   return -1;  // not found
 }
 
-static char *slot_get_key_data(storage_slot_data_t *slot_data) {
+/**
+ * Return index-th slot in USE status
+ */
+static int slot_find_by_index(int index) {
+  const uint8_t *STORAGE_ADDR =
+      (uint8_t *)(km_flash_addr + (SECTOR_BASE * KALUMA_FLASH_SECTOR_SIZE));
+  int pos = 0;
+  for (int i = 0; i < SLOT_COUNT; i++) {
+    storage_slot_data_t *slot =
+        (storage_slot_data_t *)(STORAGE_ADDR + (i * SLOT_SIZE));
+    if (slot->status == SS_USE) {
+      pos++;
+    }
+    if (pos == index) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+static char *slot_get_key(storage_slot_data_t *slot_data) {
   return (char *)(slot_data->buffer);
 }
 
-static char *slot_get_value_data(storage_slot_data_t *slot_data) {
-  return (char *)(slot_data->buffer + slot_data->key_length + 1);
+static char *slot_get_value(storage_slot_data_t *slot_data) {
+  return (char *)(slot_data->buffer + slot_data->key_length);
 }
 
 int storage_set_item(char *key, char *value) {
@@ -101,7 +119,7 @@ int storage_set_item(char *key, char *value) {
   storage_slot_data_t temp;
 
   // if key found, remove it
-  int slot = slot_find(key);
+  int slot = slot_find(key, strlen(key));
   if (slot >= 0) {
     storage_slot_data_t *old_slot_data = slot_get_data(slot);
     memcpy(&temp, old_slot_data, sizeof(storage_slot_data_t));
@@ -110,7 +128,7 @@ int storage_set_item(char *key, char *value) {
   }
 
   // create new slot
-  int new_slot = get_available_slot();
+  int new_slot = slot_new();
   if (new_slot < 0) {
     return ESTGFULL;
   } else {
@@ -120,8 +138,8 @@ int storage_set_item(char *key, char *value) {
   return 0;
 }
 
-int storage_get_item_value_length(char *key) {
-  int slot = slot_find(key);
+int storage_get_value_length(char *key) {
+  int slot = slot_find(key, strlen(key));
   if (slot < 0) {
     return ESTGNOKEY;
   }
@@ -129,18 +147,37 @@ int storage_get_item_value_length(char *key) {
   return slot_data->value_length;
 }
 
-int storage_get_item(char *key, char *value) {
-  int slot = slot_find(key);
+int storage_get_value(char *key, char *value) {
+  int slot = slot_find(key, strlen(key));
   if (slot < 0) {
     return ESTGNOKEY;
   }
   storage_slot_data_t *slot_data = slot_get_data(slot);
-  strcpy(value, slot_get_value_data(slot_data));
+  strcpy(value, slot_get_value(slot_data));
+  return 0;
+}
+
+int storage_get_key_length(int index) {
+  int slot = slot_find_by_index(index);
+  if (slot < 0) {
+    return ESTGNOKEY;
+  }
+  storage_slot_data_t *slot_data = slot_get_data(slot);
+  return slot_data->key_length;
+}
+
+int storage_get_key(int index, char *key) {
+  int slot = slot_find_by_index(index);
+  if (slot < 0) {
+    return ESTGNOKEY;
+  }
+  storage_slot_data_t *slot_data = slot_get_data(slot);
+  strcpy(key, slot_get_key(slot_data));
   return 0;
 }
 
 int storage_remove_item(char *key) {
-  int slot = slot_find(key);
+  int slot = slot_find(key, strlen(key));
   if (slot < 0) {
     return ESTGNOKEY;
   }
@@ -169,22 +206,4 @@ int storage_get_item_count() {
     }
   }
   return len;
-}
-
-char *storage_get_key(int index) {
-  const uint8_t *STORAGE_ADDR =
-      (uint8_t *)(km_flash_addr + (SECTOR_BASE * KALUMA_FLASH_SECTOR_SIZE));
-  int idx = 0;
-  for (int i = 0; i < SLOT_COUNT; i++) {
-    storage_slot_data_t *slot =
-        (storage_slot_data_t *)(STORAGE_ADDR + (i * SLOT_SIZE));
-    if (slot->status == SS_USE) {
-      if (idx == index) {
-        return slot_get_value_data(slot);
-      } else {
-        idx++;
-      }
-    }
-  }
-  return NULL;
 }
