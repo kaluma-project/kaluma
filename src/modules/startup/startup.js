@@ -34,7 +34,11 @@ global.require = Module.require;
  */
 
 if (process.builtin_modules.indexOf("storage") > -1) {
-  global.storage = Module.require("storage");
+  Object.defineProperty(global, "storage", {
+    get: function () {
+      return Module.require("storage");
+    },
+  });
 }
 
 /**
