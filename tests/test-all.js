@@ -4,6 +4,8 @@ function cmd(cmd, args) {
   childProcess.spawnSync(cmd, args, { stdio: "inherit" });
 }
 
-cmd("../build/kaluma", ['test-path.js']);
-cmd("../build/kaluma", ['test-vfs_lfs.js']);
-cmd("../build/kaluma", ['test-fs.js']);
+cmd("../build/kaluma", ["path.test.js"]);
+cmd("../build/kaluma", ["process.test.js"]);
+cmd("../build/kaluma", ["storage.test.js"]);
+cmd("../build/kaluma", ["vfs_lfs.test.js"]);
+cmd("../build/kaluma", ["fs.test.js"]);

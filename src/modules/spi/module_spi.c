@@ -75,7 +75,7 @@ JERRYXX_FUN(spi_ctor_fn) {
   int ret = km_spi_setup(bus, (km_spi_mode_t)mode, baudrate,
                          (km_spi_bitorder_t)bitorder, pins);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   } else {
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_BUS, bus);
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_SPI_MODE, mode);
@@ -122,7 +122,7 @@ JERRYXX_FUN(spi_transfer_fn) {
     int ret = km_spi_sendrecv(bus, tx_buf, rx_buf, len, timeout);
     if (ret < 0) {
       free(rx_buf);
-      return create_system_error(ret);
+      return jerry_create_error_from_value(create_system_error(ret), true);
     } else {
       jerry_value_t buffer =
           jerry_create_arraybuffer_external(len, rx_buf, buffer_free_cb);
@@ -140,7 +140,7 @@ JERRYXX_FUN(spi_transfer_fn) {
     int ret = km_spi_sendrecv(bus, tx_buf, rx_buf, len, timeout);
     if (ret < 0) {
       free(rx_buf);
-      return create_system_error(ret);
+      return jerry_create_error_from_value(create_system_error(ret), true);
     } else {
       jerry_value_t buffer =
           jerry_create_arraybuffer_external(len, rx_buf, buffer_free_cb);
@@ -209,7 +209,7 @@ JERRYXX_FUN(spi_send_fn) {
              *)"The data argument must be Uint8Array or string.");
   }
   if (ret < 0)
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   else
     return jerry_create_number(ret);
 }
@@ -240,7 +240,7 @@ JERRYXX_FUN(spi_recv_fn) {
   // return an Uin8Array
   if (ret < 0) {
     free(buf);
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   } else {
     jerry_value_t array_buffer =
         jerry_create_arraybuffer_external(length, buf, buffer_free_cb);
@@ -269,7 +269,7 @@ JERRYXX_FUN(spi_close_fn) {
   // close the bus
   int ret = km_spi_close(bus);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   }
 
   // delete this.bus property

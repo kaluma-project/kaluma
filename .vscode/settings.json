@@ -2,6 +2,7 @@
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
   "files.associations": {
+    "*.ejs": "html",
     "usbd_cdc.h": "c",
     "system.h": "c",
     "stm32f4xx_hal.h": "c",
@@ -27,7 +28,9 @@
     "lfs.h": "c",
     "__hash_table": "c",
     "memory": "c",
-    "new": "c"
+    "new": "c",
+    "storage.h": "c",
+    "storage_magic_strings.h": "c"
   },
   "cpplint.filters": ["-build/include_subdir", "-build/header_guard"],
   "C_Cpp.clang_format_fallbackStyle": "Google",

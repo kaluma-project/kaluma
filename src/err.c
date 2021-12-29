@@ -169,6 +169,9 @@ const char* errmsg[] = {
     NULL,
     "Invalid pin number",
     "No such pheriperal",
+    "Storage full",
+    "Key not found",
+    "Data too long",
 };
 
 jerry_value_t create_system_error(const int errno) {

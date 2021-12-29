@@ -1,1 +1,1 @@
-global.board.name = 'linux';
+global.board.name = "linux";

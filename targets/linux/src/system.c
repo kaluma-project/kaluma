@@ -24,6 +24,7 @@
 #include <time.h>
 
 #include "adc.h"
+#include "flash.h"
 #include "gpio.h"
 #include "i2c.h"
 #include "pwm.h"
@@ -81,6 +82,7 @@ void km_system_init() {
   km_spi_init();
   km_uart_init();
   km_rtc_init();
+  km_flash_init();
 }
 
 void km_system_cleanup() {
@@ -91,6 +93,7 @@ void km_system_cleanup() {
   km_uart_cleanup();
   km_gpio_cleanup();
   km_rtc_cleanup();
+  km_flash_cleanup();
 }
 
 uint8_t km_running_script_check() { return false; }

@@ -42,7 +42,7 @@ JERRYXX_FUN(pwm_ctor_fn) {
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PWM_INV_PIN, -1);
   int ret = km_pwm_setup(pin, frequency, duty);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   } else {
     return jerry_create_undefined();
   }
@@ -67,7 +67,7 @@ JERRYXX_FUN(pwm_set_inversion_fn) {
   }
   int ret = km_pwm_set_inversion(pin, inv_pin);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   }
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PWM_INV_PIN, inv_pin);
   return jerry_create_undefined();
@@ -100,7 +100,7 @@ JERRYXX_FUN(pwm_start_fn) {
 
   int ret = km_pwm_start(pin);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   }
   return jerry_create_undefined();
 }
@@ -117,7 +117,7 @@ JERRYXX_FUN(pwm_stop_fn) {
 
   int ret = km_pwm_stop(pin);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   }
   return jerry_create_undefined();
 }
@@ -134,7 +134,7 @@ JERRYXX_FUN(pwm_get_frequency_fn) {
 
   double frequency = km_pwm_get_frequency(pin);
   if (frequency < 0) {
-    return create_system_error(frequency);
+    return jerry_create_error_from_value(create_system_error(frequency), true);
   }
   return jerry_create_number(frequency);
 }
@@ -154,7 +154,7 @@ JERRYXX_FUN(pwm_set_frequency_fn) {
 
   int ret = km_pwm_set_frequency(pin, frequency);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   }
   return jerry_create_undefined();
 }
@@ -171,7 +171,7 @@ JERRYXX_FUN(pwm_get_duty_fn) {
 
   double duty = km_pwm_get_duty(pin);
   if (duty < 0) {
-    return create_system_error(duty);
+    return jerry_create_error_from_value(create_system_error(duty), true);
   }
   return jerry_create_number(duty);
 }
@@ -195,7 +195,7 @@ JERRYXX_FUN(pwm_set_duty_fn) {
 
   int ret = km_pwm_set_duty(pin, duty);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   }
   return jerry_create_undefined();
 }
@@ -212,7 +212,7 @@ JERRYXX_FUN(pwm_close_fn) {
 
   int ret = km_pwm_close(pin);
   if (ret < 0) {
-    return create_system_error(ret);
+    return jerry_create_error_from_value(create_system_error(ret), true);
   }
   return jerry_create_undefined();
 }

@@ -32,6 +32,10 @@
 const uint8_t *km_flash_addr =
     (const uint8_t *)(XIP_BASE + KALUMA_FLASH_OFFSET);
 
+void km_flash_init() { return; }
+
+void km_flash_cleanup() { return; }
+
 int km_flash_program(uint32_t sector, uint32_t offset, uint8_t *buffer,
                      size_t size) {
   const uint32_t _base =
