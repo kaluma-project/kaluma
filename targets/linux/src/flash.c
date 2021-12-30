@@ -31,7 +31,7 @@
 
 const size_t __flash_size =
     KALUMA_FLASH_SECTOR_SIZE * KALUMA_FLASH_SECTOR_COUNT;
-uint8_t __flash_buffer[__flash_size];
+uint8_t __flash_buffer[KALUMA_FLASH_SECTOR_SIZE * KALUMA_FLASH_SECTOR_COUNT];
 
 const uint8_t *km_flash_addr = (const uint8_t *)(__flash_buffer);
 
