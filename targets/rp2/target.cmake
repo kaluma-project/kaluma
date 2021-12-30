@@ -36,6 +36,7 @@ if(NOT MODULES)
     rp2
     rtc
     path
+    flash
     fs
     vfs_lfs
     startup)

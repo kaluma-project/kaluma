@@ -35,6 +35,7 @@ if(NOT MODULES)
     url
     rtc
     path
+    flash
     fs
     vfs_lfs
     startup

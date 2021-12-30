@@ -19,9 +19,13 @@
  * SOFTWARE.
  */
 
-#include "board.h"
+#ifndef __FLASH_MAGIC_STRINGS_H
+#define __FLASH_MAGIC_STRINGS_H
 
-/**
- * Initialize board
- */
-void board_init() {}
+#define MSTR_FLASH_FLASH "Flash"
+#define MSTR_FLASH_FLASH_ "flash"
+#define MSTR_FLASH_READ "read"
+#define MSTR_FLASH_WRITE "write"
+#define MSTR_FLASH_IOCTL "ioctl"
+
+#endif /* __FLASH_MAGIC_STRINGS_H */

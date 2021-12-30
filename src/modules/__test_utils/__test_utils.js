@@ -1,8 +1,8 @@
 class RAMBlockDev {
-  constructor() {
-    this.blocksize = 4096;
-    this.blockcount = 16;
-    this.buffersize = 256;
+  constructor(size = 4096, count = 16, bufsz = 256) {
+    this.blocksize = size;
+    this.blockcount = count;
+    this.buffersize = bufsz;
     this.buf = new Uint8Array(this.blocksize * this.blockcount);
     this.buf.fill(255);
   }

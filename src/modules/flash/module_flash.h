@@ -19,9 +19,6 @@
  * SOFTWARE.
  */
 
-#include "board.h"
+#include "jerryscript.h"
 
-/**
- * Initialize board
- */
-void board_init() {}
+jerry_value_t module_flash_init();
