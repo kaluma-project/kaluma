@@ -12,7 +12,7 @@ function test(name, fn) {
     name: name,
     fn: fn,
     state: 0, // 0=idle, 1=runs, 2=pass, 3=fail
-    assertFail: 0
+    assertFail: 0,
   });
 }
 
@@ -25,25 +25,31 @@ function expect(v1) {
     toBe: function (v2) {
       if (!Object.is(v1, v2)) {
         tests[0].assertFail++;
-        error(`${JSON.stringify(v2)} expected, but ${JSON.stringify(v1)} received`);
+        error(
+          `${JSON.stringify(v2)} expected, but ${JSON.stringify(v1)} received`
+        );
       }
     },
     notToBe: function (v2) {
       if (Object.is(v1, v2)) {
         tests[0].assertFail++;
-        error(`${JSON.stringify(v2)} not expected, but ${JSON.stringify(v1)} received`);
+        error(
+          `${JSON.stringify(v2)} not expected, but ${JSON.stringify(
+            v1
+          )} received`
+        );
       }
     },
     toBeTruthy: function () {
       if (!v1) {
         tests[0].assertFail++;
-        error(`Truthy expected, but falsy (${JSON.stringify(v1)}) received`);        
+        error(`Truthy expected, but falsy (${JSON.stringify(v1)}) received`);
       }
     },
     toBeFalsy: function () {
       if (v1) {
         tests[0].assertFail++;
-        error(`Falsy expected, but truthy (${JSON.stringify(v1)}) received`);        
+        error(`Falsy expected, but truthy (${JSON.stringify(v1)}) received`);
       }
     },
   };
@@ -52,62 +58,100 @@ function expect(v1) {
       toContain: function (v2) {
         if (v1.indexOf(v2) < 0) {
           tests[0].assertFail++;
-          error(`${JSON.stringify(v1)} expected to contain ${JSON.stringify(v2)}, but not contained`);
+          error(
+            `${JSON.stringify(v1)} expected to contain ${JSON.stringify(
+              v2
+            )}, but not contained`
+          );
         }
       },
       notToContain: function (v2) {
         if (v1.indexOf(v2) >= 0) {
           tests[0].assertFail++;
-          error(`${JSON.stringify(v1)} expected not to contain ${JSON.stringify(v2)}, but contained`);
+          error(
+            `${JSON.stringify(v1)} expected not to contain ${JSON.stringify(
+              v2
+            )}, but contained`
+          );
         }
-      }
+      },
     });
   }
-  if (typeof v1 === 'number') {
+  if (typeof v1 === "number") {
     matchers = Object.assign(matchers, {
       toBeGreaterThan: function (v2) {
         if (v1 <= v2) {
           tests[0].assertFail++;
-          error(`${JSON.stringify(v1)} expected to be greater than ${JSON.stringify(v2)}, but not greater`);
+          error(
+            `${JSON.stringify(v1)} expected to be greater than ${JSON.stringify(
+              v2
+            )}, but not greater`
+          );
         }
       },
       toBeGreaterThanOrEqual: function (v2) {
         if (v1 < v2) {
           tests[0].assertFail++;
-          error(`${JSON.stringify(v1)} expected to be greater than or equal to ${JSON.stringify(v2)}, but less`);
+          error(
+            `${JSON.stringify(
+              v1
+            )} expected to be greater than or equal to ${JSON.stringify(
+              v2
+            )}, but less`
+          );
         }
       },
       toBeLessThan: function (v2) {
         if (v1 >= v2) {
           tests[0].assertFail++;
-          error(`${JSON.stringify(v1)} expected to be less than ${JSON.stringify(v2)}, but not less`);
+          error(
+            `${JSON.stringify(v1)} expected to be less than ${JSON.stringify(
+              v2
+            )}, but not less`
+          );
         }
-      },      
+      },
       toBeLessThanOrEqual: function (v2) {
         if (v1 > v2) {
           tests[0].assertFail++;
-          error(`${JSON.stringify(v1)} expected to be less than or equal to ${JSON.stringify(v2)}, but greater`);
+          error(
+            `${JSON.stringify(
+              v1
+            )} expected to be less than or equal to ${JSON.stringify(
+              v2
+            )}, but greater`
+          );
         }
       },
     });
   }
-  if (typeof v1 === 'string') {
+  if (typeof v1 === "string") {
     matchers = Object.assign(matchers, {
-      toMatch: function (v2) { // v2 should be regex
+      toMatch: function (v2) {
+        // v2 should be regex
         if (!v1.match(v2)) {
           tests[0].assertFail++;
-          error(`${JSON.stringify(v1)} expected to match ${v2.toString()}, but not matched`);
+          error(
+            `${JSON.stringify(
+              v1
+            )} expected to match ${v2.toString()}, but not matched`
+          );
         }
       },
-      notToMatch: function (v2) { // v2 should be regex
+      notToMatch: function (v2) {
+        // v2 should be regex
         if (v1.match(v2)) {
           tests[0].assertFail++;
-          error(`${JSON.stringify(v1)} not expected to match ${v2.toString()}, but matched`);
+          error(
+            `${JSON.stringify(
+              v1
+            )} not expected to match ${v2.toString()}, but matched`
+          );
         }
-      }
+      },
     });
   }
-  if (typeof v1 === 'function') {
+  if (typeof v1 === "function") {
     matchers = Object.assign(matchers, {
       toThrow: function (v2) {
         try {
@@ -115,6 +159,14 @@ function expect(v1) {
           tests[0].assertFail++;
           error(`function expected to throw error, but not thrown`);
         } catch (err) {
+          if (typeof v2 === "string") {
+            if (err.message !== v2) {
+              tests[0].assertFail++;
+              error(
+                `function expected to throw error with message "${v2}", but thrown with message "${err.message}"`
+              );
+            }
+          }
         }
       },
       notToThrow: function (v2) {
@@ -124,25 +176,26 @@ function expect(v1) {
           tests[0].assertFail++;
           error(`function expected not to throw error, but thrown`);
         }
-      }
+      },
     });
   }
   return matchers;
 }
 
 /**
-* Start all tests. If idx given, only the idx-th test to be performed
-* @param {number} idx
-*/
+ * Start all tests. If idx given, only the idx-th test to be performed
+ * @param {number} idx
+ */
 function start(idx) {
-  if (typeof idx === 'number') {
+  if (typeof idx === "number") {
     var _t = tests[idx];
     tests = [_t];
   }
   timer = setInterval(() => {
     if (tests.length > 0) {
       var t = tests[0];
-      if (t.state === 0) { // idle
+      if (t.state === 0) {
+        // idle
         t.state = 1;
         print(`\r\x1b[97;43m RUNS \x1b[0m ${t.name}`);
         try {
@@ -158,18 +211,22 @@ function start(idx) {
           t.state = 3;
           console.log(e);
         }
-      } else if (t.state === 2) { // pass
+      } else if (t.state === 2) {
+        // pass
         print(`\x1b[2K\r\x1b[97;102m PASS \x1b[0m ${t.name}\r\n`);
         finished.push(tests.shift());
-      } else if (t.state === 3) { // fail
-        print(`\x1b[2K\r\x1b[97;101m FAIL \x1b[0m\x1b[91m ${t.name}\x1b[0m\r\n`);
+      } else if (t.state === 3) {
+        // fail
+        print(
+          `\x1b[2K\r\x1b[97;101m FAIL \x1b[0m\x1b[91m ${t.name}\x1b[0m\r\n`
+        );
         finished.push(tests.shift());
       }
     } else {
       clearInterval(timer);
-      console.log('');
+      console.log("");
       var l = finished.length;
-      var f = finished.filter(ts => ts.state === 3).length;
+      var f = finished.filter((ts) => ts.state === 3).length;
       var p = l - f;
       console.log(`Tests: ${p} passed, ${f} failed (${l} total)`);
     }
