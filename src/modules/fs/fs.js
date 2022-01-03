@@ -328,7 +328,7 @@ function rename(oldPath, newPath) {
 function exists(path) {
   const vfs = __lookup(path);
   if (vfs) {
-    try { 
+    try {
       let _stat = vfs.stat(vfs.__pathout)
       return _stat ? true : false;
     } catch (err) {

@@ -6,7 +6,7 @@
 set(DEBUG 1)
 
 # optimization
-set(OPT -Og)
+# set(OPT -Og)
 
 # default board: default
 if(NOT BOARD)
@@ -38,6 +38,7 @@ if(NOT MODULES)
     flash
     fs
     vfs_lfs
+    vfs_fat
     startup
     __ujest
     __test_utils)
@@ -72,9 +73,9 @@ set(JERRY_TOOLCHAIN toolchain_linux_i686.cmake)
 
 # set(CMAKE_SYSTEM_PROCESSOR amd64)
 # set(CMAKE_C_FLAGS "${OPT} -Wall -fdata-sections -ffunction-sections")
-# if(DEBUG EQUAL 1)
-#   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -gdwarf-2")
-# endif()
+if(DEBUG EQUAL 1)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -gdwarf-2")
+endif()
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -MMD -MP")
 
 #set(PREFIX)

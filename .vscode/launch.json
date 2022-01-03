@@ -10,7 +10,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/build/kaluma",
       "args": [
-        //"./tests/vfs_fat_script.js"
+        // "./tests/vfs_fat.test.js"
       ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",

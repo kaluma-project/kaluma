@@ -10,4 +10,5 @@ cmd("../build/kaluma", ["process.test.js"]);
 cmd("../build/kaluma", ["storage.test.js"]);
 cmd("../build/kaluma", ["flash.test.js"]);
 cmd("../build/kaluma", ["vfs_lfs.test.js"]);
+cmd("../build/kaluma", ["vfs_fat.test.js"]);
 cmd("../build/kaluma", ["fs.test.js"]);
