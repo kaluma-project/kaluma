@@ -1,9 +1,8 @@
 const { test, start, expect } = require("__ujest");
-const { RAMFatBlkDev } = require("__test_utils");
+const { RAMBlockDev } = require("__test_utils");
 const { VFSFatFS } = require("vfs_fat");
 
-
-const bd = new RAMFatBlkDev();
+const bd = new RAMBlockDev(512, 1024, 512);
 const vfs = new VFSFatFS(bd);
 
 test("[vfs_fat] mount without format", (done) => {
