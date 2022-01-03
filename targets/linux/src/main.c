@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "board.h"
 #include "gpio.h"
@@ -33,10 +34,14 @@
 #include "tty.h"
 
 int main(int argc, char* argv[]) {
+  bool en_repl = false;
+  if ((argc == 1) || ((argc > 2) && (strcmp(argv[2], "-i") == 0))) {
+    en_repl = true;
+  }
   km_system_init();
   km_tty_init();
   km_io_init();
-  km_repl_init(argc < 2);
+  km_repl_init(en_repl);
   km_runtime_init(false, false);
 
   // read file
@@ -70,5 +75,5 @@ int main(int argc, char* argv[]) {
     jerry_release_value(parsed_code);
   }
 
-  km_io_run(argc < 2);
+  km_io_run(en_repl);
 }

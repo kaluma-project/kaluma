@@ -53,6 +53,7 @@ uint32_t km_tty_available() {
   // printf("sz=%d\r\n", sz);
   while (sz > 0) {
     ringbuffer_write(&__tty_rx_ringbuffer, ch, 1);
+    sz = read(STDIN_FILENO, ch, 1);
   }
   return ringbuffer_length(&__tty_rx_ringbuffer);
 }

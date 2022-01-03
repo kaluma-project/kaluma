@@ -60,7 +60,7 @@ static km_io_tty_handle_t tty;
  * REPL state
  */
 static km_repl_state_t state;
-
+static bool before_cr = false;
 // --------------------------------------------------------------------------
 // PRIVATE FUNCTIONS
 // --------------------------------------------------------------------------
@@ -201,6 +201,10 @@ static void set_cursor_to_position() {
 static void handle_normal(char ch) {
   switch (ch) {
     case '\r': /* carrage return */
+    case '\n':
+      if ((ch == '\n') && before_cr) {
+        break;
+      }
       if (state.echo) {
         km_repl_printf("\r\n");
       }
@@ -272,6 +276,11 @@ static void handle_normal(char ch) {
         km_repl_set_output(KM_REPL_OUTPUT_NORMAL);
       }
       break;
+  }
+  if (ch == '\r') {
+    before_cr = true;
+  } else {
+    before_cr = false;
   }
 }
 
