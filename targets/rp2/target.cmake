@@ -39,6 +39,7 @@ if(NOT MODULES)
     flash
     fs
     vfs_lfs
+    vfs_fat
     startup)
 endif()
 
