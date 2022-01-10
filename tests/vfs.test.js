@@ -3,7 +3,6 @@ const { RAMBlockDev } = require("__test_utils");
 const { VFSFatFS } = require("vfs_fat");
 const { VFSLittleFS } = require("vfs_lfs");
 
-
 // configs for FAT
 const BLOCK_SIZE = 512;
 const BLOCK_COUNT = 1024;
@@ -35,7 +34,7 @@ function init_vfs() {
 }
 
 test("[vfs_lfs] mkfs()", (done) => {
-  const bd = new RAMBlockDev(512, 1024, 512);
+  const bd = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
   const vfs = new VFS(bd);
   vfs.mkfs();
   expect(() => {
@@ -45,7 +44,7 @@ test("[vfs_lfs] mkfs()", (done) => {
 });
 
 test("[vfs_lfs] mount()", (done) => {
-  const bd = new RAMBlockDev(512, 1024, 512);
+  const bd = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
   const vfs = new VFS(bd);
   vfs.mkfs();
   expect(() => {
@@ -55,7 +54,7 @@ test("[vfs_lfs] mount()", (done) => {
 });
 
 test("[vfs_lfs] mount() - not formatted", (done) => {
-  const bd = new RAMBlockDev(512, 1024, 512);
+  const bd = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
   const vfs = new VFS(bd);
   expect(() => {
     vfs.mount();
@@ -64,7 +63,7 @@ test("[vfs_lfs] mount() - not formatted", (done) => {
 });
 
 test("[vfs_lfs] unmount()", (done) => {
-  const bd = new RAMBlockDev(512, 1024, 512);
+  const bd = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
   const vfs = new VFS(bd);
   vfs.mkfs();
   vfs.mount();
