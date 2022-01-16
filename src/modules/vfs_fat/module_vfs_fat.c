@@ -476,7 +476,12 @@ JERRYXX_FUN(vfs_fat_stat_fn) {  // check and get args
   // check and get args
   JERRYXX_CHECK_ARG_STRING(0, "path")
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, path)
-
+  if (strcmp(path, "/") == 0) {
+    jerry_value_t obj = jerry_create_object();
+    jerryxx_set_property_number(obj, "type", 2);
+    jerryxx_set_property_number(obj, "size", 0);
+    return obj;
+  }
   // file stat
   FILINFO *info = (FILINFO *)malloc(sizeof(FILINFO));
   int ret = f_stat(path, info);
