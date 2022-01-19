@@ -39,7 +39,9 @@ void km_rtc_cleanup() {}
 
 void km_rtc_set_time(uint64_t time) {
   struct tm* ptm;
-  time_t t = (time_t)time;
+  uint64_t stime = time / 1000;
+  // uint64_t ms = time % 1000;
+  time_t t = (time_t)stime;
   ptm = gmtime(&t);
   datetime_t datetime;
   datetime.sec = ptm->tm_sec;
