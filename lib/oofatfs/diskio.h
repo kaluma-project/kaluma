@@ -1,3 +1,7 @@
+/* This file is part of ooFatFs, a customised version of FatFs
+ * See https://github.com/micropython/oofatfs for details
+ */
+
 /*-----------------------------------------------------------------------/
 /  Low level disk interface modlue include file   (C)ChaN, 2014          /
 /-----------------------------------------------------------------------*/
@@ -5,12 +9,10 @@
 #ifndef _DISKIO_DEFINED
 #define _DISKIO_DEFINED
 
+#include "ff.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "integer.h"
-
 
 /* Status of Disk Functions */
 typedef BYTE    DSTATUS;
@@ -29,11 +31,9 @@ typedef enum {
 /* Prototypes for disk control functions */
 
 
-DSTATUS disk_initialize (BYTE pdrv);
-DSTATUS disk_status (BYTE pdrv);
-DRESULT disk_read (BYTE pdrv, BYTE* buff, DWORD sector, UINT count);
-DRESULT disk_write (BYTE pdrv, const BYTE* buff, DWORD sector, UINT count);
-DRESULT disk_ioctl (BYTE pdrv, BYTE cmd, void* buff);
+DRESULT disk_read (void *drv, BYTE* buff, DWORD sector, UINT count);
+DRESULT disk_write (void *drv, const BYTE* buff, DWORD sector, UINT count);
+DRESULT disk_ioctl (void *drv, BYTE cmd, void* buff);
 
 
 /* Disk Status Bits (DSTATUS) */
@@ -46,11 +46,13 @@ DRESULT disk_ioctl (BYTE pdrv, BYTE cmd, void* buff);
 /* Command code for disk_ioctrl fucntion */
 
 /* Generic command (Used by FatFs) */
-#define CTRL_SYNC           0   /* Complete pending write process (needed at _FS_READONLY == 0) */
-#define GET_SECTOR_COUNT    1   /* Get media size (needed at _USE_MKFS == 1) */
-#define GET_SECTOR_SIZE     2   /* Get sector size (needed at _MAX_SS != _MIN_SS) */
-#define GET_BLOCK_SIZE      3   /* Get erase block size (needed at _USE_MKFS == 1) */
-#define CTRL_TRIM           4   /* Inform device that the data on the block of sectors is no longer used (needed at _USE_TRIM == 1) */
+#define CTRL_SYNC           0   /* Complete pending write process (needed at FF_FS_READONLY == 0) */
+#define GET_SECTOR_COUNT    1   /* Get media size (needed at FF_USE_MKFS == 1) */
+#define GET_SECTOR_SIZE     2   /* Get sector size (needed at FF_MAX_SS != FF_MIN_SS) */
+#define GET_BLOCK_SIZE      3   /* Get erase block size (needed at FF_USE_MKFS == 1) */
+#define CTRL_TRIM           4   /* Inform device that the data on the block of sectors is no longer used (needed at FF_USE_TRIM == 1) */
+#define IOCTL_INIT          5
+#define IOCTL_STATUS        6
 
 /* Generic command (Not used by FatFs) */
 #define CTRL_POWER          5   /* Get/Set power status */

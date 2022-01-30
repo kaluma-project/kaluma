@@ -55,7 +55,6 @@ enum vfs_fat_open_flags {
 
 struct vfs_fat_root_s {
   uint32_t file_id_count;
-  uint32_t fs_count;
   km_list_t vfs_fat_handles;
 };
 
@@ -63,7 +62,6 @@ struct vfs_fat_handle_s {
   km_list_node_t base;
   jerry_value_t blkdev_js;
   km_list_t file_handles;
-  BYTE fs_no;
   FATFS *fat_fs;
   DSTATUS status;
 };

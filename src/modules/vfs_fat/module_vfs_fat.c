@@ -26,7 +26,6 @@
 
 #include "diskio.h"
 #include "err.h"
-#include "ff.h"
 #include "io.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
@@ -66,22 +65,37 @@ static int blkdev_ioctl(jerry_value_t blkdev_js, int op, int arg) {
   return ret_value;
 }
 
-DSTATUS disk_status(BYTE pdrv) /* [IN] Physical drive number */
-{
-  VFS_GET_FS_HANDLE(&vfs_fat_root, vfs_handle, pdrv);
+static int ret_conversion(int ret) {
+  int new_ret = 0;  // OK
+  if (ret != 0) {
+    switch (ret) {
+      case FR_NO_FILE:
+      case FR_NO_PATH:
+      case FR_INVALID_NAME:
+      case FR_INVALID_DRIVE:
+        new_ret = ENOENT;
+        break;
+      case FR_EXIST:
+        new_ret = EEXIST;
+        break;
+      case FR_WRITE_PROTECTED:
+        new_ret = EROFS;
+        break;
+      case FR_LOCKED:
+        new_ret = ETXTBSY;
+        break;
+      case FR_INVALID_PARAMETER:
+        new_ret = EINVAL;
+        break;
+      default:
+        new_ret = EIO;
+        break;
+    }
+  }
 
-  return vfs_handle->status;
+  return new_ret;
 }
-
-DSTATUS disk_initialize(BYTE pdrv) /* [IN] Physical drive number */
-{
-  // get native vfs handle
-  VFS_GET_FS_HANDLE(&vfs_fat_root, vfs_handle, pdrv);
-  vfs_handle->status &= ~STA_NOINIT;
-  return vfs_handle->status;
-}
-
-DRESULT disk_read(BYTE pdrv,    /* [IN] Physical drive number */
+DRESULT disk_read(void *drv,    /* [IN] Physical drive nmuber (0..) */
                   BYTE *buff,   /* [OUT] Pointer to the read data buffer */
                   DWORD sector, /* [IN] Start sector number */
                   UINT count    /* [IN] Number of sectros to read */
@@ -90,7 +104,7 @@ DRESULT disk_read(BYTE pdrv,    /* [IN] Physical drive number */
     return RES_PARERR;
   }
   // get native vfs handle
-  VFS_GET_FS_HANDLE(&vfs_fat_root, vfs_handle, pdrv);
+  vfs_fat_handle_t *vfs_handle = (vfs_fat_handle_t *)drv;
   int block_size = blkdev_ioctl(vfs_handle->blkdev_js, 5, 0);
   jerry_value_t arraybuffer = jerry_create_arraybuffer_external(
       count * block_size, (uint8_t *)buff, NULL);
@@ -112,7 +126,7 @@ DRESULT disk_read(BYTE pdrv,    /* [IN] Physical drive number */
 }
 
 DRESULT disk_write(
-    BYTE pdrv,        /* [IN] Physical drive number */
+    void *drv,        /* [IN] Physical drive nmuber (0..) */
     const BYTE *buff, /* [IN] Pointer to the data to be written */
     DWORD sector,     /* [IN] Sector number to write from */
     UINT count        /* [IN] Number of sectors to write */
@@ -120,8 +134,8 @@ DRESULT disk_write(
   if (count == 0) {  // Support drive 0 only
     return RES_PARERR;
   }
-  //  get native vfs handle
-  VFS_GET_FS_HANDLE(&vfs_fat_root, vfs_handle, pdrv);
+  // get native vfs handle
+  vfs_fat_handle_t *vfs_handle = (vfs_fat_handle_t *)drv;
   int block_size = blkdev_ioctl(vfs_handle->blkdev_js, 5, 0);
   jerry_value_t arraybuffer = jerry_create_arraybuffer_external(
       count * block_size, (uint8_t *)buff, NULL);
@@ -142,21 +156,23 @@ DRESULT disk_write(
   return RES_OK;
 }
 
-DRESULT disk_ioctl(BYTE pdrv, /* [IN] Drive number */
+DRESULT disk_ioctl(void *drv, /* [IN] Physical drive nmuber (0..) */
                    BYTE cmd,  /* [IN] Control command code */
                    void *buff /* [I/O] Parameter and data buffer */
 ) {
-  //  get native vfs handle
-  VFS_GET_FS_HANDLE(&vfs_fat_root, vfs_handle, pdrv);
-  if (vfs_handle->status & STA_NOINIT) {
+  // get native vfs handle
+  vfs_fat_handle_t *vfs_handle = (vfs_fat_handle_t *)drv;
+  if ((cmd != IOCTL_INIT) && (vfs_handle->status & STA_NOINIT)) {
     return RES_NOTRDY;
   }
   DRESULT ret = RES_ERROR;
   switch (cmd) {
     int res;
     case CTRL_SYNC:
-      blkdev_ioctl(vfs_handle->blkdev_js, 3, 0);
-      ret = RES_OK;
+      res = blkdev_ioctl(vfs_handle->blkdev_js, 3, 0);
+      if (res == 0) {
+        ret = RES_OK;
+      }
       break;
     case GET_SECTOR_COUNT:
       res = blkdev_ioctl(vfs_handle->blkdev_js, 4, 0);
@@ -165,7 +181,7 @@ DRESULT disk_ioctl(BYTE pdrv, /* [IN] Drive number */
       break;
     case GET_SECTOR_SIZE:
       res = blkdev_ioctl(vfs_handle->blkdev_js, 5, 0);
-      *(DWORD *)buff = (DWORD)res;
+      *(WORD *)buff = (WORD)res;
       ret = RES_OK;
       break;
     case GET_BLOCK_SIZE:
@@ -174,6 +190,19 @@ DRESULT disk_ioctl(BYTE pdrv, /* [IN] Drive number */
       ret = RES_OK;
       break;
     case CTRL_TRIM:
+      ret = RES_OK;
+      break;
+    case IOCTL_INIT:
+      res = blkdev_ioctl(vfs_handle->blkdev_js, 1, 0);
+      if (res < 0) {
+        break;
+      }
+      vfs_handle->status &= ~STA_NOINIT;
+      *(DSTATUS *)buff = (DSTATUS)vfs_handle->status;
+      ret = RES_OK;
+      break;
+    case IOCTL_STATUS:
+      *(DSTATUS *)buff = (DSTATUS)vfs_handle->status;
       ret = RES_OK;
       break;
   }
@@ -215,6 +244,7 @@ JERRYXX_FUN(vfsfat_ctor_fn) {
   vfs_handle->blkdev_js = blkdev;
   jerry_acquire_value(vfs_handle->blkdev_js);
   vfs_handle->fat_fs = (FATFS *)malloc(sizeof(FATFS));
+  vfs_handle->fat_fs->drv = (void *)vfs_handle;
   vfs_handle->status = STA_NOINIT;
   // assign native handle in js object
   jerry_set_object_native_pointer(this_val, vfs_handle, &vfs_handle_info);
@@ -233,13 +263,11 @@ JERRYXX_FUN(vfs_fat_mkfs_fn) {
   int32_t buff_size = blkdev_ioctl(vfs_handle->blkdev_js, 5, 0);
   BYTE *buff = (BYTE *)malloc(sizeof(BYTE) * buff_size);
   // make fs (format)
-  char logic_drv[7];
-  // sprintf(logic_drv, "%d://", vfs_handle->fs_no);
-  sprintf(logic_drv, "/");
-  FRESULT ret = f_mkfs(logic_drv, FM_ANY, 0, buff, buff_size);
+  FRESULT ret = f_mkfs(vfs_handle->fat_fs, FM_ANY, 0, buff, buff_size);
   free(buff);
-  if (ret != FR_OK) {
-    return jerry_create_error_from_value(create_system_error(-5), true);
+  int err = ret_conversion(ret);
+  if (err < 0) {
+    return jerry_create_error_from_value(create_system_error(err), true);
   }
   return jerry_create_undefined();
 }
@@ -254,13 +282,10 @@ JERRYXX_FUN(vfs_fat_mount_fn) {
   // initialize block device
   blkdev_ioctl(vfs_handle->blkdev_js, 1, 0);
 
-  // mount vfs
-  char logic_drv[7];
-  // sprintf(logic_drv, "%d://", vfs_handle->fs_no);
-  sprintf(logic_drv, "/");
-  FRESULT ret = f_mount(vfs_handle->fat_fs, logic_drv, 1);
-  if (ret != FR_OK) {
-    return jerry_create_error_from_value(create_system_error(-1), true);
+  FRESULT ret = f_mount(vfs_handle->fat_fs);
+  int err = ret_conversion(ret);
+  if (err < 0) {
+    return jerry_create_error_from_value(create_system_error(err), true);
   }
   return jerry_create_undefined();
 }
@@ -272,13 +297,10 @@ JERRYXX_FUN(vfs_fat_unmount_fn) {
   // get native vfs handle
   JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_fat_handle_t, vfs_handle_info);
 
-  // unmount vfs
-  char logic_drv[7];
-  // sprintf(logic_drv, "%d://", vfs_handle->fs_no);
-  sprintf(logic_drv, "/");
-  FRESULT ret = f_mount(NULL, logic_drv, 0);
-  if (ret != FR_OK) {
-    return jerry_create_error_from_value(create_system_error(-1), true);
+  FRESULT ret = f_umount(vfs_handle->fat_fs);
+  int err = ret_conversion(ret);
+  if (err < 0) {
+    return jerry_create_error_from_value(create_system_error(err), true);
   }
 
   // shutdown block device
@@ -305,7 +327,7 @@ JERRYXX_FUN(vfs_fat_open_fn) {
 
   // convert flags to fat_flags
   BYTE fat_flags = 0;
-  if (flags & VFS_FLAG_EXCL) fat_flags |= FA_OPEN_EXISTING;
+  if (flags & VFS_FLAG_EXCL) fat_flags |= FA_CREATE_NEW;
   if (flags & VFS_FLAG_TRUNC) fat_flags |= FA_CREATE_ALWAYS;
   if (flags & VFS_FLAG_READ) fat_flags |= FA_READ;
   if (flags & VFS_FLAG_WRITE) fat_flags |= FA_WRITE;
@@ -321,9 +343,10 @@ JERRYXX_FUN(vfs_fat_open_fn) {
   file->fat_fp = fp;
 
   // file open
-  FRESULT ret = f_open(file->fat_fp, path, fat_flags);
-  if (ret != FR_OK) {
-    return jerry_create_error_from_value(create_system_error(-5), true);
+  FRESULT ret = f_open(vfs_handle->fat_fs, file->fat_fp, path, fat_flags);
+  int err = ret_conversion(ret);
+  if (err < 0) {
+    return jerry_create_error_from_value(create_system_error(err), true);
   }
 
   // add file handle and return the id
@@ -367,9 +390,10 @@ JERRYXX_FUN(vfs_fat_write_fn) {
 
   // set position
   if (position > -1) {
-    FRESULT pos = f_lseek(file->fat_fp, position);
-    if (pos != FR_OK) {
-      return jerry_create_error_from_value(create_system_error(-5), true);
+    FRESULT ret = f_lseek(file->fat_fp, position);
+    int err = ret_conversion(ret);
+    if (err < 0) {
+      return jerry_create_error_from_value(create_system_error(err), true);
     }
   }
 
@@ -377,8 +401,9 @@ JERRYXX_FUN(vfs_fat_write_fn) {
   UINT out_length = 0;
   FRESULT ret =
       f_write(file->fat_fp, (void *)(buffer_p + offset), length, &out_length);
-  if (ret != FR_OK) {
-    return jerry_create_error_from_value(create_system_error(-5), true);
+  int err = ret_conversion(ret);
+  if (err < 0) {
+    return jerry_create_error_from_value(create_system_error(err), true);
   }
 
   // return number of bytes written
@@ -420,9 +445,10 @@ JERRYXX_FUN(vfs_fat_read_fn) {
 
   // set position
   if (position > -1) {
-    FRESULT pos = f_lseek(file->fat_fp, position);
-    if (pos != FR_OK) {
-      return jerry_create_error_from_value(create_system_error(-5), true);
+    FRESULT ret = f_lseek(file->fat_fp, position);
+    int err = ret_conversion(ret);
+    if (err < 0) {
+      return jerry_create_error_from_value(create_system_error(err), true);
     }
   }
 
@@ -430,8 +456,9 @@ JERRYXX_FUN(vfs_fat_read_fn) {
   UINT out_length = 0;
   FRESULT ret =
       f_read(file->fat_fp, (void *)(buffer_p + offset), length, &out_length);
-  if (ret != FR_OK) {
-    return jerry_create_error_from_value(create_system_error(-5), true);
+  int err = ret_conversion(ret);
+  if (err < 0) {
+    return jerry_create_error_from_value(create_system_error(err), true);
   }
 
   // return number of bytes read
@@ -454,8 +481,9 @@ JERRYXX_FUN(vfs_fat_close_fn) {
 
   // file close
   FRESULT ret = f_close(file->fat_fp);
-  if (ret != FR_OK) {
-    return jerry_create_error_from_value(create_system_error(-5), true);
+  int err = ret_conversion(ret);
+  if (err < 0) {
+    return jerry_create_error_from_value(create_system_error(err), true);
   }
   free(file->fat_fp);
   // remote file handle
@@ -482,12 +510,13 @@ JERRYXX_FUN(vfs_fat_stat_fn) {  // check and get args
     jerryxx_set_property_number(obj, "size", 0);
     return obj;
   }
+  JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_fat_handle_t, vfs_handle_info);
   // file stat
   FILINFO *info = (FILINFO *)malloc(sizeof(FILINFO));
-  int ret = f_stat(path, info);
-  if (ret != FR_OK) {
-    free(info);
-    return jerry_create_error_from_value(create_system_error(-5), true);
+  FRESULT ret = f_stat(vfs_handle->fat_fs, path, info);
+  int err = ret_conversion(ret);
+  if (err < 0) {
+    return jerry_create_error_from_value(create_system_error(err), true);
   }
 
   // return stat object {type, size}
@@ -513,9 +542,11 @@ JERRYXX_FUN(vfs_fat_rename_fn) {
   JERRYXX_GET_ARG_STRING_AS_CHAR(1, new_path)
 
   // file rename
-  int ret = f_rename(old_path, new_path);
-  if (ret != FR_OK) {
-    return jerry_create_error_from_value(create_system_error(-5), true);
+  JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_fat_handle_t, vfs_handle_info);
+  FRESULT ret = f_rename(vfs_handle->fat_fs, old_path, new_path);
+  int err = ret_conversion(ret);
+  if (err < 0) {
+    return jerry_create_error_from_value(create_system_error(err), true);
   }
   return jerry_create_undefined();
 }
@@ -531,9 +562,11 @@ JERRYXX_FUN(vfs_fat_unlink_fn) {
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, path)
 
   // file delete
-  int ret = f_unlink(path);
-  if (ret != FR_OK) {
-    return jerry_create_error_from_value(create_system_error(-5), true);
+  JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_fat_handle_t, vfs_handle_info);
+  FRESULT ret = f_unlink(vfs_handle->fat_fs, path);
+  int err = ret_conversion(ret);
+  if (err < 0) {
+    return jerry_create_error_from_value(create_system_error(err), true);
   }
   return jerry_create_undefined();
 }
@@ -549,9 +582,11 @@ JERRYXX_FUN(vfs_fat_mkdir_fn) {
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, path)
 
   // create a directory
-  int ret = f_mkdir(path);
-  if (ret != FR_OK) {
-    return jerry_create_error_from_value(create_system_error(-5), true);
+  JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_fat_handle_t, vfs_handle_info);
+  FRESULT ret = f_mkdir(vfs_handle->fat_fs, path);
+  int err = ret_conversion(ret);
+  if (err < 0) {
+    return jerry_create_error_from_value(create_system_error(err), true);
   }
   return jerry_create_undefined();
 }
@@ -568,17 +603,20 @@ JERRYXX_FUN(vfs_fat_readdir_fn) {
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, path)
 
   // read dir
-  DIR dir;
+  JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_fat_handle_t, vfs_handle_info);
+  FF_DIR dir;
   FILINFO *info = (FILINFO *)malloc(sizeof(FILINFO));
-  FRESULT ret = f_opendir(&dir, path);
-  if (ret != FR_OK) {
-    return jerry_create_error_from_value(create_system_error(-5), true);
+  FRESULT ret = f_opendir(vfs_handle->fat_fs, &dir, path);
+  int err = ret_conversion(ret);
+  if (err < 0) {
+    return jerry_create_error_from_value(create_system_error(err), true);
   }
   jerry_value_t files = jerry_create_array(0);
   while (true) {
     ret = f_readdir(&dir, info);
-    if (ret != FR_OK) {
-      return jerry_create_error_from_value(create_system_error(-5), true);
+    err = ret_conversion(ret);
+    if (err < 0) {
+      return jerry_create_error_from_value(create_system_error(err), true);
     }
     if (info->fname[0] == 0) {
       break;
@@ -593,8 +631,9 @@ JERRYXX_FUN(vfs_fat_readdir_fn) {
   }
   free(info);
   ret = f_closedir(&dir);
-  if (ret != FR_OK) {
-    return jerry_create_error_from_value(create_system_error(-5), true);
+  err = ret_conversion(ret);
+  if (err < 0) {
+    return jerry_create_error_from_value(create_system_error(err), true);
   }
   return files;
 }
@@ -610,9 +649,11 @@ JERRYXX_FUN(vfs_fat_rmdir_fn) {
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, path)
 
   // file delete
-  int ret = f_unlink(path);
-  if (ret != FR_OK) {
-    return jerry_create_error_from_value(create_system_error(-5), true);
+  JERRYXX_GET_NATIVE_HANDLE(vfs_handle, vfs_fat_handle_t, vfs_handle_info);
+  FRESULT ret = f_unlink(vfs_handle->fat_fs, path);
+  int err = ret_conversion(ret);
+  if (err < 0) {
+    return jerry_create_error_from_value(create_system_error(err), true);
   }
   return jerry_create_undefined();
 }

@@ -34,7 +34,6 @@ vfs_fat_root_t vfs_fat_root;
 
 void vfs_fat_init() {
   vfs_fat_root.file_id_count = 0;
-  vfs_fat_root.fs_count = 0;
   km_list_init(&vfs_fat_root.vfs_fat_handles);
 }
 
@@ -55,7 +54,6 @@ void vfs_fat_handle_init(vfs_fat_handle_t *handle) {
 }
 
 void vfs_fat_handle_add(vfs_fat_handle_t *handle) {
-  handle->fs_no = vfs_fat_root.fs_count++;
   km_list_append(&vfs_fat_root.vfs_fat_handles, (km_list_node_t *)handle);
 }
 
@@ -83,17 +81,6 @@ vfs_fat_file_handle_t *vfs_fat_file_get_by_id(vfs_fat_handle_t *handle,
       return file;
     }
     file = (vfs_fat_file_handle_t *)((km_list_node_t *)file)->next;
-  }
-  return NULL;
-}
-
-vfs_fat_handle_t *vfs_fat_get_fs_by_drv(vfs_fat_root_t *handle, BYTE pdrv) {
-  vfs_fat_handle_t *vfs_fs = (vfs_fat_handle_t *)handle->vfs_fat_handles.head;
-  while (vfs_fs != NULL) {
-    if (vfs_fs->fs_no == pdrv) {
-      return vfs_fs;
-    }
-    vfs_fs = (vfs_fat_handle_t *)((km_list_node_t *)vfs_fs)->next;
   }
   return NULL;
 }
