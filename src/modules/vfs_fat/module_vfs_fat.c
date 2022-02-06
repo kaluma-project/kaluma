@@ -346,6 +346,8 @@ JERRYXX_FUN(vfs_fat_open_fn) {
   FRESULT ret = f_open(vfs_handle->fat_fs, file->fat_fp, path, fat_flags);
   int err = ret_conversion(ret);
   if (err < 0) {
+    free(fp);
+    free(file);
     return jerry_create_error_from_value(create_system_error(err), true);
   }
 
@@ -516,6 +518,7 @@ JERRYXX_FUN(vfs_fat_stat_fn) {  // check and get args
   FRESULT ret = f_stat(vfs_handle->fat_fs, path, info);
   int err = ret_conversion(ret);
   if (err < 0) {
+    free(info);
     return jerry_create_error_from_value(create_system_error(err), true);
   }
 
@@ -609,6 +612,7 @@ JERRYXX_FUN(vfs_fat_readdir_fn) {
   FRESULT ret = f_opendir(vfs_handle->fat_fs, &dir, path);
   int err = ret_conversion(ret);
   if (err < 0) {
+    free(info);
     return jerry_create_error_from_value(create_system_error(err), true);
   }
   jerry_value_t files = jerry_create_array(0);
@@ -616,6 +620,7 @@ JERRYXX_FUN(vfs_fat_readdir_fn) {
     ret = f_readdir(&dir, info);
     err = ret_conversion(ret);
     if (err < 0) {
+      free(info);
       return jerry_create_error_from_value(create_system_error(err), true);
     }
     if (info->fname[0] == 0) {
