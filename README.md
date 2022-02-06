@@ -1,5 +1,9 @@
 ![logo](https://github.com/kaluma-project/kaluma/blob/master/logo.png?raw=true)
 
+[![Current Version](https://img.shields.io/github/tag/kaluma-project/kaluma.svg)](https://github.com/kaluma-project/kaluma/tags)
+[![GitHub license](https://img.shields.io/github/license/kaluma-project/kaluma)](https://github.com/kaluma-project/kaluma/blob/master/LICENSE)
+[![Docs Status](https://img.shields.io/badge/docs-ready-orange.svg)](https://docs.kaluma.io)
+
 # Overview
 
 Kaluma is a tiny and efficient JavaScript runtime for microcontrollers. The main features are:
