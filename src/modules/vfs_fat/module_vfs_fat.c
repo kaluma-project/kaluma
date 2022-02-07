@@ -30,7 +30,9 @@
 #include "jerryscript.h"
 #include "jerryxx.h"
 #include "magic_strings.h"
+#include "rtc.h"
 #include "tty.h"
+#include "utils.h"
 #include "vfs_fat.h"
 #include "vfs_fat_magic_strings.h"
 
@@ -221,8 +223,14 @@ DWORD get_fattime(void) {
     };
     DWORD value;
   } timestamp;
-  // uint64_t rtc = km_rtc_get_time();
-  timestamp.value = 0;
+  struct km_time tm;
+  km_rtc_to_time(km_rtc_get_time(), &tm);
+  timestamp.second = (tm.sec & 0x1F);
+  timestamp.minute = (tm.min & 0x3F);
+  timestamp.hour = (tm.hour & 0x1F);
+  timestamp.day_in_month = (tm.day & 0x1F);
+  timestamp.month = (tm.mon & 0x0F);
+  timestamp.year = (tm.year & 0x7F);
   return timestamp.value;
 }
 
