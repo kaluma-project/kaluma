@@ -41,6 +41,7 @@ extern vfs_fat_root_t vfs_fat_root;
 static void vfs_handle_freecb(void *handle) {
   vfs_fat_handle_t *vfs_handle = (vfs_fat_handle_t *)handle;
   jerry_release_value(vfs_handle->blkdev_js);
+  vfs_fat_handle_remove(vfs_handle);
   free(vfs_handle->fat_fs);
   free(handle);
 }
