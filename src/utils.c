@@ -21,6 +21,7 @@
 
 #include "utils.h"
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -72,4 +73,55 @@ uint8_t km_hex2bin(unsigned char *hex) {
   uint8_t hh = km_hex1(hex[0]);
   uint8_t hl = km_hex1(hex[1]);
   return hh << 4 | hl;
+}
+
+#define LEAPS_THRU_END_OF(y) ((y) / 4 - (y) / 100 + (y) / 400)
+
+static inline bool is_leap_year(unsigned int year) {
+  return (!(year % 4) && (year % 100)) || !(year % 400);
+}
+
+/*
+ * The number of days in the month.
+ */
+static int rtc_month_days(unsigned int month, unsigned int year) {
+  const unsigned char rtc_days_in_month[] = {31, 28, 31, 30, 31, 30,
+                                             31, 31, 30, 31, 30, 31};
+  return rtc_days_in_month[month] + (is_leap_year(year) && month == 1);
+}
+
+void km_rtc_to_time(uint64_t time_ms, struct km_time *tm) {
+  uint8_t month;
+  uint16_t year;
+  uint64_t secs, days;
+  uint64_t time_s = time_ms / 1000;
+  secs = time_s % 86400;
+  days = time_s / 86400;
+
+  /* day of the week, 1970-01-01 was a Thursday */
+  tm->week_day = (days + 4) % 7;
+
+  year = 1970 + days / 365;
+  days -= (year - 1970) * 365 + LEAPS_THRU_END_OF(year - 1) -
+          LEAPS_THRU_END_OF(1970 - 1);
+  while (days < 0) {
+    year -= 1;
+    days += 365 + is_leap_year(year);
+  }
+  tm->year = year;
+
+  for (month = 0; month < 11; month++) {
+    int newdays;
+
+    newdays = days - rtc_month_days(month, year);
+    if (newdays < 0) break;
+    days = newdays;
+  }
+  tm->mon = month + 1;
+  tm->day = days + 1;
+
+  tm->hour = secs / 3600;
+  secs -= tm->hour * 3600;
+  tm->min = secs / 60;
+  tm->sec = secs - tm->min * 60;
 }

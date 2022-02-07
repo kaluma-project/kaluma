@@ -2,17 +2,31 @@ const { test, start, expect } = require("__ujest");
 const { RAMBlockDev } = require("__test_utils");
 const { VFSFatFS } = require("vfs_fat");
 
-const bd = new RAMBlockDev(512, 1024, 512);
-const vfs = new VFSFatFS(bd);
+// configs for FAT
+const BLOCK_SIZE = 512;
+const BLOCK_COUNT = 1024;
+const BUFFER_SIZE = 512;
+const VFS = VFSFatFS;
 
-test("[vfs_fat] mount without format", (done) => {
-  expect(() => {
-    vfs.mount();
-  }).toThrow();
-  done();
-});
+// constants for flags
+const VFS_FLAG_READ = 1;
+const VFS_FLAG_WRITE = 2;
+const VFS_FLAG_CREATE = 4;
+const VFS_FLAG_APPEND = 8;
+const VFS_FLAG_EXCL = 16;
+const VFS_FLAG_TRUNC = 32;
 
-test("[vfs_fat] mkfs and mount()", (done) => {
+function init_vfs() {
+  const bd = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  const vfs = new VFS(bd);
+  vfs.mkfs();
+  vfs.mount();
+  return vfs;
+}
+
+test("[vfs_fat] mkfs()", (done) => {
+  const bd = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  const vfs = new VFS(bd);
   vfs.mkfs();
   expect(() => {
     vfs.mount();
@@ -20,101 +34,276 @@ test("[vfs_fat] mkfs and mount()", (done) => {
   done();
 });
 
-test("[vfs_fat] unmount()", (done) => {
-  expect(() => {
-    vfs.unmount();
-  }).notToThrow();
-  done();
-});
-
 test("[vfs_fat] mount()", (done) => {
+  const bd = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  const vfs = new VFS(bd);
+  vfs.mkfs();
   expect(() => {
     vfs.mount();
   }).notToThrow();
   done();
 });
 
+test("[vfs_fat] mount() - not formatted", (done) => {
+  const bd = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  const vfs = new VFS(bd);
+  expect(() => {
+    vfs.mount();
+  }).toThrow();
+  done();
+});
+
+test("[vfs_fat] unmount()", (done) => {
+  const bd = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  const vfs = new VFS(bd);
+  vfs.mkfs();
+  vfs.mount();
+  expect(() => {
+    vfs.unmount();
+  }).notToThrow();
+  done();
+});
+
 test("[vfs_fat] mkdir()", (done) => {
-  vfs.mkdir("dir1");
-  let files = vfs.readdir("/");
-  expect(files).toContain("DIR1");
-  done();
-});
-
-test("[vfs_fat] rmdir()", (done) => {
-  let files = vfs.readdir("/");
-  expect(files).toContain("DIR1");
-  vfs.rmdir("dir1");
-  files = vfs.readdir("/");
-  expect(files).notToContain("DIR1");
-  done();
-});
-
-test("[vfs_fat] readdir()", (done) => {
+  const vfs = init_vfs();
   vfs.mkdir("dir1");
   vfs.mkdir("dir2");
   vfs.mkdir("dir3");
   let files = vfs.readdir("/");
   expect(files.length).toBe(3);
-  expect(files).toContain("DIR1");
-  expect(files).toContain("DIR2");
-  expect(files).toContain("DIR3");
+  expect(files).toContain("dir1");
+  expect(files).toContain("dir2");
+  expect(files).toContain("dir3");
+  vfs.unmount();
+  done();
+});
+
+test("[vfs_fat] mkdir() - already exists", (done) => {
+  const vfs = init_vfs();
+  vfs.mkdir("dir1");
+  let files = vfs.readdir("/");
+  expect(files.length).toBe(1);
+  expect(files).toContain("dir1");
+
+  // mkdir "dir1" already exists
+  expect(() => {
+    vfs.mkdir("dir1");
+  }).toThrow("File exists");
+
+  vfs.unmount();
+  done();
+});
+
+test("[vfs_fat] rmdir()", (done) => {
+  const vfs = init_vfs();
+
+  vfs.mkdir("dir1");
+  vfs.mkdir("dir2");
+  vfs.mkdir("dir3");
+  let files = vfs.readdir("/");
+  expect(files.length).toBe(3);
+  expect(files).toContain("dir1");
+  expect(files).toContain("dir2");
+  expect(files).toContain("dir3");
+
+  // rmdir dir1
+  vfs.rmdir("dir1");
+  files = vfs.readdir("/");
+  expect(files.length).toBe(2);
+  expect(files).notToContain("dir1");
+  expect(files).toContain("dir2");
+  expect(files).toContain("dir3");
+
+  // rmdir dir2
+  vfs.rmdir("dir2");
+  files = vfs.readdir("/");
+  expect(files.length).toBe(1);
+  expect(files).notToContain("dir1");
+  expect(files).notToContain("dir2");
+  expect(files).toContain("dir3");
+
+  // rmdir dir3
+  vfs.rmdir("dir3");
+  files = vfs.readdir("/");
+  expect(files.length).toBe(0);
+  expect(files).notToContain("dir1");
+  expect(files).notToContain("dir2");
+  expect(files).notToContain("dir3");
+
+  vfs.unmount();
+  done();
+});
+
+test("[vfs_fat] rmdir() - not exists", (done) => {
+  const vfs = init_vfs();
+
+  // rmdir dir1 not exists
+  expect(() => {
+    vfs.rmdir("dir1");
+  }).toThrow("No such file or directory");
+
+  vfs.unmount();
+  done();
+});
+
+test("[vfs_fat] readdir()", (done) => {
+  const vfs = init_vfs();
+
+  vfs.mkdir("dir1");
+  vfs.mkdir("dir2");
+  vfs.mkdir("dir3");
+
+  let files = vfs.readdir("/");
+  expect(files.length).toBe(3);
+  expect(files).toContain("dir1");
+  expect(files).toContain("dir2");
+  expect(files).toContain("dir3");
+
+  vfs.unmount();
+  done();
+});
+
+test("[vfs_fat] readdir() - not exists", (done) => {
+  const vfs = init_vfs();
+
+  expect(() => {
+    vfs.readdir("/dir");
+  }).toThrow("No such file or directory");
+
+  vfs.unmount();
+  done();
+});
+
+test("[vfs_fat] open/write/read/close/unlink/stat()", (done) => {
+  const vfs = init_vfs();
+  const fname = "/file.txt";
+
+  // file write (create)
+  let fd = vfs.open(fname, VFS_FLAG_WRITE | VFS_FLAG_CREATE, 0);
+  let buf = new Uint8Array([60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
+  vfs.write(fd, buf, 0, buf.length, 0);
+  vfs.close(fd);
+
+  // file stat
+  let stat = vfs.stat(fname);
+  expect(stat.type).toBe(1); // 1=file, 2=dir
+  expect(stat.size).toBe(buf.length);
+
+  // file read
+  let fd2 = vfs.open(fname, VFS_FLAG_READ, 0);
+  let buf2 = new Uint8Array(10);
+  vfs.read(fd2, buf2, 0, buf2.length, 0);
+  vfs.close(fd2);
+  expect(buf.join(",")).toBe(buf2.join(","));
+
+  // file unlink
+  vfs.unlink(fname);
+  expect(() => {
+    let fd3 = vfs.open(fname, VFS_FLAG_READ, 0);
+  }).toThrow("No such file or directory");
+
+  vfs.unmount();
+  done();
+});
+
+test("[vfs_fat] open() - for read not exists", (done) => {
+  const vfs = init_vfs();
+  const fname = "/nofile.txt";
+  expect(() => {
+    vfs.open(fname, VFS_FLAG_READ, 0);
+  }).toThrow("No such file or directory");
+  vfs.unmount();
+  done();
+});
+
+test("[vfs_fat] open() - for write with VFS_FLAG_EXCL to already exists", (done) => {
+  const vfs = init_vfs();
+  const fname = "/file.txt";
+
+  // file write (create)
+  let fd = vfs.open(fname, VFS_FLAG_WRITE | VFS_FLAG_CREATE, 0);
+  let buf = new Uint8Array([60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
+  vfs.write(fd, buf, 0, buf.length, 0);
+  vfs.close(fd);
+
+  // write exclusive on already exists
+  expect(() => {
+    vfs.open(fname, VFS_FLAG_WRITE | VFS_FLAG_EXCL, 0);
+  }).toThrow("File exists");
+
+  vfs.unmount();
+  done();
+});
+
+test("[vfs_fat] write(fd, buffer) - without offset, length, position", (done) => {
+  const vfs = init_vfs();
+  const fname = "/written.txt";
+
+  // file write sequentially
+  let fd = vfs.open(fname, VFS_FLAG_WRITE | VFS_FLAG_CREATE, 0);
+  let wbuf1 = new Uint8Array([60, 61, 62, 63, 64]);
+  let wbuf2 = new Uint8Array([65, 66, 67, 68, 69]);
+  let wbuf3 = new Uint8Array([70, 71, 72, 73, 74]);
+  vfs.write(fd, wbuf1);
+  vfs.write(fd, wbuf2);
+  vfs.write(fd, wbuf3);
+  vfs.close(fd);
+
+  // file size
+  let stat = vfs.stat(fname);
+  expect(stat.type).toBe(1); // 1=file,2=dir
+  expect(stat.size).toBe(wbuf1.length + wbuf2.length + wbuf3.length);
+
+  // file read sequentially
+  let fd2 = vfs.open(fname, VFS_FLAG_READ, 0);
+  let rbuf1 = new Uint8Array(wbuf1.length);
+  let rbuf2 = new Uint8Array(wbuf2.length);
+  let rbuf3 = new Uint8Array(wbuf3.length);
+  vfs.read(fd2, rbuf1);
+  vfs.read(fd2, rbuf2);
+  vfs.read(fd2, rbuf3);
+  vfs.close(fd2);
+  expect(wbuf1.join(",")).toBe(rbuf1.join(","));
+  expect(wbuf2.join(",")).toBe(rbuf2.join(","));
+  expect(wbuf3.join(",")).toBe(rbuf3.join(","));
+
+  // remove file
+  vfs.unlink(fname);
+
+  // unmount
+  vfs.unmount();
   done();
 });
 
 test("[vfs_fat] rename()", (done) => {
-  vfs.rename("dir3", "dir4");
-  let files = vfs.readdir("/");
-  expect(files).notToContain("DIR3");
-  expect(files).toContain("DIR4");
-  done();
-});
+  const vfs = init_vfs();
 
-test("[vfs_fat] open() / close()", (done) => {
-  let id = vfs.open("/test.txt", 0x0A, 0);
-  vfs.close(id);
-  let files = vfs.readdir("/");
-  expect(files).toContain("TEST.TXT");
-  done();
-});
+  // create file "rename.txt"
+  let fd = vfs.open("rename.txt", VFS_FLAG_WRITE | VFS_FLAG_CREATE, 0);
+  let buf = new Uint8Array([60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
+  vfs.write(fd, buf, 0, buf.length, 0);
+  vfs.close(fd);
 
-test("[vfs_fat] stat()", (done) => {
-  let stat_file = vfs.stat("/test.txt");
-  expect(stat_file.type).toBe(1);
-  expect(stat_file.size).toBe(0);
-  let stat_dir = vfs.stat("/DIR4");
-  expect(stat_dir.type).toBe(2);
-  expect(stat_dir.size).toBe(0);
-  done();
-});
+  // check file exists
+  let stat1 = vfs.stat("rename.txt");
+  expect(stat1.type).toBe(1); // 1=file,2=dir
+  expect(stat1.size).toBe(buf.length);
 
-test("[vfs_fat] unlink", (done) => {
-  vfs.unlink("/test.txt");
-  let files = vfs.readdir("/");
-  expect(files).notToContain("TEST.TXT");
-  done();
-});
+  // rename "rename.txt" to "newname.txt"
+  vfs.rename("rename.txt", "newname.txt");
 
-test("[vfs_fat] write()", (done) => {
-  let id = vfs.open("/test.txt", 0x0A, 0);
-  let w_buffer = new Uint8Array([0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39]);
-  vfs.write(id, w_buffer, 0, w_buffer.length, 0);
-  vfs.close(id);
-  let stat_file = vfs.stat("/test.txt");
-  expect(stat_file.type).toBe(1);
-  expect(stat_file.size).toBe(w_buffer.length);
-  let files = vfs.readdir("/");
-  expect(files).toContain("TEST.TXT");
-  done();
-});
+  // "rename.txt" not exists
+  expect(() => {
+    vfs.stat("rename.txt");
+  }).toThrow("No such file or directory");
 
-test("[vfs_fat] read()", (done) => {
-  let id = vfs.open("/test.txt", 0x01, 0);
-  let w_buffer = new Uint8Array([0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39]);
-  let r_buffer = new Uint8Array(10);
-  vfs.read(id, r_buffer, 0, r_buffer.length, 0);
-  vfs.close(id);
-  expect(r_buffer.join(',')).toBe(w_buffer.join(','));
+  // "newname.txt" exists
+  let stat2 = vfs.stat("newname.txt");
+  expect(stat2.type).toBe(1); // 1=file,2=dir
+  expect(stat2.size).toBe(buf.length);
+
+  vfs.unlink("newname.txt");
+  vfs.unmount();
   done();
 });
 

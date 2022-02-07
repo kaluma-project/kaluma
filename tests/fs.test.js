@@ -1,11 +1,20 @@
 const { test, start, expect } = require("__ujest");
 const { VFSLittleFS } = require("vfs_lfs");
+const { VFSFatFS } = require("vfs_fat");
 const { RAMBlockDev } = require("__test_utils");
 const fs = require("fs");
+
 fs.register('lfs', VFSLittleFS);
+fs.register('fat', VFSFatFS);
+
+// configs for FAT
+const BLOCK_SIZE = 512;
+const BLOCK_COUNT = 512;
+const BUFFER_SIZE = 512;
 
 test("[fs] mkfs()", (done) => {
   const bd1 = new RAMBlockDev();
+  const bd_fat1 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
 
   expect(() => {
     fs.mount('/', bd1, 'lfs');
@@ -17,12 +26,13 @@ test("[fs] mkfs()", (done) => {
   expect(fs.__lookup("/")).toBeTruthy();
 
   fs.unmount('/');
-  done();
-});
 
-test("[fs] mount() - with mkfs", (done) => {
-  const bd1 = new RAMBlockDev();
-  fs.mount('/', bd1, 'lfs', true);
+  expect(() => {
+    fs.mount('/', bd_fat1, 'fat');
+  }).toThrow()
+
+  fs.mkfs(bd_fat1, 'fat');
+  fs.mount('/', bd_fat1, 'fat');
 
   expect(fs.__lookup("/")).toBeTruthy();
 
@@ -30,13 +40,39 @@ test("[fs] mount() - with mkfs", (done) => {
   done();
 });
 
+test("[fs] mount() - with mkfs", (done) => {
+  const bd1 = new RAMBlockDev();
+  const bd_fat1 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+
+  fs.mount('/', bd1, 'lfs', true);
+  fs.mount('/sd', bd_fat1, 'fat', true);
+  expect(fs.__lookup("/")).toBeTruthy();
+  expect(fs.__lookup("/sd")).toBeTruthy();
+
+  fs.unmount('/sd');
+  fs.unmount('/');
+  done();
+});
+
 test("[fs] mount() - already formatted", (done) => {
   const bd1 = new RAMBlockDev();
+  const bd_fat1 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+
   fs.mount('/', bd1, 'lfs', true);
   fs.mkdir('/dir1');
   fs.unmount('/');
 
   fs.mount('/', bd1, 'lfs');
+  expect(fs.__lookup("/")).toBeTruthy();
+  expect(fs.readdir('/')).toContain('dir1');
+
+  fs.unmount('/');
+
+  fs.mount('/', bd_fat1, 'fat', true);
+  fs.mkdir('/dir1');
+  fs.unmount('/');
+
+  fs.mount('/', bd_fat1, 'fat');
   expect(fs.__lookup("/")).toBeTruthy();
   expect(fs.readdir('/')).toContain('dir1');
 
@@ -56,13 +92,23 @@ test("[fs] mount() - multiple blkdev", (done) => {
   const bd3 = new RAMBlockDev();
   fs.mount('/sd', bd3, 'lfs', true);
 
+  const bd_fat1 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  fs.mount('/sd_fat1', bd_fat1, 'fat', true);
+
+  const bd_fat2 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  fs.mount('/sd_fat2', bd_fat2, 'fat', true);
+
   expect(fs.__lookup("/")).toBeTruthy();
   expect(fs.__lookup("/flash")).toBeTruthy();
   expect(fs.__lookup("/sd")).toBeTruthy();
+  expect(fs.__lookup("/sd_fat1")).toBeTruthy();
+  expect(fs.__lookup("/sd_fat2")).toBeTruthy();
 
   fs.unmount('/');
   fs.unmount('/flash');
   fs.unmount('/sd');
+  fs.unmount('/sd_fat1');
+  fs.unmount('/sd_fat2');
   done();
 });
 
@@ -70,12 +116,18 @@ test("[fs] unmount()", (done) => {
   const bd1 = new RAMBlockDev();
   const bd2 = new RAMBlockDev();
   const bd3 = new RAMBlockDev();
+  const bd_fat1 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  const bd_fat2 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
   fs.mount('/', bd1, 'lfs', true);
   fs.mount('/flash', bd2, 'lfs', true);
   fs.mount('/sd', bd3, 'lfs', true);
+  fs.mount('/sd_fat1', bd_fat1, 'fat', true);
+  fs.mount('/sd_fat2', bd_fat2, 'fat', true);
   fs.unmount('/');
   fs.unmount('/flash');
   fs.unmount('/sd');
+  fs.unmount('/sd_fat1');
+  fs.unmount('/sd_fat2');
 
   expect(() => {
     fs.__lookup("/");
@@ -86,17 +138,46 @@ test("[fs] unmount()", (done) => {
   expect(() => {
     fs.__lookup("/sd");
   }).toThrow();
-
+  expect(() => {
+    fs.__lookup("/sd_fat1");
+  }).toThrow();
+  expect(() => {
+    fs.__lookup("/sd_fat2");
+  }).toThrow();
   done();
 });
 
-test("[fs] __lookup()", (done) => {
+/*
+test("[fs] unmount() - second", (done) => {
   const bd1 = new RAMBlockDev();
   const bd2 = new RAMBlockDev();
   const bd3 = new RAMBlockDev();
+  let files;
   fs.mount('/', bd1, 'lfs', true);
   fs.mount('/flash', bd2, 'lfs', true);
   fs.mount('/sd', bd3, 'lfs', true);
+  files = fs.readdir("/");
+  expect(files).toContain("sd");
+  expect(files).toContain("flash");
+  fs.unmount('/flash');
+  expect(() => {
+    fs.__lookup("/flash");
+  }).toThrow();
+  files = fs.readdir("/");
+  expect(files).toContain("sd");
+  expect(files).notToContain("flash");
+  fs.unmount('/sd');
+  fs.unmount('/');
+  done();
+});
+*/
+test("[fs] __lookup()", (done) => {
+  const bd1 = new RAMBlockDev();
+  const bd_fat1 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  const bd_fat2 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  fs.mount('/', bd1, 'lfs', true);
+  fs.mount('/flash', bd_fat1, 'fat', true);
+  fs.mount('/sd', bd_fat2, 'fat', true);
 
   let r = null;
 
@@ -145,11 +226,11 @@ test("[fs] cwd()", (done) => {
 
 test("[fs] chdir()", (done) => {
   const bd1 = new RAMBlockDev();
-  const bd2 = new RAMBlockDev();
-  const bd3 = new RAMBlockDev();
+  const bd_fat1 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  const bd_fat2 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
   fs.mount('/', bd1, 'lfs', true);
-  fs.mount('/flash', bd2, 'lfs', true);
-  fs.mount('/sd', bd3, 'lfs', true);
+  fs.mount('/flash', bd_fat1, 'fat', true);
+  fs.mount('/sd', bd_fat2, 'fat', true);
 
   fs.chdir("/");
   expect(fs.cwd()).toBe("/");
@@ -190,11 +271,11 @@ test("[fs] chdir()", (done) => {
 
 test("[fs] readdir()", (done) => {
   const bd1 = new RAMBlockDev();
-  const bd2 = new RAMBlockDev();
-  const bd3 = new RAMBlockDev();
+  const bd_fat1 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  const bd_fat2 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
   fs.mount('/', bd1, 'lfs', true);
-  fs.mount('/flash', bd2, 'lfs', true);
-  fs.mount('/sd', bd3, 'lfs', true);  
+  fs.mount('/flash', bd_fat1, 'fat', true);
+  fs.mount('/sd', bd_fat2, 'fat', true);
 
   const bd4 = new RAMBlockDev();
   fs.mount('/sd/dev1', bd4, 'lfs', true);
@@ -220,6 +301,34 @@ test("[fs] mkdir() and rmdir()", (done) => {
   fs.mount('/', bd1, 'lfs', true);
 
   let ls = [];
+
+  fs.mkdir("/home");
+  ls = fs.readdir("/");
+  expect(ls).toContain("home");
+
+  fs.mkdir("/home/usr");
+  ls = fs.readdir("/home");
+  expect(ls).toContain("usr");
+
+  expect(fs.stat("/home").isDirectory()).toBe(true);
+  expect(fs.stat("/home").isFile()).toBe(false);
+  expect(fs.stat("/home/usr").isDirectory()).toBe(true);
+  expect(fs.stat("/home/usr").isFile()).toBe(false);
+
+  fs.rmdir("/home/usr");
+  ls = fs.readdir("/home");
+  expect(ls).notToContain("usr");
+
+  fs.rmdir("/home");
+  ls = fs.readdir("/");
+  expect(ls).notToContain("home");
+
+  fs.unmount('/');
+
+  const bd_fat1 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  fs.mount('/', bd_fat1, 'fat', true);
+
+  ls = [];
 
   fs.mkdir("/home");
   ls = fs.readdir("/");
@@ -273,6 +382,30 @@ test("[fs] open/write/read/close/unlink/stat()", (done) => {
   fs.unlink(fname);
 
   fs.unmount('/');
+
+  const bd_fat1 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  fs.mount('/', bd_fat1, 'fat', true);
+
+  // file write (create)
+  fd = fs.open(fname, 'w');
+  fs.write(fd, buf, 0, buf.length, 0);
+  fs.close(fd);
+
+  // file stat test
+  stat = fs.stat(fname);
+  expect(stat.isFile()).toBe(true);
+  expect(stat.size).toBe(buf.length);
+
+  // file read test
+  fd2 = fs.open(fname, 'r');
+  buf2 = new Uint8Array(10);
+  fs.read(fd2, buf2, 0, buf2.length, 0);
+  fs.close(fd2);
+  expect(buf.join(',')).toBe(buf2.join(','));
+
+  fs.unlink(fname);
+
+  fs.unmount('/');
   done();
 });
 
@@ -315,24 +448,58 @@ test("[fs] write(fd, buffer) - without offset, length, position", (done) => {
 
   // unmount
   fs.unmount('/');
+
+  const bd_fat1 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  fs.mount('/', bd_fat1, 'fat', true);
+
+  // file write sequentially
+  fd = fs.open(fname, 'w');
+  fs.write(fd, wbuf1);
+  fs.write(fd, wbuf2);
+  fs.write(fd, wbuf3);
+  fs.close(fd);
+
+  // file size
+  stat = fs.stat(fname);
+  expect(stat.isFile()).toBe(true);
+  expect(stat.size).toBe(wbuf1.length + wbuf2.length + wbuf3.length);
+
+  // file read sequentially
+  fd2 = fs.open(fname, 'r');
+  rbuf1 = new Uint8Array(wbuf1.length);
+  rbuf2 = new Uint8Array(wbuf2.length);
+  rbuf3 = new Uint8Array(wbuf3.length);
+  fs.read(fd2, rbuf1);
+  fs.read(fd2, rbuf2);
+  fs.read(fd2, rbuf3);
+  fs.close(fd2);
+  expect(wbuf1.join(',')).toBe(rbuf1.join(','));
+  expect(wbuf2.join(',')).toBe(rbuf2.join(','));
+  expect(wbuf3.join(',')).toBe(rbuf3.join(','));
+
+  // remove file
+  fs.unlink(fname);
+
+  // unmount
+  fs.unmount('/');
   done();
 });
 
 
 test("[fs] exists()", (done) => {
   const bd1 = new RAMBlockDev();
-  const bd2 = new RAMBlockDev();
-  const bd3 = new RAMBlockDev();
+  const bd_fat1 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  const bd_fat2 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
   fs.mount('/', bd1, 'lfs', true);
-  fs.mount('/flash', bd2, 'lfs', true);
-  fs.mount('/sd', bd3, 'lfs', true);  
+  fs.mount('/flash', bd_fat1, 'fat', true);
+  fs.mount('/sd', bd_fat2, 'fat', true);
 
   const fname = '/exists.txt';
 
   let fd = fs.open(fname, 'w');
   let buf = new Uint8Array([60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
   fs.write(fd, buf, 0, buf.length, 0);
-  fs.close(fd);  
+  fs.close(fd);
   expect(fs.exists(fname)).toBe(true);
 
   expect(fs.exists('/')).toBe(true);
@@ -350,10 +517,27 @@ test("[fs] exists()", (done) => {
 
 test("[fs] rename()", (done) => {
   const bd1 = new RAMBlockDev();
-  fs.mount('/', bd1, 'lfs', true);  
+  fs.mount('/', bd1, 'lfs', true);
 
   let fd = fs.open('/rename.txt', 'w');
   let buf = new Uint8Array([60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
+  fs.write(fd, buf, 0, buf.length, 0);
+  fs.close(fd);
+  expect(fs.exists('/rename.txt')).toBe(true);
+
+  fs.rename('rename.txt', 'newname.txt');
+  expect(fs.exists('/rename.txt')).toBe(false);
+  expect(fs.exists('/newname.txt')).toBe(true);
+
+  fs.unlink('newname.txt');
+
+  fs.unmount('/');
+
+  const bd_fat1 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  fs.mount('/', bd_fat1, 'fat', true);
+
+  fd = fs.open('/rename.txt', 'w');
+  buf = new Uint8Array([60, 61, 62, 63, 64, 65, 66, 67, 68, 69]);
   fs.write(fd, buf, 0, buf.length, 0);
   fs.close(fd);
   expect(fs.exists('/rename.txt')).toBe(true);
@@ -377,6 +561,18 @@ test("[fs] write/readFile()", (done) => {
   expect(fs.exists('/filesync.txt')).toBe(true);
 
   const buf2 = fs.readFile('/filesync.txt');
+  expect(buf.join(',')).toBe(buf2.join(','));
+
+  fs.unlink('/filesync.txt');
+
+  fs.unmount('/');
+
+  const bd_fat1 = new RAMBlockDev(BLOCK_SIZE, BLOCK_COUNT, BUFFER_SIZE);
+  fs.mount('/', bd_fat1, 'fat', true);
+
+  fs.writeFile('/filesync.txt', buf);
+  expect(fs.exists('/filesync.txt')).toBe(true);
+
   expect(buf.join(',')).toBe(buf2.join(','));
 
   fs.unlink('/filesync.txt');
