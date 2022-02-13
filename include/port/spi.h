@@ -96,12 +96,14 @@ int km_spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
  * Receive data from the SPI bus and store them into a given buffer.
  *
  * @param {uint8_t} bus
+ * @param {uint8_t} send_byte byte to send
  * @param {uint8_t*} buf
  * @param {size_t} len
  * @param {uint32_t} timeout
  * @return {int} the number of bytes read
  */
-int km_spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
+int km_spi_recv(uint8_t bus, uint8_t send_byte, uint8_t *buf, size_t len,
+                uint32_t timeout);
 
 /**
  * Close the SPI bus

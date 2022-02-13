@@ -169,7 +169,8 @@ int km_spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   return ENOPHRPL;
 }
 
-int km_spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
+int km_spi_recv(uint8_t bus, uint8_t send_byte, uint8_t *buf, size_t len,
+                uint32_t timeout) {
   uint8_t emptyBuf[len];
   if ((bus != 0) && (bus != 1)) return ENOPHRPL;
 
@@ -177,7 +178,7 @@ int km_spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   // I think SPI_Receive function has a bug (sending garbage data)
   // HAL_SPI_Receive(hspi, buf, (uint16_t)len, timeout);
   // Use transmitReceive with empty Tx buffer
-  for (size_t i = 0; i < len; i++) emptyBuf[i] = 0;
+  for (size_t i = 0; i < len; i++) emptyBuf[i] = send_byte;
   HAL_StatusTypeDef status =
       HAL_SPI_TransmitReceive(hspi, emptyBuf, buf, (uint16_t)len, timeout);
   if (status == HAL_OK) {
