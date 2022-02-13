@@ -37,26 +37,10 @@ struct km_list_s {
   km_list_node_t *tail;
 };
 
-struct km_time {
-  uint8_t sec;
-  uint8_t min;
-  uint8_t hour;
-  uint8_t day;
-  uint8_t mon;
-  uint8_t week_day;
-  uint16_t year;
-};
-
 void km_list_init(km_list_t *list);
 void km_list_append(km_list_t *list, km_list_node_t *node);
 void km_list_remove(km_list_t *list, km_list_node_t *node);
 
 uint8_t km_hex1(char hex);
 uint8_t km_hex2bin(unsigned char *hex);
-
-/*
- * rtc_to_time
- * Convert rtc mili seconds since 01-01-1970 00:00:00 to km_time.
- */
-void km_rtc_to_time(uint64_t time_ms, struct km_time *tm);
 #endif /* __KM_UTILS_H */
