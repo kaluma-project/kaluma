@@ -182,6 +182,15 @@ int km_spi_recv(uint8_t bus, uint8_t send_byte, uint8_t *buf, size_t len,
   return spi_read_blocking(spi, send_byte, buf, len);
 }
 
+int km_set_spi_baudrate(uint8_t bus, uint32_t baudrate) {
+  spi_inst_t *spi = __get_spi_no(bus);
+  if ((spi == NULL) || (__spi_status[bus].enabled == false)) {
+    return ENOPHRPL;
+  }
+  spi_set_baudrate(spi, baudrate);
+  return 0;
+}
+
 int km_spi_close(uint8_t bus) {
   spi_inst_t *spi = __get_spi_no(bus);
   if ((spi == NULL) || (__spi_status[bus].enabled == false)) {
