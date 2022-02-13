@@ -235,7 +235,7 @@ JERRYXX_FUN(spi_recv_fn) {
 
   // recv data
   uint8_t *buf = malloc(length);
-  int ret = km_spi_recv(bus, buf, length, timeout);
+  int ret = km_spi_recv(bus, 0, buf, length, timeout);
 
   // return an Uin8Array
   if (ret < 0) {

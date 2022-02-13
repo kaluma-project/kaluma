@@ -59,7 +59,8 @@ int km_spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   return 0;
 }
 
-int km_spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
+int km_spi_recv(uint8_t bus, uint8_t send_byte, uint8_t *buf, size_t len,
+                uint32_t timeout) {
   return 0;
 }
 
