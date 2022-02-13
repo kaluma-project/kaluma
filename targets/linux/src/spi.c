@@ -64,4 +64,6 @@ int km_spi_recv(uint8_t bus, uint8_t send_byte, uint8_t *buf, size_t len,
   return 0;
 }
 
+int km_set_spi_baudrate(uint8_t bus, uint32_t baudrate) { return 0; }
+
 int km_spi_close(uint8_t bus) { return 0; }
