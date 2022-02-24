@@ -23,6 +23,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "diskio.h"
 #include "err.h"
@@ -224,14 +225,14 @@ DWORD get_fattime(void) {
     };
     DWORD value;
   } timestamp;
-  struct km_time tm;
-  km_rtc_to_time(km_rtc_get_time(), &tm);
-  timestamp.second = (tm.sec & 0x1F);
-  timestamp.minute = (tm.min & 0x3F);
-  timestamp.hour = (tm.hour & 0x1F);
-  timestamp.day_in_month = (tm.day & 0x1F);
-  timestamp.month = (tm.mon & 0x0F);
-  timestamp.year = (tm.year & 0x7F);
+  time_t t = (time_t)(km_rtc_get_time() / 1000);
+  struct tm *tm = gmtime(&t);
+  timestamp.second = (tm->tm_sec & 0x1F);
+  timestamp.minute = (tm->tm_min & 0x3F);
+  timestamp.hour = (tm->tm_hour & 0x1F);
+  timestamp.day_in_month = (tm->tm_mday & 0x1F);
+  timestamp.month = ((tm->tm_mon + 1) & 0x0F);
+  timestamp.year = ((tm->tm_year + 1900 - 1980) & 0x7F);
   return timestamp.value;
 }
 
