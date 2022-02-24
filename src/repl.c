@@ -182,15 +182,15 @@ static void set_cursor_to_position() {
   int vert = (state.position + 2) / state.width;
   if (horz > 0) {
     if (vert > 0) {
-      km_repl_printf("\033[u\033[%dC\033[%dB", horz, vert);
+      km_repl_printf("\0338\033[%dC\033[%dB", horz, vert);
     } else {
-      km_repl_printf("\033[u\033[%dC", horz);
+      km_repl_printf("\0338\033[%dC", horz);
     }
   } else {
     if (vert > 0) {
-      km_repl_printf("\033[u\033[%dB", vert);
+      km_repl_printf("\0338\033[%dB", vert);
     } else {
-      km_repl_printf("\033[u");
+      km_repl_printf("\0338");
     }
   }
 }
@@ -234,7 +234,7 @@ static void handle_normal(char ch) {
         state.buffer[state.buffer_length] = '\0';
         if (state.echo) {
           km_repl_printf("\033[D\033[K\033[J");
-          km_repl_printf("\033[u> %s", state.buffer);
+          km_repl_printf("\0338> %s", state.buffer);
           set_cursor_to_position();
         }
       }
@@ -262,7 +262,7 @@ static void handle_normal(char ch) {
           state.position++;
           state.buffer[state.buffer_length] = '\0';
           if (state.echo) {
-            km_repl_printf("\033[u> %s", state.buffer);
+            km_repl_printf("\0338> %s", state.buffer);
             set_cursor_to_position();
           }
         }
@@ -366,7 +366,7 @@ static void handle_escape(char ch) {
         state.buffer[state.buffer_length] = '\0';
         if (state.echo) {
           km_repl_printf("\033[K\033[J");
-          km_repl_printf("\033[u> %s", state.buffer);
+          km_repl_printf("\0338> %s", state.buffer);
           set_cursor_to_position();
         }
       }
@@ -922,11 +922,11 @@ void km_repl_print_prompt() {
   km_tty_printf("\33[0m");  // back to normal color
   if (state.echo) {
     state.buffer[state.buffer_length] = '\0';
-    km_tty_printf("\r\033[s");  // save cursor position
+    km_tty_printf("\r\0337");  // save cursor position
     km_tty_printf("> %s", &state.buffer);
     km_tty_printf(
-        "\33[H\33[900C\33[6n\033[u\033[2C");  // query terminal screen width and
-                                              // restore cursor position
+        "\33[H\33[900C\33[6n\0338\033[2C");  // query terminal screen width and
+                                             // restore cursor position
   }
 }
 
