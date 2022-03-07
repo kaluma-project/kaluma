@@ -10,7 +10,7 @@ if(NOT "${TARGET}" STREQUAL "rp2")
 endif()
 
 if(NOT VER)
-  set(VER "1.0.0-beta.13")
+  set(VER "1.0.0-beta.14")
 endif()
 
 include(${CMAKE_SOURCE_DIR}/targets/${TARGET}/target.cmake)
