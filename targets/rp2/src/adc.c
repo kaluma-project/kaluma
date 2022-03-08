@@ -36,7 +36,7 @@
  * @return Returns index on success or EINVPIN on failure.
  */
 static int __get_adc_index(uint8_t pin) {
-  if ((pin >= 26) && (pin <= 28)) {
+  if ((pin >= 26) && (pin <= 29)) {
     return pin - 26;  // GPIO 26 is channel 0
   }
   return EINVPIN;
