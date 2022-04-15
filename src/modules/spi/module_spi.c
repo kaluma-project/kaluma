@@ -73,7 +73,7 @@ JERRYXX_FUN(spi_ctor_fn) {
                               (const jerry_char_t *)"SPI mode error.");
   // initialize the bus
   int ret = km_spi_setup(bus, (km_spi_mode_t)mode, baudrate,
-                         (km_spi_bitorder_t)bitorder, pins);
+                         (km_spi_bitorder_t)bitorder, pins, false);
   if (ret < 0) {
     return jerry_create_error_from_value(create_system_error(ret), true);
   } else {

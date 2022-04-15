@@ -112,7 +112,8 @@ void km_spi_cleanup() {
 /** SPI Setup
  */
 int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
-                 km_spi_bitorder_t bitorder, km_spi_pins_t pins) {
+                 km_spi_bitorder_t bitorder, km_spi_pins_t pins,
+                 bool miso_pullup) {
   spi_inst_t *spi = __get_spi_no(bus);
   if ((spi == NULL) || (__spi_status[bus].enabled) ||
       (__check_spi_pins(bus, pins) == false)) {
@@ -149,6 +150,9 @@ int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
   gpio_set_function(pins.miso, GPIO_FUNC_SPI);
   gpio_set_function(pins.mosi, GPIO_FUNC_SPI);
   gpio_set_function(pins.sck, GPIO_FUNC_SPI);
+  if (miso_pullup) {
+    gpio_pull_up(pins.miso);
+  }
   __spi_status[bus].enabled = true;
   return 0;
 }

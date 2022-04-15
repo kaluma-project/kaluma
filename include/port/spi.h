@@ -22,6 +22,7 @@
 #ifndef __KM_SPI_H
 #define __KM_SPI_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -63,10 +64,12 @@ void km_spi_cleanup();
  * @param bit_order Bit order (MSB or LSB).
  * @param bits Number of bits in each transferred word.
  * @param pins pin numbers for the SCK/MISO/MOSI
+ * @param miso_pullup true when MISO internal pull up is needed.
  * @return Returns 0 on success or minus value (err) on failure.
  */
 int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
-                 km_spi_bitorder_t bitorder, km_spi_pins_t pins);
+                 km_spi_bitorder_t bitorder, km_spi_pins_t pins,
+                 bool miso_pullup);
 
 /**
  * Send and receive data simultaneously to the SPI bus
