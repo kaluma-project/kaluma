@@ -85,10 +85,7 @@ function __lookup(path) {
     if (vfs.path === "/") {
       vfs.__pathout = _path;
       return vfs;
-    } else if (
-      _path === vfs.path ||
-      _path.startsWith(vfs.path + __path.sep)
-    ) {
+    } else if (_path === vfs.path || _path.startsWith(vfs.path + __path.sep)) {
       vfs.__pathout = _path.substr(vfs.path.length) || "/";
       return vfs;
     }
@@ -98,7 +95,7 @@ function __lookup(path) {
 
 /**
  * Register a filesystem
- * @param {string} fstype 
+ * @param {string} fstype
  * @param {constructor} fsctr
  */
 function register(fstype, fsctr) {
@@ -115,8 +112,8 @@ function unregister(fstype) {
 
 /**
  * Make filesystem
- * @param {BlockDevice} blkdev 
- * @param {string} fstype 
+ * @param {BlockDevice} blkdev
+ * @param {string} fstype
  */
 function mkfs(blkdev, fstype) {
   // create vfs of fstype
@@ -181,7 +178,8 @@ function unmount(path) {
   path = __path.normalize(path);
   const vfs = __mounts.find((v) => v.path === path);
   if (vfs) {
-    __mounts.splice(__mounts.indexOf(vfs));
+    vfs.unmount();
+    __mounts.splice(__mounts.indexOf(vfs), 1);
   }
 }
 
@@ -277,7 +275,7 @@ function read(fd, ...args) {
 function readFile(path) {
   const _stat = stat(path);
   const buffer = new Uint8Array(_stat.size);
-  const fd = open(path, 'r');
+  const fd = open(path, "r");
   read(fd, buffer, 0, buffer.length, 0);
   close(fd);
   return buffer;
@@ -292,7 +290,7 @@ function write(fd, ...args) {
 }
 
 function writeFile(path, data) {
-  const fd = open(path, 'w');
+  const fd = open(path, "w");
   write(fd, data, 0, data.length, 0);
   close(fd);
 }
@@ -329,7 +327,7 @@ function exists(path) {
   const vfs = __lookup(path);
   if (vfs) {
     try {
-      let _stat = vfs.stat(vfs.__pathout)
+      let _stat = vfs.stat(vfs.__pathout);
       return _stat ? true : false;
     } catch (err) {
       return false;
