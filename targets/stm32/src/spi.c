@@ -102,7 +102,8 @@ void km_spi_cleanup() {
 /** SPI Setup
  */
 int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
-                 km_spi_bitorder_t bitorder, km_spi_pins_t pins) {
+                 km_spi_bitorder_t bitorder, km_spi_pins_t pins,
+                 bool miso_pullup) {
   if ((bus != 0) && (bus != 1)) return ENOPHRPL;
 
   SPI_HandleTypeDef *pspi = spi_handle[bus];
@@ -169,7 +170,8 @@ int km_spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   return ENOPHRPL;
 }
 
-int km_spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
+int km_spi_recv(uint8_t bus, uint8_t send_byte, uint8_t *buf, size_t len,
+                uint32_t timeout) {
   uint8_t emptyBuf[len];
   if ((bus != 0) && (bus != 1)) return ENOPHRPL;
 
@@ -177,13 +179,18 @@ int km_spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   // I think SPI_Receive function has a bug (sending garbage data)
   // HAL_SPI_Receive(hspi, buf, (uint16_t)len, timeout);
   // Use transmitReceive with empty Tx buffer
-  for (size_t i = 0; i < len; i++) emptyBuf[i] = 0;
+  for (size_t i = 0; i < len; i++) emptyBuf[i] = send_byte;
   HAL_StatusTypeDef status =
       HAL_SPI_TransmitReceive(hspi, emptyBuf, buf, (uint16_t)len, timeout);
   if (status == HAL_OK) {
     return (len - hspi->RxXferCount);
   }
   return ENOPHRPL;
+}
+
+int km_set_spi_baudrate(uint8_t bus, uint32_t baudrate) {
+  // Need to implement to support SDcard module
+  return 0;
 }
 
 int km_spi_close(uint8_t bus) {

@@ -22,6 +22,7 @@
 #ifndef __KM_SPI_H
 #define __KM_SPI_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -63,10 +64,12 @@ void km_spi_cleanup();
  * @param bit_order Bit order (MSB or LSB).
  * @param bits Number of bits in each transferred word.
  * @param pins pin numbers for the SCK/MISO/MOSI
- * @return Returns 0 on success or -1 on failure.
+ * @param miso_pullup true when MISO internal pull up is needed.
+ * @return Returns 0 on success or minus value (err) on failure.
  */
 int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
-                 km_spi_bitorder_t bitorder, km_spi_pins_t pins);
+                 km_spi_bitorder_t bitorder, km_spi_pins_t pins,
+                 bool miso_pullup);
 
 /**
  * Send and receive data simultaneously to the SPI bus
@@ -76,7 +79,8 @@ int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
  * @param rx_buf
  * @param len
  * @param timeout
- * @return the number of bytes read or -1 on timeout or nothing written.
+ * @return the number of bytes read or minus value (err) on timeout or nothing
+ * written.
  */
 int km_spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len,
                     uint32_t timeout);
@@ -96,12 +100,23 @@ int km_spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
  * Receive data from the SPI bus and store them into a given buffer.
  *
  * @param {uint8_t} bus
+ * @param {uint8_t} send_byte byte to send
  * @param {uint8_t*} buf
  * @param {size_t} len
  * @param {uint32_t} timeout
  * @return {int} the number of bytes read
  */
-int km_spi_recv(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout);
+int km_spi_recv(uint8_t bus, uint8_t send_byte, uint8_t *buf, size_t len,
+                uint32_t timeout);
+
+/**
+ * Set SPI baudrate - change the clock frequency
+ *
+ * @param bus The bus number.
+ * @param baudrate Baud rate.
+ * @return int Returns 0 on success or minus value (err) on failure.
+ */
+int km_set_spi_baudrate(uint8_t bus, uint32_t baudrate);
 
 /**
  * Close the SPI bus

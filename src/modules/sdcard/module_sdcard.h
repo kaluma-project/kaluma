@@ -19,52 +19,6 @@
  * SOFTWARE.
  */
 
-#include "spi.h"
+#include "jerryscript.h"
 
-#include "gpio.h"
-
-/**
- * Return default SPI pins. -1 means there is no default value on that pin.
- */
-km_spi_pins_t km_spi_get_default_pins(uint8_t bus) {
-  km_spi_pins_t pins;
-  pins.miso = 0;
-  pins.mosi = 1;
-  pins.sck = 2;
-  return pins;
-}
-/**
- * Initialize all SPI when system started
- */
-void km_spi_init() {}
-
-/**
- * Cleanup all SPI when system cleanup
- */
-void km_spi_cleanup() {}
-
-/** SPI Setup
- */
-int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
-                 km_spi_bitorder_t bitorder, km_spi_pins_t pins,
-                 bool miso_pullup) {
-  return 0;
-}
-
-int km_spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len,
-                    uint32_t timeout) {
-  return 0;
-}
-
-int km_spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
-  return 0;
-}
-
-int km_spi_recv(uint8_t bus, uint8_t send_byte, uint8_t *buf, size_t len,
-                uint32_t timeout) {
-  return 0;
-}
-
-int km_set_spi_baudrate(uint8_t bus, uint32_t baudrate) { return 0; }
-
-int km_spi_close(uint8_t bus) { return 0; }
+jerry_value_t module_sdcard_init();

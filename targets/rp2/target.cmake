@@ -40,6 +40,7 @@ if(NOT MODULES)
     fs
     vfs_lfs
     vfs_fat
+    sdcard
     startup)
 endif()
 

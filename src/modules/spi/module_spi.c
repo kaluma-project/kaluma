@@ -73,7 +73,7 @@ JERRYXX_FUN(spi_ctor_fn) {
                               (const jerry_char_t *)"SPI mode error.");
   // initialize the bus
   int ret = km_spi_setup(bus, (km_spi_mode_t)mode, baudrate,
-                         (km_spi_bitorder_t)bitorder, pins);
+                         (km_spi_bitorder_t)bitorder, pins, false);
   if (ret < 0) {
     return jerry_create_error_from_value(create_system_error(ret), true);
   } else {
@@ -235,7 +235,7 @@ JERRYXX_FUN(spi_recv_fn) {
 
   // recv data
   uint8_t *buf = malloc(length);
-  int ret = km_spi_recv(bus, buf, length, timeout);
+  int ret = km_spi_recv(bus, 0, buf, length, timeout);
 
   // return an Uin8Array
   if (ret < 0) {
