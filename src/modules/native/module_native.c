@@ -83,6 +83,7 @@ JERRYXX_FUN(native_rfill_fn) {
   jerry_value_t array_buffer = jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
   uint16_t *buf = (uint16_t*)jerry_get_arraybuffer_pointer(array_buffer);
   for(int i=0;i<len;i++) buf[i]=val;
+  jerry_release_value(array_buffer);
   return jerry_create_undefined();
 }
 
@@ -104,7 +105,8 @@ JERRYXX_FUN(native_sprdraw_fn) {
     uint32_t ydo = ((ydst+y)%160)*128;
     for(int x=0;x<xlen;x++){
       uint32_t xdo = (xdst+x)%128;
-      if(src[yso+x]!=0) dst[ydo+xdo]=src[yso+x];
+      if(src[yso+x]!=0)
+		  dst[ydo+xdo]=src[yso+x];
     }
   }
   jerry_release_value(src_buffer);

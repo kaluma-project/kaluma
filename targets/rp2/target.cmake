@@ -42,6 +42,8 @@ if(NOT MODULES)
     vfs_fat
     sdcard
     native
+    engine
+    screen
     startup)
 endif()
 
