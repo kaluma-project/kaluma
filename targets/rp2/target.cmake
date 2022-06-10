@@ -43,6 +43,7 @@ if(NOT MODULES)
     sdcard
     native
     engine
+    pwmaudio
     screen
     startup)
 endif()
@@ -103,7 +104,9 @@ set(TARGET_LIBS c nosys m
   hardware_pio
   hardware_flash
   hardware_rtc
-  hardware_sync)
+  hardware_sync
+  pico_time
+  pico_multicore)
 set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -Wl,-Map=${OUTPUT_TARGET}.map,--cref,--gc-sections")
 
 include(${CMAKE_SOURCE_DIR}/tools/kaluma.cmake)
