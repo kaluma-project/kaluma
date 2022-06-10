@@ -54,14 +54,20 @@ void audio_main(void) {
 }
 
 JERRYXX_FUN(pwmaudio_start_ticker_fn) {
-  km_pwm_setup(PWM_AUDIO_PIN, 220, 0);
-  km_pwm_start(PWM_AUDIO_PIN);
+  static uint8_t started = 0;
 
-  queue_init(&note_queue, sizeof(note_t), 1 << 5);
+  if (!started) {
+    started = 1;
 
-  multicore_launch_core1(audio_main);
+    km_pwm_setup(PWM_AUDIO_PIN, 220, 0);
+    km_pwm_start(PWM_AUDIO_PIN);
 
-  return jerry_create_undefined();
+    queue_init(&note_queue, sizeof(note_t), 1 << 5);
+    multicore_launch_core1(audio_main);
+
+    return jerry_create_boolean(true);
+  }
+  return jerry_create_boolean(false);
 }
 
 JERRYXX_FUN(pwmaudio_play_note) {
