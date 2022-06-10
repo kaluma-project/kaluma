@@ -37,30 +37,18 @@
 
 #define PWM_AUDIO_PIN (6)
 
-#define NOTE_TICKS (0.5)
-float notes[] = {
-  440, 294, 587, 784,
-  880, 784, 699, 659,
-  523, 440, 349, 330,
-  330, 330, 349,   0,
-  784, 699, 659, 349,
-    0, 350, 349, 349,
-  392, 659, 659, 587,
-  587, 523, 523, 494,
-};
-#define NNOTE (sizeof(notes) / sizeof(notes[0]))
-
 queue_t note_queue; /* awww aint u a queue_t */
+typedef struct { uint16_t freq, ms; } note_t;
 
 void audio_main(void) {
   while (true) {
-    uint32_t msg;
-    queue_remove_blocking(&note_queue, &msg);
-    km_pwm_set_frequency(PWM_AUDIO_PIN, msg);
+    note_t note;
+    queue_remove_blocking(&note_queue, &note);
+    km_pwm_set_frequency(PWM_AUDIO_PIN, note.freq);
 
     /* play a note at that frequency */
     km_pwm_set_duty(PWM_AUDIO_PIN, 0.5); {
-      sleep_until(make_timeout_time_ms(0.5 * 1000));
+      sleep_until(make_timeout_time_ms(note.ms));
     } km_pwm_set_duty(PWM_AUDIO_PIN, 0);
   }
 }
@@ -69,7 +57,7 @@ JERRYXX_FUN(pwmaudio_start_ticker_fn) {
   km_pwm_setup(PWM_AUDIO_PIN, 220, 0);
   km_pwm_start(PWM_AUDIO_PIN);
 
-  queue_init(&note_queue, sizeof(uint32_t), 1 << 5);
+  queue_init(&note_queue, sizeof(note_t), 1 << 5);
 
   multicore_launch_core1(audio_main);
 
@@ -77,8 +65,13 @@ JERRYXX_FUN(pwmaudio_start_ticker_fn) {
 }
 
 JERRYXX_FUN(pwmaudio_play_note) {
-  uint32_t note = 220;
-  return jerry_create_boolean(queue_try_add(&note_queue, &note));
+  JERRYXX_CHECK_ARG_NUMBER(0, "frequency");
+  JERRYXX_CHECK_ARG_NUMBER(1, "milliseconds");
+
+  return jerry_create_boolean(queue_try_add(&note_queue, &(note_t){
+    .freq = (uint16_t)JERRYXX_GET_ARG_NUMBER(0),
+    .ms   = (uint16_t)JERRYXX_GET_ARG_NUMBER(1),
+  }));
 }
 
 jerry_value_t module_pwmaudio_init() {
