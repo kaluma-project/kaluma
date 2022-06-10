@@ -25,6 +25,7 @@
 #define MSTR_PWMAUDIO_PWMAUDIO "PWMAUDIO"
 
 #define MSTR_PWMAUDIO_START_TICKER "startticker"
+#define MSTR_PWMAUDIO_PLAY_NOTE "playnote"
 
 
 #endif /* __PWMAUDIO_MAGIC_STRINGS_H */

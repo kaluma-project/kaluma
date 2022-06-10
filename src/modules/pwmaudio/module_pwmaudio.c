@@ -27,6 +27,7 @@
 #include "hardware/structs/systick.h"
 #include "hardware/structs/sio.h"
 #include "pico/multicore.h"
+#include "pico/util/queue.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
 #include "pwm.h"
@@ -49,30 +50,43 @@ float notes[] = {
 };
 #define NNOTE (sizeof(notes) / sizeof(notes[0]))
 
+queue_t note_queue; /* awww aint u a queue_t */
+
 void audio_main(void) {
-  int i = 0;
   while (true) {
-    i = (i + 1) % NNOTE;
-    float note = notes[i];
-    // float f = powf(2, (note-69)/12)*440;
-    km_pwm_set_frequency(PWM_AUDIO_PIN, note);
-    sleep_until(make_timeout_time_ms(0.5 * 1000));
+    uint32_t msg;
+    queue_remove_blocking(&note_queue, &msg);
+    km_pwm_set_frequency(PWM_AUDIO_PIN, msg);
+
+    /* play a note at that frequency */
+    km_pwm_set_duty(PWM_AUDIO_PIN, 0.5); {
+      sleep_until(make_timeout_time_ms(0.5 * 1000));
+    } km_pwm_set_duty(PWM_AUDIO_PIN, 0);
   }
 }
 
 JERRYXX_FUN(pwmaudio_start_ticker_fn) {
-  km_pwm_setup(PWM_AUDIO_PIN, 220, 0.5);
+  km_pwm_setup(PWM_AUDIO_PIN, 220, 0);
   km_pwm_start(PWM_AUDIO_PIN);
+
+  queue_init(&note_queue, sizeof(uint32_t), 1 << 5);
 
   multicore_launch_core1(audio_main);
 
   return jerry_create_undefined();
 }
 
+JERRYXX_FUN(pwmaudio_play_note) {
+  uint32_t note = 220;
+  return jerry_create_boolean(queue_try_add(&note_queue, &note));
+}
+
 jerry_value_t module_pwmaudio_init() {
   jerry_value_t exports = jerry_create_object();
   jerryxx_set_property_function(exports, MSTR_PWMAUDIO_START_TICKER,
                                 pwmaudio_start_ticker_fn);
+  jerryxx_set_property_function(exports, MSTR_PWMAUDIO_PLAY_NOTE,
+                                pwmaudio_play_note);
 
   return exports;
 }
