@@ -1,5 +1,6 @@
 const { GPIO } = require("gpio");
 const { screen } = require("screen");
+const { startticker, playnote } = require("pwmaudio");
 
 let width = 0, height = 0;
 let legend = {};
@@ -16,6 +17,17 @@ exports.afterInput = fn => afterInputFn = fn;
 exports.setSolids = arr => solids = arr;
 exports.setZOrder = arr => zOrder = arr;
 exports.setPushables = obj => pushable = obj;
+
+const playSong = exports.playSong = (notes) => {
+  startticker();
+  
+  if (!notes.length) return;
+  
+  const [freq, dur] = notes.shift();
+  playnote(freq, dur);
+  
+  setTimeout(() => playSong(notes), dur*1.2);
+};
 
 const getGrid = exports.getGrid = () => {
 	const overlaps = {};
@@ -205,13 +217,16 @@ class ImageData {
  const pixels = new Uint16Array(width * height);
  const { rfill, sprdraw } = global.require("native");
  setInterval(() => {
+   let input = false;
    for (const [name, btn] of Object.entries(dpad)) {
      const { pin, handler } = btn;
      const now = pin.read();
      if (handler && btn.last != now && !(btn.last = now))
-       handler();
+       input = true, handler();
    }
-   afterInputFn();
+
+   if (input)
+     afterInputFn();
 
    rfill(pixels, gc.color16(255, 255, 255), width*height);
 

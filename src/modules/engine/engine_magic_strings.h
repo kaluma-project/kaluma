@@ -24,6 +24,9 @@
 
 #define MSTR_ENGINE_AFTER_INPUT "afterInput"
 #define MSTR_ENGINE_SET_SOLIDS "setSolids"
+#define MSTR_ENGINE_SET_SOLIDS "setZOrder"
+#define MSTR_ENGINE_SET_SOLIDS "setPushables"
+#define MSTR_ENGINE_SET_SOLIDS "playSong"
 
 #define 
 
