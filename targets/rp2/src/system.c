@@ -40,6 +40,10 @@
 #include "tusb.h"
 #include "uart.h"
 
+#ifdef __RP2_PICO_W_H
+#include "pico/cyw43_arch.h"
+#endif
+
 /**
  * Delay in milliseconds
  */
@@ -80,6 +84,9 @@ void km_system_init() {
   km_uart_init();
   km_rtc_init();
   km_flash_init();
+  #ifdef __RP2_PICO_W_H
+  cyw43_arch_init();
+  #endif
 }
 
 void km_system_cleanup() {
