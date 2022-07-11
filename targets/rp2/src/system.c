@@ -83,9 +83,7 @@ void km_system_init() {
   km_uart_init();
   km_rtc_init();
   km_flash_init();
-  #ifdef __RP2_PICO_W_H
-  cyw43_arch_init();
-  #endif
+  km_cyw43_arch_init();
 }
 
 void km_system_cleanup() {

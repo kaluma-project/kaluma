@@ -28,8 +28,6 @@ void km_cyw43_arch_init() {
   cyw43_arch_init();
 }
 
-void km_cyw43_arch_cleanup() {}
-
 void km_cyw43_arch_gpio_put(uint8_t pin, uint8_t value) {
   cyw43_arch_gpio_put(pin, value);
 }
