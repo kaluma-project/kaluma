@@ -19,17 +19,17 @@
  * SOFTWARE.
  */
 
-#ifndef __KM_CYW43_ARCH_H
-#define __KM_CYW43_ARCH_H
+#include "cyw43_arch.h"
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "pico/stdlib.h"
+#include "pico/cyw43_arch.h"
 
-#define KM_CYW43_WL_GPIO_LED_PIN 0
-#define MSTR_CYW43_WL_GPIO_LED_PIN "CYW43_WL_GPIO_LED_PIN"
+void km_cyw43_arch_init() {
+  cyw43_arch_init();
+}
 
-void km_cyw43_arch_init();
+void km_cyw43_arch_cleanup() {}
 
-void km_cyw43_arch_gpio_put(uint8_t pin, uint8_t value);
-
-#endif /* __KM_CYW43_ARCH_H */
+void km_cyw43_arch_gpio_put(uint8_t pin, uint8_t value) {
+  cyw43_arch_gpio_put(pin, value);
+}
