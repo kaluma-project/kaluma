@@ -10,7 +10,7 @@ set(OPT -Og)
 
 # default board: pico
 if(NOT BOARD)
-  set(BOARD "pico")
+  set(BOARD "pico_w")
 endif()
 
 # default modules
@@ -34,6 +34,7 @@ if(NOT MODULES)
     http
     url
     rp2
+    cyw43_arch
     rtc
     path
     flash
@@ -60,6 +61,7 @@ set(SOURCES
   ${SOURCES}
   ${TARGET_SRC_DIR}/adc.c
   ${TARGET_SRC_DIR}/system.c
+  ${TARGET_SRC_DIR}/cyw43_arch.c
   ${TARGET_SRC_DIR}/gpio.c
   ${TARGET_SRC_DIR}/pwm.c
   ${TARGET_SRC_DIR}/tty.c
@@ -92,6 +94,7 @@ set(CMAKE_OBJCOPY ${PREFIX}objcopy)
 
 set(TARGET_LIBS c nosys m
   pico_stdlib
+  pico_cyw43_arch_none
   hardware_adc
   hardware_pwm
   hardware_i2c
@@ -114,3 +117,4 @@ pico_add_extra_outputs(${OUTPUT_TARGET})
 
 # Turn off PICO_STDIO_DEFAULT_CRLF
 add_compile_definitions(PICO_STDIO_DEFAULT_CRLF=0)
+

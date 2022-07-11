@@ -40,9 +40,8 @@
 #include "tusb.h"
 #include "uart.h"
 
-#ifdef __RP2_PICO_W_H
 #include "pico/cyw43_arch.h"
-#endif
+#include "cyw43_arch.h"
 
 /**
  * Delay in milliseconds
