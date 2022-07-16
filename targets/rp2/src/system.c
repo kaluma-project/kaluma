@@ -33,14 +33,13 @@
 #include "i2c.h"
 #include "io.h"
 #include "pico/stdlib.h"
+#include "pico/cyw43_arch.h"
 #include "pwm.h"
 #include "rtc.h"
 #include "spi.h"
 #include "tty.h"
 #include "tusb.h"
 #include "uart.h"
-
-#include "pico/cyw43_arch.h"
 #include "cyw43_arch.h"
 
 /**

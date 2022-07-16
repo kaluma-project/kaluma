@@ -10,7 +10,15 @@ set(OPT -Og)
 
 # default board: pico
 if(NOT BOARD)
-  set(BOARD "pico_w")
+  set(BOARD "pico")
+endif()
+
+if(BOARD STREQUAL "pico_w")
+  set(PICO_CYW43_SUPPORTED 1)
+endif()
+
+if(PICO_CYW43_SUPPORTED)
+  set(EXTRA_MODULES cyw43_arch)
 endif()
 
 # default modules
@@ -34,7 +42,7 @@ if(NOT MODULES)
     http
     url
     rp2
-    cyw43_arch
+    ${EXTRA_MODULES}
     rtc
     path
     flash
@@ -57,11 +65,15 @@ set(TARGET_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 set(TARGET_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(BOARD_DIR ${CMAKE_CURRENT_LIST_DIR}/boards/${BOARD})
 
+if(PICO_CYW43_SUPPORTED)
+  set(EXTRA_SOURCES ${TARGET_SRC_DIR}/cyw43_arch.c)
+endif()
+
 set(SOURCES
   ${SOURCES}
   ${TARGET_SRC_DIR}/adc.c
   ${TARGET_SRC_DIR}/system.c
-  ${TARGET_SRC_DIR}/cyw43_arch.c
+  ${EXTRA_SOURCES}
   ${TARGET_SRC_DIR}/gpio.c
   ${TARGET_SRC_DIR}/pwm.c
   ${TARGET_SRC_DIR}/tty.c
@@ -92,9 +104,13 @@ set(CMAKE_CXX_COMPILER ${PREFIX}g++)
 set(CMAKE_LINKER ${PREFIX}ld)
 set(CMAKE_OBJCOPY ${PREFIX}objcopy)
 
+if(PICO_CYW43_SUPPORTED)
+  set(EXTRA_LIBS pico_cyw43_arch_none)
+endif()
+
 set(TARGET_LIBS c nosys m
   pico_stdlib
-  pico_cyw43_arch_none
+  ${EXTRA_LIBS}
   hardware_adc
   hardware_pwm
   hardware_i2c

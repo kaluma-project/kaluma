@@ -34,8 +34,10 @@ function build() {
   if (argv.target) params.push(`-DTARGET=${argv.target}`);
   if (argv.board) params.push(`-DBOARD=${argv.board}`);
   if (argv.modules) params.push(`-DMODULES=${argv.modules}`);
-  if (argv.board === 'pico_w') params.push('-DPICO_CYW43_SUPPORTED=1');
-  if (argv.board === 'pico_w') params.push('-DPICO_BOARD=pico_w');
+  if (argv.board === 'pico_w') {
+    params.push('-DPICO_CYW43_SUPPORTED=1');
+    params.push('-DPICO_BOARD=pico_w');
+  }
 
   console.log(params)
   cmd("cmake", params);

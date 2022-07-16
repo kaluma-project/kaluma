@@ -172,6 +172,4 @@
 #define MSTR_HEAP_PEAK "heapPeak"
 #define MSTR_HEAP_USED "heapUsed"
 
-#define MSTR_CYW43_WL_GPIO_LED_PIN "CYW43_WL_GPIO_LED_PIN"
-
 #endif /* __MAGIC_STRINGS_H */

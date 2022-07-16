@@ -1,5 +1,5 @@
 // initialize board object
-global.board.name = "picow";
+global.board.name = "pico_w";
 // global.board.LED = "WL_GPIO0";
 
 // mount lfs on "/"

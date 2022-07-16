@@ -25,8 +25,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define KM_CYW43_WL_GPIO_LED_PIN 0
-#define MSTR_CYW43_WL_GPIO_LED_PIN "CYW43_WL_GPIO_LED_PIN"
+#define KM_CYW43_ARCH_WL_GPIO_LED_PIN 0
+#define MSTR_CYW43_ARCH_WL_GPIO_LED_PIN "CYW43_ARCH_WL_GPIO_LED_PIN"
 
 void km_cyw43_arch_init();
 
