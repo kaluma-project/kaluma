@@ -32,4 +32,6 @@ void km_cyw43_arch_init();
 
 void km_cyw43_arch_gpio_put(uint8_t pin, uint8_t value);
 
+void km_cyw43_arch_deinit();
+
 #endif /* __KM_CYW43_ARCH_H */

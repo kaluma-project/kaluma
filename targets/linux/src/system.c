@@ -84,7 +84,6 @@ void km_system_init() {
   km_uart_init();
   km_rtc_init();
   km_flash_init();
-  km_cyw43_arch_init();
 }
 
 void km_system_cleanup() {

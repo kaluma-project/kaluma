@@ -25,3 +25,13 @@
  * Initialize board
  */
 void board_init() {}
+
+/**
+ * Initialize board specific modules
+ */
+void extra_modules_init() {}
+
+/**
+ * Cleanup board specific modules
+ */
+void extra_modules_cleanup() {}
