@@ -22,6 +22,14 @@
 #ifndef __NATIVE_MAGIC_STRINGS_H
 #define __NATIVE_MAGIC_STRINGS_H
 
+#define MSTR_NATIVE_setMap "setMap"
+#define MSTR_NATIVE_getFirst "getFirst"
+#define MSTR_NATIVE_clearTile "clearTile"
+#define MSTR_NATIVE_addSprite "addSprite"
+#define MSTR_NATIVE_getTile "getTile"
+#define MSTR_NATIVE_getGrid "getGrid"
+#define MSTR_NATIVE_tilesWith "tilesWith"
+
 #define MSTR_NATIVE_NATIVE "native"
 #define MSTR_NATIVE_ADDR "addr"
 #define MSTR_NATIVE_OBJ "obj"

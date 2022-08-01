@@ -177,12 +177,12 @@ const addTile = exports.addTile = (x, y, type) => { // could take array
 
 
 const dpad = {
-  up:      { last: 0, pin: new GPIO(0, INPUT_PULLUP) },
-  down:    { last: 0, pin: new GPIO(3, INPUT_PULLUP) },
-  left:    { last: 0, pin: new GPIO(2, INPUT_PULLUP) },
-  right:   { last: 0, pin: new GPIO(1, INPUT_PULLUP) },
-  action0: { last: 0, pin: new GPIO(4, INPUT_PULLUP) },
-  action1: { last: 0, pin: new GPIO(5, INPUT_PULLUP) },
+  up:      { last: 0, pin: new GPIO(28, INPUT_PULLUP) },
+  down:    { last: 0, pin: new GPIO(15, INPUT_PULLUP) },
+  left:    { last: 0, pin: new GPIO(27, INPUT_PULLUP) },
+  right:   { last: 0, pin: new GPIO(14, INPUT_PULLUP) },
+  action0: { last: 0, pin: new GPIO( 5, INPUT_PULLUP) },
+  action1: { last: 0, pin: new GPIO( 6, INPUT_PULLUP) },
 };
 exports.onInput = function onInput(key, handler) {
 	if (!dpad[key]) throw new Error(
@@ -197,17 +197,18 @@ class ImageData {
 		this.width = w;
 		this.height = h;
 		const bytes = new Uint8Array(w*h*2);
-		for (let x = 0; x < w; x++)
-			for (let y = 0; y < h; y++) {
-				let i = (y*w + x);
-				const [r, g, b, a] = pixels.slice(i*4, (i + 1)*4);
-				if (a < 255) continue;
-				const col = gc.color16(Math.max(b, 5),
-									   Math.max(g, 5),
-									   Math.max(r, 5));
-				bytes[i*2+0] = col >> 8;
-				bytes[i*2+1] = col;
-			}
+                for (let y = 0; y < h; y++)
+                    for (let x = 0; x < w; x++) {
+                      let di = (x*h + y);
+                      let si = (y*w + x);
+                      const [r, g, b, a] = pixels.slice(si*4, (si + 1)*4);
+                      if (a < 255) continue;
+                      const col = gc.color16(Math.max(b, 5),
+                                             Math.max(g, 5),
+                                             Math.max(r, 5));
+                      bytes[di*2+0] = col >> 8;
+                      bytes[di*2+1] = col;
+                    }
 		this.data = new Uint16Array(bytes.buffer);
 	}
 }
@@ -234,7 +235,7 @@ class ImageData {
      .sort((a, b) => zOrder.indexOf(b.type) - zOrder.indexOf(a.type))
      .forEach(tile => {
        sprdraw(tile.img.data, tile.img.width, tile.img.height,
-           pixels, tile.y*16, tile.x*16);
+           pixels, 16+tile.y*16, tile.x*16);
      });
 
    screen.fillImage(0, 0, width, height, new Uint8Array(pixels.buffer));

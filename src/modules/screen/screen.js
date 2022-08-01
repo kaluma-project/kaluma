@@ -155,9 +155,14 @@ exports.ST7735 = ST7735;
 
 exports.screen = (() => {
   let st7735 = new ST7735();
-  const spi = board.spi(1, {
-    sck: 10,
-    mosi: 11,
+
+  const lite = 17;
+  pinMode(lite, OUTPUT);
+  digitalToggle(lite);
+
+  const spi = board.spi(0, {
+    sck: 18,
+    mosi: 19,
     baudrate: 30000000 // default: 3000000
   });
   st7735.setup(spi, { // ST7735R 1.8"
@@ -165,9 +170,9 @@ exports.screen = (() => {
     height: 160,
     xstart: 0,
     ystart: 0,
-    dc: 16,
-    rst: 17,
-    cs: 18
+    dc: 22,
+    rst: 26,
+    cs: 20
   });
   return st7735;
 })();
