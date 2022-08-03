@@ -29,6 +29,11 @@
 #define MSTR_NATIVE_getTile "getTile"
 #define MSTR_NATIVE_getGrid "getGrid"
 #define MSTR_NATIVE_tilesWith "tilesWith"
+#define MSTR_NATIVE_render "render"
+
+#define MSTR_NATIVE_legend_doodle_set "legend_doodle_set"
+#define MSTR_NATIVE_legend_clear "legend_clear"
+#define MSTR_NATIVE_legend_prepare "legend_prepare"
 
 #define MSTR_NATIVE_NATIVE "native"
 #define MSTR_NATIVE_ADDR "addr"

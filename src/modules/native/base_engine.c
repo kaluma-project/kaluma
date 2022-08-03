@@ -2,17 +2,21 @@
 
 #ifdef __wasm__
 
-#define WASM_EXPORT __attribute__((visibility("default")))
+  #define WASM_EXPORT __attribute__((visibility("default")))
+  
+  extern void putchar(char c);
+  extern void putint(int i);
+  extern void oom();
+  extern unsigned char __heap_base;
+  #define PAGE_SIZE (1 << 16)
 
-extern void putchar(char c);
-extern void putint(int i);
-extern void oom();
-extern unsigned char __heap_base;
-#define PAGE_SIZE (1 << 16)
+  typedef struct { uint8_t rgba[4]; } Color;
 
 #else
 
-#define WASM_EXPORT static
+  #define WASM_EXPORT static
+
+  typedef uint16_t Color;
 
 #endif
 
@@ -36,6 +40,7 @@ typedef struct {
 #define SPRITE_SIZE (16)
 typedef struct {
   uint16_t pixels[SPRITE_SIZE][SPRITE_SIZE];
+  uint8_t     lit[SPRITE_SIZE*SPRITE_SIZE / 8];
 } Doodle;
 
 typedef struct Sprite Sprite;
@@ -49,35 +54,44 @@ static Sprite *map_alloc(void);
 
 typedef struct { Sprite *sprite; int x, y; uint8_t dirty; } MapIter;
 
-typedef struct { uint8_t rgba[4]; } Color;
-
 #define PER_CHAR (255)
+#define PER_DOODLE (10)
+
 #define MAP_SIZE_X (20)
 #define MAP_SIZE_Y (20)
 #define SCREEN_SIZE_X (160)
 #define SCREEN_SIZE_Y (128)
 typedef struct {
+  uint8_t char_to_index[PER_CHAR];
+
+  Color palette[PER_CHAR];
+  uint8_t lit[SCREEN_SIZE_Y * SCREEN_SIZE_X / 8];
+
+  /* some SoA v. AoS shit goin on here man */
+  int doodle_index_count;
+  uint8_t legend_doodled[PER_CHAR]; /* PER_CHAR = because it's used for assigning indices */
+  Doodle legend[PER_DOODLE];
+  Doodle legend_resized[PER_DOODLE];
+
+} State_Render;
+
+typedef struct {
   int width, height;
 
   // Text texts[TEXT_CHARS_MAX_Y*TEXT_CHARS_MAX_X];
 
-  /* some SoA v. AoS shit goin on here man */
-  // Doodle legend[PER_CHAR];
-  // Doodle legend_resized[PER_CHAR];
-  // uint8_t legend_doodled[PER_CHAR];
-
   uint8_t solid[PER_CHAR];
   // uint8_t push_table[PER_CHAR][PER_CHAR];
 
-  Sprite sprite_pool[(1 << 10)];
+  Sprite sprite_pool[(1 << 8)];
   size_t sprite_pool_head;
   /* points into sprite_pool */
   Sprite *map[MAP_SIZE_X][MAP_SIZE_Y];
 
   int tile_size; /* how small tiles have to be to fit map on screen */
   char background_sprite;
-  // Color palette[PER_CHAR];
-  // uint16_t screen[SCREEN_SIZE_Y][SCREEN_SIZE_X];
+
+  State_Render *render;
 
   /* this is honestly probably heap abuse and most kaluma uses of it should
      probably use stack memory instead. It started out as a way to pass
@@ -87,6 +101,26 @@ typedef struct {
 } State;
 static State *state = 0;
 
+static void render_lit_write(int x, int y) {
+  int i = x*SCREEN_SIZE_Y + y;
+  state->render->lit[i/8] |= 1 << (i % 8);
+}
+static uint8_t render_lit_read(int x, int y) {
+  int i = x*SCREEN_SIZE_Y + y;
+  int q = 1 << (i % 8);
+  return !!(state->render->lit[i/8] & q);
+}
+
+static void doodle_lit_write(Doodle *d, int x, int y) {
+  int i = y*SPRITE_SIZE + x;
+  d->lit[i/8] |= 1 << (i % 8);
+}
+static uint8_t doodle_lit_read(Doodle *d, int x, int y) {
+  int i = y*SPRITE_SIZE + x;
+  int q = 1 << (i % 8);
+  return !!(d->lit[i/8] & q);
+}
+
 WASM_EXPORT void init(void) {
 #ifdef __wasm__
   int mem_needed = sizeof(State)/PAGE_SIZE;
@@ -94,30 +128,35 @@ WASM_EXPORT void init(void) {
   int delta = mem_needed - __builtin_wasm_memory_size(0) + 2;
   if (delta > 0) __builtin_wasm_memory_grow(0, delta);
   state = (void *)&__heap_base;
-#else
-  // 78_176
-  // static State _state;
-  printf("state addr before: %d\n", (size_t)state);
-  if (state == 0) {
-    state = malloc(sizeof(State));
-    printf("sizeof(State) = %d, addr: %d\n", sizeof(State), (unsigned int)state);
-  }
-  if (state == 0) puts("couldn't alloc state");
-#endif
 
+#else
+  static State _state = {0};
+  state = &_state;
   __builtin_memset(state, 0, sizeof(State));
 
-  // state->palette['0'] = (Color){{   0,   0,   0, 255 }};
-  // state->palette['1'] = (Color){{ 128, 128, 128, 255 }};
-  // state->palette['L'] = (Color){{  85,  85,  85, 255 }};
-  // state->palette['2'] = (Color){{ 255, 255, 255, 255 }};
-  // state->palette['3'] = (Color){{ 255,   0,   0, 255 }};
-  // state->palette['4'] = (Color){{   0, 255,   0, 255 }};
-  // state->palette['5'] = (Color){{   0,   0, 255, 255 }};
-  // state->palette['6'] = (Color){{ 255, 255,   0, 255 }};
-  // state->palette['7'] = (Color){{   0, 255, 255, 255 }};
-  // state->palette['8'] = (Color){{ 255,   0, 255, 255 }};
-  // state->palette['.'] = (Color){{   0,   0,   0,   0 }};
+  static State_Render _state_render = {0};
+  state->render = &_state_render;
+
+  // if (state->render == 0) {
+  //   state->render = malloc(sizeof(State_Render));
+  //   printf("sizeof(State_Render) = %d, addr: %d\n", sizeof(State_Render), (unsigned int)state->render);
+  // }
+  // if (state->render == 0) puts("couldn't alloc state");
+#endif
+
+  __builtin_memset(state->render, 0, sizeof(State_Render));
+
+  state->render->palette['0'] = color16(   0,   0,   0 );
+  state->render->palette['1'] = color16( 128, 128, 128 );
+  state->render->palette['L'] = color16(  85,  85,  85 );
+  state->render->palette['2'] = color16( 255, 255, 255 );
+  state->render->palette['3'] = color16( 255,   0,   0 );
+  state->render->palette['4'] = color16(   0, 255,   0 );
+  state->render->palette['5'] = color16(   0,   0, 255 );
+  state->render->palette['6'] = color16( 255, 255,   0 );
+  state->render->palette['7'] = color16(   0, 255, 255 );
+  state->render->palette['8'] = color16( 255,   0, 255 );
+  state->render->palette['.'] = color16(   0,   0,   0 );
 
   puts("hi!");
 }
@@ -132,9 +171,6 @@ WASM_EXPORT MapIter *temp_MapIter_mem(void) {
   return &state->temp_MapIter_mem;
 }
 
-// WASM_EXPORT uint8_t *screen(void) { return (void *)state->screen; }
-
-#if 0
 /* call this when the map changes size, or when the legend changes */
 static void render_resize_legend(void) {
   /* how big do our tiles need to be to fit them all snugly on screen? */
@@ -144,37 +180,38 @@ static void render_resize_legend(void) {
   if (state->tile_size > 16)
     state->tile_size = 16;
 
-  for (int i = 0; i < PER_CHAR; i++) {
-    if (!state->legend_doodled[i]) continue;
+  for (int c = 0; c < PER_CHAR; c++) {
+    if (!state->render->legend_doodled[c]) continue;
+    int i = state->render->char_to_index[c];
 
-    Doodle *rd = state->legend_resized + i;
-    Doodle *od = state->legend + i;
+    Doodle *rd = state->render->legend_resized + i;
+    Doodle *od = state->render->legend + i;
 
     for (int y = 0; y < 16; y++)
       for (int x = 0; x < 16; x++) {
         int rx = (float) x / 16.0f * state->tile_size;
         int ry = (float) y / 16.0f * state->tile_size;
 
-        for (int i = 0; i < 4; i++)
-          rd->pixels[rx][ry][i] = (float)od->pixels[x][y][i];
+        if (!doodle_lit_read(od, x, y)) continue;
+        rd->pixels[ry][rx] = od->pixels[y][x];
+        if (doodle_lit_read(od, x, y)) doodle_lit_write(rd, rx, ry);
       }
   }
 }
 
-static void render_blit_sprite(int sx, int sy, char kind) {
-  Doodle *d = state->legend_resized + (int)kind;
+static void render_blit_sprite(Color *screen, int sx, int sy, char kind) {
+  Doodle *d = state->render->legend_resized + state->render->char_to_index[(int)kind];
 
   for (int x = 0; x < state->tile_size; x++)
     for (int y = 0; y < state->tile_size; y++) {
-      uint8_t *dst = state->screen[sy+y][sx+x];
-      uint8_t *src = d->pixels[y][x];
 
-      if (src[3] == 0 || dst[3] > 0) continue;
+      if (!doodle_lit_read(d, x, y)) continue;
+      if (render_lit_read(sx+x, sy+y)) continue;
 
-      dst[0] = src[0];
-      dst[1] = src[1];
-      dst[2] = src[2];
-      dst[3] = 255;
+      render_lit_write(sx+x, sy+y);
+
+      int i = (sx+x) * SCREEN_SIZE_Y + (sy+y);
+      screen[i] = d->pixels[y][x];
     }
 }
 
@@ -183,8 +220,8 @@ WASM_EXPORT void render_set_background(char kind) {
 }
 
 WASM_EXPORT uint8_t map_get_grid(MapIter *m);
-WASM_EXPORT void render(void) {
-  __builtin_memset(&state->screen, 0, sizeof(state->screen));
+WASM_EXPORT void render(Color *screen) {
+  __builtin_memset(&state->render->lit, 0, sizeof(state->render->lit));
 
   int pixel_width = state->width*state->tile_size;
   int pixel_height = state->height*state->tile_size;
@@ -192,28 +229,28 @@ WASM_EXPORT void render(void) {
   int ox = (SCREEN_SIZE_X - pixel_width)/2;
   int oy = (SCREEN_SIZE_Y - pixel_height)/2;
 
+
+  for (int y = oy; y < oy+pixel_height; y++)
+    for (int x = ox; x < ox+pixel_width; x++) {
+      int i = x*SCREEN_SIZE_Y + y;
+      screen[i] = color16(255, 255, 255);
+    }
+
   MapIter m = {0};
   while (map_get_grid(&m))
-    render_blit_sprite(ox + state->tile_size*m.sprite->x,
+    render_blit_sprite(screen,
+                       ox + state->tile_size*m.sprite->x,
                        oy + state->tile_size*m.sprite->y,
                        m.sprite->kind);
 
   if (state->background_sprite)
     for (int y = 0; y < state->height; y++)
       for (int x = 0; x < state->width; x++)
-        render_blit_sprite(ox + state->tile_size*x,
+        render_blit_sprite(screen,
+                           ox + state->tile_size*x,
                            oy + state->tile_size*y,
                            state->background_sprite);
-
-  for (int y = oy; y < oy+pixel_height; y++)
-    for (int x = ox; x < ox+pixel_width; x++)
-      if (state->screen[y][x][3] == 0)
-        state->screen[y][x][0] = 255,
-        state->screen[y][x][1] = 255,
-        state->screen[y][x][2] = 255,
-        state->screen[y][x][3] = 255;
 }
-#endif
 
 static Sprite *map_alloc(void) {
   Sprite *mem = state->sprite_pool + state->sprite_pool_head++;
@@ -284,7 +321,7 @@ WASM_EXPORT void map_set(char *str) {
   state->width = tx;
   state->height = ty+1;
 
-  // render_resize_legend();
+  render_resize_legend();
 }
 
 WASM_EXPORT int map_width(void) { return state->width; }
@@ -450,12 +487,14 @@ WASM_EXPORT void map_move(Sprite *s, int big_dx, int big_dy) {
   else             s->dy = moved;
 }
 
+#ifdef __wasm__
 WASM_EXPORT int sprite_get_x(Sprite *s) { return s->x; }
 WASM_EXPORT int sprite_get_y(Sprite *s) { return s->y; }
 WASM_EXPORT int sprite_get_dx(Sprite *s) { return s->dx; }
 WASM_EXPORT int sprite_get_dy(Sprite *s) { return s->dy; }
 WASM_EXPORT char sprite_get_kind(Sprite *s) { return s->kind; }
 WASM_EXPORT void sprite_set_kind(Sprite *s, char kind) { s->kind = kind; }
+#endif
 
 WASM_EXPORT void map_clear_deltas(void) {
   for (int y = 0; y < state->height; y++)
@@ -474,11 +513,20 @@ WASM_EXPORT void solids_clear(void) {
   __builtin_memset(&state->solid, 0, sizeof(state->solid));
 }
 
-#if 0
 WASM_EXPORT void legend_doodle_set(char kind, char *str) {
-  state->legend_doodled[(int)kind] = 1;
 
-  Doodle *d = state->legend + (int)kind;
+  int index = state->render->char_to_index[(int)kind];
+
+  /* we don't want to increment if index 0 has already been assigned and this is it */
+  if (index == 0 && !state->render->legend_doodled[(int)kind]) {
+
+    if (state->render->doodle_index_count >= PER_DOODLE) puts("max doodle count exceeded.");
+    index = state->render->doodle_index_count++;
+  }
+  state->render->char_to_index[(int)kind] = index;
+
+  state->render->legend_doodled[(int)kind] = 1;
+  Doodle *d = state->render->legend + index;
 
   int px = 0, py = 0;
   do {
@@ -487,22 +535,23 @@ WASM_EXPORT void legend_doodle_set(char kind, char *str) {
       case  '.': px++;         break;
       case '\0':               break;
       default: {
-        Color *c = state->palette + (int) *str;
-        for (int i = 0; i < 4; i++)
-          d->pixels[py][px][i] = c->rgba[i];
+        d->pixels[py][px] = state->render->palette[(int)*str];
+        doodle_lit_write(d, px, py);
         px++;
       } break;
     }
   } while (*str++);
 }
 WASM_EXPORT void legend_clear(void) {
-  __builtin_memset(&state->legend_doodled, 0, sizeof(state->legend_doodled));
+  __builtin_memset(&state->render->legend, 0, sizeof(state->render->legend));
+  __builtin_memset(&state->render->legend_resized, 0, sizeof(state->render->legend_resized));
+  __builtin_memset(&state->render->legend_doodled, 0, sizeof(state->render->legend_doodled));
+  __builtin_memset(&state->render->char_to_index, 0, sizeof(state->render->char_to_index));
 }
 WASM_EXPORT void legend_prepare(void) {
   if (state->width && state->height)
     render_resize_legend();
 }
-#endif
 
 #if 0
 WASM_EXPORT void push_table_set(char pusher, char pushes) {

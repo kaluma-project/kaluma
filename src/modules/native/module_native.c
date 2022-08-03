@@ -22,12 +22,26 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+static uint16_t color16(uint8_t r, uint8_t g, uint8_t b) {
+  return ((r & 0xF8) << 8) | ((b & 0xFC) << 3) | (g >> 3);
+}
+
 static void oom(void) { puts("sprite alloc overflow (TODO: gendex)"); }
 #include "base_engine.c"
 
 #include "jerryscript.h"
 #include "jerryxx.h"
 #include "native_magic_strings.h"
+
+static char jerry_value_to_char(jerry_value_t val) {
+  jerry_char_t tmp[2] = {0};
+  jerry_size_t nbytes = jerry_string_to_char_buffer(val, tmp, 1);
+  if (nbytes == 0) {
+    puts("uh non-char given as char input"); /* TODO: error? */
+    return '.';
+  }
+  return tmp[0];
+}
 
 JERRYXX_FUN(setMap) {
   JERRYXX_CHECK_ARG(0, "str");
@@ -45,15 +59,26 @@ JERRYXX_FUN(setMap) {
   return jerry_create_undefined();
 }
 
-static char jerry_value_to_char(jerry_value_t val) {
-  jerry_char_t tmp[2] = {0};
-  jerry_size_t nbytes = jerry_string_to_char_buffer(val, tmp, 1);
-  if (nbytes == 0) {
-    puts("uh non-char given as char input"); /* TODO: error? */
-    return '.';
-  }
-  return tmp[0];
+JERRYXX_FUN(native_legend_doodle_set_fn) {
+  JERRYXX_CHECK_ARG(0, "char");
+  JERRYXX_CHECK_ARG(1, "str");
+
+  char *tmp = temp_str_mem();
+  jerry_size_t nbytes = jerry_string_to_char_buffer(
+    JERRYXX_GET_ARG(1),
+    (jerry_char_t *)tmp,
+    sizeof(state->temp_str_mem) - 1
+  );
+  tmp[nbytes] = '\0'; 
+
+  puts(tmp);
+  legend_doodle_set(jerry_value_to_char(JERRYXX_GET_ARG(0)), tmp);
+
+  return jerry_create_undefined();
 }
+
+JERRYXX_FUN(native_legend_clear_fn) { legend_clear(); return jerry_create_undefined(); }
+JERRYXX_FUN(native_legend_prepare_fn) { legend_prepare(); return jerry_create_undefined(); }
 
 static struct {
   jerry_value_t x, y, dx, dy, addr, kind, remove, push;
@@ -422,6 +447,24 @@ JERRYXX_FUN(native_rfill_fn) {
   return jerry_create_undefined();
 }
 
+JERRYXX_FUN(native_render_fn) {
+  jerry_value_t data = JERRYXX_GET_ARG(0);
+
+  jerry_length_t byteLength = 0;
+  jerry_length_t byteOffset = 0;
+  jerry_value_t array_buffer = jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
+  uint16_t *buf = (uint16_t*)jerry_get_arraybuffer_pointer(array_buffer);
+
+  render(buf);
+  // for (int y = 0; y < 16; y++)
+  //   for (int x = 0; x < 16; x++)
+  //     if (doodle_lit_read(state->render->legend + 0, x, y))
+  //       buf[y*128 + x] = state->render->legend[0].pixels[y][x];
+
+  jerry_release_value(array_buffer);
+  return jerry_create_undefined();
+}
+
 JERRYXX_FUN(native_sprdraw_fn) {
   jerry_value_t src_data = JERRYXX_GET_ARG(0);
   jerry_length_t byteLength = 0;
@@ -465,6 +508,11 @@ jerry_value_t module_native_init() {
   jerryxx_set_property_function(exports, MSTR_NATIVE_getTile,   getTile);
   jerryxx_set_property_function(exports, MSTR_NATIVE_getGrid,   getGrid);
   jerryxx_set_property_function(exports, MSTR_NATIVE_tilesWith, tilesWith);
+  jerryxx_set_property_function(exports, MSTR_NATIVE_render,    native_render_fn);
+
+  jerryxx_set_property_function(exports, MSTR_NATIVE_legend_doodle_set, native_legend_doodle_set_fn);
+  jerryxx_set_property_function(exports, MSTR_NATIVE_legend_clear, native_legend_clear_fn);
+  jerryxx_set_property_function(exports, MSTR_NATIVE_legend_prepare, native_legend_prepare_fn);
 
   jerryxx_set_property_function(exports, MSTR_NATIVE_ADDR, native_addr_fn);
   jerryxx_set_property_function(exports, MSTR_NATIVE_OBJ, native_obj_fn);
