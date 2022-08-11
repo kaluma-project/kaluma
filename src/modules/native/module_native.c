@@ -37,7 +37,9 @@ static char jerry_value_to_char(jerry_value_t val) {
   jerry_char_t tmp[2] = {0};
   jerry_size_t nbytes = jerry_string_to_char_buffer(val, tmp, 1);
   if (nbytes == 0) {
-    puts("uh non-char given as char input"); /* TODO: error? */
+
+    puts("uh non-char given as char input:");
+    jerryxx_print_value(val);
     return '.';
   }
   return tmp[0];
@@ -56,6 +58,11 @@ JERRYXX_FUN(setMap) {
 
   map_set(tmp);
 
+  return jerry_create_undefined();
+}
+
+JERRYXX_FUN(setBackground) {
+  render_set_background(jerry_value_to_char(JERRYXX_GET_ARG(0)));
   return jerry_create_undefined();
 }
 
@@ -79,6 +86,22 @@ JERRYXX_FUN(native_legend_doodle_set_fn) {
 
 JERRYXX_FUN(native_legend_clear_fn) { legend_clear(); return jerry_create_undefined(); }
 JERRYXX_FUN(native_legend_prepare_fn) { legend_prepare(); return jerry_create_undefined(); }
+
+JERRYXX_FUN(native_solids_push_fn) {
+  char c = jerry_value_to_char(JERRYXX_GET_ARG(0));
+  solids_push(c);
+  return jerry_create_undefined();
+}
+JERRYXX_FUN(native_solids_clear_fn) { solids_clear(); return jerry_create_undefined(); }
+
+JERRYXX_FUN(native_push_table_set_fn) {
+  push_table_set(jerry_value_to_char(JERRYXX_GET_ARG(0)),
+                 jerry_value_to_char(JERRYXX_GET_ARG(1)));
+  return jerry_create_undefined();
+}
+JERRYXX_FUN(native_push_table_clear_fn) { push_table_clear(); return jerry_create_undefined(); }
+
+JERRYXX_FUN(native_map_clear_deltas_fn) { map_clear_deltas(); return jerry_create_undefined(); }
 
 static struct {
   jerry_value_t x, y, dx, dy, addr, kind, remove, push;
@@ -329,6 +352,35 @@ JERRYXX_FUN(getTile) {
   return ret;
 }
 
+
+JERRYXX_FUN(width) { return jerry_create_number(state->width); }
+JERRYXX_FUN(height) { return jerry_create_number(state->height); }
+JERRYXX_FUN(getAll) {
+  uint8_t no_arg = JERRYXX_GET_ARG_COUNT == 0;
+  char kind = no_arg ? 0 : jerry_value_to_char(JERRYXX_GET_ARG(0));
+  int i = 0;
+  
+  /* figure out how much to allocate */
+  MapIter m = {0};
+  while (map_get_grid(&m))
+    if (no_arg || m.sprite->kind == kind)
+      i++;
+  jerry_value_t ret = jerry_create_array(i);
+
+  i = 0;
+  m = (MapIter) {0};
+  while (map_get_grid(&m))
+    if (no_arg || m.sprite->kind == kind) {
+      jerry_value_t sprite = sprite_to_jerry_object(m.sprite);
+      jerry_release_value(
+        jerry_set_property_by_index(ret, i++, sprite)
+      );
+      jerry_release_value(sprite);
+    }
+
+  return ret;
+}
+
 JERRYXX_FUN(getGrid) {
   int len = map_width() * map_height();
   jerry_value_t ret = jerry_create_array(len);
@@ -501,18 +553,37 @@ jerry_value_t module_native_init() {
   /* rtc module exports */
   jerry_value_t exports = jerry_create_object();
 
-  jerryxx_set_property_function(exports, MSTR_NATIVE_setMap,    setMap);
-  jerryxx_set_property_function(exports, MSTR_NATIVE_getFirst,  getFirst);
-  jerryxx_set_property_function(exports, MSTR_NATIVE_clearTile, clearTile);
-  jerryxx_set_property_function(exports, MSTR_NATIVE_addSprite, addSprite);
-  jerryxx_set_property_function(exports, MSTR_NATIVE_getTile,   getTile);
-  jerryxx_set_property_function(exports, MSTR_NATIVE_getGrid,   getGrid);
-  jerryxx_set_property_function(exports, MSTR_NATIVE_tilesWith, tilesWith);
-  jerryxx_set_property_function(exports, MSTR_NATIVE_render,    native_render_fn);
 
+  /* these ones actually need to be in C for perf */
+  jerryxx_set_property_function(exports, MSTR_NATIVE_setMap,    setMap);
+  jerryxx_set_property_function(exports, MSTR_NATIVE_tilesWith, tilesWith);
+  jerryxx_set_property_function(exports, MSTR_NATIVE_getGrid,   getGrid);
+  jerryxx_set_property_function(exports, MSTR_NATIVE_getFirst,  getFirst);
+  jerryxx_set_property_function(exports, MSTR_NATIVE_getAll,    getAll);
+
+  /* it was just easier to implement these in C */
+  jerryxx_set_property_function(exports, MSTR_NATIVE_width,         width);
+  jerryxx_set_property_function(exports, MSTR_NATIVE_height,        height);
+  jerryxx_set_property_function(exports, MSTR_NATIVE_setBackground, setBackground);
+  jerryxx_set_property_function(exports, MSTR_NATIVE_getTile,       getTile);
+  jerryxx_set_property_function(exports, MSTR_NATIVE_clearTile,     clearTile);
+  jerryxx_set_property_function(exports, MSTR_NATIVE_addSprite,     addSprite);
+  jerryxx_set_property_function(exports, MSTR_NATIVE_render,        native_render_fn);
+
+  /* random background goodie */
+  jerryxx_set_property_function(exports, MSTR_NATIVE_map_clear_deltas, native_map_clear_deltas_fn);
+
+  /* it was easier to split these into multiple C functions than do the JS data shuffling in C */
+  jerryxx_set_property_function(exports, MSTR_NATIVE_solids_push, native_solids_push_fn);
+  jerryxx_set_property_function(exports, MSTR_NATIVE_solids_clear, native_solids_clear_fn);
+  /* -- */
+  jerryxx_set_property_function(exports, MSTR_NATIVE_push_table_set, native_push_table_set_fn);
+  jerryxx_set_property_function(exports, MSTR_NATIVE_push_table_clear, native_push_table_clear_fn);
+  /* -- */
   jerryxx_set_property_function(exports, MSTR_NATIVE_legend_doodle_set, native_legend_doodle_set_fn);
   jerryxx_set_property_function(exports, MSTR_NATIVE_legend_clear, native_legend_clear_fn);
   jerryxx_set_property_function(exports, MSTR_NATIVE_legend_prepare, native_legend_prepare_fn);
+
 
   jerryxx_set_property_function(exports, MSTR_NATIVE_ADDR, native_addr_fn);
   jerryxx_set_property_function(exports, MSTR_NATIVE_OBJ, native_obj_fn);
@@ -526,3 +597,5 @@ jerry_value_t module_native_init() {
   jerryxx_set_property_function(exports, MSTR_NATIVE_RFILL, native_rfill_fn);
   return exports;
 }
+
+// move JS wrapper into engine.js

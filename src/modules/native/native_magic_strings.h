@@ -23,6 +23,7 @@
 #define __NATIVE_MAGIC_STRINGS_H
 
 #define MSTR_NATIVE_setMap "setMap"
+#define MSTR_NATIVE_setBackground "setBackground"
 #define MSTR_NATIVE_getFirst "getFirst"
 #define MSTR_NATIVE_clearTile "clearTile"
 #define MSTR_NATIVE_addSprite "addSprite"
@@ -30,6 +31,18 @@
 #define MSTR_NATIVE_getGrid "getGrid"
 #define MSTR_NATIVE_tilesWith "tilesWith"
 #define MSTR_NATIVE_render "render"
+
+#define MSTR_NATIVE_width "width"
+#define MSTR_NATIVE_height "height"
+#define MSTR_NATIVE_getAll "getAll"
+
+#define MSTR_NATIVE_map_clear_deltas "map_clear_deltas"
+
+#define MSTR_NATIVE_solids_push "solids_push"
+#define MSTR_NATIVE_solids_clear "solids_clear"
+
+#define MSTR_NATIVE_push_table_set "push_table_set"
+#define MSTR_NATIVE_push_table_clear "push_table_clear"
 
 #define MSTR_NATIVE_legend_doodle_set "legend_doodle_set"
 #define MSTR_NATIVE_legend_clear "legend_clear"
