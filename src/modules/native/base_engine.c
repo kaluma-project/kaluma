@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "font.h"
 
 #ifdef __wasm__
 
@@ -12,7 +13,13 @@
 
   typedef struct { uint8_t rgba[4]; } Color;
 
+  #define color16(r, g, b) ((Color) { r, g, b, 255 })
+
 #else
+
+  static uint16_t color16(uint8_t r, uint8_t g, uint8_t b) {
+    return ((r & 0xF8) << 8) | ((b & 0xFC) << 3) | (g >> 3);
+  }
 
   #define WASM_EXPORT static
 
@@ -31,11 +38,6 @@ static float signf(float f) {
 
 #define TEXT_CHARS_MAX_X (20)
 #define TEXT_CHARS_MAX_Y (16)
-typedef struct {
-  uint8_t r, g, b;
-  int x, y;
-  char content[TEXT_CHARS_MAX_X];
-} Text;
 
 #define SPRITE_SIZE (16)
 typedef struct {
@@ -51,11 +53,13 @@ struct Sprite {
 };
 static void map_free(Sprite *s);
 static Sprite *map_alloc(void);
+static uint8_t map_active(Sprite *s, uint32_t generation);
 
 typedef struct { Sprite *sprite; int x, y; uint8_t dirty; } MapIter;
 
 #define PER_CHAR (255)
-#define PER_DOODLE (10)
+#define PER_DOODLE (30)
+#define SPRITE_COUNT (1 << 8)
 
 #define MAP_SIZE_X (20)
 #define MAP_SIZE_Y (20)
@@ -76,14 +80,17 @@ typedef struct {
 typedef struct {
   int width, height;
 
-  // Text texts[TEXT_CHARS_MAX_Y*TEXT_CHARS_MAX_X];
+  char  text_char [TEXT_CHARS_MAX_Y][TEXT_CHARS_MAX_X];
+  Color text_color[TEXT_CHARS_MAX_Y][TEXT_CHARS_MAX_X];
 
   uint8_t char_to_index[PER_CHAR];
 
   uint8_t solid[PER_CHAR];
   uint8_t push_table[PER_DOODLE * PER_DOODLE / 8];
 
-  Sprite sprite_pool[(1 << 8)];
+  uint8_t  sprite_slot_active[SPRITE_COUNT];
+  uint32_t sprite_slot_generation[SPRITE_COUNT];
+  Sprite sprite_pool[SPRITE_COUNT];
   size_t sprite_pool_head;
   /* points into sprite_pool */
   Sprite *map[MAP_SIZE_X][MAP_SIZE_Y];
@@ -103,9 +110,9 @@ static State *state = 0;
 
 /* almost makes ya wish for generic data structures dont it :shushing_face:
 
-   we have to do this to cut down on RAM usage (uses 1/8 of the RAM!) because
-   kaluma's OS doesn't want to let us allocate over 512KB? free cookie for
-   whoever figures that one out */
+   this was implemented to cut down on RAM usage before I discovered you can
+   control how much RAM gets handed to JS in targets/rp2/target.cmake
+   */
 static void render_lit_write(int x, int y) {
   int i = x*SCREEN_SIZE_Y + y;
   state->render->lit[i/8] |= 1 << (i % 8);
@@ -142,6 +149,12 @@ static uint8_t push_table_read(char x_char, char y_char) {
   return !!(state->push_table[i/8] & q);
 }
 
+WASM_EXPORT void text_add(char *str, Color color, int x, int y) {
+  for (; *str; str++, x++)
+    state->text_char [y][x] = *str,
+    state->text_color[y][x] = color;
+}
+
 WASM_EXPORT void init(void) {
 #ifdef __wasm__
   int mem_needed = sizeof(State)/PAGE_SIZE;
@@ -153,17 +166,19 @@ WASM_EXPORT void init(void) {
 #else
   static State _state = {0};
   state = &_state;
+
   __builtin_memset(state, 0, sizeof(State));
 
   static State_Render _state_render = {0};
   state->render = &_state_render;
+#endif
 
+  /* -- error handling for when state is dynamically allocated -- */ 
   // if (state->render == 0) {
   //   state->render = malloc(sizeof(State_Render));
   //   printf("sizeof(State_Render) = %d, addr: %d\n", sizeof(State_Render), (unsigned int)state->render);
   // }
   // if (state->render == 0) puts("couldn't alloc state");
-#endif
 
   __builtin_memset(state->render, 0, sizeof(State_Render));
 
@@ -231,6 +246,18 @@ static void render_blit_sprite(Color *screen, int sx, int sy, char kind) {
     }
 }
 
+static void render_char(Color *screen, char c, Color color, int sx, int sy) {
+  for (int y = 0; y < 8; y++) {
+    uint8_t bits = font_pixels[c*8 + y];
+    for (int x = 0; x < 8; x++)
+      if ((bits >> (7-x)) & 1) {
+        int i = (SCREEN_SIZE_X - (sx+x) - 1)*SCREEN_SIZE_Y + (sy+y);
+        screen[i] = color;
+      }
+  }
+}
+
+
 WASM_EXPORT void render_set_background(char kind) {
   state->background_sprite = kind;
 }
@@ -248,7 +275,7 @@ WASM_EXPORT void render(Color *screen) {
 
   for (int y = oy; y < oy+pixel_height; y++)
     for (int x = ox; x < ox+pixel_width; x++) {
-      int i = x*SCREEN_SIZE_Y + y;
+      int i = (SCREEN_SIZE_X - x - 1)*SCREEN_SIZE_Y + y;
       screen[i] = color16(255, 255, 255);
     }
 
@@ -266,16 +293,37 @@ WASM_EXPORT void render(Color *screen) {
                            ox + state->tile_size*x,
                            oy + state->tile_size*y,
                            state->background_sprite);
+
+  for (int y = 0; y < TEXT_CHARS_MAX_Y; y++)
+    for (int x = 0; x < TEXT_CHARS_MAX_X; x++) {
+      char c = state->text_char[y][x];
+      if (c) render_char(screen, c, state->text_color[y][x], x*8, y*8);
+    }
 }
 
 static Sprite *map_alloc(void) {
-  Sprite *mem = state->sprite_pool + state->sprite_pool_head++;
-  if (state->sprite_pool_head >= ARR_COUNT(state->sprite_pool))
-    oom();
-  return mem;
+  for (int i = 0; i < SPRITE_COUNT; i++) {
+    if (state->sprite_slot_active[i] == 0) {
+      state->sprite_slot_active[i] = 1;
+      return state->sprite_pool + i;
+    }
+  }
+  oom();
+  return 0;
 }
 static void map_free(Sprite *s) {
-  // TODO: generational indexing
+  size_t i = s - state->sprite_pool;
+  state->sprite_slot_active    [i] = 0;
+  state->sprite_slot_generation[i]++;
+}
+static uint8_t map_active(Sprite *s, uint32_t generation) {
+  if (s == NULL) return 0;
+  size_t i = s - state->sprite_pool;
+  return state->sprite_slot_generation[i] == generation;
+}
+WASM_EXPORT uint32_t sprite_generation(Sprite *s) {
+  size_t i = s - state->sprite_pool;
+  return state->sprite_slot_generation[i];
 }
 
 /* removes the canonical reference to this sprite from the spatial grid.
@@ -320,6 +368,9 @@ WASM_EXPORT Sprite *map_add(int x, int y, char kind) {
 
 WASM_EXPORT void map_set(char *str) {
   __builtin_memset(&state->map, 0, sizeof(state->map));
+
+  for (int i = 0; i < SPRITE_COUNT; i++)
+    map_free(state->sprite_pool + i);
 
   int tx = 0, ty = 0;
   do {

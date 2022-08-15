@@ -77,7 +77,7 @@ set(SOURCES
 
 include_directories(${TARGET_INC_DIR} ${BOARD_DIR})
 
-set(TARGET_HEAPSIZE 196)
+set(TARGET_HEAPSIZE 150)
 set(JERRY_TOOLCHAIN toolchain_mcu_cortexm0plus.cmake)
 
 set(CMAKE_SYSTEM_PROCESSOR cortex-m0plus)

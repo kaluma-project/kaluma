@@ -22,10 +22,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static uint16_t color16(uint8_t r, uint8_t g, uint8_t b) {
-  return ((r & 0xF8) << 8) | ((b & 0xFC) << 3) | (g >> 3);
-}
-
 static void oom(void) { puts("sprite alloc overflow (TODO: gendex)"); }
 #include "base_engine.c"
 
@@ -103,9 +99,11 @@ JERRYXX_FUN(native_push_table_clear_fn) { push_table_clear(); return jerry_creat
 
 JERRYXX_FUN(native_map_clear_deltas_fn) { map_clear_deltas(); return jerry_create_undefined(); }
 
+/* I may be recreating kaluma's MAGIC_STRINGs thing here,
+   I'd have to look more into how it works */
 static struct {
-  jerry_value_t x, y, dx, dy, addr, kind, remove, push;
-  jerry_property_descriptor_t  x_prop_desc,  y_prop_desc, kind_prop_desc,
+  jerry_value_t x, y, dx, dy, addr, type, push, remove, generation;
+  jerry_property_descriptor_t  x_prop_desc,  y_prop_desc, type_prop_desc,
                               dx_prop_desc, dy_prop_desc;
   jerry_value_t sprite_remove;
 } props = {0};
@@ -119,11 +117,21 @@ static Sprite *sprite_from_jerry_addr(jerry_value_t v) {
 }
 
 
+#define jerry_create_error_sprite_freed() \
+  jerry_create_error(JERRY_ERROR_COMMON, (jerry_char_t *)"sprite no longer on map")
+
 static Sprite *sprite_from_jerry_object(jerry_value_t this_val) {
-  jerry_value_t addr = jerry_get_property(this_val, props.addr);
-  Sprite *s = sprite_from_jerry_addr(addr);
-  jerry_release_value(addr);
-  return s;
+  jerry_value_t       addr_prop = jerry_get_property(this_val, props.      addr);
+  jerry_value_t generation_prop = jerry_get_property(this_val, props.generation);
+  uint32_t generation = jerry_get_number_value(generation_prop);
+
+  Sprite *s = sprite_from_jerry_addr(addr_prop);
+
+  jerry_release_value(      addr_prop);
+  jerry_release_value(generation_prop);
+
+  if (map_active(s, generation)) return s;
+  else                           return NULL;
 }
 
 static jerry_value_t sprite_remove(
@@ -132,7 +140,10 @@ static jerry_value_t sprite_remove(
   const jerry_value_t args[],
   const jerry_length_t argc
 ) {
-  map_remove(sprite_from_jerry_object(this_obj));
+  Sprite *s = sprite_from_jerry_object(this_obj);
+  if (!s) return jerry_create_error_sprite_freed();
+
+  map_remove(s);
   return jerry_create_undefined();
 }
 
@@ -143,7 +154,10 @@ static jerry_value_t sprite_x_getter(
   const jerry_value_t args[],
   const jerry_length_t argc
 ) {
-  return jerry_create_number(sprite_from_jerry_object(this_obj)->x);
+  Sprite *s = sprite_from_jerry_object(this_obj);
+  if (!s) return jerry_create_error_sprite_freed();
+
+  return jerry_create_number(s->x);
 }
 static jerry_value_t sprite_x_setter(
   const jerry_value_t func_obj,
@@ -152,6 +166,7 @@ static jerry_value_t sprite_x_setter(
   const jerry_length_t argc
 ) {
   Sprite *s = sprite_from_jerry_object(this_obj);
+  if (!s) return jerry_create_error_sprite_freed();
 
   int new_x = jerry_get_number_value(args[0]);
   map_move(s, new_x - s->x, 0);
@@ -166,7 +181,10 @@ static jerry_value_t sprite_y_getter(
   const jerry_value_t args[],
   const jerry_length_t argc
 ) {
-  return jerry_create_number(sprite_from_jerry_object(this_obj)->y);
+  Sprite *s = sprite_from_jerry_object(this_obj);
+  if (!s) return jerry_create_error_sprite_freed();
+
+  return jerry_create_number(s->y);
 }
 static jerry_value_t sprite_y_setter(
   const jerry_value_t func_obj,
@@ -175,6 +193,7 @@ static jerry_value_t sprite_y_setter(
   const jerry_length_t argc
 ) {
   Sprite *s = sprite_from_jerry_object(this_obj);
+  if (!s) return jerry_create_error_sprite_freed();
 
   int new_y = jerry_get_number_value(args[0]);
   map_move(s, 0, new_y - s->y);
@@ -183,22 +202,28 @@ static jerry_value_t sprite_y_setter(
 }
 
 
-static jerry_value_t sprite_kind_getter(
+static jerry_value_t sprite_type_getter(
   const jerry_value_t func_obj,
   const jerry_value_t this_obj,
   const jerry_value_t args[],
   const jerry_length_t argc
 ) {
-  jerry_char_t tmp[2] = { sprite_from_jerry_object(this_obj)->kind };
+  Sprite *s = sprite_from_jerry_object(this_obj);
+  if (!s) return jerry_create_error_sprite_freed();
+
+  jerry_char_t tmp[2] = { s->kind };
   return jerry_create_string(tmp);
 }
-static jerry_value_t sprite_kind_setter(
+static jerry_value_t sprite_type_setter(
   const jerry_value_t func_obj,
   const jerry_value_t this_obj,
   const jerry_value_t args[],
   const jerry_length_t argc
 ) {
-  sprite_from_jerry_object(this_obj)->kind = jerry_value_to_char(args[0]);
+  Sprite *s = sprite_from_jerry_object(this_obj);
+  if (!s) return jerry_create_error_sprite_freed();
+
+  s->kind = jerry_value_to_char(args[0]);
   return jerry_create_undefined();
 }
 
@@ -209,7 +234,9 @@ static jerry_value_t sprite_dx_getter(
   const jerry_value_t args[],
   const jerry_length_t argc
 ) {
-  return jerry_create_number(sprite_from_jerry_object(this_obj)->dx);
+  Sprite *s = sprite_from_jerry_object(this_obj);
+  if (s) return jerry_create_number(s->dx);
+  else   return jerry_create_error_sprite_freed();
 }
 
 static jerry_value_t sprite_dy_getter(
@@ -218,20 +245,23 @@ static jerry_value_t sprite_dy_getter(
   const jerry_value_t args[],
   const jerry_length_t argc
 ) {
-  return jerry_create_number(sprite_from_jerry_object(this_obj)->dy);
+  Sprite *s = sprite_from_jerry_object(this_obj);
+  if (s) return jerry_create_number(s->dy);
+  else   return jerry_create_error_sprite_freed();
 }
 
 
 static void props_init(void) {
 
-  props.     x = jerry_create_string((const jerry_char_t *)      "x");
-  props.     y = jerry_create_string((const jerry_char_t *)      "y");
-  props.    dx = jerry_create_string((const jerry_char_t *)     "dx");
-  props.    dy = jerry_create_string((const jerry_char_t *)     "dy");
-  props.  addr = jerry_create_string((const jerry_char_t *)   "addr");
-  props.  kind = jerry_create_string((const jerry_char_t *)   "kind");
-  props.  push = jerry_create_string((const jerry_char_t *)   "push");
-  props.remove = jerry_create_string((const jerry_char_t *) "remove");
+  props.         x = jerry_create_string((const jerry_char_t *)          "x");
+  props.         y = jerry_create_string((const jerry_char_t *)          "y");
+  props.        dx = jerry_create_string((const jerry_char_t *)         "dx");
+  props.        dy = jerry_create_string((const jerry_char_t *)         "dy");
+  props.      addr = jerry_create_string((const jerry_char_t *)       "addr");
+  props.      type = jerry_create_string((const jerry_char_t *)       "type");
+  props.      push = jerry_create_string((const jerry_char_t *)       "push");
+  props.    remove = jerry_create_string((const jerry_char_t *)     "remove");
+  props.generation = jerry_create_string((const jerry_char_t *) "generation");
 
   props.sprite_remove = jerry_create_external_function(sprite_remove);
 
@@ -247,11 +277,11 @@ static void props_init(void) {
   props.y_prop_desc.is_set_defined = 1;
   props.y_prop_desc.setter = jerry_create_external_function(sprite_y_setter);
 
-  jerry_init_property_descriptor_fields(&props.kind_prop_desc);
-  props.kind_prop_desc.is_get_defined = 1;
-  props.kind_prop_desc.getter = jerry_create_external_function(sprite_kind_getter);
-  props.kind_prop_desc.is_set_defined = 1;
-  props.kind_prop_desc.setter = jerry_create_external_function(sprite_kind_setter);
+  jerry_init_property_descriptor_fields(&props.type_prop_desc);
+  props.type_prop_desc.is_get_defined = 1;
+  props.type_prop_desc.getter = jerry_create_external_function(sprite_type_getter);
+  props.type_prop_desc.is_set_defined = 1;
+  props.type_prop_desc.setter = jerry_create_external_function(sprite_type_setter);
 
   jerry_init_property_descriptor_fields(&props.dx_prop_desc);
   props.dx_prop_desc.is_get_defined = 1;
@@ -272,6 +302,11 @@ static jerry_value_t sprite_to_jerry_object(Sprite *s) {
   jerry_release_value(jerry_set_property(ret, props.addr, addr_val));
   jerry_release_value(addr_val);
 
+  /* store generation field on ret */
+  jerry_value_t generation_val = jerry_create_number(sprite_generation(s));
+  jerry_release_value(jerry_set_property(ret, props.generation, generation_val));
+  jerry_release_value(generation_val);
+
   /* add methods */
   jerry_release_value(jerry_set_property(ret, props.remove, props.sprite_remove));
 
@@ -280,7 +315,7 @@ static jerry_value_t sprite_to_jerry_object(Sprite *s) {
   jerry_release_value(jerry_define_own_property(ret, props.y, &props.y_prop_desc));
   jerry_release_value(jerry_define_own_property(ret, props.dx, &props.dx_prop_desc));
   jerry_release_value(jerry_define_own_property(ret, props.dy, &props.dy_prop_desc));
-  jerry_release_value(jerry_define_own_property(ret, props.kind, &props.kind_prop_desc));
+  jerry_release_value(jerry_define_own_property(ret, props.type, &props.type_prop_desc));
 
   return ret;
 }
@@ -499,6 +534,34 @@ JERRYXX_FUN(native_rfill_fn) {
   return jerry_create_undefined();
 }
 
+JERRYXX_FUN(native_text_add_fn) {
+  char *tmp = temp_str_mem();
+  jerry_size_t nbytes = jerry_string_to_char_buffer(
+    JERRYXX_GET_ARG(0),
+    (jerry_char_t *)tmp,
+    sizeof(state->temp_str_mem) - 1
+  );
+  tmp[nbytes] = '\0'; 
+
+  jerry_value_t color_val = JERRYXX_GET_ARG(1);
+
+  uint8_t color[3] = {0};
+  for (int i = 0; i < 3; i++) {
+    jerry_value_t el = jerry_get_property_by_index(color_val, i);
+    color[i] = jerry_get_number_value(el);
+    jerry_release_value(el);
+  }
+
+  text_add(
+    tmp,
+    color16(color[0], color[1], color[2]),
+    JERRYXX_GET_ARG_NUMBER(2),
+    JERRYXX_GET_ARG_NUMBER(3) 
+  );
+
+  return jerry_create_undefined();
+}
+
 JERRYXX_FUN(native_render_fn) {
   jerry_value_t data = JERRYXX_GET_ARG(0);
 
@@ -569,6 +632,7 @@ jerry_value_t module_native_init() {
   jerryxx_set_property_function(exports, MSTR_NATIVE_clearTile,     clearTile);
   jerryxx_set_property_function(exports, MSTR_NATIVE_addSprite,     addSprite);
   jerryxx_set_property_function(exports, MSTR_NATIVE_render,        native_render_fn);
+  jerryxx_set_property_function(exports, MSTR_NATIVE_text_add,      native_text_add_fn);
 
   /* random background goodie */
   jerryxx_set_property_function(exports, MSTR_NATIVE_map_clear_deltas, native_map_clear_deltas_fn);

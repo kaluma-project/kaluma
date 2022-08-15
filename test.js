@@ -1,44 +1,42 @@
-const { GPIO } = require("gpio");
-const { screen } = require("screen");
-const gc = screen.getContext("buffer");
-const native = global.require("native");
+const {
+  /* sprite interactions */ setSolids, setPushables,
+  /*              see also: sprite.x +=, sprite.y += */
 
-const setLegend = bitmaps => {
-  native.legend_clear();
-  for (const [charStr, imgStr] of bitmaps) {
-    native.legend_doodle_set(charStr, imgStr.trim());
-  }
-  native.legend_prepare();
-}
+  /* art */ setLegend, setBackground,
+  /* text */ addText, clearText,
 
-function _makeTag(cb) {
-  return (strings, ...interps) => {
-    if (typeof strings === "string") {
-      throw new Error("Tagged template literal must be used like name`text`, instead of name(`text`)");
-    }
-    const string = strings.reduce((p, c, i) => p + c + (interps[i] ?? ''), '');
-    return cb(string);
-  }
-}
-const bitmap = _makeTag(text => text);
+  /*   spawn sprites */ setMap, addSprite,
+  /* despawn sprites */ clearTile, /* sprite.remove() */
 
-(() => {
-  const width = 128, height = 160;
-  const pixels = new Uint16Array(width * height);
-  const { render, setMap, getGrid, legend_doodle_set } = native;
-  
-  const smallFire = ['0', '1'];
-  const   bigFire = ['2', '3'];
-  const   allFire = [...smallFire, ...bigFire];
-  const       log = 'l';
-  const    player = 'p';
-  const      cube = 'c';
-  const     house = 'h';
-  const     grass = 'g';
-  
-  // for (let i = 0; i < 100; i++) {
-    pixels.fill(gc.color16(255, 255, 255));
-  setLegend([
+  /* tile queries */ getGrid, getTile, getFirst, getAll, tilesWith,
+  /* see also: sprite.type */
+
+  /* map dimensions */ width, height,
+
+  /* constructors */ bitmap, tune, map,
+
+  /* input handling */ onInput, afterInput,
+
+  /* how much sprite has moved since last onInput: sprite.dx, sprite.dy */
+} = require("engine");
+/*
+@title: pyre
+@author: ced
+
+Instructions:
+
+Burn down the blue hut.
+*/
+
+const smallFire = ['0', '1'];
+const   bigFire = ['2', '3'];
+const   allFire = [...smallFire, ...bigFire];
+const       log = 'l';
+const    player = 'p';
+const      cube = 'c';
+const     house = 'h';
+const     grass = 'g';
+setLegend(
   [ smallFire[0], bitmap`
 ................
 ................
@@ -193,19 +191,148 @@ const bitmap = _makeTag(text => text);
 .4...........4..
 4...........4...
 ................`]
-  ]);
-  setMap(`.........
-...g.g...
+)
+
+setSolids([player, log, cube]);
+setPushables({ [player]: [cube] })
+
+const      isGrass = tile => tile.type == grass;
+const     burnsBig = tile => tile.type == log || tile.type == cube;
+const needsBigFire = tile => tile.type == house;
+
+const isSmallFire = tile => smallFire.includes(tile.type);
+const      isFire = tile => allFire.includes(tile.type);
+
+const fireTiles = () => allFire.flatMap(getAll);
+const neighborTiles = tile => {
+  return [
+    getTile(tile.x+1, tile.y+0),                                 
+    getTile(tile.x-1, tile.y+0),                                 
+    getTile(tile.x+0, tile.y+1),                                 
+    getTile(tile.x+0, tile.y-1),                                 
+    getTile(tile.x,   tile.y)
+  ]
+  .flat();
+}
+
+const replace = (type0, type1) => {
+  for (const sprite of getAll(type0)) {
+    sprite.type = type1;
+  }
+}
+
+let tick = 0;
+setInterval(() => {
+  tick++;
+
+  /* fire flicker */
+  if (tick % 2) {
+    replace(smallFire[0], smallFire[1]);
+    replace(  bigFire[0],   bigFire[1]);
+  } else {
+    replace(smallFire[1], smallFire[0]);
+    replace(  bigFire[1],   bigFire[0]);
+  }
+
+  /* fire spread */
+  if (tick % 4 == 0) {        
+    // changing the map while iterating over can create bugs,
+    // so we'll store the tiles we want to replace with fire here
+    const replacements = new Map();
+    
+    for (const fire of fireTiles()) {            
+      for (const tile of neighborTiles(fire)) {
+        if (isFire(tile)) continue;
+        if (isSmallFire(fire) && needsBigFire(tile)) continue;
+        
+        replacements.set(
+          tile,
+          burnsBig(tile) ? bigFire[0] : smallFire[0]
+        );
+      }
+      
+      fire.remove();
+    }
+
+    // apply all of the replacements we stored
+    for (const [tile, type] of replacements) {
+      tile.type = type;
+    }
+  }
+
+  /* win condition */
+  if (getAll(house).length == 0 && fireTiles().length == 0) {
+    levels[1+level] && setMap(levels[++level]);
+    addText("smol been", { x: 6, y: 0, color: [ 200, 20, 20 ]});
+    addText("big rage", { x: 6, y: 14, color: [ 200, 20, 20 ]});
+  }
+}, 200);
+
+afterInput(() => {
+  /* crate kill grass */
+  for (const { x, y } of getAll('c')) {
+    for (const g of getTile(x, y).filter(isGrass)) {
+      g.remove();
+    }
+  }
+})
+
+let level = 0;
+const levels = [
+    map`
+.........
+...g.g.p.
 ..gg.gg..
 .gg...g..
 ..1...gl.
 ......ll.
 ..lllll..
-..hl...p.
-.........`);
-  console.log(JSON.stringify(getGrid(), null, 2));
-    render(pixels, 0);
+..hl.....
+.........`,
+    map`
+.........
+..gg.....
+.gggg....
+.ghgg....
+.ggg..c..
+gggg.....
+gg...p...
+g1.......
+.........`,
+    map`
+..llllggg
+........g
+........g
+..h.....g
+......c.g
+..p.....g
+........g
+.......gg
+.1gggggg.`,
+]
+// .reverse();
 
-    screen.fillImage(0, 0, width, height, new Uint8Array(pixels.buffer));
-  // }
-})();
+const pushPlayer = (dx, dy) => {
+  if (getFirst(player)) {
+    getFirst(player).x += dx;
+    getFirst(player).y += dy;
+  }
+}
+onInput("a", () => {
+  pushPlayer(-1,  0);
+})
+onInput("d", () => {
+  pushPlayer( 1,  0);
+})
+onInput("w", () => {
+  pushPlayer( 0, -1);
+})
+onInput("s", () => {
+  pushPlayer( 0,  1);
+})
+
+setMap(levels[level]);
+
+onInput(    "j", () => {
+  setMap(levels[level]);
+});

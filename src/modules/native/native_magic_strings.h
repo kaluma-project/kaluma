@@ -31,6 +31,7 @@
 #define MSTR_NATIVE_getGrid "getGrid"
 #define MSTR_NATIVE_tilesWith "tilesWith"
 #define MSTR_NATIVE_render "render"
+#define MSTR_NATIVE_text_add "text_add"
 
 #define MSTR_NATIVE_width "width"
 #define MSTR_NATIVE_height "height"
