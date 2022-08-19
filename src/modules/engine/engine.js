@@ -59,9 +59,9 @@ exports.onInput = (() => {
   const { Button } = require('button');
 
   const dpad = {
-    "w": { handlers: [], button: new Button(13, { debounce: 0 }) },
+    "w": { handlers: [], button: new Button(12, { debounce: 0 }) },
     "s": { handlers: [], button: new Button(14, { debounce: 0 }) },
-    "a": { handlers: [], button: new Button(12, { debounce: 0 }) },
+    "a": { handlers: [], button: new Button(13, { debounce: 0 }) },
     "d": { handlers: [], button: new Button(15, { debounce: 0 }) },
     "i": { handlers: [], button: new Button( 5, { debounce: 0 }) },
     "k": { handlers: [], button: new Button( 8, { debounce: 0 }) },

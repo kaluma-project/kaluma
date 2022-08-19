@@ -40,6 +40,7 @@ if(NOT MODULES)
     fs
     vfs_lfs
     vfs_fat
+    i2saudio
     sdcard
     native
     engine

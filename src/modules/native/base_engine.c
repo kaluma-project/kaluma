@@ -347,15 +347,30 @@ static void map_pluck(Sprite *s) {
   state->map[s->x][s->y] = 0;
 }
 
-/* pushes pointer to sprite onto top of spritestack at the sprite's x and y.
+/* inserts pointer to sprite into the spritestack at this x and y,
+ * such that rendering z-order is preserved
+ * (as expressed in order of legend_doodle_set calls)
+ * 
+ * see map_plop about caller's responsibility */
+static void map_plop(Sprite *sprite) {
+  Sprite *top = state->map[sprite->x][sprite->y];
 
-   caller's responsibility to ensure the sprite
-   is not already pointed to on the map somewhere,
-   e.g. called map_pluck beforehand (or this is a fresh sprite)
-   (unless they're into that!?!) */
-static void map_plop(Sprite *s) {
-  s->next = state->map[s->x][s->y];
-  state->map[s->x][s->y] = s;
+  /* we want the sprite with the lowest z-order on the top. */
+
+  #define Z_ORDER(sprite) (state->char_to_index[(int)(sprite)->kind])
+  if (top == 0 || Z_ORDER(top) >= Z_ORDER(sprite)) {
+    sprite->next = state->map[sprite->x][sprite->y];
+    state->map[sprite->x][sprite->y] = sprite;
+    return;
+  }
+
+  Sprite *insert_after = top;
+  while (insert_after->next && Z_ORDER(insert_after->next) < Z_ORDER(sprite))
+    insert_after = insert_after->next;
+  #undef Z_ORDER
+
+  sprite->next = insert_after->next;
+  insert_after->next = sprite;
 }
 
 
