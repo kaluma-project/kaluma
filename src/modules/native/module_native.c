@@ -562,6 +562,8 @@ JERRYXX_FUN(native_text_add_fn) {
   return jerry_create_undefined();
 }
 
+JERRYXX_FUN(native_text_clear_fn) { text_clear(); return jerry_create_undefined(); }
+
 JERRYXX_FUN(native_render_fn) {
   jerry_value_t data = JERRYXX_GET_ARG(0);
 
@@ -633,6 +635,7 @@ jerry_value_t module_native_init() {
   jerryxx_set_property_function(exports, MSTR_NATIVE_addSprite,     addSprite);
   jerryxx_set_property_function(exports, MSTR_NATIVE_render,        native_render_fn);
   jerryxx_set_property_function(exports, MSTR_NATIVE_text_add,      native_text_add_fn);
+  jerryxx_set_property_function(exports, MSTR_NATIVE_text_clear,    native_text_clear_fn);
 
   /* random background goodie */
   jerryxx_set_property_function(exports, MSTR_NATIVE_map_clear_deltas, native_map_clear_deltas_fn);

@@ -155,6 +155,11 @@ WASM_EXPORT void text_add(char *str, Color color, int x, int y) {
     state->text_color[y][x] = color;
 }
 
+WASM_EXPORT void text_clear(void) {
+  __builtin_memset(state->text_char , 0, sizeof(state->text_char ));
+  __builtin_memset(state->text_color, 0, sizeof(state->text_color));
+}
+
 WASM_EXPORT void init(void) {
 #ifdef __wasm__
   int mem_needed = sizeof(State)/PAGE_SIZE;
