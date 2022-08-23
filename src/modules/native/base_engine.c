@@ -68,6 +68,8 @@ typedef struct { Sprite *sprite; int x, y; uint8_t dirty; } MapIter;
 typedef struct {
   Color palette[PER_CHAR];
   uint8_t lit[SCREEN_SIZE_Y * SCREEN_SIZE_X / 8];
+  
+  int scale;
 
   /* some SoA v. AoS shit goin on here man */
   int doodle_index_count;
@@ -209,6 +211,8 @@ WASM_EXPORT char *temp_str_mem(void) {
 
 /* call this when the map changes size, or when the legend changes */
 static void render_resize_legend(void) {
+  __builtin_memset(&state->render->legend_resized, 0, sizeof(state->render->legend_resized));
+
   /* how big do our tiles need to be to fit them all snugly on screen? */
   float min_tile_x = SCREEN_SIZE_X / state->width;
   float min_tile_y = SCREEN_SIZE_Y / state->height;
@@ -236,18 +240,24 @@ static void render_resize_legend(void) {
 }
 
 static void render_blit_sprite(Color *screen, int sx, int sy, char kind) {
+  int scale = state->render->scale;
   Doodle *d = state->render->legend_resized + state->char_to_index[(int)kind];
 
   for (int x = 0; x < state->tile_size; x++)
     for (int y = 0; y < state->tile_size; y++) {
 
       if (!doodle_lit_read(d, x, y)) continue;
-      if (render_lit_read(sx+x, sy+y)) continue;
+      for (  int ox = 0; ox < scale; ox++)
+        for (int oy = 0; oy < scale; oy++) {
+          int px = ox + sx + scale*x;
+          int py = oy + sy + scale*y;
+          if (render_lit_read(px, py)) continue;
 
-      render_lit_write(sx+x, sy+y);
+          render_lit_write(px, py);
 
-      int i = (sx+(state->tile_size - 1 - x)) * SCREEN_SIZE_Y + (sy+y);
-      screen[i] = d->pixels[y][x];
+          int i = (ox + sx + scale*(state->tile_size - 1 - x)) * SCREEN_SIZE_Y + py;
+          screen[i] = d->pixels[y][x];
+        }
     }
 }
 
@@ -262,7 +272,6 @@ static void render_char(Color *screen, char c, Color color, int sx, int sy) {
   }
 }
 
-
 WASM_EXPORT void render_set_background(char kind) {
   state->background_sprite = kind;
 }
@@ -271,8 +280,20 @@ WASM_EXPORT uint8_t map_get_grid(MapIter *m);
 WASM_EXPORT void render(Color *screen) {
   __builtin_memset(&state->render->lit, 0, sizeof(state->render->lit));
 
-  int pixel_width = state->width*state->tile_size;
-  int pixel_height = state->height*state->tile_size;
+  int scale;
+  {
+    int scale_x = SCREEN_SIZE_X/(state->width*16);
+    int scale_y = SCREEN_SIZE_Y/(state->height*16);
+
+    scale = (scale_x < scale_y) ? scale_x : scale_y;
+    if (scale < 1) scale = 1;
+
+    state->render->scale = scale;
+  }
+  int size = state->tile_size*scale;
+
+  int pixel_width = state->width*size;
+  int pixel_height = state->height*size;
 
   int ox = (SCREEN_SIZE_X - pixel_width)/2;
   int oy = (SCREEN_SIZE_Y - pixel_height)/2;
@@ -287,16 +308,16 @@ WASM_EXPORT void render(Color *screen) {
   MapIter m = {0};
   while (map_get_grid(&m))
     render_blit_sprite(screen,
-                       ox + state->tile_size*(state->width - 1 - m.sprite->x),
-                       oy + state->tile_size*m.sprite->y,
+                       ox + size*(state->width - 1 - m.sprite->x),
+                       oy + size*m.sprite->y,
                        m.sprite->kind);
 
   if (state->background_sprite)
     for (int y = 0; y < state->height; y++)
       for (int x = 0; x < state->width; x++)
         render_blit_sprite(screen,
-                           ox + state->tile_size*x,
-                           oy + state->tile_size*y,
+                           ox + size*x,
+                           oy + size*y,
                            state->background_sprite);
 
   for (int y = 0; y < TEXT_CHARS_MAX_Y; y++)

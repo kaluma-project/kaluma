@@ -77,7 +77,7 @@ static SoundSample sound_samples[Sound_COUNT];
 
 void pio0_irq_0_handler(void) {
   uint32_t ints = pio0->ints0;
-  uint16_t sample = 0x1000;
+  uint16_t sample = 0x0000;
 
   ints >>= 8;
   pio0->irq = ints;
@@ -86,8 +86,11 @@ void pio0_irq_0_handler(void) {
   for (int i = 0; i < CHANNEL_COUNT; i++) {
     Channel *chan = state.channels + i;
 
-    if (chan->volume)
-      sample += sound_samples[chan->sound].data[chan->phase / (MAX_PHASE/SOUND_SAMPLE_LEN)];
+    if (chan->volume) {
+      float x = sound_samples[chan->sound].data[chan->phase / (MAX_PHASE/SOUND_SAMPLE_LEN)];
+      if (x > 0) sample = ((sample+x) <  0x800000) ? sample+x :  0x800000;
+      else       sample = ((sample+x) > -0x800000) ? sample+x : -0x800000;
+    }
   }
 
   pio_sm_put(pio0, 0, sample<<16);
@@ -197,9 +200,9 @@ void core1_entry(void) {
   for (int i = 0; i < SOUND_SAMPLE_LEN; i++) {
     float t = (float)i / (float)SOUND_SAMPLE_LEN;
     sound_samples[Sound_Sine    ].data[i] = sinf(t * M_PI * 2) * 7500;
-    sound_samples[Sound_Square  ].data[i] = (t > 0.5f) ? 7500 : 0;
-    sound_samples[Sound_Triangle].data[i] = fabsf(0.5f - fmodf(t, 1.0f)) * 7500;
-    sound_samples[Sound_Sawtooth].data[i] = t * 7500;
+    sound_samples[Sound_Square  ].data[i] = (t > 0.5f) ? 7500 : -7500;
+    sound_samples[Sound_Triangle].data[i] = 2.0f*fabsf(0.5f - fmodf(t, 1.0f)) * 7500;
+    sound_samples[Sound_Sawtooth].data[i] = (0.5f - t)*2 * 7500;
   }
 
   while (true) {
