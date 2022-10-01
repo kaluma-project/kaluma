@@ -30,7 +30,10 @@
 #define MAX_GPIO_NUM 2
 
 JERRYXX_FUN(pico_cyw43_ctor_fn) {
-  cyw43_arch_deinit();
+  int ret = cyw43_arch_init();
+  if (ret) {
+    return jerry_create_error_from_value(create_system_error(ret), true);
+  }
   return jerry_create_undefined();
 }
 
@@ -38,10 +41,7 @@ JERRYXX_FUN(pico_cyw43_ctor_fn) {
  * PICO_CYW43.prototype.close() function
  */
 JERRYXX_FUN(pico_cyw43_close_fn) {
-  int ret = cyw43_arch_init();
-  if (ret) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
-  }
+  cyw43_arch_deinit();
   return jerry_create_undefined();
 }
 
