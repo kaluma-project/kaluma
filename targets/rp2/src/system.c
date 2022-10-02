@@ -39,6 +39,9 @@
 #include "tty.h"
 #include "tusb.h"
 #include "uart.h"
+#ifdef PICO_CYW43
+#include "pico/cyw43_arch.h"
+#endif /* PICO_CYW43 */
 
 /**
  * Delay in milliseconds
@@ -83,6 +86,9 @@ void km_system_init() {
 }
 
 void km_system_cleanup() {
+#ifdef PICO_CYW43
+  cyw43_arch_deinit();
+#endif /* PICO_CYW43 */
   km_adc_cleanup();
   km_pwm_cleanup();
   km_i2c_cleanup();
