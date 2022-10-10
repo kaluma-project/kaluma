@@ -30,7 +30,9 @@
 #include "system.h"
 
 #define MAX_GPIO_NUM 2
-#define SCAN_TIMEOUT 2000 /* 2 sec */
+#define SCAN_TIMEOUT 2000     /* 2 sec */
+#define CONNECT_TIMEOUT 30000 /* 30 sec */
+
 typedef struct __scan_queue_s {
   cyw43_ev_scan_result_t data;
   struct __scan_queue_s *next;
@@ -97,12 +99,6 @@ JERRYXX_FUN(pico_cyw43_wifi_ctor_fn) {
   return jerry_create_undefined();
 }
 
-JERRYXX_FUN(pico_cyw43_wifi_assoc_cb_fn) { return jerry_create_undefined(); }
-
-JERRYXX_FUN(pico_cyw43_wifi_connect_cb) { return jerry_create_undefined(); }
-
-JERRYXX_FUN(pico_cyw43_wifi_disconnect_cb) { return jerry_create_undefined(); }
-
 JERRYXX_FUN(pico_cyw43_wifi_reset) { return jerry_create_undefined(); }
 
 static int __scan_cb(void *env, const cyw43_ev_scan_result_t *result) {
@@ -145,7 +141,8 @@ JERRYXX_FUN(pico_cyw43_wifi_scan) {
     if (ret < 0) {
       jerryxx_set_property_number(JERRYXX_GET_THIS,
                                   MSTR_PICO_CYW43_NETWORK_ERRNO, -1);
-      jerry_value_t errno = jerry_create_number(-1);
+      jerry_value_t errno = jerryxx_get_property_number(
+          JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, -1);
       jerry_value_t this_val = jerry_create_undefined();
       jerry_value_t args_p[1] = {errno};
       jerry_call_function(scan_js_cb, this_val, args_p, 1);
@@ -191,6 +188,7 @@ JERRYXX_FUN(pico_cyw43_wifi_scan) {
         } else {
           sprintf(str_buff, "OPEN");
         }
+        printf("security %d\r\n", current->data.auth_mode);
         jerryxx_set_property_string(obj, MSTR_PICO_CYW43_SCANINFO_SECURITY,
                                     str_buff);
         jerryxx_set_property_number(obj, MSTR_PICO_CYW43_SCANINFO_RSSI,
@@ -206,7 +204,8 @@ JERRYXX_FUN(pico_cyw43_wifi_scan) {
         current = current->next;
         free(remove);
       }
-      jerry_value_t errno = jerry_create_number(0);
+      jerry_value_t errno = jerryxx_get_property_number(
+          JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
       jerry_value_t this_val = jerry_create_undefined();
       jerry_value_t args_p[2] = {errno, scan_array};
       jerry_call_function(scan_js_cb, this_val, args_p, 2);
@@ -221,9 +220,107 @@ JERRYXX_FUN(pico_cyw43_wifi_scan) {
   return jerry_create_undefined();
 }
 
-JERRYXX_FUN(pico_cyw43_wifi_connect) { return jerry_create_undefined(); }
+JERRYXX_FUN(pico_cyw43_wifi_connect) {
+  JERRYXX_CHECK_ARG(0, "connectInfo");
+  JERRYXX_CHECK_ARG_FUNCTION_OPT(1, "callback");
+  jerry_value_t connect_info = JERRYXX_GET_ARG(0);
+  jerry_value_t ssid =
+      jerryxx_get_property(connect_info, MSTR_PICO_CYW43_SCANINFO_SSID);
+  jerry_value_t pw =
+      jerryxx_get_property(connect_info, MSTR_PICO_CYW43_PASSWORD);
+  uint8_t *ssid_str = NULL;
+  uint8_t *pw_str = NULL;
+  if (jerry_value_is_string(ssid)) {
+    jerry_size_t len = jerryxx_get_ascii_string_size(ssid);
+    ssid_str = (uint8_t *)malloc(len + 1);
+    jerryxx_string_to_ascii_char_buffer(ssid, ssid_str, len);
+    ssid_str[len] = '\0';
+  } else {
+    return jerry_create_error(JERRY_ERROR_TYPE,
+                              (const jerry_char_t *)"SSID error");
+  }
+  if (jerry_value_is_string(pw)) {
+    jerry_size_t len = jerryxx_get_ascii_string_size(pw);
+    pw_str = (uint8_t *)malloc(len + 1);
+    jerryxx_string_to_ascii_char_buffer(pw, pw_str, len);
+    pw_str[len] = '\0';
+  }
+  jerry_release_value(ssid);
+  jerry_release_value(pw);
+  // printf("ssid %s, pw %s\r\n", ssid_str, pw_str);
+  int connect_ret = cyw43_arch_wifi_connect_timeout_ms(
+      (char *)ssid_str, (char *)pw_str, -1, CONNECT_TIMEOUT);
+  free(ssid_str);
+  if (pw_str) {
+    free(pw_str);
+  }
+  if (connect_ret) {
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
+                                -1);
+  } else {
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
+                                0);
+    jerry_value_t assoc_js_cb =
+        jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ASSOC_CB);
+    jerry_value_t this_val = jerry_create_undefined();
+    if (jerry_value_is_function(assoc_js_cb)) {
+      jerry_call_function(assoc_js_cb, this_val, NULL, 0);
+    }
+    jerry_value_t connect_js_cb =
+        jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_CONNECT_CB);
+    if (jerry_value_is_function(connect_js_cb)) {
+      jerry_call_function(connect_js_cb, this_val, NULL, 0);
+    }
+    jerry_release_value(this_val);
+  }
+  // printf("cyw43_arch_wifi_connect_timeout_ms %d\r\n", connect_ret);
+  if (JERRYXX_HAS_ARG(1)) {
+    jerry_value_t callback = JERRYXX_GET_ARG(1);
+    jerry_value_t connect_js_cb = jerry_acquire_value(callback);
+    jerry_value_t errno = jerryxx_get_property_number(
+        JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
+    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t args_p[1] = {errno};
+    jerry_call_function(connect_js_cb, this_val, args_p, 1);
+    jerry_release_value(errno);
+    jerry_release_value(this_val);
+    jerry_release_value(connect_js_cb);
+  }
+  return jerry_create_undefined();
+}
 
-JERRYXX_FUN(pico_cyw43_wifi_disconnect) { return jerry_create_undefined(); }
+JERRYXX_FUN(pico_cyw43_wifi_disconnect) {
+  JERRYXX_CHECK_ARG_FUNCTION_OPT(0, "callback");
+  int disconnect_ret = cyw43_wifi_leave(&cyw43_state, CYW43_ITF_STA);
+  if (disconnect_ret == 0) {
+    jerry_value_t disconnect_js_cb = jerryxx_get_property(
+        JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_DISCONNECT_CB);
+    if (jerry_value_is_function(disconnect_js_cb)) {
+      jerry_value_t this_val = jerry_create_undefined();
+      jerry_call_function(disconnect_js_cb, this_val, NULL, 0);
+      jerry_release_value(this_val);
+    }
+  }
+  if (JERRYXX_HAS_ARG(0)) {
+    jerry_value_t callback = JERRYXX_GET_ARG(0);
+    jerry_value_t disconnect_js_cb = jerry_acquire_value(callback);
+    jerry_value_t errno;
+    if (disconnect_ret) {
+      errno = jerryxx_get_property_number(JERRYXX_GET_THIS,
+                                          MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
+    } else {
+      errno = jerryxx_get_property_number(JERRYXX_GET_THIS,
+                                          MSTR_PICO_CYW43_NETWORK_ERRNO, -1);
+    }
+    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t args_p[1] = {errno};
+    jerry_call_function(disconnect_js_cb, this_val, args_p, 1);
+    jerry_release_value(errno);
+    jerry_release_value(this_val);
+    jerry_release_value(disconnect_js_cb);
+  }
+  return jerry_create_undefined();
+}
 
 JERRYXX_FUN(pico_cyw43_wifi_get_connection) { return jerry_create_undefined(); }
 
@@ -267,13 +364,6 @@ jerry_value_t module_pico_cyw43_init() {
       jerry_create_external_function(pico_cyw43_wifi_ctor_fn);
   jerry_value_t wifi_prototype = jerry_create_object();
   jerryxx_set_property(pico_cyw43_wifi_ctor, "prototype", wifi_prototype);
-  jerryxx_set_property_function(wifi_prototype, MSTR_PICO_CYW43_WIFI_ASSOC_CB,
-                                pico_cyw43_wifi_assoc_cb_fn);
-  jerryxx_set_property_function(wifi_prototype, MSTR_PICO_CYW43_WIFI_CONNECT_CB,
-                                pico_cyw43_wifi_connect_cb);
-  jerryxx_set_property_function(wifi_prototype,
-                                MSTR_PICO_CYW43_WIFI_DISCONNECT_CB,
-                                pico_cyw43_wifi_disconnect_cb);
   jerryxx_set_property_function(wifi_prototype, MSTR_PICO_CYW43_WIFI_RESET,
                                 pico_cyw43_wifi_reset);
   jerryxx_set_property_function(wifi_prototype, MSTR_PICO_CYW43_WIFI_SCAN,

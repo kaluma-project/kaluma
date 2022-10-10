@@ -57,4 +57,5 @@
 #define MSTR_PICO_CYW43_SCANINFO_RSSI "rssi"
 #define MSTR_PICO_CYW43_SCANINFO_CHANNEL "channel"
 
+#define MSTR_PICO_CYW43_PASSWORD "password"
 #endif /* __PICO_CYW43_MAGIC_STRINGS_H */
