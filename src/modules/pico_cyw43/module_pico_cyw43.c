@@ -55,14 +55,6 @@ JERRYXX_FUN(pico_cyw43_ctor_fn) {
   return jerry_create_undefined();
 }
 
-/**
- * PICO_CYW43.prototype.close() function
- */
-JERRYXX_FUN(pico_cyw43_close_fn) {
-  cyw43_arch_deinit();
-  return jerry_create_undefined();
-}
-
 static int __check_gpio(uint32_t pin) {
   if (pin > MAX_GPIO_NUM) {
     return -1;
@@ -352,8 +344,6 @@ jerry_value_t module_pico_cyw43_init() {
       jerry_create_external_function(pico_cyw43_ctor_fn);
   jerry_value_t prototype = jerry_create_object();
   jerryxx_set_property(pico_cyw43_ctor, "prototype", prototype);
-  jerryxx_set_property_function(prototype, MSTR_PICO_CYW43_CLOSE,
-                                pico_cyw43_close_fn);
   jerryxx_set_property_function(prototype, MSTR_PICO_CYW43_GETGPIO,
                                 pico_cyw43_get_gpio);
   jerryxx_set_property_function(prototype, MSTR_PICO_CYW43_PUTGPIO,

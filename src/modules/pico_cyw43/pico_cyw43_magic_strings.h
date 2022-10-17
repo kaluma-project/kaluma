@@ -23,7 +23,6 @@
 #define __PICO_CYW43_MAGIC_STRINGS_H
 
 #define MSTR_PICO_CYW43_PICO_CYW43 "PicoCYW43"
-#define MSTR_PICO_CYW43_CLOSE "close"
 #define MSTR_PICO_CYW43_GETGPIO "getGpio"
 #define MSTR_PICO_CYW43_PUTGPIO "putGpio"
 
