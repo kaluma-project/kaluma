@@ -45,6 +45,9 @@ typedef struct {
 } __scan_result_t;
 __scan_result_t *__p_scan_result;
 
+char __current_ssid[33];
+uint8_t __current_bssid[6] = {0};
+
 JERRYXX_FUN(pico_cyw43_ctor_fn) {
   int ret = cyw43_arch_init();
   __p_scan_result = NULL;
@@ -160,7 +163,6 @@ JERRYXX_FUN(pico_cyw43_wifi_scan) {
       uint8_t index = 0;
       while (current) {
         jerry_value_t obj = jerry_create_object();
-        ;
         char *str_buff = (char *)calloc(1, 33);
         memcpy(str_buff, current->data.ssid, current->data.ssid_len);
         jerryxx_set_property_string(obj, MSTR_PICO_CYW43_SCANINFO_SSID,
@@ -224,9 +226,11 @@ JERRYXX_FUN(pico_cyw43_wifi_connect) {
   uint8_t *pw_str = NULL;
   if (jerry_value_is_string(ssid)) {
     jerry_size_t len = jerryxx_get_ascii_string_size(ssid);
-    ssid_str = (uint8_t *)malloc(len + 1);
-    jerryxx_string_to_ascii_char_buffer(ssid, ssid_str, len);
-    ssid_str[len] = '\0';
+    if (len > 32) {
+      len = 32;
+    }
+    jerryxx_string_to_ascii_char_buffer(ssid, (uint8_t *)__current_ssid, len);
+    __current_ssid[len] = '\0';
   } else {
     return jerry_create_error(JERRY_ERROR_TYPE,
                               (const jerry_char_t *)"SSID error");
@@ -264,6 +268,12 @@ JERRYXX_FUN(pico_cyw43_wifi_connect) {
       jerry_call_function(connect_js_cb, this_val, NULL, 0);
     }
     jerry_release_value(this_val);
+    /** This function return RP-W mac address. need to change it */
+    int mac_ret =
+        cyw43_wifi_get_mac(&cyw43_state, CYW43_ITF_STA, __current_bssid);
+    if (mac_ret < 0) {
+      memset(__current_bssid, 0, 6);
+    }
   }
   // printf("cyw43_arch_wifi_connect_timeout_ms %d\r\n", connect_ret);
   if (JERRYXX_HAS_ARG(1)) {
@@ -314,7 +324,23 @@ JERRYXX_FUN(pico_cyw43_wifi_disconnect) {
   return jerry_create_undefined();
 }
 
-JERRYXX_FUN(pico_cyw43_wifi_get_connection) { return jerry_create_undefined(); }
+JERRYXX_FUN(pico_cyw43_wifi_get_connection) {
+  int wifi_status = cyw43_tcpip_link_status(&cyw43_state, CYW43_ITF_STA);
+  if (wifi_status == CYW43_LINK_UP) {
+    jerry_value_t obj = jerry_create_object();
+    jerryxx_set_property_string(obj, MSTR_PICO_CYW43_SCANINFO_SSID,
+                                __current_ssid);
+    char *str_buff = (char *)calloc(1, 18);
+    sprintf(str_buff, "%02X:%02X:%02X:%02X:%02X:%02X", __current_bssid[0],
+            __current_bssid[1], __current_bssid[2], __current_bssid[3],
+            __current_bssid[4], __current_bssid[5]);
+    jerryxx_set_property_string(obj, MSTR_PICO_CYW43_SCANINFO_BSSID, str_buff);
+    free(str_buff);
+    return obj;
+  } else {
+    return jerry_create_undefined();
+  }
+}
 
 JERRYXX_FUN(pico_cyw43_network_ctor_fn) {
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
