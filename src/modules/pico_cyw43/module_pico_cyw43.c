@@ -46,15 +46,21 @@ typedef struct {
 __scan_result_t *__p_scan_result;
 
 char __current_ssid[33];
-uint8_t __current_bssid[6] = {0};
+// uint8_t __current_bssid[6] = {0};
+
+static int __cyw43_init() {
+  int ret = cyw43_arch_init();
+  if (ret == 0) {
+    __p_scan_result = NULL;
+    cyw43_arch_enable_sta_mode();
+  }
+  return ret;
+}
 
 JERRYXX_FUN(pico_cyw43_ctor_fn) {
-  int ret = cyw43_arch_init();
-  __p_scan_result = NULL;
-  if (ret) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+  if (__cyw43_init()) {
+    return jerry_create_error_from_value(create_system_error(EAGAIN), true);
   }
-  cyw43_arch_enable_sta_mode();
   return jerry_create_undefined();
 }
 
@@ -94,7 +100,35 @@ JERRYXX_FUN(pico_cyw43_wifi_ctor_fn) {
   return jerry_create_undefined();
 }
 
-JERRYXX_FUN(pico_cyw43_wifi_reset) { return jerry_create_undefined(); }
+JERRYXX_FUN(pico_cyw43_wifi_reset) {
+  JERRYXX_CHECK_ARG_FUNCTION_OPT(0, "callback");
+  cyw43_arch_deinit();
+  /* Reset and power up the WL chip */
+  cyw43_hal_pin_low(CYW43_PIN_WL_REG_ON);
+  cyw43_delay_ms(20);
+  cyw43_hal_pin_high(CYW43_PIN_WL_REG_ON);
+  cyw43_delay_ms(50);
+  if (__cyw43_init()) {
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
+                                -1);
+  } else {
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
+                                0);
+  }
+  if (JERRYXX_HAS_ARG(0)) {
+    jerry_value_t callback = JERRYXX_GET_ARG(0);
+    jerry_value_t reset_js_cb = jerry_acquire_value(callback);
+    jerry_value_t errno = jerryxx_get_property_number(
+        JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
+    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t args_p[1] = {errno};
+    jerry_call_function(reset_js_cb, this_val, args_p, 1);
+    jerry_release_value(errno);
+    jerry_release_value(this_val);
+    jerry_release_value(reset_js_cb);
+  }
+  return jerry_create_undefined();
+}
 
 static int __scan_cb(void *env, const cyw43_ev_scan_result_t *result) {
   (void)env;
@@ -147,6 +181,7 @@ JERRYXX_FUN(pico_cyw43_wifi_scan) {
       uint64_t diff = 0;
       do {
         km_delay(200);
+        cyw43_arch_poll();
         uint64_t current_time = km_gettime();
         if (current_time < __p_scan_result->prev_time_ms) {
           diff = __UINT64_MAX__ - __p_scan_result->prev_time_ms + current_time;
@@ -182,7 +217,6 @@ JERRYXX_FUN(pico_cyw43_wifi_scan) {
         } else {
           sprintf(str_buff, "OPEN");
         }
-        printf("security %d\r\n", current->data.auth_mode);
         jerryxx_set_property_string(obj, MSTR_PICO_CYW43_SCANINFO_SECURITY,
                                     str_buff);
         jerryxx_set_property_number(obj, MSTR_PICO_CYW43_SCANINFO_RSSI,
@@ -243,7 +277,6 @@ JERRYXX_FUN(pico_cyw43_wifi_connect) {
   }
   jerry_release_value(ssid);
   jerry_release_value(pw);
-  // printf("ssid %s, pw %s\r\n", ssid_str, pw_str);
   int connect_ret = cyw43_arch_wifi_connect_timeout_ms(
       (char *)ssid_str, (char *)pw_str, -1, CONNECT_TIMEOUT);
   free(ssid_str);
@@ -268,14 +301,15 @@ JERRYXX_FUN(pico_cyw43_wifi_connect) {
       jerry_call_function(connect_js_cb, this_val, NULL, 0);
     }
     jerry_release_value(this_val);
-    /** This function return RP-W mac address. need to change it */
+
+    /** I can't find the way to get connected device mac address on pico-w SDK.
+    // This function return RP-W mac address. need to change it
     int mac_ret =
         cyw43_wifi_get_mac(&cyw43_state, CYW43_ITF_STA, __current_bssid);
     if (mac_ret < 0) {
       memset(__current_bssid, 0, 6);
-    }
+    } */
   }
-  // printf("cyw43_arch_wifi_connect_timeout_ms %d\r\n", connect_ret);
   if (JERRYXX_HAS_ARG(1)) {
     jerry_value_t callback = JERRYXX_GET_ARG(1);
     jerry_value_t connect_js_cb = jerry_acquire_value(callback);
@@ -297,23 +331,22 @@ JERRYXX_FUN(pico_cyw43_wifi_disconnect) {
   if (disconnect_ret == 0) {
     jerry_value_t disconnect_js_cb = jerryxx_get_property(
         JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_DISCONNECT_CB);
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
+                                0);
     if (jerry_value_is_function(disconnect_js_cb)) {
       jerry_value_t this_val = jerry_create_undefined();
       jerry_call_function(disconnect_js_cb, this_val, NULL, 0);
       jerry_release_value(this_val);
     }
+  } else {
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
+                                -1);
   }
   if (JERRYXX_HAS_ARG(0)) {
     jerry_value_t callback = JERRYXX_GET_ARG(0);
     jerry_value_t disconnect_js_cb = jerry_acquire_value(callback);
-    jerry_value_t errno;
-    if (disconnect_ret) {
-      errno = jerryxx_get_property_number(JERRYXX_GET_THIS,
-                                          MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
-    } else {
-      errno = jerryxx_get_property_number(JERRYXX_GET_THIS,
-                                          MSTR_PICO_CYW43_NETWORK_ERRNO, -1);
-    }
+    jerry_value_t errno = jerryxx_get_property_number(
+        JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
     jerry_value_t this_val = jerry_create_undefined();
     jerry_value_t args_p[1] = {errno};
     jerry_call_function(disconnect_js_cb, this_val, args_p, 1);
@@ -325,21 +358,46 @@ JERRYXX_FUN(pico_cyw43_wifi_disconnect) {
 }
 
 JERRYXX_FUN(pico_cyw43_wifi_get_connection) {
+  JERRYXX_CHECK_ARG_FUNCTION_OPT(0, "callback");
   int wifi_status = cyw43_tcpip_link_status(&cyw43_state, CYW43_ITF_STA);
+  jerry_value_t obj = jerry_create_object();
   if (wifi_status == CYW43_LINK_UP) {
-    jerry_value_t obj = jerry_create_object();
     jerryxx_set_property_string(obj, MSTR_PICO_CYW43_SCANINFO_SSID,
                                 __current_ssid);
-    char *str_buff = (char *)calloc(1, 18);
-    sprintf(str_buff, "%02X:%02X:%02X:%02X:%02X:%02X", __current_bssid[0],
+    /** Can't find the way to get connected device mac address in
+    the pico-w SDK.
+    char *str_buff = (char *)calloc(1, 18); sprintf(str_buff,
+    "%02X:%02X:%02X:%02X:%02X:%02X", __current_bssid[0],
             __current_bssid[1], __current_bssid[2], __current_bssid[3],
             __current_bssid[4], __current_bssid[5]);
-    jerryxx_set_property_string(obj, MSTR_PICO_CYW43_SCANINFO_BSSID, str_buff);
-    free(str_buff);
-    return obj;
+    */
+    jerryxx_set_property_string(obj, MSTR_PICO_CYW43_SCANINFO_BSSID, "");
+    /* free(str_buff); */
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
+                                0);
   } else {
-    return jerry_create_undefined();
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
+                                -1);
   }
+  if (JERRYXX_HAS_ARG(0)) {
+    jerry_value_t callback = JERRYXX_GET_ARG(0);
+    jerry_value_t get_connect_js_cb = jerry_acquire_value(callback);
+    jerry_value_t errno = jerryxx_get_property_number(
+        JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
+    jerry_value_t this_val = jerry_create_undefined();
+    if (wifi_status == CYW43_LINK_UP) {
+      jerry_value_t args_p[2] = {errno, obj};
+      jerry_call_function(get_connect_js_cb, this_val, args_p, 2);
+    } else {
+      jerry_value_t args_p[1] = {errno};
+      jerry_call_function(get_connect_js_cb, this_val, args_p, 1);
+    }
+    jerry_release_value(errno);
+    jerry_release_value(this_val);
+    jerry_release_value(get_connect_js_cb);
+  }
+  jerry_release_value(obj);
+  return jerry_create_undefined();
 }
 
 JERRYXX_FUN(pico_cyw43_network_ctor_fn) {

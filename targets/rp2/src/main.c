@@ -18,13 +18,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
+#include "board.h"
 #include "gpio.h"
 #include "io.h"
 #include "repl.h"
 #include "runtime.h"
 #include "system.h"
 #include "tty.h"
+
+#ifdef PICO_CYW43
+#include "pico/cyw43_arch.h"
+#endif /* PICO_CYW43 */
 
 int main(void) {
   bool load = false;
@@ -35,4 +39,7 @@ int main(void) {
   km_repl_init(true);
   km_runtime_init(load, true);
   km_io_run(true);
+#ifdef PICO_CYW43
+  cyw43_arch_poll();
+#endif /* PICO_CYW43 */
 }
