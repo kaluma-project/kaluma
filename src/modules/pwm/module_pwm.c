@@ -54,6 +54,7 @@ JERRYXX_FUN(pwm_set_inversion_fn) {
   jerry_value_t pin_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
   if (!jerry_value_is_number(pin_value)) {
+    jerry_release_value(pin_value);
     return jerry_create_error(JERRY_ERROR_REFERENCE,
                               (const jerry_char_t *)"PWM pin is not setup.");
   }
@@ -77,6 +78,7 @@ JERRYXX_FUN(pwm_get_inversion_fn) {
   jerry_value_t pin_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_INV_PIN);
   if (!jerry_value_is_number(pin_value)) {
+    jerry_release_value(pin_value);
     return jerry_create_error(JERRY_ERROR_REFERENCE,
                               (const jerry_char_t *)"PWM inversion pin error.");
   }
@@ -92,6 +94,7 @@ JERRYXX_FUN(pwm_start_fn) {
   jerry_value_t pin_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
   if (!jerry_value_is_number(pin_value)) {
+    jerry_release_value(pin_value);
     return jerry_create_error(JERRY_ERROR_REFERENCE,
                               (const jerry_char_t *)"PWM pin is not setup.");
   }
@@ -109,6 +112,7 @@ JERRYXX_FUN(pwm_stop_fn) {
   jerry_value_t pin_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
   if (!jerry_value_is_number(pin_value)) {
+    jerry_release_value(pin_value);
     return jerry_create_error(JERRY_ERROR_REFERENCE,
                               (const jerry_char_t *)"PWM pin is not setup.");
   }
@@ -126,6 +130,7 @@ JERRYXX_FUN(pwm_get_frequency_fn) {
   jerry_value_t pin_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
   if (!jerry_value_is_number(pin_value)) {
+    jerry_release_value(pin_value);
     return jerry_create_error(JERRY_ERROR_REFERENCE,
                               (const jerry_char_t *)"PWM pin is not setup.");
   }
@@ -146,6 +151,7 @@ JERRYXX_FUN(pwm_set_frequency_fn) {
   jerry_value_t pin_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
   if (!jerry_value_is_number(pin_value)) {
+    jerry_release_value(pin_value);
     return jerry_create_error(JERRY_ERROR_REFERENCE,
                               (const jerry_char_t *)"PWM pin is not setup.");
   }
@@ -163,6 +169,7 @@ JERRYXX_FUN(pwm_get_duty_fn) {
   jerry_value_t pin_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
   if (!jerry_value_is_number(pin_value)) {
+    jerry_release_value(pin_value);
     return jerry_create_error(JERRY_ERROR_REFERENCE,
                               (const jerry_char_t *)"PWM pin is not setup.");
   }
@@ -187,6 +194,7 @@ JERRYXX_FUN(pwm_set_duty_fn) {
   jerry_value_t pin_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
   if (!jerry_value_is_number(pin_value)) {
+    jerry_release_value(pin_value);
     return jerry_create_error(JERRY_ERROR_REFERENCE,
                               (const jerry_char_t *)"PWM pin is not setup.");
   }
@@ -204,6 +212,7 @@ JERRYXX_FUN(pwm_close_fn) {
   jerry_value_t pin_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PWM_PIN);
   if (!jerry_value_is_number(pin_value)) {
+    jerry_release_value(pin_value);
     return jerry_create_error(JERRY_ERROR_REFERENCE,
                               (const jerry_char_t *)"PWM pin is not setup.");
   }
@@ -222,7 +231,6 @@ jerry_value_t module_pwm_init() {
   jerry_value_t pwm_ctor = jerry_create_external_function(pwm_ctor_fn);
   jerry_value_t prototype = jerry_create_object();
   jerryxx_set_property(pwm_ctor, "prototype", prototype);
-  jerry_release_value(prototype);
   jerryxx_set_property_function(prototype, MSTR_PWM_START, pwm_start_fn);
   jerryxx_set_property_function(prototype, MSTR_PWM_STOP, pwm_stop_fn);
   jerryxx_set_property_function(prototype, MSTR_PWM_GET_FREQUENCY,
@@ -236,6 +244,7 @@ jerry_value_t module_pwm_init() {
   jerryxx_set_property_function(prototype, MSTR_PWM_GET_INVERSION,
                                 pwm_get_inversion_fn);
   jerryxx_set_property_function(prototype, MSTR_PWM_CLOSE, pwm_close_fn);
+  jerry_release_value(prototype);
 
   /* pwm module exports */
   jerry_value_t exports = jerry_create_object();

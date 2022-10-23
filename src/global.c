@@ -257,10 +257,13 @@ JERRYXX_FUN(pulse_read_fn) {
             } else {
               trigger_buf[i] = 0;
             }
+            jerry_release_value(item);
           }
         }
       }
+      jerry_release_value(trigger_interval);
     }
+    jerry_release_value(trigger);
   }
 
   // triggering
@@ -276,7 +279,7 @@ JERRYXX_FUN(pulse_read_fn) {
   count = pulse_read(pin, state, buf, count, timeout);
 
   // free trigger buffer
-  if (trigger_len > 0) {
+  if (trigger_buf) {
     free(trigger_buf);
   }
 
@@ -316,6 +319,7 @@ JERRYXX_FUN(pulse_write_fn) {
       } else {
         buf[i] = 0;  // write 0 for non-number item.
       }
+      jerry_release_value(item);
     }
     pulse_write(pin, value, buf, length);
   } else {
@@ -431,6 +435,7 @@ static void irq_cb(uint8_t pin) {
     jerry_release_value(ret_val);
     jerry_release_value(this_val);
   }
+  jerry_release_value(cb);
 }
 
 JERRYXX_FUN(attach_interrupt_fn) {
@@ -981,6 +986,7 @@ JERRYXX_FUN(textencoder_encode_fn) {
   jerry_char_t buf[sz + 1];
   jerry_size_t len = jerry_string_to_char_buffer(encoding, buf, sz);
   buf[len] = '\0';
+  jerry_release_value(encoding);
   if (strcmp((char *)buf, "ascii") == 0) {
     jerry_size_t len = jerryxx_get_ascii_string_size(input);
     jerry_value_t array = jerry_create_typedarray(JERRY_TYPEDARRAY_UINT8, len);
@@ -1021,6 +1027,7 @@ static void register_global_text_encoder() {
 
   jerry_value_t global = jerry_get_global_object();
   jerryxx_set_property(global, MSTR_TEXT_ENCODER, textencoder_ctor);
+  jerry_release_value(textencoder_ctor);
   jerry_release_value(global);
 }
 
@@ -1057,6 +1064,7 @@ JERRYXX_FUN(textdecoder_decode_fn) {
     jerry_size_t sz = jerry_get_string_size(encoding);
     jerry_char_t buf[sz + 1];
     jerry_size_t len = jerry_string_to_char_buffer(encoding, buf, sz);
+    jerry_release_value(encoding);
     buf[len] = '\0';
     if (strcmp((char *)buf, "ascii") == 0) {
       // return String.fromCharCode.apply(null, input);
@@ -1105,6 +1113,7 @@ static void register_global_text_decoder() {
 
   jerry_value_t global = jerry_get_global_object();
   jerryxx_set_property(global, MSTR_TEXT_DECODER, textdecoder_ctor);
+  jerry_release_value(textdecoder_ctor);
   jerry_release_value(global);
 }
 
@@ -1271,6 +1280,7 @@ static void register_global_system_error() {
   jerryxx_inherit(global_error, system_error_ctor);
   // global.SystemError = SystemError
   jerryxx_set_property(global, MSTR_SYSTEM_ERROR, system_error_ctor);
+  jerry_release_value(system_error_ctor);
   jerry_release_value(global_error);
   jerry_release_value(global);
 }

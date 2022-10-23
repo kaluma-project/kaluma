@@ -56,9 +56,11 @@ int main(int argc, char* argv[]) {
     jerry_value_t parsed_code = jerry_parse(NULL, 0, (jerry_char_t*)script,
                                             size, JERRY_PARSE_STRICT_MODE);
     if (!jerry_value_is_error(parsed_code)) {
+      jerry_release_value(parsed_code);
       jerry_value_t ret_value = jerry_run(parsed_code);
       if (jerry_value_is_error(ret_value)) {
         jerryxx_print_error(ret_value, true);
+        jerry_release_value(ret_value);
         // km_runtime_cleanup();
         // km_runtime_init(false, false);
         return 0;
@@ -69,6 +71,6 @@ int main(int argc, char* argv[]) {
     }
     jerry_release_value(parsed_code);
   }
-
+  free(script);
   km_io_run(argc < 2);
 }
