@@ -542,5 +542,6 @@ jerry_value_t module_sdcard_init() {
   /* sdcard module exports */
   jerry_value_t exports = jerry_create_object();
   jerryxx_set_property(exports, MSTR_SDCARD_SDCARD, sdcard_ctor);
+  jerry_release_value(sdcard_ctor);
   return exports;
 }

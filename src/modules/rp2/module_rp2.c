@@ -426,6 +426,8 @@ JERRYXX_FUN(dormant_fn) {
     }
     _pins[i] = (uint8_t)jerry_get_number_value(pin);
     _events[i] = (uint8_t)jerry_get_number_value(event);
+    jerry_release_value(pin);
+    jerry_release_value(event);
   }
 
   // Hibernate system for dormant

@@ -34,6 +34,9 @@
 
 static void vfs_handle_freecb(void *handle) {
   vfs_lfs_handle_t *vfs_handle = (vfs_lfs_handle_t *)handle;
+  free(vfs_handle->config.lookahead_buffer);
+  free(vfs_handle->config.prog_buffer);
+  free(vfs_handle->config.read_buffer);
   jerry_release_value(vfs_handle->blkdev_js);
   vfs_lfs_handle_remove(handle);
   free(handle);
