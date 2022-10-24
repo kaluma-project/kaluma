@@ -256,7 +256,6 @@ JERRYXX_FUN(pico_cyw43_wifi_connect) {
       jerryxx_get_property(connect_info, MSTR_PICO_CYW43_SCANINFO_SSID);
   jerry_value_t pw =
       jerryxx_get_property(connect_info, MSTR_PICO_CYW43_PASSWORD);
-  uint8_t *ssid_str = NULL;
   uint8_t *pw_str = NULL;
   if (jerry_value_is_string(ssid)) {
     jerry_size_t len = jerryxx_get_ascii_string_size(ssid);
@@ -278,8 +277,7 @@ JERRYXX_FUN(pico_cyw43_wifi_connect) {
   jerry_release_value(ssid);
   jerry_release_value(pw);
   int connect_ret = cyw43_arch_wifi_connect_timeout_ms(
-      (char *)ssid_str, (char *)pw_str, -1, CONNECT_TIMEOUT);
-  free(ssid_str);
+      (char *)__current_ssid, (char *)pw_str, -1, CONNECT_TIMEOUT);
   if (pw_str) {
     free(pw_str);
   }
@@ -300,7 +298,9 @@ JERRYXX_FUN(pico_cyw43_wifi_connect) {
     if (jerry_value_is_function(connect_js_cb)) {
       jerry_call_function(connect_js_cb, this_val, NULL, 0);
     }
+    jerry_release_value(connect_js_cb);
     jerry_release_value(this_val);
+    jerry_release_value(assoc_js_cb);
 
     /** I can't find the way to get connected device mac address on pico-w SDK.
     // This function return RP-W mac address. need to change it
@@ -338,6 +338,7 @@ JERRYXX_FUN(pico_cyw43_wifi_disconnect) {
       jerry_call_function(disconnect_js_cb, this_val, NULL, 0);
       jerry_release_value(this_val);
     }
+    jerry_release_value(disconnect_js_cb);
   } else {
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
                                 -1);
