@@ -38,7 +38,7 @@ static void km_io_timer_run();
 static void km_io_tty_run();
 static void km_io_watch_run();
 static void km_io_uart_run();
-static void km_io_idle_run();
+// static void km_io_idle_run();
 static void km_io_idle_run();
 
 /* general handle functions */
@@ -92,6 +92,8 @@ void km_io_init() {
   km_list_init(&loop.uart_handles);
   km_list_init(&loop.idle_handles);
   km_list_init(&loop.stream_handles);
+  km_list_init(&loop.tcp_handles);
+  km_list_init(&loop.ieee80211_handles);
   km_list_init(&loop.closing_handles);
 }
 
@@ -102,6 +104,8 @@ void km_io_cleanup() {
   // km_io_idle_cleanup();
   // Do not cleanup tty I/O to keep terminal communication
   km_io_stream_cleanup();
+  km_io_tcp_cleanup();
+  km_io_ieee80211_cleanup();
 }
 
 void km_io_run(bool infinite) {
@@ -112,12 +116,18 @@ void km_io_run(bool infinite) {
     km_io_watch_run();
     km_io_uart_run();
     km_io_idle_run();
+    km_io_stream_run();
+    km_io_tcp_run();
+    km_io_ieee80211_run();
     km_io_handle_closing();
 
     // quite if there no IO handles
     if (!infinite) {
       if (loop.timer_handles.head == NULL && loop.watch_handles.head == NULL &&
-          loop.uart_handles.head == NULL && loop.closing_handles.head == NULL) {
+          loop.uart_handles.head == NULL && loop.idle_handles.head == NULL &&
+          loop.stream_handles.head == NULL && loop.tcp_handles.head == NULL &&
+          loop.ieee80211_handles.head == NULL &&
+          loop.closing_handles.head == NULL) {
         loop.stop_flag = true;
       }
     }
@@ -457,8 +467,8 @@ void km_io_stream_cleanup() {
   km_list_init(&loop.stream_handles);
 }
 
-/*
 static void km_io_stream_run() {
+  /*
   km_io_stream_handle_t *handle =
       (km_io_stream_handle_t *)loop.stream_handles.head;
   while (handle != NULL) {
@@ -475,5 +485,74 @@ static void km_io_stream_run() {
     }
     handle = (km_io_stream_handle_t *)((km_list_node_t *)handle)->next;
   }
+  */
 }
-*/
+
+/* tcp function */
+
+void km_io_tcp_init(km_io_tcp_handle_t *tcp) {
+  km_io_handle_init((km_io_handle_t *)tcp, KM_IO_TCP);
+}
+
+void km_io_tcp_cleanup() {
+  km_io_tcp_handle_t *handle = (km_io_tcp_handle_t *)loop.tcp_handles.head;
+  while (handle != NULL) {
+    km_io_tcp_handle_t *next =
+        (km_io_tcp_handle_t *)((km_list_node_t *)handle)->next;
+    free(handle);
+    handle = next;
+  }
+  km_list_init(&loop.tcp_handles);
+}
+
+static void km_io_tcp_run() {
+  km_io_tcp_handle_t *handle = (km_io_tcp_handle_t *)loop.tcp_handles.head;
+  while (handle != NULL) {
+    if (KM_IO_HAS_FLAG(handle->base.flags, KM_IO_FLAG_ACTIVE)) {
+      // TODO
+    }
+    handle = (km_io_tcp_handle_t *)((km_list_node_t *)handle)->next;
+  }
+}
+
+/* ieee80211 function */
+
+void km_io_ieee80211_init(km_io_ieee80211_handle_t *ieee80211) {
+  km_io_handle_init((km_io_handle_t *)ieee80211, KM_IO_IEEE80211);
+}
+
+void km_io_ieee80211_connect(km_io_ieee80211_handle_t *ieee80211,
+                             km_io_ieee80211_cb connect_cb) {
+  KM_IO_SET_FLAG_ON(ieee80211->base.flags, KM_IO_FLAG_ACTIVE);
+  ieee80211->connect_cb = connect_cb;
+  km_list_append(&loop.ieee80211_handles, (km_list_node_t *)ieee80211);
+}
+
+void km_io_ieee80211_disconnect(km_io_ieee80211_handle_t *ieee80211,
+                                km_io_ieee80211_cb disconnect_cb) {}
+
+void km_io_ieee80211_scan(km_io_ieee80211_handle_t *ieee80211,
+                          km_io_ieee80211_scan_cb read_cb) {}
+
+void km_io_ieee80211_cleanup() {
+  km_io_ieee80211_handle_t *handle =
+      (km_io_ieee80211_handle_t *)loop.ieee80211_handles.head;
+  while (handle != NULL) {
+    km_io_ieee80211_handle_t *next =
+        (km_io_ieee80211_handle_t *)((km_list_node_t *)handle)->next;
+    free(handle);
+    handle = next;
+  }
+  km_list_init(&loop.ieee80211_handles);
+}
+
+static void km_io_ieee80211_run() {
+  km_io_ieee80211_handle_t *handle =
+      (km_io_ieee80211_handle_t *)loop.ieee80211_handles.head;
+  while (handle != NULL) {
+    if (KM_IO_HAS_FLAG(handle->base.flags, KM_IO_FLAG_ACTIVE)) {
+      // int state = km_ieee80211_poll();
+    }
+    handle = (km_io_ieee80211_handle_t *)((km_list_node_t *)handle)->next;
+  }
+}

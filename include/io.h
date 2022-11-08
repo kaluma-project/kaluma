@@ -25,6 +25,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "ieee80211.h"
 #include "jerryscript.h"
 #include "utils.h"
 
@@ -37,6 +38,8 @@ typedef struct km_io_watch_handle_s km_io_watch_handle_t;
 typedef struct km_io_uart_handle_s km_io_uart_handle_t;
 typedef struct km_io_idle_handle_s km_io_idle_handle_t;
 typedef struct km_io_stream_handle_s km_io_stream_handle_t;
+typedef struct km_io_tcp_handle_s km_io_tcp_handle_t;
+typedef struct km_io_ieee80211_handle_s km_io_ieee80211_handle_t;
 
 /* handle flags */
 
@@ -55,7 +58,9 @@ typedef enum km_io_type {
   KM_IO_WATCH,
   KM_IO_UART,
   KM_IO_IDLE,
-  KM_IO_STREAM
+  KM_IO_STREAM,
+  KM_IO_TCP,
+  KM_IO_IEEE80211
 } km_io_type_t;
 
 typedef void (*km_io_close_cb)(km_io_handle_t *);
@@ -150,6 +155,34 @@ struct km_io_stream_handle_s {
   km_io_stream_read_cb read_cb;
 };
 
+/* tcp handle type */
+
+typedef void (*km_io_tcp_cb)(km_io_tcp_handle_t *, int);
+typedef void (*km_io_tcp_read_cb)(km_io_tcp_handle_t *, uint8_t *, size_t);
+
+struct km_io_tcp_handle_s {
+  km_io_handle_t base;
+  km_io_tcp_cb connect_cb;
+  km_io_tcp_cb close_cb;
+  km_io_tcp_cb shutdown_cb;
+  km_io_tcp_cb read_available_cb;
+  km_io_tcp_read_cb read_cb;
+};
+
+/* ieee80211 handle type */
+
+typedef void (*km_io_ieee80211_cb)(km_io_ieee80211_handle_t *);
+typedef void (*km_io_ieee80211_scan_cb)(
+    km_io_ieee80211_handle_t *, km_ieee80211_scan_result_t *scan_result);
+
+struct km_io_ieee80211_handle_s {
+  km_io_handle_t base;
+  bool connected;
+  km_io_ieee80211_cb connect_cb;
+  km_io_ieee80211_cb disconnect_cb;
+  km_io_ieee80211_scan_cb scan_cb;
+};
+
 /* loop type */
 
 struct km_io_loop_s {
@@ -161,6 +194,8 @@ struct km_io_loop_s {
   km_list_t uart_handles;
   km_list_t idle_handles;
   km_list_t stream_handles;
+  km_list_t tcp_handles;
+  km_list_t ieee80211_handles;
   km_list_t closing_handles;
 };
 
@@ -232,5 +267,27 @@ void km_io_stream_cleanup();
 // int km_io_stream_read(km_io_stream_handle_t *stream);
 // void km_io_stream_push(km_io_stream_handle_t *stream, uint8_t *buffer, size_t
 // size); // push to read buffer
+
+/* tcp functions */
+
+void km_io_tcp_init(km_io_tcp_handle_t *tcp);
+void km_io_tcp_connect(km_io_tcp_handle_t *tcp, km_io_tcp_cb connect_cb);
+void km_io_tcp_read_start(km_io_tcp_handle_t *tcp,
+                          km_io_tcp_cb read_available_cb,
+                          km_io_tcp_read_cb read_cb);
+void km_io_tcp_read_stop(km_io_tcp_handle_t *tcp);
+void km_io_tcp_close(km_io_tcp_handle_t *tcp, km_io_tcp_cb connect_cb);
+void km_io_tcp_cleanup();
+
+/* ieee80211 functions */
+
+void km_io_ieee80211_init(km_io_ieee80211_handle_t *ieee80211);
+void km_io_ieee80211_connect(km_io_ieee80211_handle_t *ieee80211,
+                             km_io_ieee80211_cb connect_cb);
+void km_io_ieee80211_disconnect(km_io_ieee80211_handle_t *ieee80211,
+                                km_io_ieee80211_cb disconnect_cb);
+void km_io_ieee80211_scan(km_io_ieee80211_handle_t *ieee80211,
+                          km_io_ieee80211_scan_cb read_cb);
+void km_io_ieee80211_cleanup();
 
 #endif /* ___KM_IO_H */
