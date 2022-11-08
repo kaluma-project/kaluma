@@ -255,8 +255,8 @@ jerry_value_t jerryxx_call_method(jerry_value_t obj, char *name,
                                   jerry_value_t *args, int args_count) {
   jerry_value_t method = jerryxx_get_property(obj, name);
   jerry_value_t ret = jerry_call_function(method, obj, args, args_count);
-  return ret;
   jerry_release_value(method);
+  return ret;
 }
 
 void jerryxx_inherit(jerry_value_t super_ctor, jerry_value_t sub_ctor) {

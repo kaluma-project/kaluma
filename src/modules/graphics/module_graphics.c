@@ -699,6 +699,7 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
   gc_handle->buffer = jerry_get_arraybuffer_pointer(buf);
   gc_handle->buffer_size = size;
   jerry_release_value(buf);
+  jerry_release_value(buffer);
   return jerry_create_undefined();
 }
 

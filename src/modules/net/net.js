@@ -18,10 +18,12 @@ class Socket extends stream.Duplex {
     this._dev = global.__netdev;
   }
 
-  _socket(fd) {
+  _socket(fd, sck) {
     if (this._dev) {
       this._fd = fd;
-      var sck = this._dev.get(this._fd);
+      if (!sck) {
+        sck = this._dev.get(this._fd);
+      }
       if (sck) {
         this.localAddress = sck.laddr;
         this.localPort = sck.lport;
@@ -53,7 +55,7 @@ class Socket extends stream.Duplex {
    */
   connect(options, connectListener) {
     if (this._dev) {
-      var fd = this._dev.socket(null, 'STREAM');
+      var fd = this._dev.socket('AF_INET', 'STREAM');
       if (connectListener) {
         this.on('connect', connectListener);
       }
@@ -136,14 +138,10 @@ class Socket extends stream.Duplex {
  * Server class
  */
 class Server extends EventEmitter {
-  constructor(options, connectionListener) {
+  constructor(connectionListener) {
     super();
     if (!global.__netdev) {
       throw new Error('Network device not found');
-    }
-    if (typeof options === 'function') {
-      connectionListener = options;
-      options = undefined;
     }
     if (connectionListener) {
       this.on('connection', connectionListener);
@@ -160,7 +158,7 @@ class Server extends EventEmitter {
    */
   listen(port, cb) {
     if (this._dev) {
-      this._fd = this._dev.socket(null, 'STREAM');
+      this._fd = this._dev.socket('AF_INET', 'STREAM');
       if (this._fd < 0) {
         this.emit('error', new SystemError(this._dev.errno));
         return;
@@ -168,7 +166,7 @@ class Server extends EventEmitter {
         var sck = this._dev.get(this._fd);
         sck.accept_cb = (fd) => {
           var client = new Socket();
-          client._socket(fd);
+          client._socket(fd, sck);
           this.emit('connection', client);
         }
       }

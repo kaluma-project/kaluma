@@ -178,5 +178,6 @@ jerry_value_t module_flash_init() {
   /* flash module exports */
   jerry_value_t exports = jerry_create_object();
   jerryxx_set_property(exports, MSTR_FLASH_FLASH, flash_ctor);
+  jerry_release_value(flash_ctor);
   return exports;
 }

@@ -100,6 +100,7 @@ jerry_value_t module_stream_init() {
   jerryxx_set_property(stdin_ctor, MSTR_PROTOTYPE, stdin_prototype);
   jerryxx_set_property_function(stdin_prototype, MSTR_STREAM_READ,
                                 stdin_read_fn);
+  jerry_release_value(stdin_prototype);
 
   /* StdOutNative class */
   jerry_value_t stdout_ctor = jerry_create_external_function(stdout_ctor_fn);
@@ -107,6 +108,7 @@ jerry_value_t module_stream_init() {
   jerryxx_set_property(stdout_ctor, MSTR_PROTOTYPE, stdout_prototype);
   jerryxx_set_property_function(stdout_prototype, MSTR_STREAM_WRITE,
                                 stdout_write_fn);
+  jerry_release_value(stdout_prototype);
 
   /* stream module exports */
   jerry_value_t exports = jerry_create_object();

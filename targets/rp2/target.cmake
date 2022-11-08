@@ -77,7 +77,7 @@ set(SOURCES
 
 include_directories(${TARGET_INC_DIR} ${BOARD_DIR})
 
-set(TARGET_HEAPSIZE 196)
+set(TARGET_HEAPSIZE 180)
 set(JERRY_TOOLCHAIN toolchain_mcu_cortexm0plus.cmake)
 
 set(CMAKE_SYSTEM_PROCESSOR cortex-m0plus)
@@ -116,7 +116,8 @@ if(BOARD STREQUAL "pico-w")
   # libs for pico-w
   set(TARGET_LIBS
   ${TARGET_LIBS}
-  pico_cyw43_arch_none)
+  pico_lwip
+  pico_cyw43_arch_lwip_poll)
 endif()
 
 include(${CMAKE_SOURCE_DIR}/tools/kaluma.cmake)

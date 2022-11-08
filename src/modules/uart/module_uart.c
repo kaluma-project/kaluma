@@ -145,6 +145,7 @@ JERRYXX_FUN(uart_write_fn) {
   jerry_value_t port_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
   if (!jerry_value_is_number(port_value)) {
+    jerry_release_value(port_value);
     return jerry_create_error(
         JERRY_ERROR_REFERENCE,
         (const jerry_char_t *)"UART port is not initialized.");
@@ -196,6 +197,7 @@ JERRYXX_FUN(uart_close_fn) {
   jerry_value_t port_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
   if (!jerry_value_is_number(port_value)) {
+    jerry_release_value(port_value);
     return jerry_create_error(
         JERRY_ERROR_REFERENCE,
         (const jerry_char_t *)"UART port is not initialized.");

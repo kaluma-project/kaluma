@@ -101,6 +101,7 @@ JERRYXX_FUN(spi_transfer_fn) {
   jerry_value_t bus_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
   if (!jerry_value_is_number(bus_value)) {
+    jerry_release_value(bus_value);
     return jerry_create_error(
         JERRY_ERROR_REFERENCE,
         (const jerry_char_t *)"SPI bus is not initialized.");
@@ -120,6 +121,7 @@ JERRYXX_FUN(spi_transfer_fn) {
     uint8_t *tx_buf = jerry_get_arraybuffer_pointer(array_buffer);
     uint8_t *rx_buf = malloc(len);
     int ret = km_spi_sendrecv(bus, tx_buf, rx_buf, len, timeout);
+    jerry_release_value(array_buffer);
     if (ret < 0) {
       free(rx_buf);
       return jerry_create_error_from_value(create_system_error(ret), true);
@@ -129,9 +131,9 @@ JERRYXX_FUN(spi_transfer_fn) {
       jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
           JERRY_TYPEDARRAY_UINT8, buffer);
       jerry_release_value(buffer);
+      free(rx_buf);
       return array;
     }
-    jerry_release_value(array_buffer);
   } else if (jerry_value_is_string(data)) { /* for string */
     jerry_size_t len = jerryxx_get_ascii_string_size(data);
     uint8_t tx_buf[len];
@@ -147,6 +149,7 @@ JERRYXX_FUN(spi_transfer_fn) {
       jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
           JERRY_TYPEDARRAY_UINT8, buffer);
       jerry_release_value(buffer);
+      free(rx_buf);
       return array;
     }
   } else {
@@ -171,6 +174,7 @@ JERRYXX_FUN(spi_send_fn) {
   jerry_value_t bus_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
   if (!jerry_value_is_number(bus_value)) {
+    jerry_release_value(bus_value);
     return jerry_create_error(
         JERRY_ERROR_REFERENCE,
         (const jerry_char_t *)"SPI bus is not initialized.");
@@ -226,6 +230,7 @@ JERRYXX_FUN(spi_recv_fn) {
   jerry_value_t bus_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
   if (!jerry_value_is_number(bus_value)) {
+    jerry_release_value(bus_value);
     return jerry_create_error(
         JERRY_ERROR_REFERENCE,
         (const jerry_char_t *)"SPI bus is not initialized.");
@@ -247,6 +252,7 @@ JERRYXX_FUN(spi_recv_fn) {
     jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
         JERRY_TYPEDARRAY_UINT8, array_buffer);
     jerry_release_value(array_buffer);
+    free(buf);
     return array;
   }
 }
@@ -259,6 +265,7 @@ JERRYXX_FUN(spi_close_fn) {
   jerry_value_t bus_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_SPI_BUS);
   if (!jerry_value_is_number(bus_value)) {
+    jerry_release_value(bus_value);
     return jerry_create_error(
         JERRY_ERROR_REFERENCE,
         (const jerry_char_t *)"SPI bus is not initialized.");
