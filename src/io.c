@@ -38,8 +38,10 @@ static void km_io_timer_run();
 static void km_io_tty_run();
 static void km_io_watch_run();
 static void km_io_uart_run();
-// static void km_io_idle_run();
 static void km_io_idle_run();
+static void km_io_stream_run();
+static void km_io_tcp_run();
+static void km_io_ieee80211_run();
 
 /* general handle functions */
 
