@@ -27,6 +27,7 @@
 #define MSTR_NET_CONNECT "connect"
 #define MSTR_NET_CREATE_SERVER "createServer"
 #define MSTR_NET_SOCKET "Socket"
+#define MSTR_NET_SOCKET_NATIVE "SocketNative"
 #define MSTR_NET__DEV "_dev"
 #define MSTR_NET__FD "_fd"
 #define MSTR_NET_LOCAL_ADDRESS "localAddress"

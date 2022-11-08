@@ -25,8 +25,71 @@
 #include "io.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
+#include "magic_strings.h"
+#include "net_magic_strings.h"
+#include "socket.h"
+
+static int socket_connect_cb(km_io_tcp_handle_t *handle) { return -1; }
+
+/**
+ * SocketNative() constructor
+ */
+JERRYXX_FUN(socket_ctor_fn) {
+  int fd = km_socket_create(KM_SOCKET_DOMAIN_TYPE_AF_INET,
+                            KM_SOCKET_PROTOCOL_TYPE_STREAM);
+  if (fd < 0) {
+    return jerry_create_error_from_value(create_system_error(fd), true);
+  }
+  jerryxx_set_property_number(JERRYXX_GET_THIS, "fd", fd);
+
+  // setup tcp handle
+  km_io_tcp_handle_t *handle = malloc(sizeof(km_io_tcp_handle_t));
+  km_io_tcp_init(handle);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, "handle_id", handle->base.id);
+
+  return jerry_create_undefined();
+}
+
+/**
+ * SocketNative.prototype.connect(host, port)
+ * args:
+ * - host {string}
+ * - port {number}
+ * returns: {number} file descriptor
+ */
+JERRYXX_FUN(socket_connect_fn) {
+  // check and get args
+  JERRYXX_CHECK_ARG_NUMBER_OPT(0, "size");
+  JERRYXX_CHECK_ARG_FUNCTION(1, "callback");
+
+  // read parameters
+  int size = (int)JERRYXX_GET_ARG_NUMBER_OPT(0, -1);
+  jerry_value_t callback = JERRYXX_GET_ARG(1);
+
+  uint32_t handle_id =
+      jerryxx_get_property_number(JERRYXX_GET_THIS, "handle_id", 0);
+  km_io_uart_handle_t *handle = km_io_tcp_get_by_id(handle_id);
+  int ret = km_io_tcp_connect(handle, socket_connect_cb);
+  if (ret < 0) {
+    return jerry_create_error_from_value(create_system_error(ret), true);
+  }
+}
 
 /**
  * Initialize 'net' module and return exports
  */
-jerry_value_t module_net_init() {}
+jerry_value_t module_net_init() {
+  /* SocketNative class */
+  jerry_value_t socket_ctor = jerry_create_external_function(socket_ctor_fn);
+  jerry_value_t socket_prototype = jerry_create_object();
+  jerryxx_set_property(socket_ctor, MSTR_PROTOTYPE, socket_prototype);
+  jerryxx_set_property_function(socket_prototype, MSTR_NET_CONNECT,
+                                socket_connect_fn);
+  jerry_release_value(socket_prototype);
+
+  /* net module exports */
+  jerry_value_t exports = jerry_create_object();
+  jerryxx_set_property(exports, MSTR_NET_SOCKET_NATIVE, socket_ctor);
+  jerry_release_value(socket_ctor);
+  return exports;
+}

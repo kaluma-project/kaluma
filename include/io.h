@@ -271,12 +271,13 @@ void km_io_stream_cleanup();
 /* tcp functions */
 
 void km_io_tcp_init(km_io_tcp_handle_t *tcp);
-void km_io_tcp_connect(km_io_tcp_handle_t *tcp, km_io_tcp_cb connect_cb);
+int km_io_tcp_connect(km_io_tcp_handle_t *tcp, km_io_tcp_cb connect_cb);
 void km_io_tcp_read_start(km_io_tcp_handle_t *tcp,
                           km_io_tcp_cb read_available_cb,
                           km_io_tcp_read_cb read_cb);
 void km_io_tcp_read_stop(km_io_tcp_handle_t *tcp);
 void km_io_tcp_close(km_io_tcp_handle_t *tcp, km_io_tcp_cb connect_cb);
+km_io_tcp_handle_t *km_io_tcp_get_by_id(uint32_t id);
 void km_io_tcp_cleanup();
 
 /* ieee80211 functions */

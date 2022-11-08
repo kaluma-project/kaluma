@@ -496,6 +496,12 @@ void km_io_tcp_init(km_io_tcp_handle_t *tcp) {
   km_io_handle_init((km_io_handle_t *)tcp, KM_IO_TCP);
 }
 
+int km_io_tcp_connect(km_io_tcp_handle_t *tcp, km_io_tcp_cb connect_cb) {
+  return -1;
+}
+
+km_io_tcp_handle_t *km_io_tcp_get_by_id(uint32_t id) { return NULL; }
+
 void km_io_tcp_cleanup() {
   km_io_tcp_handle_t *handle = (km_io_tcp_handle_t *)loop.tcp_handles.head;
   while (handle != NULL) {
