@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
       jerryxx_print_error(parsed_code, true);
     }
     jerry_release_value(parsed_code);
+    free(script);
   }
-  free(script);
   km_io_run(argc < 2);
 }

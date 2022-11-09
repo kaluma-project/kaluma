@@ -19,6 +19,9 @@
  * SOFTWARE.
  */
 
+// TODO Refactor common codes in *_cleanup() functions to reduce bin size
+// TODO Allow to use io_stream_*() functions for socket handles
+
 #include "io.h"
 
 #include <stdbool.h>
@@ -26,6 +29,7 @@
 #include <stdlib.h>
 
 #include "gpio.h"
+#include "socket.h"
 #include "system.h"
 #include "tty.h"
 #include "uart.h"
@@ -40,7 +44,7 @@ static void km_io_watch_run();
 static void km_io_uart_run();
 static void km_io_idle_run();
 static void km_io_stream_run();
-static void km_io_tcp_run();
+static void km_io_socket_run();
 static void km_io_ieee80211_run();
 
 /* general handle functions */
@@ -94,7 +98,7 @@ void km_io_init() {
   km_list_init(&loop.uart_handles);
   km_list_init(&loop.idle_handles);
   km_list_init(&loop.stream_handles);
-  km_list_init(&loop.tcp_handles);
+  km_list_init(&loop.socket_handles);
   km_list_init(&loop.ieee80211_handles);
   km_list_init(&loop.closing_handles);
 }
@@ -106,7 +110,7 @@ void km_io_cleanup() {
   // km_io_idle_cleanup();
   // Do not cleanup tty I/O to keep terminal communication
   km_io_stream_cleanup();
-  km_io_tcp_cleanup();
+  km_io_socket_cleanup();
   km_io_ieee80211_cleanup();
 }
 
@@ -119,7 +123,7 @@ void km_io_run(bool infinite) {
     km_io_uart_run();
     km_io_idle_run();
     km_io_stream_run();
-    km_io_tcp_run();
+    km_io_socket_run();
     km_io_ieee80211_run();
     km_io_handle_closing();
 
@@ -127,7 +131,8 @@ void km_io_run(bool infinite) {
     if (!infinite) {
       if (loop.timer_handles.head == NULL && loop.watch_handles.head == NULL &&
           loop.uart_handles.head == NULL && loop.idle_handles.head == NULL &&
-          loop.stream_handles.head == NULL && loop.tcp_handles.head == NULL &&
+          loop.stream_handles.head == NULL &&
+          loop.socket_handles.head == NULL &&
           loop.ieee80211_handles.head == NULL &&
           loop.closing_handles.head == NULL) {
         loop.stop_flag = true;
@@ -490,36 +495,45 @@ static void km_io_stream_run() {
   */
 }
 
-/* tcp function */
+/* socket function */
 
-void km_io_tcp_init(km_io_tcp_handle_t *tcp) {
-  km_io_handle_init((km_io_handle_t *)tcp, KM_IO_TCP);
+void km_io_socket_init(km_io_socket_handle_t *socket) {
+  km_io_handle_init((km_io_handle_t *)socket, KM_IO_SOCKET);
 }
 
-int km_io_tcp_connect(km_io_tcp_handle_t *tcp, km_io_tcp_cb connect_cb) {
-  return -1;
+int km_io_socket_connect(km_io_socket_handle_t *socket,
+                         km_socket_address_t *address,
+                         km_io_socket_cb connect_cb) {
+  socket->connect_cb = connect_cb;
+  int ret = km_socket_connect(socket->fd, address);
+  if (ret >= 0) {
+    socket->fd = ret;
+  }
+  return ret;
 }
 
-km_io_tcp_handle_t *km_io_tcp_get_by_id(uint32_t id) { return NULL; }
+km_io_socket_handle_t *km_io_socket_get_by_id(uint32_t id) { return NULL; }
 
-void km_io_tcp_cleanup() {
-  km_io_tcp_handle_t *handle = (km_io_tcp_handle_t *)loop.tcp_handles.head;
+void km_io_socket_cleanup() {
+  km_io_socket_handle_t *handle =
+      (km_io_socket_handle_t *)loop.socket_handles.head;
   while (handle != NULL) {
-    km_io_tcp_handle_t *next =
-        (km_io_tcp_handle_t *)((km_list_node_t *)handle)->next;
+    km_io_socket_handle_t *next =
+        (km_io_socket_handle_t *)((km_list_node_t *)handle)->next;
     free(handle);
     handle = next;
   }
-  km_list_init(&loop.tcp_handles);
+  km_list_init(&loop.socket_handles);
 }
 
-static void km_io_tcp_run() {
-  km_io_tcp_handle_t *handle = (km_io_tcp_handle_t *)loop.tcp_handles.head;
+static void km_io_socket_run() {
+  km_io_socket_handle_t *handle =
+      (km_io_socket_handle_t *)loop.socket_handles.head;
   while (handle != NULL) {
     if (KM_IO_HAS_FLAG(handle->base.flags, KM_IO_FLAG_ACTIVE)) {
       // TODO
     }
-    handle = (km_io_tcp_handle_t *)((km_list_node_t *)handle)->next;
+    handle = (km_io_socket_handle_t *)((km_list_node_t *)handle)->next;
   }
 }
 

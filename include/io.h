@@ -19,6 +19,9 @@
  * SOFTWARE.
  */
 
+// TODO return types of handle functions should be 'int' to return errno
+// TODO Rename `km_io_uart_available_cb` to `km_io_uart_cb`. Same rule for all
+
 #ifndef ___KM_IO_H
 #define ___KM_IO_H
 
@@ -27,6 +30,7 @@
 
 #include "ieee80211.h"
 #include "jerryscript.h"
+#include "socket.h"
 #include "utils.h"
 
 typedef struct km_io_loop_s km_io_loop_t;
@@ -38,7 +42,7 @@ typedef struct km_io_watch_handle_s km_io_watch_handle_t;
 typedef struct km_io_uart_handle_s km_io_uart_handle_t;
 typedef struct km_io_idle_handle_s km_io_idle_handle_t;
 typedef struct km_io_stream_handle_s km_io_stream_handle_t;
-typedef struct km_io_tcp_handle_s km_io_tcp_handle_t;
+typedef struct km_io_socket_handle_s km_io_socket_handle_t;
 typedef struct km_io_ieee80211_handle_s km_io_ieee80211_handle_t;
 
 /* handle flags */
@@ -59,7 +63,7 @@ typedef enum km_io_type {
   KM_IO_UART,
   KM_IO_IDLE,
   KM_IO_STREAM,
-  KM_IO_TCP,
+  KM_IO_SOCKET,
   KM_IO_IEEE80211
 } km_io_type_t;
 
@@ -155,18 +159,21 @@ struct km_io_stream_handle_s {
   km_io_stream_read_cb read_cb;
 };
 
-/* tcp handle type */
+/* socket handle type */
 
-typedef void (*km_io_tcp_cb)(km_io_tcp_handle_t *, int);
-typedef void (*km_io_tcp_read_cb)(km_io_tcp_handle_t *, uint8_t *, size_t);
+typedef void (*km_io_socket_cb)(km_io_socket_handle_t *);
+typedef void (*km_io_socket_read_cb)(km_io_socket_handle_t *, uint8_t *,
+                                     size_t);
 
-struct km_io_tcp_handle_s {
+struct km_io_socket_handle_s {
   km_io_handle_t base;
-  km_io_tcp_cb connect_cb;
-  km_io_tcp_cb close_cb;
-  km_io_tcp_cb shutdown_cb;
-  km_io_tcp_cb read_available_cb;
-  km_io_tcp_read_cb read_cb;
+  int fd;
+  km_io_socket_cb connect_cb;
+  jerry_value_t connect_js_cb;
+  km_io_socket_cb close_cb;
+  km_io_socket_cb shutdown_cb;
+  km_io_socket_cb read_available_cb;
+  km_io_socket_read_cb read_cb;
 };
 
 /* ieee80211 handle type */
@@ -194,7 +201,7 @@ struct km_io_loop_s {
   km_list_t uart_handles;
   km_list_t idle_handles;
   km_list_t stream_handles;
-  km_list_t tcp_handles;
+  km_list_t socket_handles;
   km_list_t ieee80211_handles;
   km_list_t closing_handles;
 };
@@ -268,17 +275,20 @@ void km_io_stream_cleanup();
 // void km_io_stream_push(km_io_stream_handle_t *stream, uint8_t *buffer, size_t
 // size); // push to read buffer
 
-/* tcp functions */
+/* socket functions */
 
-void km_io_tcp_init(km_io_tcp_handle_t *tcp);
-int km_io_tcp_connect(km_io_tcp_handle_t *tcp, km_io_tcp_cb connect_cb);
-void km_io_tcp_read_start(km_io_tcp_handle_t *tcp,
-                          km_io_tcp_cb read_available_cb,
-                          km_io_tcp_read_cb read_cb);
-void km_io_tcp_read_stop(km_io_tcp_handle_t *tcp);
-void km_io_tcp_close(km_io_tcp_handle_t *tcp, km_io_tcp_cb connect_cb);
-km_io_tcp_handle_t *km_io_tcp_get_by_id(uint32_t id);
-void km_io_tcp_cleanup();
+void km_io_socket_init(km_io_socket_handle_t *socket);
+int km_io_socket_connect(km_io_socket_handle_t *socket,
+                         km_socket_address_t *address,
+                         km_io_socket_cb connect_cb);
+void km_io_socket_read_start(km_io_socket_handle_t *socket,
+                             km_io_socket_cb read_available_cb,
+                             km_io_socket_read_cb read_cb);
+void km_io_socket_read_stop(km_io_socket_handle_t *socket);
+void km_io_socket_close(km_io_socket_handle_t *socket,
+                        km_io_socket_cb connect_cb);
+km_io_socket_handle_t *km_io_socket_get_by_id(uint32_t id);
+void km_io_socket_cleanup();
 
 /* ieee80211 functions */
 

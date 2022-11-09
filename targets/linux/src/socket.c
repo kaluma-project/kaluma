@@ -19,43 +19,22 @@
  * SOFTWARE.
  */
 
-#ifndef __KM_SOCKET_H
-#define __KM_SOCKET_H
+#include "socket.h"
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#include <stdlib.h>
 
-typedef enum {
-  KM_SOCKET_DOMAIN_TYPE_AF_INET = 0,
-} km_socket_domain_type_t;
-
-typedef enum {
-  KM_SOCKET_PROTOCOL_TYPE_STREAM = 0,  // TCP
-  KM_SOCKET_PROTOCOL_TYPE_DGRAM        // UDP
-} km_socket_protocol_type_t;
-
-typedef enum {
-  KM_SOCKET_HOW_TYPE_SHUT_NONE = 0,
-  KM_SOCKET_HOW_TYPE_SHUT_RD = 1,
-  KM_SOCKET_HOW_TYPE_SHUT_WR = 2,
-  KM_SOCKET_HOW_TYPE_SHUT_RDWR = 3,
-} km_socket_how_type_t;
-
-typedef struct {
-  char *host;
-  uint16_t port;
-} km_socket_address_t;
+#include "board.h"
+#include "err.h"
 
 /**
  * Initialize
  */
-void km_socket_init();
+void km_socket_init() {}
 
 /**
  * Cleanup
  */
-void km_socket_cleanup();
+void km_socket_cleanup() {}
 
 /**
  * Creates a socket and return a file descriptor
@@ -65,7 +44,9 @@ void km_socket_cleanup();
  * errno).
  */
 int km_socket_create(km_socket_domain_type_t domain,
-                     km_socket_protocol_type_t protocol);
+                     km_socket_protocol_type_t protocol) {
+  return -1;
+}
 
 /**
  * Connect the socket to the given address
@@ -73,7 +54,7 @@ int km_socket_create(km_socket_domain_type_t domain,
  * @param addr address to connect
  * @return 0 on success, (< 0) on error (nagative errno).
  */
-int km_socket_connect(int fd, km_socket_address_t *addr);
+int km_socket_connect(int fd, km_socket_address_t *addr) { return 0; }
 
 /**
  * Write data to the socket
@@ -82,7 +63,7 @@ int km_socket_connect(int fd, km_socket_address_t *addr);
  * @param count size of buffer
  * @return number of bytes written, (< 0) on error (negative errno).
  */
-int km_socket_write(int fd, uint8_t *buf, size_t count);
+int km_socket_write(int fd, uint8_t *buf, size_t count) { return -1; }
 
 /**
  * Read data from the socket
@@ -91,14 +72,14 @@ int km_socket_write(int fd, uint8_t *buf, size_t count);
  * @param count size of data to read
  * @return number of bytes read, (< 0) on error (negative errno).
  */
-int km_socket_read(int fd, uint8_t *buf, size_t count);
+int km_socket_read(int fd, uint8_t *buf, size_t count) { return -1; }
 
 /**
  * Close the socket
  * @param fd socket fd
  * @return 0 on success, (< 0) on error (negative errno).
  */
-int km_socket_close(int fd);
+int km_socket_close(int fd) { return -1; }
 
 /**
  * Shutdown the socket
@@ -106,7 +87,7 @@ int km_socket_close(int fd);
  * @param how
  * @return 0 on success, (< 0) on error (negative errno).
  */
-int km_socket_shutdown(int fd, km_socket_how_type_t how);
+int km_socket_shutdown(int fd, km_socket_how_type_t how) { return -1; }
 
 /**
  * Bind the socket to the given address
@@ -115,14 +96,14 @@ int km_socket_shutdown(int fd, km_socket_how_type_t how);
  * @param port port number
  * @return 0 on success, (< 0) on error (nagative errno).
  */
-int km_socket_bind(int fd, char *addr, uint16_t port);
+int km_socket_bind(int fd, char *addr, uint16_t port) { return -1; }
 
 /**
  * Listen the socket to accept incoming connections
  * @param fd socket fd
  * @return 0 on success, (< 0) on error (nagative errno).
  */
-int km_socket_listen(int fd);
+int km_socket_listen(int fd) { return -1; }
 
 /**
  * Accept an incoming connection
@@ -131,6 +112,4 @@ int km_socket_listen(int fd);
  * @return file descriptor of the peer socket on success, (< 0) on error
  * (nagative errno).
  */
-int km_socket_accept(int fd, km_socket_address_t *addr);
-
-#endif /* __KM_SOCKET_H */
+int km_socket_accept(int fd, km_socket_address_t *addr) { return -1; }

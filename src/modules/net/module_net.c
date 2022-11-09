@@ -29,7 +29,7 @@
 #include "net_magic_strings.h"
 #include "socket.h"
 
-static int socket_connect_cb(km_io_tcp_handle_t *handle) { return -1; }
+static void socket_connect_cb(km_io_socket_handle_t *handle) {}
 
 /**
  * SocketNative() constructor
@@ -42,11 +42,6 @@ JERRYXX_FUN(socket_ctor_fn) {
   }
   jerryxx_set_property_number(JERRYXX_GET_THIS, "fd", fd);
 
-  // setup tcp handle
-  km_io_tcp_handle_t *handle = malloc(sizeof(km_io_tcp_handle_t));
-  km_io_tcp_init(handle);
-  jerryxx_set_property_number(JERRYXX_GET_THIS, "handle_id", handle->base.id);
-
   return jerry_create_undefined();
 }
 
@@ -55,24 +50,37 @@ JERRYXX_FUN(socket_ctor_fn) {
  * args:
  * - host {string}
  * - port {number}
- * returns: {number} file descriptor
  */
 JERRYXX_FUN(socket_connect_fn) {
   // check and get args
-  JERRYXX_CHECK_ARG_NUMBER_OPT(0, "size");
-  JERRYXX_CHECK_ARG_FUNCTION(1, "callback");
+  JERRYXX_CHECK_ARG_STRING(0, "host");
+  JERRYXX_CHECK_ARG_NUMBER(1, "port");
+  JERRYXX_CHECK_ARG_FUNCTION(2, "callback");
 
   // read parameters
-  int size = (int)JERRYXX_GET_ARG_NUMBER_OPT(0, -1);
-  jerry_value_t callback = JERRYXX_GET_ARG(1);
+  JERRYXX_GET_ARG_STRING_AS_CHAR(0, host);
+  uint16_t port = (int)JERRYXX_GET_ARG_NUMBER(1);
+  jerry_value_t callback = JERRYXX_GET_ARG(2);
+
+  // setup socket handle
+  km_io_socket_handle_t *handle = malloc(sizeof(km_io_socket_handle_t));
+  km_io_socket_init(handle);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, "handle_id", handle->base.id);
 
   uint32_t handle_id =
       jerryxx_get_property_number(JERRYXX_GET_THIS, "handle_id", 0);
-  km_io_uart_handle_t *handle = km_io_tcp_get_by_id(handle_id);
-  int ret = km_io_tcp_connect(handle, socket_connect_cb);
+  km_io_socket_handle_t *handle = km_io_socket_get_by_id(handle_id);
+
+  // socket connect
+  handle->connect_js_cb = callback;
+  km_socket_address_t address;
+  address.host = host;
+  address.port = port;
+  int ret = km_io_socket_connect(handle, &address, socket_connect_cb);
   if (ret < 0) {
     return jerry_create_error_from_value(create_system_error(ret), true);
   }
+  return jerry_create_undefined();
 }
 
 /**
