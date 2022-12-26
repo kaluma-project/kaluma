@@ -69,4 +69,8 @@ void km_micro_delay(uint32_t usec);
  */
 uint8_t km_running_script_check();
 
+/**
+ * custom process which need to be run in the infinite loop
+ */
+void km_custom_infinite_loop();
 #endif /* __KM_SYSTEM_H */

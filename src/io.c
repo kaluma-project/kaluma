@@ -113,6 +113,7 @@ void km_io_run(bool infinite) {
     km_io_uart_run();
     km_io_idle_run();
     km_io_handle_closing();
+    km_custom_infinite_loop();
 
     // quite if there no IO handles
     if (!infinite) {

@@ -243,3 +243,5 @@ uint8_t km_running_script_check() {
   else
     return true;
 }
+
+void km_custom_infinite_loop() {}
