@@ -39,6 +39,10 @@
 #include "tty.h"
 #include "tusb.h"
 #include "uart.h"
+#ifdef PICO_CYW43
+#include "module_pico_cyw43.h"
+#include "pico/cyw43_arch.h"
+#endif /* PICO_CYW43 */
 
 /**
  * Delay in milliseconds
@@ -83,6 +87,9 @@ void km_system_init() {
 }
 
 void km_system_cleanup() {
+#ifdef PICO_CYW43
+  km_cyw43_deinit();
+#endif /* PICO_CYW43 */
   km_adc_cleanup();
   km_pwm_cleanup();
   km_i2c_cleanup();
@@ -99,4 +106,10 @@ uint8_t km_running_script_check() {
   bool load_state = gpio_get(SCR_LOAD_GPIO);
   gpio_set_pulls(SCR_LOAD_GPIO, false, false);
   return load_state;
+}
+
+void km_custom_infinite_loop() {
+#ifdef PICO_CYW43
+  cyw43_arch_poll();
+#endif /* PICO_CYW43 */
 }

@@ -43,6 +43,10 @@ void km_gpio_init() {
     gpio_init(i);
     gpio_set_pulls(i, false, false);
   }
+#ifdef WIFI_EN_GPIO
+  gpio_set_dir(WIFI_EN_GPIO, true);  // Set OUTPUT
+  gpio_put(WIFI_EN_GPIO, 0);         // WIFI OFF
+#endif
 }
 
 void km_gpio_cleanup() { km_gpio_init(); }

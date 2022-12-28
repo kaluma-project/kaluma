@@ -97,3 +97,5 @@ void km_system_cleanup() {
 }
 
 uint8_t km_running_script_check() { return false; }
+
+void km_custom_infinite_loop() {}

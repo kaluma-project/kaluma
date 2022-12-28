@@ -13,9 +13,13 @@ if(NOT BOARD)
   set(BOARD "pico")
 endif()
 
+if(BOARD STREQUAL "pico-w")
+  set(PICO_BOARD pico_w)
+endif()
+
 # default modules
 if(NOT MODULES)
-  set(MODULES 
+  set(MODULES
     events
     gpio
     led
@@ -73,7 +77,7 @@ set(SOURCES
 
 include_directories(${TARGET_INC_DIR} ${BOARD_DIR})
 
-set(TARGET_HEAPSIZE 196)
+set(TARGET_HEAPSIZE 180)
 set(JERRY_TOOLCHAIN toolchain_mcu_cortexm0plus.cmake)
 
 set(CMAKE_SYSTEM_PROCESSOR cortex-m0plus)
@@ -102,6 +106,19 @@ set(TARGET_LIBS c nosys m
   hardware_rtc
   hardware_sync)
 set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -Wl,-Map=${OUTPUT_TARGET}.map,--cref,--gc-sections")
+
+# For the pico-w board
+if(BOARD STREQUAL "pico-w")
+  # modules for pico-w
+  set(MODULES
+  ${MODULES}
+  pico_cyw43)
+  # libs for pico-w
+  set(TARGET_LIBS
+  ${TARGET_LIBS}
+  pico_lwip
+  pico_cyw43_arch_lwip_poll)
+endif()
 
 include(${CMAKE_SOURCE_DIR}/tools/kaluma.cmake)
 add_executable(${OUTPUT_TARGET} ${SOURCES} ${JERRY_LIBS})
