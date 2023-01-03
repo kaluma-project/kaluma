@@ -31,7 +31,9 @@
 
 static ringbuffer_t __uart_rx_ringbuffer[UART_NUM];
 static uint8_t *__read_buffer[UART_NUM];
-static struct __uart_status_s { bool enabled; } __uart_status[UART_NUM];
+static struct __uart_status_s {
+  bool enabled;
+} __uart_status[UART_NUM];
 
 static uart_inst_t *__get_uart_no(uint8_t bus) {
   if (bus == 0) {
@@ -59,9 +61,6 @@ void __uart_irq_handler_0(void) { __uart_fill_ringbuffer(uart0, 0); }
 void __uart_irq_handler_1(void) { __uart_fill_ringbuffer(uart1, 1); }
 
 static bool __check_uart_pins(uint8_t port, km_uart_pins_t pins) {
-  if ((pins.tx < 0) && (pins.rx < 0)) {
-    return false;
-  }
   if (port == 0) {
     if ((pins.tx >= 0) && (pins.tx != 0) && (pins.tx != 12) &&
         (pins.tx != 16)) {

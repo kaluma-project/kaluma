@@ -27,24 +27,28 @@
 #include "pico/stdlib.h"
 #include "system.h"
 
-static struct __i2c_status_s { km_i2c_mode_t mode; } __i2c_status[I2C_NUM];
+static struct __i2c_status_s {
+  km_i2c_mode_t mode;
+} __i2c_status[I2C_NUM];
 
 static bool __check_i2c_pins(uint8_t bus, km_i2c_pins_t pins) {
-  if ((pins.sda < 0) || (pins.sda > 27) || (pins.scl < 0) || (pins.scl > 27)) {
+  if ((pins.sda > 27) || (pins.scl > 27)) {
     return false;
   }
   if (bus == 0) {
-    if (((pins.sda % 4) != 0) || (pins.sda > 21)) {
+    if ((pins.sda >= 0) && ((pins.sda % 4) != 0) || (pins.sda > 21)) {
       return false;
     }
-    if (((pins.scl % 4) != 1) || (pins.scl > 21)) {
+    if ((pins.scl >= 0) && ((pins.scl % 4) != 1) || (pins.scl > 21)) {
       return false;
     }
   } else if (bus == 1) {
-    if (((pins.sda % 4) != 2) || ((pins.sda > 21) && (pins.sda < 26))) {
+    if ((pins.sda >= 0) && ((pins.sda % 4) != 2) ||
+        ((pins.sda > 21) && (pins.sda < 26))) {
       return false;
     }
-    if (((pins.scl % 4) != 3) || ((pins.scl > 21) && (pins.scl < 26))) {
+    if ((pins.scl >= 0) && ((pins.scl % 4) != 3) ||
+        ((pins.scl > 21) && (pins.scl < 26))) {
       return false;
     }
   } else {
@@ -109,10 +113,14 @@ int km_i2c_setup_master(uint8_t bus, uint32_t speed, km_i2c_pins_t pins) {
   if (speed > I2C_MAX_CLOCK) {
     speed = I2C_MAX_CLOCK;
   }
-  gpio_set_function(pins.sda, GPIO_FUNC_I2C);
-  gpio_set_function(pins.scl, GPIO_FUNC_I2C);
-  gpio_pull_up(pins.sda);
-  gpio_pull_up(pins.scl);
+  if (pins.sda >= 0) {
+    gpio_set_function(pins.sda, GPIO_FUNC_I2C);
+    gpio_pull_up(pins.sda);
+  }
+  if (pins.scl >= 0) {
+    gpio_set_function(pins.scl, GPIO_FUNC_I2C);
+    gpio_pull_up(pins.scl);
+  }
   i2c_init(i2c, speed);
   return 0;
 }
