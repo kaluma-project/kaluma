@@ -31,27 +31,27 @@ struct __spi_status_s {
 } __spi_status[SPI_NUM];
 
 static bool __check_spi_pins(uint8_t bus, km_spi_pins_t pins) {
-  if ((pins.sck < 0) || (pins.miso < 0) || (pins.mosi < 0)) {
-    return false;
-  }
   if (bus == 0) {
-    if ((pins.miso != 0) && (pins.miso != 4) && (pins.miso != 16)) {
+    if ((pins.miso >= 0) && (pins.miso != 0) && (pins.miso != 4) &&
+        (pins.miso != 16)) {
       return false;
     }
-    if ((pins.mosi != 3) && (pins.mosi != 7) && (pins.mosi != 19)) {
+    if ((pins.mosi >= 0) && (pins.mosi != 3) && (pins.mosi != 7) &&
+        (pins.mosi != 19)) {
       return false;
     }
-    if ((pins.sck != 2) && (pins.sck != 6) && (pins.sck != 18)) {
+    if ((pins.sck >= 0) && (pins.sck != 2) && (pins.sck != 6) &&
+        (pins.sck != 18)) {
       return false;
     }
   } else if (bus == 1) {
-    if ((pins.miso != 8) && (pins.miso != 12)) {
+    if ((pins.miso >= 0) && (pins.miso != 8) && (pins.miso != 12)) {
       return false;
     }
-    if ((pins.mosi != 11) && (pins.mosi != 15)) {
+    if ((pins.mosi >= 0) && (pins.mosi != 11) && (pins.mosi != 15)) {
       return false;
     }
-    if ((pins.sck != 10) && (pins.sck != 14)) {
+    if ((pins.sck >= 0) && (pins.sck != 10) && (pins.sck != 14)) {
       return false;
     }
   } else {
@@ -147,9 +147,15 @@ int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
   }
   spi_init(spi, baudrate);
   spi_set_format(spi, 8, pol, pha, order);
-  gpio_set_function(pins.miso, GPIO_FUNC_SPI);
-  gpio_set_function(pins.mosi, GPIO_FUNC_SPI);
-  gpio_set_function(pins.sck, GPIO_FUNC_SPI);
+  if (pins.miso >= 0) {
+    gpio_set_function(pins.miso, GPIO_FUNC_SPI);
+  }
+  if (pins.mosi >= 0) {
+    gpio_set_function(pins.mosi, GPIO_FUNC_SPI);
+  }
+  if (pins.sck >= 0) {
+    gpio_set_function(pins.sck, GPIO_FUNC_SPI);
+  }
   if (miso_pullup) {
     gpio_pull_up(pins.miso);
   }
