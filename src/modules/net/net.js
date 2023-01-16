@@ -170,7 +170,7 @@ class Server extends EventEmitter {
           this.emit('connection', client);
         }
       }
-      this._dev.bind(this._fd, '127.0.0.1', port, (err) => {
+      this._dev.bind(this._fd, this._dev.ip, port, (err) => {
         if (err) {
           this.emit('error', new SystemError(this._dev.errno));
         } else {

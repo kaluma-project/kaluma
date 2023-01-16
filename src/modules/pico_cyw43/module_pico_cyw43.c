@@ -101,6 +101,22 @@ int km_get_socket_fd(void) {
 }
 
 void km_cyw43_deinit() {
+  for (int i = 0; i < KM_MAX_SOCKET_NO; i++) {
+    if (__socket_info.socket[i].fd >= 0) {
+      if (__socket_info.socket[i].ptcl == NET_SOCKET_STREAM) {
+        if (__socket_info.socket[i].tcp_pcb) {
+          tcp_abort(__socket_info.socket[i].tcp_pcb);
+        }
+        if (__socket_info.socket[i].tcp_server_pcb) {
+          tcp_abort(__socket_info.socket[i].tcp_server_pcb);
+        }
+      } else {
+        if (__socket_info.socket[i].udp_pcb) {
+          udp_remove(__socket_info.socket[i].udp_pcb);
+        }
+      }
+    }
+  }
   if (__cyw43_drv.status_flag & KM_CYW43_STATUS_INIT) {
     cyw43_arch_deinit();
     __cyw43_drv.status_flag = KM_CYW43_STATUS_DISABLED;
@@ -176,17 +192,17 @@ JERRYXX_FUN(pico_cyw43_wifi_reset) {
   cyw43_delay_ms(50);
   __cyw43_drv.status_flag = KM_CYW43_STATUS_DISABLED;
   if (__cyw43_init()) {
-    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO,
                                 -1);
   } else {
-    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO,
                                 0);
   }
   if (JERRYXX_HAS_ARG(0)) {
     jerry_value_t callback = JERRYXX_GET_ARG(0);
     jerry_value_t reset_js_cb = jerry_acquire_value(callback);
     jerry_value_t errno = jerryxx_get_property_number(
-        JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
+        JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO, 0);
     jerry_value_t this_val = jerry_create_undefined();
     jerry_value_t args_p[1] = {errno};
     jerry_call_function(reset_js_cb, this_val, args_p, 1);
@@ -235,10 +251,10 @@ JERRYXX_FUN(pico_cyw43_wifi_scan) {
     cyw43_wifi_scan_options_t scan_opt = {0};
     int ret = cyw43_wifi_scan(&cyw43_state, &scan_opt, NULL, __scan_cb);
     if (ret < 0) {
-      jerryxx_set_property_number(JERRYXX_GET_THIS,
-                                  MSTR_PICO_CYW43_NETWORK_ERRNO, -1);
+      jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO,
+                                  -1);
       jerry_value_t errno = jerryxx_get_property_number(
-          JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, -1);
+          JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO, -1);
       jerry_value_t this_val = jerry_create_undefined();
       jerry_value_t args_p[1] = {errno};
       jerry_call_function(scan_js_cb, this_val, args_p, 1);
@@ -257,8 +273,8 @@ JERRYXX_FUN(pico_cyw43_wifi_scan) {
         }
       } while (diff < SCAN_TIMEOUT);
       __p_scan_result->scanning = false;
-      jerryxx_set_property_number(JERRYXX_GET_THIS,
-                                  MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
+      jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO,
+                                  0);
       jerry_value_t scan_array =
           jerry_create_array(__p_scan_result->queue_size);
       __scan_queue_t *current = __p_scan_result->p_scan_result_queue;
@@ -300,7 +316,7 @@ JERRYXX_FUN(pico_cyw43_wifi_scan) {
         free(remove);
       }
       jerry_value_t errno = jerryxx_get_property_number(
-          JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
+          JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO, 0);
       jerry_value_t this_val = jerry_create_undefined();
       jerry_value_t args_p[2] = {errno, scan_array};
       jerry_call_function(scan_js_cb, this_val, args_p, 2);
@@ -350,10 +366,10 @@ JERRYXX_FUN(pico_cyw43_wifi_connect) {
     free(pw_str);
   }
   if (connect_ret) {
-    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO,
                                 -1);
   } else {
-    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO,
                                 0);
     jerry_value_t assoc_js_cb =
         jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ASSOC_CB);
@@ -382,7 +398,7 @@ JERRYXX_FUN(pico_cyw43_wifi_connect) {
     jerry_value_t callback = JERRYXX_GET_ARG(1);
     jerry_value_t connect_js_cb = jerry_acquire_value(callback);
     jerry_value_t errno = jerryxx_get_property_number(
-        JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
+        JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO, 0);
     jerry_value_t this_val = jerry_create_undefined();
     jerry_value_t args_p[1] = {errno};
     jerry_call_function(connect_js_cb, this_val, args_p, 1);
@@ -399,7 +415,7 @@ JERRYXX_FUN(pico_cyw43_wifi_disconnect) {
   if (disconnect_ret == 0) {
     jerry_value_t disconnect_js_cb = jerryxx_get_property(
         JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_DISCONNECT_CB);
-    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO,
                                 0);
     if (jerry_value_is_function(disconnect_js_cb)) {
       jerry_value_t this_val = jerry_create_undefined();
@@ -408,14 +424,14 @@ JERRYXX_FUN(pico_cyw43_wifi_disconnect) {
     }
     jerry_release_value(disconnect_js_cb);
   } else {
-    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO,
                                 -1);
   }
   if (JERRYXX_HAS_ARG(0)) {
     jerry_value_t callback = JERRYXX_GET_ARG(0);
     jerry_value_t js_cb = jerry_acquire_value(callback);
     jerry_value_t errno = jerryxx_get_property_number(
-        JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
+        JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO, 0);
     jerry_value_t this_val = jerry_create_undefined();
     jerry_value_t args_p[1] = {errno};
     jerry_call_function(js_cb, this_val, args_p, 1);
@@ -442,17 +458,17 @@ JERRYXX_FUN(pico_cyw43_wifi_get_connection) {
     */
     jerryxx_set_property_string(obj, MSTR_PICO_CYW43_SCANINFO_BSSID, "");
     /* free(str_buff); */
-    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO,
                                 0);
   } else {
-    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO,
                                 -1);
   }
   if (JERRYXX_HAS_ARG(0)) {
     jerry_value_t callback = JERRYXX_GET_ARG(0);
     jerry_value_t get_connect_js_cb = jerry_acquire_value(callback);
     jerry_value_t errno = jerryxx_get_property_number(
-        JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
+        JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO, 0);
     jerry_value_t this_val = jerry_create_undefined();
     if (wifi_status == CYW43_LINK_UP) {
       jerry_value_t args_p[2] = {errno, obj};
@@ -569,16 +585,8 @@ static err_t __net_socket_close(uint8_t fd) {
   err_t err = ERR_OK;
   if (__socket_info.socket[fd].ptcl == NET_SOCKET_STREAM) {
     if (__socket_info.socket[fd].tcp_pcb) {
-      tcp_arg(__socket_info.socket[fd].tcp_pcb, NULL);
-      // tcp_poll(__socket_info.socket[fd].tcp_pcb, NULL, 0);
-      // tcp_sent(__socket_info.socket[fd].tcp_pcb, NULL);
-      // tcp_err(__socket_info.socket[fd].tcp_pcb, NULL);
-      tcp_recv(__socket_info.socket[fd].tcp_pcb, NULL);
-      err = tcp_close(__socket_info.socket[fd].tcp_pcb);
-      if (err != ERR_OK) {
-        tcp_abort(__socket_info.socket[fd].tcp_pcb);
-        err = ERR_ABRT;
-      }
+      tcp_abort(__socket_info.socket[fd].tcp_pcb);
+      __socket_info.socket[fd].fd = -1;
       __socket_info.socket[fd].tcp_pcb = NULL;
     }
   } else { /** UDP */
@@ -604,10 +612,8 @@ static err_t __net_data_receved(uint8_t fd, struct tcp_pcb *tpcb,
                                 struct pbuf *p) {
   err_t err = ERR_OK;
   if (p == NULL) {
-    err = __net_socket_close(fd);
-    if ((err == ERR_OK) && (__socket_info.socket[fd].state)) {
-      __socket_info.socket[fd].fd = -1;
-    }
+    tcp_abort(tpcb);
+    __socket_info.socket[fd].fd = -1;
   } else {
     if (p->tot_len > 0) {
       char *receiver_buffer = (char *)calloc(1, p->tot_len + 1);
