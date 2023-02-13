@@ -98,7 +98,7 @@ class HTTPParser {
         }
       }
     } else {
-      var len = parseInt(this.incoming.headers['content-length'] || '0');
+      var len = parseInt(this.incoming.headers['Content-Length'] || '0');
       if (this._buf.length >= len) {
         this.body = this._buf;
         this._buf = '';
@@ -255,7 +255,7 @@ class ClientRequest extends OutgoingMessage {
    * Flush headers to buffer.
    */
   flushHeaders() {
-    if (!this.headers.hasOwnProperty['content-length']) {
+    if (!this.headers.hasOwnProperty['Content-Length']) {
       this.setHeader('transfer-encoding', 'chunked');
     }
     this._wbuf += `${this.options.method} ${this.path} HTTP/1.1\r\n`;
@@ -343,7 +343,7 @@ class ServerResponse extends OutgoingMessage {
       this.statusCode = statusCode;
       if (statusMessage) this.statusMessage = statusMessage;
       if (headers) Object.assign(this.headers, headers);
-      if (!this.headers.hasOwnProperty['content-length']) { // chunked transfer mode
+      if (!this.headers.hasOwnProperty['Content-Length']) { // chunked transfer mode
         this.headers['transfer-encoding'] = 'chunked';
       }
       var msg = `HTTP/1.1 ${this.statusCode} ${this.statusMessage}\r\n`;
