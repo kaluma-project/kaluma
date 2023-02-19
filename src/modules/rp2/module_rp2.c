@@ -46,6 +46,8 @@
 #define __PIO_INT_SM3 0x800
 #define __PIO_INT_FULL 0xF00
 
+#define __RP2_TEMP_ADC_PORT 30
+
 static jerry_value_t __pio_call_back[PIO_NUM];
 
 static PIO __pio(uint8_t pio) {

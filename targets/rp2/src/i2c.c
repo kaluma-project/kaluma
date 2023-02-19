@@ -36,18 +36,18 @@ static bool __check_i2c_pins(uint8_t bus, km_i2c_pins_t pins) {
     return false;
   }
   if (bus == 0) {
-    if ((pins.sda >= 0) && ((pins.sda % 4) != 0) || (pins.sda > 21)) {
+    if (((pins.sda >= 0) && ((pins.sda % 4) != 0)) || (pins.sda > 21)) {
       return false;
     }
-    if ((pins.scl >= 0) && ((pins.scl % 4) != 1) || (pins.scl > 21)) {
+    if (((pins.scl >= 0) && ((pins.scl % 4) != 1)) || (pins.scl > 21)) {
       return false;
     }
   } else if (bus == 1) {
-    if ((pins.sda >= 0) && ((pins.sda % 4) != 2) ||
+    if (((pins.sda >= 0) && ((pins.sda % 4) != 2)) ||
         ((pins.sda > 21) && (pins.sda < 26))) {
       return false;
     }
-    if ((pins.scl >= 0) && ((pins.scl % 4) != 3) ||
+    if (((pins.scl >= 0) && ((pins.scl % 4) != 3)) ||
         ((pins.scl > 21) && (pins.scl < 26))) {
       return false;
     }
