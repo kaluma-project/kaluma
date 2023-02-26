@@ -51,6 +51,7 @@
 
 typedef struct {
   int8_t fd;
+  int8_t server_fd;
   int8_t ptcl;
   int8_t state;
   uint16_t lport;
@@ -115,6 +116,7 @@ void km_cyw43_deinit() {
           udp_remove(__socket_info.socket[i].udp_pcb);
         }
       }
+      __socket_info.socket[i].fd = -1;
     }
   }
   if (__cyw43_drv.status_flag & KM_CYW43_STATUS_INIT) {
@@ -523,6 +525,7 @@ JERRYXX_FUN(pico_cyw43_network_socket) {
   if (fd < 0) {
     return jerry_create_error_from_value(create_system_error(EREMOTEIO), true);
   }
+  __socket_info.socket[fd].server_fd = -1;
   __socket_info.socket[fd].tcp_server_pcb = NULL;
   __socket_info.socket[fd].state = NET_SOCKET_STATE_CLOSED;
   __socket_info.socket[fd].ptcl = protocol_param;
@@ -583,10 +586,15 @@ JERRYXX_FUN(pico_cyw43_network_get) {
 
 static err_t __net_socket_close(uint8_t fd) {
   err_t err = ERR_OK;
+  if (fd < KM_MAX_SOCKET_NO) {
+    __socket_info.socket[fd].fd = -1;
+  } else {
+    return EPERM;
+  }
+
   if (__socket_info.socket[fd].ptcl == NET_SOCKET_STREAM) {
     if (__socket_info.socket[fd].tcp_pcb) {
       tcp_abort(__socket_info.socket[fd].tcp_pcb);
-      __socket_info.socket[fd].fd = -1;
       __socket_info.socket[fd].tcp_pcb = NULL;
     }
   } else { /** UDP */
@@ -613,10 +621,13 @@ static err_t __net_data_receved(uint8_t fd, struct tcp_pcb *tpcb,
   err_t err = ERR_OK;
   if (p == NULL) {
     tcp_abort(tpcb);
-    __socket_info.socket[fd].fd = -1;
+    __net_socket_close(fd);
   } else {
+    uint8_t read_fd = (__socket_info.socket[fd].server_fd >= 0)
+                          ? __socket_info.socket[fd].server_fd
+                          : fd;
     if (p->tot_len > 0) {
-      char *receiver_buffer = (char *)calloc(1, p->tot_len + 1);
+      char *receiver_buffer = (char *)calloc(sizeof(char), p->tot_len + 1);
       for (struct pbuf *q = p; q != NULL; q = q->next) {
         strncat(receiver_buffer, q->payload, q->len);
       }
@@ -624,7 +635,7 @@ static err_t __net_data_receved(uint8_t fd, struct tcp_pcb *tpcb,
         tcp_recved(tpcb, p->tot_len);
       }
       jerry_value_t read_js_cb = jerryxx_get_property(
-          __socket_info.socket[fd].obj, MSTR_PICO_CYW43_SOCKET_READ_CB);
+          __socket_info.socket[read_fd].obj, MSTR_PICO_CYW43_SOCKET_READ_CB);
       if (jerry_value_is_function(read_js_cb)) {
         jerry_value_t this_val = jerry_create_undefined();
         jerry_value_t data =
@@ -680,24 +691,63 @@ static err_t __net_client_connect_cb(void *arg, struct tcp_pcb *tpcb,
 static err_t __tcp_server_accept_cb(void *arg, struct tcp_pcb *newpcb,
                                     err_t err) {
   if (err == ERR_OK) {
-    uint8_t *fd = (uint8_t *)arg;
-    __socket_info.socket[*fd].tcp_pcb = newpcb;
-    tcp_arg(__socket_info.socket[*fd].tcp_pcb, &(__socket_info.socket[*fd].fd));
-    tcp_poll(__socket_info.socket[*fd].tcp_pcb, NULL, 0);
-    tcp_sent(__socket_info.socket[*fd].tcp_pcb, NULL);
-    tcp_err(__socket_info.socket[*fd].tcp_pcb, NULL);
-    tcp_recv(__socket_info.socket[*fd].tcp_pcb, __tcp_data_recv_cb);
-    jerry_value_t acept_js_cb = jerryxx_get_property(
-        __socket_info.socket[*fd].obj, MSTR_PICO_CYW43_SOCKET_ACCEPT_CB);
-    if (jerry_value_is_function(acept_js_cb)) {
-      jerry_value_t this_val = jerry_create_undefined();
-      jerry_value_t fd_val = jerry_create_number(*fd);
-      jerry_value_t args_p[1] = {fd_val};
-      jerry_call_function(acept_js_cb, this_val, args_p, 1);
-      jerry_release_value(fd_val);
-      jerry_release_value(this_val);
+    uint8_t *server_fd = (uint8_t *)arg;
+    uint8_t fd = km_get_socket_fd();
+    if (fd >= 0) {
+      char *p_str_buff = (char *)malloc(18);
+      __socket_info.socket[fd].server_fd = *server_fd;
+      __socket_info.socket[fd].tcp_server_pcb = NULL;
+      __socket_info.socket[fd].state = NET_SOCKET_STATE_CONNECTED;
+      __socket_info.socket[fd].ptcl = NET_SOCKET_STREAM;
+      __socket_info.socket[fd].lport = __socket_info.socket[*server_fd].lport;
+      __socket_info.socket[fd].rport = 0;
+      __socket_info.socket[fd].raddr.addr = 0;
+      __socket_info.socket[fd].obj = jerry_create_object();
+      jerryxx_set_property_number(__socket_info.socket[fd].obj,
+                                  MSTR_PICO_CYW43_SOCKET_FD, fd);
+      sprintf(p_str_buff, "STREAM");
+      jerryxx_set_property_string(__socket_info.socket[fd].obj,
+                                  MSTR_PICO_CYW43_SOCKET_PTCL, p_str_buff);
+      jerryxx_set_property_number(__socket_info.socket[fd].obj,
+                                  MSTR_PICO_CYW43_SOCKET_STATE,
+                                  __socket_info.socket[fd].state);
+      struct netif *p_netif = &(cyw43_state.netif[CYW43_ITF_STA]);
+      const ip_addr_t *laddr = netif_ip_addr4(p_netif);
+      __socket_info.laddr = *laddr;
+      sprintf(p_str_buff, "%s", ipaddr_ntoa(laddr));
+      jerryxx_set_property_string(__socket_info.socket[fd].obj,
+                                  MSTR_PICO_CYW43_SOCKET_LADDR, p_str_buff);
+      jerryxx_set_property_number(__socket_info.socket[fd].obj,
+                                  MSTR_PICO_CYW43_SOCKET_LPORT,
+                                  __socket_info.socket[fd].lport);
+      sprintf(p_str_buff, "%s", ipaddr_ntoa(&(__socket_info.socket[fd].raddr)));
+      jerryxx_set_property_string(__socket_info.socket[fd].obj,
+                                  MSTR_PICO_CYW43_SOCKET_RADDR, p_str_buff);
+      jerryxx_set_property_number(__socket_info.socket[fd].obj,
+                                  MSTR_PICO_CYW43_SOCKET_RPORT,
+                                  __socket_info.socket[fd].rport);
+      free(p_str_buff);
+      __socket_info.socket[fd].tcp_pcb = newpcb;
+      tcp_arg(__socket_info.socket[fd].tcp_pcb, &(__socket_info.socket[fd].fd));
+      tcp_poll(__socket_info.socket[fd].tcp_pcb, NULL, 0);
+      tcp_sent(__socket_info.socket[fd].tcp_pcb, NULL);
+      tcp_err(__socket_info.socket[fd].tcp_pcb, NULL);
+      tcp_recv(__socket_info.socket[fd].tcp_pcb, __tcp_data_recv_cb);
+      jerry_value_t acept_js_cb =
+          jerryxx_get_property(__socket_info.socket[*server_fd].obj,
+                               MSTR_PICO_CYW43_SOCKET_ACCEPT_CB);
+      if (jerry_value_is_function(acept_js_cb)) {
+        jerry_value_t this_val = jerry_create_undefined();
+        jerry_value_t fd_val = jerry_create_number(fd);
+        jerry_value_t args_p[1] = {fd_val};
+        jerry_call_function(acept_js_cb, this_val, args_p, 1);
+        jerry_release_value(fd_val);
+        jerry_release_value(this_val);
+      }
+      jerry_release_value(acept_js_cb);
+    } else {
+      err = ECONNREFUSED;
     }
-    jerry_release_value(acept_js_cb);
   }
   return err;
 }
@@ -840,7 +890,7 @@ JERRYXX_FUN(pico_cyw43_network_close) {
   JERRYXX_CHECK_ARG_NUMBER(0, "fd");
   JERRYXX_CHECK_ARG_FUNCTION_OPT(1, "callback");
   int8_t fd = JERRYXX_GET_ARG_NUMBER(0);
-  err_t err = __net_socket_close(fd);
+  err_t err = ERR_OK;
   if (__socket_info.socket[fd].tcp_server_pcb) {
     tcp_arg(__socket_info.socket[fd].tcp_server_pcb, NULL);
     err = tcp_close(__socket_info.socket[fd].tcp_server_pcb);
@@ -850,7 +900,7 @@ JERRYXX_FUN(pico_cyw43_network_close) {
     }
     __socket_info.socket[fd].tcp_server_pcb = NULL;
   }
-  __socket_info.socket[fd].fd = -1;
+  err = __net_socket_close(fd);
   if (err == ERR_OK) {
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
                                 0);
