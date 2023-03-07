@@ -512,17 +512,20 @@ JERRYXX_FUN(dormant_fn) {
  */
 jerry_value_t module_rp2_init() {
   // clear PIO and state machines
+#if 0 // This code is moved to the rp2_pio_init() and called in km_system_init()
   for (int i = 0; i < PIO_SM_NUM; i++) {
     pio_sm_unclaim(pio0, i);
     pio_sm_unclaim(pio1, i);
   }
   pio_clear_instruction_memory(pio0);
   pio_clear_instruction_memory(pio1);
+#endif
   irq_set_exclusive_handler(PIO0_IRQ_0, __pio0_irq_0_handler);
   irq_set_exclusive_handler(PIO1_IRQ_0, __pio1_irq_0_handler);
   for (int i = 0; i < PIO_NUM; i++) {
     __pio_call_back[i] = jerry_create_undefined();
   }
+
 
   // pio module exports
   jerry_value_t exports = jerry_create_object();
