@@ -1,38 +1,22 @@
 {
-  "editor.tabSize": 2,
-  "editor.insertSpaces": true,
-  "files.associations": {
-    "*.ejs": "html",
-    "usbd_cdc.h": "c",
-    "system.h": "c",
-    "stm32f4xx_hal.h": "c",
-    "main.h": "c",
-    "is25lq040b.h": "c",
-    "tty.h": "c",
-    "diskio.h": "c",
-    "buffer.h": "c",
-    "limits": "c",
-    "board.h": "c",
-    "ymodem.h": "c",
-    "jerryxx.h": "c",
-    "string_view": "c",
-    "random": "c",
-    "rpi_pico.h": "c",
-    "gpio.h": "c",
-    "pico.h": "c",
-    "__locale": "c",
-    "__string": "c",
-    "string": "c",
-    "clocks.h": "c",
-    "jerryscript.h": "c",
-    "lfs.h": "c",
-    "__hash_table": "c",
-    "memory": "c",
-    "new": "c",
-    "storage.h": "c",
-    "storage_magic_strings.h": "c"
+  // These settings tweaks to the cmake plugin will ensure
+  // that you debug using cortex-debug instead of trying to launch
+  // a Pico binary on the host
+  "cmake.statusbar.advanced": {
+    "debug": {
+      "visibility": "hidden"
+    },
+    "launch": {
+      "visibility": "hidden"
+    },
+    "build": {
+      "visibility": "hidden"
+    },
+    "buildTarget": {
+      "visibility": "hidden"
+    }
   },
-  "cpplint.filters": ["-build/include_subdir", "-build/header_guard"],
-  "C_Cpp.clang_format_fallbackStyle": "Google",
-  "editor.formatOnSave": true
+  "cmake.buildBeforeRun": true,
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+  "cmake.configureOnOpen": false
 }
