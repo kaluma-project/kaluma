@@ -1,5 +1,7 @@
 const rp2_native = process.binding(process.binding.rp2);
 
+const TEMPERATURE_ADC = 30;
+
 const PIO = {
   FIFO_JOIN_NONE: 0,
   FIFO_JOIN_TX: 1,
@@ -494,3 +496,4 @@ exports.PIO = PIO;
 exports.ASM = ASM;
 exports.StateMachine = StateMachine;
 exports.dormant = dormant;
+exports.TEMPERATURE_ADC = TEMPERATURE_ADC;

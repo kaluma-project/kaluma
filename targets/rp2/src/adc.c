@@ -36,7 +36,7 @@
  * @return Returns index on success or EINVPIN on failure.
  */
 static int __get_adc_index(uint8_t pin) {
-  if ((pin >= 26) && (pin <= 29)) {
+  if ((pin >= 26) && (pin <= 30)) {
     return pin - 26;  // GPIO 26 is channel 0
   }
   return EINVPIN;
@@ -65,18 +65,27 @@ double km_adc_read(uint8_t adcIndex) {
 }
 
 int km_adc_setup(uint8_t pin) {
+
+
+  
   int ch = __get_adc_index(pin);
   if (ch < 0) {
     return EINVPIN;
+  } else if (ch == 4) {
+    adc_set_temp_sensor_enabled(true);
+  } else {
+    adc_gpio_init(pin);
   }
-  adc_gpio_init(pin);
   adc_select_input(ch);
   return 0;
 }
 
 int km_adc_close(uint8_t pin) {
-  if (__get_adc_index(pin) < 0) {
+  int ch = __get_adc_index(pin);
+  if (ch < 0) {
     return EINVPIN;
+  } else if (ch == 4) {
+    adc_set_temp_sensor_enabled(false);
   }
   return 0;
 }
