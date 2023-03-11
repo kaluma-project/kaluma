@@ -85,6 +85,7 @@ static void rp2_pio_init() {
  * Kaluma Hardware System Initializations
  */
 void km_system_init() {
+  rp2_pio_init();
   stdio_init_all();
   km_gpio_init();
   km_adc_init();
@@ -94,13 +95,13 @@ void km_system_init() {
   km_uart_init();
   km_rtc_init();
   km_flash_init();
-  rp2_pio_init();
 }
 
 void km_system_cleanup() {
 #ifdef PICO_CYW43
   km_cyw43_deinit();
 #endif /* PICO_CYW43 */
+  rp2_pio_init();
   km_adc_cleanup();
   km_pwm_cleanup();
   km_i2c_cleanup();
@@ -109,7 +110,6 @@ void km_system_cleanup() {
   km_gpio_cleanup();
   km_rtc_cleanup();
   km_flash_cleanup();
-  rp2_pio_init();
 }
 
 uint8_t km_running_script_check() {
