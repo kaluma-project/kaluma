@@ -1103,6 +1103,53 @@ JERRYXX_FUN(pico_cyw43_network_listen) {
   return jerry_create_undefined();
 }
 
+/*
+  AP Mode
+*/
+
+JERRYXX_FUN(pico_cyw43_wifi_ap_mode) {
+  JERRYXX_CHECK_ARG(0, "apInfo");
+  jerry_value_t ap_info = JERRYXX_GET_ARG(0);
+  jerry_value_t ssid = jerryxx_get_property(ap_info, MSTR_PICO_CYW43_WIFI_APMODE_SSID);
+  jerry_value_t password = jerryxx_get_property(ap_info, MSTR_PICO_CYW43_WIFI_APMODE_PASSWORD);
+  uint8_t *pw_str = NULL;
+
+  const char *passwordfi = "password";
+  // validate SSID
+  if (jerry_value_is_string(ssid)) {
+    jerry_size_t len = jerryxx_get_ascii_string_size(ssid);
+    if (len > 32) {
+      len = 32;
+    }
+    jerryxx_string_to_ascii_char_buffer(
+        ssid, (uint8_t *)__cyw43_drv.current_ssid, len);
+    __cyw43_drv.current_ssid[len] = '\0';
+  } else {
+    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *)"SSID error");
+  }
+
+  // validate password
+   if (jerry_value_is_string(password)) {
+    jerry_size_t len = jerryxx_get_ascii_string_size(password);
+    if (len < 8) {
+      return jerry_create_error(JERRY_ERROR_COMMON, (const jerry_char_t *)"PASSWORD need to have at least 8 characters");
+    }
+    pw_str = (uint8_t *)malloc(len + 1);
+    jerryxx_string_to_ascii_char_buffer(password, pw_str, len);
+    pw_str[len] = '\0';
+  }
+
+  // init driver
+  if (__cyw43_init()) {
+    return jerry_create_error_from_value(create_system_error(EAGAIN), true);
+  }
+
+  cyw43_arch_enable_ap_mode(
+    (char *) __cyw43_drv.current_ssid, pw_str, CYW43_AUTH_WPA2_AES_PSK
+  );
+  return jerry_create_undefined();
+}
+
 jerry_value_t module_pico_cyw43_init() {
   /* PICO_CYW43 class */
   jerry_value_t pico_cyw43_ctor =
@@ -1130,6 +1177,9 @@ jerry_value_t module_pico_cyw43_init() {
   jerryxx_set_property_function(wifi_prototype,
                                 MSTR_PICO_CYW43_WIFI_GET_CONNECTION,
                                 pico_cyw43_wifi_get_connection);
+  jerryxx_set_property_function(wifi_prototype,
+                                MSTR_PICO_CYW43_WIFI_APMODE_FN,
+                                pico_cyw43_wifi_ap_mode);
   jerry_release_value(wifi_prototype);
 
   jerry_value_t pico_cyw43_network_ctor =
