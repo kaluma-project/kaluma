@@ -32,6 +32,9 @@
 #include "pico_cyw43_magic_strings.h"
 #include "system.h"
 
+#include "dhcpserver.h"
+
+
 #define MAX_GPIO_NUM 2
 #define SCAN_TIMEOUT 2000     /* 2 sec */
 #define CONNECT_TIMEOUT 30000 /* 30 sec */
@@ -1138,15 +1141,26 @@ JERRYXX_FUN(pico_cyw43_wifi_ap_mode) {
     jerryxx_string_to_ascii_char_buffer(password, pw_str, len);
     pw_str[len] = '\0';
   }
+  // free data
+  jerry_release_value(ssid);
+  jerry_release_value(password);
 
   // init driver
   if (__cyw43_init()) {
     return jerry_create_error_from_value(create_system_error(EAGAIN), true);
   }
 
-  cyw43_arch_enable_ap_mode(
-    (char *) __cyw43_drv.current_ssid, pw_str, CYW43_AUTH_WPA2_AES_PSK
-  );
+  cyw43_arch_enable_ap_mode((char *) __cyw43_drv.current_ssid, (char *) pw_str, CYW43_AUTH_WPA2_AES_PSK);
+
+  // start DHCP server
+
+	ip4_addr_t gw, mask;
+	IP4_ADDR(&gw, 192, 168, 4, 1);
+	IP4_ADDR(&mask, 255, 255, 255, 0);
+
+	static dhcp_server_t dhcp_server;
+	dhcp_server_init(&dhcp_server, &gw, &mask);
+
   return jerry_create_undefined();
 }
 
