@@ -520,7 +520,8 @@ JERRYXX_FUN(pico_cyw43_network_socket) {
         (const jerry_char_t *)"PICO-W CYW43 WiFi is not initialized.");
   }
   int wifi_status = cyw43_tcpip_link_status(&cyw43_state, CYW43_ITF_STA);
-  if (wifi_status != CYW43_LINK_UP) {
+  int wifi_ap_status = cyw43_tcpip_link_status(&cyw43_state, CYW43_ITF_AP);
+  if (wifi_status != CYW43_LINK_UP && wifi_ap_status != CYW43_LINK_UP) {
     return jerry_create_error(JERRY_ERROR_COMMON,
                               (const jerry_char_t *)"WiFi is not connected.");
   }
@@ -1117,7 +1118,6 @@ JERRYXX_FUN(pico_cyw43_wifi_ap_mode) {
   jerry_value_t password = jerryxx_get_property(ap_info, MSTR_PICO_CYW43_WIFI_APMODE_PASSWORD);
   uint8_t *pw_str = NULL;
 
-  const char *passwordfi = "password";
   // validate SSID
   if (jerry_value_is_string(ssid)) {
     jerry_size_t len = jerryxx_get_ascii_string_size(ssid);
