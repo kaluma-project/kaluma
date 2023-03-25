@@ -94,6 +94,8 @@ __cyw43_t __cyw43_drv;
 __scan_result_t *__p_scan_result;
 __socket_t __socket_info;
 
+dhcp_server_t dhcp_server;
+
 int km_get_socket_fd(void) {
   for (int i = 0; i < KM_MAX_SOCKET_NO; i++) {
     if (__socket_info.socket[i].fd != i) {
@@ -1113,6 +1115,7 @@ JERRYXX_FUN(pico_cyw43_network_listen) {
 
 JERRYXX_FUN(pico_cyw43_wifi_ap_mode) {
   JERRYXX_CHECK_ARG(0, "apInfo");
+  JERRYXX_CHECK_ARG_FUNCTION_OPT(1, "callback");
   jerry_value_t ap_info = JERRYXX_GET_ARG(0);
   jerry_value_t ssid = jerryxx_get_property(ap_info, MSTR_PICO_CYW43_WIFI_APMODE_SSID);
   jerry_value_t password = jerryxx_get_property(ap_info, MSTR_PICO_CYW43_WIFI_APMODE_PASSWORD);
@@ -1158,10 +1161,79 @@ JERRYXX_FUN(pico_cyw43_wifi_ap_mode) {
 	IP4_ADDR(&gw, 192, 168, 4, 1);
 	IP4_ADDR(&mask, 255, 255, 255, 0);
 
-	static dhcp_server_t dhcp_server;
 	dhcp_server_init(&dhcp_server, &gw, &mask);
 
+  // call callback
+  if (JERRYXX_HAS_ARG(1)) {
+    jerry_value_t callback = JERRYXX_GET_ARG(1);
+    jerry_value_t js_cb = jerry_acquire_value(callback);
+    jerry_value_t errno = jerryxx_get_property_number(
+        JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO, 0);
+    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t args_p[1] = {errno};
+    jerry_call_function(js_cb, this_val, args_p, 1);
+    jerry_release_value(errno);
+    jerry_release_value(this_val);
+    jerry_release_value(js_cb);
+  }
+
   return jerry_create_undefined();
+}
+
+JERRYXX_FUN(pico_cyw43_wifi_disable_ap_mode) {
+  // verify if AP_mode is enabled
+  int wifi_ap_status = cyw43_tcpip_link_status(&cyw43_state, CYW43_ITF_AP);
+  if (wifi_ap_status != CYW43_LINK_UP) {
+    return jerry_create_error(JERRY_ERROR_COMMON,
+                              (const jerry_char_t *)"WiFi AP_mode is not enabled.");
+  }
+
+  // deinit DHCP server
+  dhcp_server_deinit(&dhcp_server);
+  cyw43_arch_deinit();
+  /* Reset and power up the WL chip */
+  cyw43_hal_pin_low(CYW43_PIN_WL_REG_ON);
+  cyw43_delay_ms(20);
+  cyw43_hal_pin_high(CYW43_PIN_WL_REG_ON);
+  cyw43_delay_ms(50);
+  __cyw43_drv.status_flag = KM_CYW43_STATUS_DISABLED;
+  // init the WiFi chip
+  if (__cyw43_init()) {
+    return jerry_create_error_from_value(create_system_error(EAGAIN), true);
+  }
+  return jerry_create_undefined();
+}
+
+// Function to get the MAC address of connected clients
+JERRYXX_FUN(pico_cyw43_wifi_ap_get_stas) {
+  // verify if AP_mode is enabled
+  int wifi_ap_status = cyw43_tcpip_link_status(&cyw43_state, CYW43_ITF_AP);
+  if (wifi_ap_status != CYW43_LINK_UP) {
+    return jerry_create_error(JERRY_ERROR_COMMON,
+                              (const jerry_char_t *)"WiFi AP_mode is not enabled.");
+  }
+
+  int num_stas, max_stas, MAC_len = 17;
+  // get max stas
+  cyw43_wifi_ap_get_max_stas(&cyw43_state, &max_stas);
+  // declare
+  uint8_t *macs = (uint8_t*)malloc(num_stas * 6);
+  jerry_value_t MAC_array = jerry_create_array (num_stas);
+  //uint8_t macs[32 * 6];
+  cyw43_wifi_ap_get_stas(&cyw43_state, &num_stas, macs);
+  char **mac_strs = (char **)malloc(num_stas * sizeof(char *));
+  for (int i = 0; i < num_stas; i++) {
+    mac_strs[i] = (char *)malloc(MAC_len * sizeof(char));
+    sprintf(mac_strs[i], "%02x:%02x:%02x:%02x:%02x:%02x", macs[i*6], macs[i*6+1], macs[i*6+2], macs[i*6+3], macs[i*6+4], macs[i*6+5]);
+    // add to the array
+    jerry_value_t prop = jerry_create_string((const jerry_char_t *)mac_strs[i]);
+    jerry_release_value(jerry_set_property_by_index(MAC_array, i, prop));
+    jerry_release_value(prop);
+  }
+  // deallocate memory
+  free(macs);
+  // return the list of macs
+  return MAC_array;
 }
 
 jerry_value_t module_pico_cyw43_init() {
@@ -1194,6 +1266,12 @@ jerry_value_t module_pico_cyw43_init() {
   jerryxx_set_property_function(wifi_prototype,
                                 MSTR_PICO_CYW43_WIFI_APMODE_FN,
                                 pico_cyw43_wifi_ap_mode);
+  jerryxx_set_property_function(wifi_prototype,
+                                MSTR_PICO_CYW43_WIFI_APMODE_GET_STAS_FN,
+                                pico_cyw43_wifi_ap_get_stas);
+  jerryxx_set_property_function(wifi_prototype,
+                                MSTR_PICO_CYW43_WIFI_APMODE_DISABLE_FN,
+                                pico_cyw43_wifi_disable_ap_mode);
   jerry_release_value(wifi_prototype);
 
   jerry_value_t pico_cyw43_network_ctor =
