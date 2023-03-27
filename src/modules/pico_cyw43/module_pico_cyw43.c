@@ -101,15 +101,24 @@ int km_get_socket_fd(void) {
   return EMFILE;  // Too many sockets.
 }
 
+static err_t __tcp_close(struct tcp_pcb *pcb) {
+  err_t err = tcp_close(pcb);
+  if (err != ERR_OK) {
+    tcp_abort(pcb);
+    err = ERR_ABRT;
+  }
+  return err;
+}
+
 void km_cyw43_deinit() {
   for (int i = 0; i < KM_MAX_SOCKET_NO; i++) {
     if (__socket_info.socket[i].fd >= 0) {
       if (__socket_info.socket[i].ptcl == NET_SOCKET_STREAM) {
         if (__socket_info.socket[i].tcp_pcb) {
-          tcp_abort(__socket_info.socket[i].tcp_pcb);
+          __tcp_close(__socket_info.socket[i].tcp_pcb);
         }
         if (__socket_info.socket[i].tcp_server_pcb) {
-          tcp_abort(__socket_info.socket[i].tcp_server_pcb);
+          __tcp_close(__socket_info.socket[i].tcp_server_pcb);
         }
       } else {
         if (__socket_info.socket[i].udp_pcb) {
@@ -593,8 +602,13 @@ static err_t __net_socket_close(uint8_t fd) {
   }
 
   if (__socket_info.socket[fd].ptcl == NET_SOCKET_STREAM) {
+    if (__socket_info.socket[fd].tcp_server_pcb) {
+    tcp_arg(__socket_info.socket[fd].tcp_server_pcb, NULL);
+    err = __tcp_close(__socket_info.socket[fd].tcp_server_pcb);
+    __socket_info.socket[fd].tcp_server_pcb = NULL;
+    }
     if (__socket_info.socket[fd].tcp_pcb) {
-      tcp_abort(__socket_info.socket[fd].tcp_pcb);
+      __tcp_close(__socket_info.socket[fd].tcp_pcb);
       __socket_info.socket[fd].tcp_pcb = NULL;
     }
   } else { /** UDP */
@@ -620,7 +634,6 @@ static err_t __net_data_receved(uint8_t fd, struct tcp_pcb *tpcb,
                                 struct pbuf *p) {
   err_t err = ERR_OK;
   if (p == NULL) {
-    tcp_abort(tpcb);
     __net_socket_close(fd);
   } else {
     uint8_t read_fd = (__socket_info.socket[fd].server_fd >= 0)
@@ -891,15 +904,6 @@ JERRYXX_FUN(pico_cyw43_network_close) {
   JERRYXX_CHECK_ARG_FUNCTION_OPT(1, "callback");
   int8_t fd = JERRYXX_GET_ARG_NUMBER(0);
   err_t err = ERR_OK;
-  if (__socket_info.socket[fd].tcp_server_pcb) {
-    tcp_arg(__socket_info.socket[fd].tcp_server_pcb, NULL);
-    err = tcp_close(__socket_info.socket[fd].tcp_server_pcb);
-    if (err != ERR_OK) {
-      tcp_abort(__socket_info.socket[fd].tcp_server_pcb);
-      err = ERR_ABRT;
-    }
-    __socket_info.socket[fd].tcp_server_pcb = NULL;
-  }
   err = __net_socket_close(fd);
   if (err == ERR_OK) {
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
