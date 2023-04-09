@@ -49,6 +49,11 @@
 #define KM_CYW43_STATUS_DISABLED 0
 #define KM_CYW43_STATUS_INIT 1 /* BIT 0 */
 
+#define CYW43_WIFI_AUTH_OPEN 0
+#define CYW43_WIFI_AUTH_WEP_PSK 1 /* BIT 0 */
+#define CYW43_WIFI_AUTH_WPA 2 /* BIT 1 */
+#define CYW43_WIFI_AUTH_WPA2 4 /* BIT 2 */
+
 typedef struct {
   int8_t fd;
   int8_t server_fd;
@@ -293,14 +298,18 @@ JERRYXX_FUN(pico_cyw43_wifi_scan) {
                 current->data.bssid[4], current->data.bssid[5]);
         jerryxx_set_property_string(obj, MSTR_PICO_CYW43_SCANINFO_BSSID,
                                     str_buff);
-        if (current->data.auth_mode == CYW43_AUTH_WPA2_MIXED_PSK) {
+        if ((current->data.auth_mode & (CYW43_WIFI_AUTH_WPA | CYW43_WIFI_AUTH_WPA2)) == (CYW43_WIFI_AUTH_WPA | CYW43_WIFI_AUTH_WPA2)) {
           sprintf(str_buff, "WPA2_WPA_PSK");
-        } else if (current->data.auth_mode == CYW43_AUTH_WPA2_AES_PSK) {
+        } else if (current->data.auth_mode & CYW43_WIFI_AUTH_WPA2) {
           sprintf(str_buff, "WPA2_PSK");
-        } else if (current->data.auth_mode == CYW43_AUTH_WPA_TKIP_PSK) {
+        } else if (current->data.auth_mode & CYW43_WIFI_AUTH_WPA) {
           sprintf(str_buff, "WPA_PSK");
-        } else {
+        } else if (current->data.auth_mode & CYW43_WIFI_AUTH_WEP_PSK) {
+          sprintf(str_buff, "WEP_PSK");
+        } else if (current->data.auth_mode == CYW43_WIFI_AUTH_OPEN) {
           sprintf(str_buff, "OPEN");
+        } else {
+          sprintf(str_buff, "-"); // Unknown
         }
         jerryxx_set_property_string(obj, MSTR_PICO_CYW43_SCANINFO_SECURITY,
                                     str_buff);
