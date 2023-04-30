@@ -7,6 +7,7 @@
 // allow override in some examples
 #ifndef NO_SYS
 #define NO_SYS 1
+#define SYS_LIGHTWEIGHT_PROT 1
 #endif
 // allow override in some examples
 #ifndef LWIP_SOCKET
@@ -18,6 +19,7 @@
 // MEM_LIBC_MALLOC is incompatible with non polling versions
 #define MEM_LIBC_MALLOC 0
 #endif
+#define SO_REUSE 1
 #define MEM_ALIGNMENT 4
 #define MEM_SIZE 4000
 #define MEMP_NUM_TCP_SEG 32
