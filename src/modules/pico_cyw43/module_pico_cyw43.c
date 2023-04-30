@@ -1245,7 +1245,7 @@ JERRYXX_FUN(pico_cyw43_wifi_ap_get_stas) {
                               (const jerry_char_t *)"WiFi AP_mode is not enabled.");
   }
 
-  int num_stas, max_stas, MAC_len = 17;
+  int num_stas, max_stas, MAC_len = 18;
   // get max stas
   cyw43_wifi_ap_get_max_stas(&cyw43_state, &max_stas);
   // declare
