@@ -38,7 +38,7 @@ typedef enum {
 #define KM_GPIO_PULL_UP 0
 #define KM_GPIO_PULL_DOWN 1
 
-typedef void (*km_gpio_irq_callback_t)(uint8_t);
+typedef void (*km_gpio_irq_callback_t)(uint8_t pin, km_gpio_io_mode_t mode);
 
 /**
  * Initialize all GPIO on system boot

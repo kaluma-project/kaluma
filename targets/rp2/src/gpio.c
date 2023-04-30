@@ -39,7 +39,7 @@ static int __check_gpio(uint8_t pin) {
 }
 
 void km_gpio_init() {
-  for (uint i = 0; i < 30; i++) {
+  for (uint i = 0; i < NUM_BANK0_GPIOS; i++) {
     gpio_init(i);
     gpio_set_pulls(i, false, false);
   }
@@ -49,7 +49,14 @@ void km_gpio_init() {
 #endif
 }
 
-void km_gpio_cleanup() { km_gpio_init(); }
+void km_gpio_cleanup() {
+  for (uint gpio = 0; gpio < NUM_BANK0_GPIOS; gpio++) {
+    gpio_acknowledge_irq(gpio, 0xF);
+    gpio_set_irq_enabled(gpio, 0xF, false);
+  }
+  km_gpio_irq_disable();
+  km_gpio_init();
+}
 
 int km_gpio_set_io_mode(uint8_t pin, km_gpio_io_mode_t mode) {
   if (__check_gpio(pin) < 0) {
@@ -96,7 +103,7 @@ static km_gpio_irq_callback_t __gpio_irq_cb = NULL;
 
 static void __gpio_irq_callback(uint gpio, uint32_t events) {
   if (__gpio_irq_cb) {
-    __gpio_irq_cb((uint8_t)gpio);
+    __gpio_irq_cb((uint8_t)gpio, (km_gpio_io_mode_t)events);
   }
 }
 

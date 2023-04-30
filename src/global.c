@@ -423,15 +423,20 @@ static void register_global_digital_io() {
 
 static jerry_value_t irq_js_cb[GPIO_MAX];
 
-static void irq_cb(uint8_t pin) {
+static void irq_cb(uint8_t pin, km_gpio_io_mode_t mode) {
   jerry_value_t cb = irq_js_cb[pin];
   if (jerry_value_is_function(cb)) {
     jerry_value_t this_val = jerry_create_undefined();
-    jerry_value_t ret_val = jerry_call_function(cb, this_val, NULL, 0);
+    jerry_value_t arg_pin = jerry_create_number(pin);
+    jerry_value_t arg_mode = jerry_create_number(mode);
+    jerry_value_t args_p[2] = {arg_pin, arg_mode};
+    jerry_value_t ret_val = jerry_call_function(cb, this_val, args_p, 2);
     if (jerry_value_is_error(ret_val)) {
       // print error
       jerryxx_print_error(ret_val, true);
     }
+    jerry_release_value(arg_pin);
+    jerry_release_value(arg_mode);
     jerry_release_value(ret_val);
     jerry_release_value(this_val);
   }
