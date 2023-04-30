@@ -69,5 +69,13 @@
 #define MSTR_PICO_CYW43_SOCKET_ACCEPT_CB "accept_cb"
 #define MSTR_PICO_CYW43_SOCKET_SHUTDOWN_CB "shutdown_cb"
 
+/* AP_mode strings */
+#define MSTR_PICO_CYW43_WIFI_APMODE_FN "ap_mode"
+#define MSTR_PICO_CYW43_WIFI_APMODE_DISABLE_FN "disable_ap_mode"
+
+#define MSTR_PICO_CYW43_WIFI_APMODE_SSID "ssid"
+#define MSTR_PICO_CYW43_WIFI_APMODE_PASSWORD "password"
+#define MSTR_PICO_CYW43_WIFI_APMODE_GET_STAS_FN "get_clients"
+
 #define MSTR_PICO_CYW43_PASSWORD "password"
 #endif /* __PICO_CYW43_MAGIC_STRINGS_H */
