@@ -131,3 +131,4 @@ pico_add_extra_outputs(${OUTPUT_TARGET})
 
 # Turn off PICO_STDIO_DEFAULT_CRLF
 add_compile_definitions(PICO_STDIO_DEFAULT_CRLF=0)
+add_compile_definitions(PICO_MALLOC_PANIC=0)

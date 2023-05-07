@@ -224,7 +224,6 @@ JERRYXX_FUN(i2c_read_fn) {
         jerry_create_arraybuffer_external(length, buf, buffer_free_cb);
     jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
         JERRY_TYPEDARRAY_UINT8, array_buffer);
-    free(buf);
     jerry_release_value(array_buffer);
     return array;
   }
@@ -353,7 +352,6 @@ JERRYXX_FUN(i2c_memread_fn) {
     jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
         JERRY_TYPEDARRAY_UINT8, array_buffer);
     jerry_release_value(array_buffer);
-    free(buf);
     return array;
   }
 }
