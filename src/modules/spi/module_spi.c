@@ -131,7 +131,6 @@ JERRYXX_FUN(spi_transfer_fn) {
       jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
           JERRY_TYPEDARRAY_UINT8, buffer);
       jerry_release_value(buffer);
-      free(rx_buf);
       return array;
     }
   } else if (jerry_value_is_string(data)) { /* for string */
@@ -149,7 +148,6 @@ JERRYXX_FUN(spi_transfer_fn) {
       jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
           JERRY_TYPEDARRAY_UINT8, buffer);
       jerry_release_value(buffer);
-      free(rx_buf);
       return array;
     }
   } else {
@@ -252,7 +250,6 @@ JERRYXX_FUN(spi_recv_fn) {
     jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
         JERRY_TYPEDARRAY_UINT8, array_buffer);
     jerry_release_value(array_buffer);
-    free(buf);
     return array;
   }
 }

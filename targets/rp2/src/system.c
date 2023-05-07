@@ -30,6 +30,7 @@
 #include "hardware/pll.h"
 #include "hardware/regs/io_bank0.h"
 #include "hardware/xosc.h"
+#include "hardware/pio.h"
 #include "i2c.h"
 #include "io.h"
 #include "pico/stdlib.h"
@@ -71,10 +72,20 @@ uint64_t km_micro_gettime() { return get_absolute_time(); }
  */
 void km_micro_delay(uint32_t usec) { sleep_us(usec); }
 
+static void rp2_pio_init() {
+  for (int i = 0; i < PIO_SM_NUM; i++) {
+    pio_sm_unclaim(pio0, i);
+    pio_sm_unclaim(pio1, i);
+  }
+  pio_clear_instruction_memory(pio0);
+  pio_clear_instruction_memory(pio1);
+}
+
 /**
  * Kaluma Hardware System Initializations
  */
 void km_system_init() {
+  rp2_pio_init();
   stdio_init_all();
   km_gpio_init();
   km_adc_init();
@@ -90,6 +101,7 @@ void km_system_cleanup() {
 #ifdef PICO_CYW43
   km_cyw43_deinit();
 #endif /* PICO_CYW43 */
+  rp2_pio_init();
   km_adc_cleanup();
   km_pwm_cleanup();
   km_i2c_cleanup();
