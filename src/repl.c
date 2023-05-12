@@ -95,6 +95,21 @@ static void history_push(char *cmd) {
 }
 
 /**
+ * Reset the REPL commands
+ */
+static void reset_commands() {
+  km_repl_clear_commands();
+  km_repl_register_command(".help", "Print this help message", cmd_help);
+  km_repl_register_command(".hi", "Print welcome message", cmd_hi);
+  km_repl_register_command(".echo", "Echo on/off", cmd_echo);
+  km_repl_register_command(".reset", "Soft reset", cmd_reset);
+  km_repl_register_command(".flash", "Commands for flash", cmd_flash);
+  km_repl_register_command(".load", "Load code from flash", cmd_load);
+  km_repl_register_command(".mem", "Heap memory status", cmd_mem);
+  km_repl_register_command(".gc", "Perform garbage collection", cmd_gc);
+}
+
+/**
  * Run the REPL command in the buffer
  */
 static void run_command() {
@@ -421,6 +436,7 @@ static void cmd_echo(km_repl_state_t *state, char *arg) {
  */
 static void cmd_reset(km_repl_state_t *state, char *arg) {
   km_runtime_cleanup();
+  reset_commands();
   km_runtime_init(false, false);
   km_repl_printf("\r\nsoft reset\r\n");
 }
@@ -605,16 +621,8 @@ void km_repl_init(bool hi) {
   state.handler = &default_handler;
   state.ymodem_state = 0;
 
-  // register commands
-  km_repl_clear_commands();
-  km_repl_register_command(".help", "Print this help message", cmd_help);
-  km_repl_register_command(".hi", "Print welcome message", cmd_hi);
-  km_repl_register_command(".echo", "Echo on/off", cmd_echo);
-  km_repl_register_command(".reset", "Soft reset", cmd_reset);
-  km_repl_register_command(".flash", "Commands for flash", cmd_flash);
-  km_repl_register_command(".load", "Load code from flash", cmd_load);
-  km_repl_register_command(".mem", "Heap memory status", cmd_mem);
-  km_repl_register_command(".gc", "Perform garbage collection", cmd_gc);
+  // initialize commands
+  reset_commands();
 
   // print welcome
   if (hi) {
