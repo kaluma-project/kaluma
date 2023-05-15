@@ -226,11 +226,15 @@ static void handle_normal(char ch) {
       }
       km_repl_print_prompt();
       break;
-    case 0x01: /* Ctrl+A */
+    case 0x01: /* Ctrl + A */
       state.position = 0;
       set_cursor_to_position();
       break;
-    case 0x05: /* Ctrl+E */
+    case 0x04: /* Ctrl + D */
+      cmd_reset(&state, NULL);
+      km_repl_print_prompt();
+      break;
+    case 0x05: /* Ctrl + E */
       state.position = state.buffer_length;
       set_cursor_to_position();
       break;
@@ -249,10 +253,6 @@ static void handle_normal(char ch) {
           set_cursor_to_position();
         }
       }
-      break;
-    case 0x12: /* Ctrl+R */
-      cmd_reset(&state, NULL);
-      km_repl_print_prompt();
       break;
     case 0x1b: /* escape char */
       state.mode = KM_REPL_MODE_ESCAPE;
@@ -593,9 +593,8 @@ static void cmd_help(km_repl_state_t *state, char *arg) {
 
   // print shortcuts
   km_repl_printf("\r\n");
-  km_repl_printf("Ctrl+C\tAbort running code\r\n");
-  km_repl_printf("Ctrl+D\tExit shell\r\n");
-  km_repl_printf("Ctrl+R\tSoft reset\r\n");
+  km_repl_printf("CTRL+C\tAbort running code\r\n");
+  km_repl_printf("CTRL+D\tSoft reset\r\n");
 }
 
 // --------------------------------------------------------------------------
