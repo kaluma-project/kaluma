@@ -438,7 +438,7 @@ static void cmd_reset(km_repl_state_t *state, char *arg) {
   km_runtime_cleanup();
   reset_commands();
   km_runtime_init(false, false);
-  km_repl_printf("\r\nSoft reset complete\r\n");
+  km_repl_printf("\r\nsoft reset\r\n");
 }
 
 static size_t bytes_remained = 0;
