@@ -1,6 +1,7 @@
 // Generate c source from js files
 
 const fs = require("fs-extra");
+const os = require("os");
 const path = require("path");
 const minimist = require("minimist");
 const childProcess = require("child_process");
@@ -35,8 +36,10 @@ function build() {
   if (argv.board) params.push(`-DBOARD=${argv.board}`);
   if (argv.modules) params.push(`-DMODULES=${argv.modules}`);
 
+  // build everything
+  const cores = os.cpus().length;
   cmd("cmake", params);
-  cmd("make");
+  cmd("make", [`-j${cores}`]);
   process.chdir(__dirname);
 }
 
