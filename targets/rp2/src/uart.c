@@ -148,7 +148,7 @@ int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
   if ((uart == NULL) || (__uart_status[port].enabled) || (bits < 5) ||
       (bits > 8) ||
       (__check_uart_pins(port, pins) == false)) {  // Can't support 9 bit
-    return ENOPHRPL;
+    return EDEVINIT;
   }
   uart_init(uart, baudrate);
   if ((flow & KM_UART_FLOW_RTS) && (pins.rts >= 0)) {
@@ -168,7 +168,7 @@ int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
   uart_set_format(uart, bits, stop, pt);
   __read_buffer[port] = (uint8_t *)malloc(buffer_size);
   if (__read_buffer[port] == NULL) {
-    return ENOPHRPL;
+    return EDEVINIT;
   } else {
     ringbuffer_init(&__uart_rx_ringbuffer[port], __read_buffer[port],
                     buffer_size);
@@ -195,7 +195,7 @@ int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
 int km_uart_write(uint8_t port, uint8_t *buf, size_t len) {
   uart_inst_t *uart = __get_uart_no(port);
   if ((uart == NULL) || (__uart_status[port].enabled == false)) {
-    return ENOPHRPL;
+    return EDEVWRITE;
   }
   uart_write_blocking(uart, (const uint8_t *)buf, len);
   return len;
@@ -213,7 +213,7 @@ uint32_t km_uart_available(uint8_t port) {
 uint32_t km_uart_read(uint8_t port, uint8_t *buf, size_t len) {
   uart_inst_t *uart = __get_uart_no(port);
   if ((uart == NULL) || (__uart_status[port].enabled == false)) {
-    return ENOPHRPL;
+    return EDEVREAD;
   }
   uint32_t n = ringbuffer_length(&__uart_rx_ringbuffer[port]);
   if (n > len) {
@@ -226,7 +226,7 @@ uint32_t km_uart_read(uint8_t port, uint8_t *buf, size_t len) {
 int km_uart_close(uint8_t port) {
   uart_inst_t *uart = __get_uart_no(port);
   if ((uart == NULL) || (__uart_status[port].enabled == false)) {
-    return ENOPHRPL;
+    return EDEVINIT;
   }
   if (__read_buffer[port]) {
     free(__read_buffer[port]);

@@ -172,6 +172,9 @@ const char* errmsg[] = {
     "Storage full",
     "Key not found",
     "Data too long",
+    "Device Init/Deinit Error",
+    "Device Read Error",
+    "Device Write Error",
 };
 
 jerry_value_t create_system_error(const int errno) {

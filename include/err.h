@@ -165,6 +165,9 @@
 #define ESTGFULL -142  /* Storage full */
 #define ESTGNOKEY -143 /* Key not found */
 #define ESTGSIZE -144  /* Data too long */
+#define EDEVINIT -145  /* Device Init/Deinit Error */
+#define EDEVREAD -146  /* Device Read Error */
+#define EDEVWRITE -147  /* Device Write Error */
 
 extern const char* errmsg[];
 

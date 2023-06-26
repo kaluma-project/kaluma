@@ -117,7 +117,7 @@ int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
   spi_inst_t *spi = __get_spi_no(bus);
   if ((spi == NULL) || (__spi_status[bus].enabled) ||
       (__check_spi_pins(bus, pins) == false)) {
-    return ENOPHRPL;
+    return EDEVINIT;
   }
   spi_cpol_t pol = SPI_CPOL_0;
   spi_cpha_t pha = SPI_CPHA_0;
@@ -167,7 +167,7 @@ int km_spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len,
                     uint32_t timeout) {
   spi_inst_t *spi = __get_spi_no(bus);
   if ((spi == NULL) || (__spi_status[bus].enabled == false)) {
-    return ENOPHRPL;
+    return EDEVREAD;
   }
   (void)timeout;  // timeout is not supported.
   return spi_write_read_blocking(spi, tx_buf, rx_buf, len);
@@ -176,7 +176,7 @@ int km_spi_sendrecv(uint8_t bus, uint8_t *tx_buf, uint8_t *rx_buf, size_t len,
 int km_spi_send(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   spi_inst_t *spi = __get_spi_no(bus);
   if ((spi == NULL) || (__spi_status[bus].enabled == false)) {
-    return ENOPHRPL;
+    return EDEVWRITE;
   }
   (void)timeout;  // timeout is not supported.
   return spi_write_blocking(spi, buf, len);
@@ -186,7 +186,7 @@ int km_spi_recv(uint8_t bus, uint8_t send_byte, uint8_t *buf, size_t len,
                 uint32_t timeout) {
   spi_inst_t *spi = __get_spi_no(bus);
   if ((spi == NULL) || (__spi_status[bus].enabled == false)) {
-    return ENOPHRPL;
+    return EDEVREAD;
   }
   (void)timeout;  // timeout is not supported.
   return spi_read_blocking(spi, send_byte, buf, len);
@@ -195,7 +195,7 @@ int km_spi_recv(uint8_t bus, uint8_t send_byte, uint8_t *buf, size_t len,
 int km_set_spi_baudrate(uint8_t bus, uint32_t baudrate) {
   spi_inst_t *spi = __get_spi_no(bus);
   if ((spi == NULL) || (__spi_status[bus].enabled == false)) {
-    return ENOPHRPL;
+    return ENODEV;
   }
   spi_set_baudrate(spi, baudrate);
   return 0;
@@ -204,7 +204,7 @@ int km_set_spi_baudrate(uint8_t bus, uint32_t baudrate) {
 int km_spi_close(uint8_t bus) {
   spi_inst_t *spi = __get_spi_no(bus);
   if ((spi == NULL) || (__spi_status[bus].enabled == false)) {
-    return ENOPHRPL;
+    return EDEVINIT;
   }
   spi_deinit(spi);
   __spi_status[bus].enabled = false;
