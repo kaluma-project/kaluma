@@ -107,7 +107,7 @@ int km_i2c_setup_master(uint8_t bus, uint32_t speed, km_i2c_pins_t pins) {
   i2c_inst_t *i2c = __get_i2c_no(bus);
   if ((i2c == NULL) || (__i2c_status[bus].mode != KM_I2C_NONE) ||
       (__check_i2c_pins(bus, pins) == false)) {
-    return ENOPHRPL;
+    return EDEVINIT;
   }
   __i2c_status[bus].mode = KM_I2C_MASTER;
   if (speed > I2C_MAX_CLOCK) {
@@ -129,7 +129,7 @@ int km_i2c_setup_slave(uint8_t bus, uint8_t address, km_i2c_pins_t pins) {
   i2c_inst_t *i2c = __get_i2c_no(bus);
   if ((i2c == NULL) || (__i2c_status[bus].mode != KM_I2C_NONE) ||
       (__check_i2c_pins(bus, pins) == false)) {
-    return ENOPHRPL;
+    return EDEVINIT;
   }
   __i2c_status[bus].mode = KM_I2C_SLAVE;
   return 0;
@@ -142,7 +142,7 @@ int km_i2c_mem_write_master(uint8_t bus, uint8_t address, uint16_t mem_addr,
   int ret;
   uint8_t __memaddr[2];
   if ((i2c == NULL) || (__i2c_status[bus].mode != KM_I2C_MASTER)) {
-    return ENOPHRPL;
+    return EDEVWRITE;
   }
   if (mem_addr_size == 16) {  // 16 bit mem address
     __memaddr[0] = ((mem_addr >> 8) & 0xFF);
@@ -156,7 +156,7 @@ int km_i2c_mem_write_master(uint8_t bus, uint8_t address, uint16_t mem_addr,
     ret = i2c_write_timeout_us(i2c, address, buf, len, false, timeout * 1000);
   }
   if (ret < 0) {
-    return -1;
+    return EDEVWRITE;
   }
   return ret;
 }
@@ -168,7 +168,7 @@ int km_i2c_mem_read_master(uint8_t bus, uint8_t address, uint16_t mem_addr,
   int ret;
   uint8_t __memaddr[2];
   if ((i2c == NULL) || (__i2c_status[bus].mode != KM_I2C_MASTER)) {
-    return ENOPHRPL;
+    return EDEVREAD;
   }
   if (mem_addr_size == 16) {  // 16 bit mem address
     __memaddr[0] = ((mem_addr >> 8) & 0xFF);
@@ -182,7 +182,7 @@ int km_i2c_mem_read_master(uint8_t bus, uint8_t address, uint16_t mem_addr,
     ret = i2c_read_timeout_us(i2c, address, buf, len, false, timeout * 1000);
   }
   if (ret < 0) {
-    return -1;
+    return EDEVREAD;
   }
   return ret;
 }
@@ -192,11 +192,11 @@ int km_i2c_write_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
   i2c_inst_t *i2c = __get_i2c_no(bus);
   int ret;
   if ((i2c == NULL) || (__i2c_status[bus].mode != KM_I2C_MASTER)) {
-    return ENOPHRPL;
+    return EDEVWRITE;
   }
   ret = i2c_write_timeout_us(i2c, address, buf, len, false, timeout * 1000);
   if (ret < 0) {
-    return -1;
+    return EDEVWRITE;
   }
   return ret;
 }
@@ -205,7 +205,7 @@ int km_i2c_write_slave(uint8_t bus, uint8_t *buf, size_t len,
                        uint32_t timeout) {
   i2c_inst_t *i2c = __get_i2c_no(bus);
   if ((i2c == NULL) || (__i2c_status[bus].mode != KM_I2C_SLAVE)) {
-    return ENOPHRPL;
+    return EDEVWRITE;
   }
   return 0;
 }
@@ -215,11 +215,11 @@ int km_i2c_read_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
   i2c_inst_t *i2c = __get_i2c_no(bus);
   int ret;
   if ((i2c == NULL) || (__i2c_status[bus].mode != KM_I2C_MASTER)) {
-    return ENOPHRPL;
+    return EDEVREAD;
   }
   ret = i2c_read_timeout_us(i2c, address, buf, len, false, timeout * 1000);
   if (ret < 0) {
-    return -1;
+    return EDEVREAD;
   }
   return ret;
 }
@@ -227,7 +227,7 @@ int km_i2c_read_master(uint8_t bus, uint8_t address, uint8_t *buf, size_t len,
 int km_i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
   i2c_inst_t *i2c = __get_i2c_no(bus);
   if ((i2c == NULL) || (__i2c_status[bus].mode != KM_I2C_SLAVE)) {
-    return ENOPHRPL;
+    return EDEVREAD;
   }
   return 0;
 }
@@ -235,7 +235,7 @@ int km_i2c_read_slave(uint8_t bus, uint8_t *buf, size_t len, uint32_t timeout) {
 int km_i2c_close(uint8_t bus) {
   i2c_inst_t *i2c = __get_i2c_no(bus);
   if ((i2c == NULL) || (__i2c_status[bus].mode == KM_I2C_NONE)) {
-    return ENOPHRPL;
+    return EDEVINIT;
   }
   i2c_deinit(i2c);
   __i2c_status[bus].mode = KM_I2C_NONE;
