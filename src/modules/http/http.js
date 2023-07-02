@@ -256,7 +256,8 @@ class ClientRequest extends OutgoingMessage {
    */
   flushHeaders() {
     if (!this.headers.hasOwnProperty['Content-Length']) {
-      this.setHeader('transfer-encoding', 'chunked');
+      // Disable automatic chunked header - some http server do not accept it.
+      // this.setHeader('transfer-encoding', 'chunked');
     }
     this._wbuf += `${this.options.method} ${this.path} HTTP/1.1\r\n`;
     for (var key in this.headers) {
