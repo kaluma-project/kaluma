@@ -405,14 +405,14 @@ JERRYXX_FUN(pico_cyw43_wifi_connect) {
   } else {
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO,
                                 0);
+    jerry_value_t connect_js_cb =
+        jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_CONNECT_CB);
     jerry_value_t assoc_js_cb =
         jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ASSOC_CB);
     jerry_value_t this_val = jerry_create_undefined();
     if (jerry_value_is_function(assoc_js_cb)) {
       jerry_call_function(assoc_js_cb, this_val, NULL, 0);
     }
-    jerry_value_t connect_js_cb =
-        jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_CONNECT_CB);
     if (jerry_value_is_function(connect_js_cb)) {
       jerry_call_function(connect_js_cb, this_val, NULL, 0);
     }
