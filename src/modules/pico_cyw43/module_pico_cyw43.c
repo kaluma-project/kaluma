@@ -817,6 +817,7 @@ JERRYXX_FUN(pico_cyw43_network_connect) {
   uint16_t port = JERRYXX_GET_ARG_NUMBER(2);
   err_t err = ERR_OK;
   if (km_is_valid_fd(fd) && __socket_info.socket[fd].state == NET_SOCKET_STATE_CLOSED) {
+#if ENABLE_CLIENT_DNS
     __cyw43_drv.status_flag &= ~KM_CYW43_STATUS_DNS_DONE;
     err = dns_gethostbyname_addrtype((const char *)addr_str, &(__socket_info.socket[fd].raddr),
                                       __dns_found_cb, &(__socket_info.socket[fd].raddr),
@@ -843,6 +844,9 @@ JERRYXX_FUN(pico_cyw43_network_connect) {
       return jerry_create_error(JERRY_ERROR_COMMON,
                                 (const jerry_char_t *)"DNS Error: DNS access error.");
     }
+#else
+    ipaddr_aton((const char *)addr_str, &(__socket_info.socket[fd].raddr));
+#endif /* ENABLE_CLIENT_DNS */
     __socket_info.socket[fd].rport = port;
     char *p_str_buff = (char *)malloc(16);
     sprintf(p_str_buff, "%s", ipaddr_ntoa(&(__socket_info.socket[fd].raddr)));
@@ -896,7 +900,8 @@ JERRYXX_FUN(pico_cyw43_network_connect) {
                                   __socket_info.socket[fd].state);
     }
   } else {
-    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, -1);
+    jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO,
+                                -1);
   }
   if (JERRYXX_HAS_ARG(3)) {
     jerry_value_t callback = JERRYXX_GET_ARG(3);
@@ -1073,6 +1078,7 @@ JERRYXX_FUN(pico_cyw43_network_bind) {
   err_t err = ERR_OK;
   if (km_is_valid_fd(fd) && __socket_info.socket[fd].state == NET_SOCKET_STATE_CLOSED) {
     ip_addr_t laddr;
+#if ENABLE_SERVER_DNS
     __cyw43_drv.status_flag &= ~KM_CYW43_STATUS_DNS_DONE;
     err = dns_gethostbyname_addrtype((const char *)addr_str, &(laddr),
                                       __dns_found_cb, &(laddr),
@@ -1099,6 +1105,9 @@ JERRYXX_FUN(pico_cyw43_network_bind) {
       return jerry_create_error(JERRY_ERROR_COMMON,
                                 (const jerry_char_t *)"DNS Error: DNS access error.");
     }
+#else
+    ipaddr_aton((const char *)addr_str, &(laddr));
+#endif /* ENABLE_SERVER_DNS */
     __socket_info.socket[fd].lport = port;
     char *p_str_buff = (char *)malloc(16);
     sprintf(p_str_buff, "%s", ipaddr_ntoa(&(laddr)));
