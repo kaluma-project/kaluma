@@ -1093,7 +1093,7 @@ JERRYXX_FUN(textdecoder_decode_fn) {
       jerry_value_t buffer =
           jerry_get_typedarray_buffer(input, &byteOffset, &byteLength);
       uint8_t *buf = jerry_get_arraybuffer_pointer(buffer);
-      jerry_value_t str = jerry_create_string_sz_from_utf8(buf, byteLength);
+      jerry_value_t str = jerry_create_string_sz_from_utf8(buf + byteOffset, byteLength);
       jerry_release_value(buffer);
       return str;
     } else {
