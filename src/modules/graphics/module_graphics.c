@@ -26,6 +26,7 @@
 #include "font.h"
 #include "gc.h"
 #include "gc_16bit_prims.h"
+#include "gc_3bit_prims.h"
 #include "gc_1bit_prims.h"
 #include "gc_cb_prims.h"
 #include "graphics_magic_strings.h"
@@ -654,8 +655,10 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
       // bpp
       uint8_t bpp = (uint8_t)jerryxx_get_property_number(
           options, MSTR_GRAPHICS_BPP, 1);  // should be 1 or 16
-      if (bpp > 1) {
+      if (bpp > 3) {
         gc_handle->bpp = 16;
+      } else if (bpp > 1) {
+        gc_handle->bpp = 3;
       } else {
         gc_handle->bpp = 1;
       }
@@ -678,6 +681,13 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
     gc_handle->draw_vline_cb = gc_prim_1bit_draw_vline;
     gc_handle->fill_rect_cb = gc_prim_1bit_fill_rect;
     gc_handle->fill_screen_cb = gc_prim_1bit_fill_screen;
+  } else if (gc_handle->bpp == 3) {
+    gc_handle->set_pixel_cb = gc_prim_3bit_set_pixel;
+    gc_handle->get_pixel_cb = gc_prim_3bit_get_pixel;
+    gc_handle->draw_hline_cb = gc_prim_3bit_draw_hline;
+    gc_handle->draw_vline_cb = gc_prim_3bit_draw_vline;
+    gc_handle->fill_rect_cb = gc_prim_3bit_fill_rect;
+    gc_handle->fill_screen_cb = gc_prim_3bit_fill_screen;
   } else {
     gc_handle->set_pixel_cb = gc_prim_16bit_set_pixel;
     gc_handle->get_pixel_cb = gc_prim_16bit_get_pixel;
@@ -688,8 +698,14 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
   }
 
   // allocate buffer
-  size_t size = (gc_handle->device_width * gc_handle->device_height *
-                 ((double)gc_handle->bpp / 8.0));
+  size_t size = gc_handle->device_width * gc_handle->device_height;
+  if (gc_handle->bpp == 1) {
+    size = size / 8;
+  } else if (gc_handle->bpp == 3) {
+    size = size / 2;
+  } else {
+    size = size * 2;
+  }
   jerry_value_t buffer = jerry_create_typedarray(JERRY_TYPEDARRAY_UINT8, size);
   jerryxx_set_property(JERRYXX_GET_THIS, MSTR_GRAPHICS_BUFFER, buffer);
   jerry_length_t byteOffset = 0;
