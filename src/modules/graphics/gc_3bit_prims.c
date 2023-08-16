@@ -30,17 +30,44 @@
 #include "gc.h"
 #include "jerryscript.h"
 
-// +--+--+--+--+--+--+--+--++--+--+--+--+--+--+--+--+
-// |A7|A6|A5|A4|A3|A2|A1|A0||B7|B6|B5|B4|B3|B2|B1|B0|
-// +--+--+--+--+--+--+--+--++--+--+--+--+--+--+--+--+
-// |XX|XX|R0|G0|B0|R1|G1|B1||XX|XX|R2|G2|B2|R3|G3|B3|
-// +--+--+--+--+--+--+--+--++--+--+--+--+--+--+--+--+
+
+
+/*
+ * @brief  Convert RGB 5-6-5 to RGB 1-1-1
+ * @param  color
+ * @param  x
+ * @param  y
+ * @param  color
+ */
+static uint8_t color_to_3bit(uint16_t color) {
+ return (color & 0xF800 ? 0x00 : 0x04) |
+        (color & 0x07E0 ? 0x00 : 0x02) |
+        (color & 0x001F ? 0x00 : 0x01); 
+}
+
+/*
+ * @brief  Convert RGB 1-1-1 to RGB 5-6-5
+ * @param  color
+ * @param  x
+ * @param  y
+ * @param  color
+ */
+static uint16_t color_from_3bit(uint8_t color) {
+ return (color & 0x04 ? 0x0000 : 0xF800 ) |
+        (color & 0x02 ? 0x0000 : 0x07E0 ) |
+        (color & 0x01 ? 0x0000 : 0x001F); 
+}
 
 /**
- * Graphic primitive functions for 3bit graphic buffer
+ * Graphic primitive functions for 1bit (mono) graphic buffer
  */
 
 /**
+ * +--+--+--+--+--+--+--+--++--+--+--+--+--+--+--+--+
+ * |A7|A6|A5|A4|A3|A2|A1|A0||B7|B6|B5|B4|B3|B2|B1|B0|
+ * +--+--+--+--+--+--+--+--++--+--+--+--+--+--+--+--+
+ * |XX|XX|R0|G0|B0|R1|G1|B1||XX|XX|R2|G2|B2|R3|G3|B3|
+ * +--+--+--+--+--+--+--+--++--+--+--+--+--+--+--+--+
  * @brief  Primitive set pixel
  * @param  handle  Graphic context handle
  * @param  x
@@ -49,6 +76,8 @@
  */
 void gc_prim_3bit_set_pixel(gc_handle_t *handle, int16_t x, int16_t y,
                             uint16_t color) {
+
+
   if ((x >= 0) && (x < handle->width) && (y >= 0) && (y < handle->height)) {
     switch (handle->rotation) {
       case 1:
@@ -65,11 +94,16 @@ void gc_prim_3bit_set_pixel(gc_handle_t *handle, int16_t x, int16_t y,
         break;
     }
     uint32_t idx = ((y * handle->device_width) + x) / 2;
+    uint8_t convertedColor = color_to_3bit(color);
     bool highPixel = ((x & 1) != 0);
     uint8_t pixel = handle->buffer[idx] & (highPixel ? 0xF8 : 0xC7);
-    handle->buffer[idx] = pixel | (highPixel ? (color & 0x7) : (color & 0x07) << 3);
+    handle->buffer[idx] = pixel | (highPixel ? (convertedColor) : (convertedColor << 3));
   }
 }
+
+
+
+
 
 /**
  * @brief  Get color of the pixel at position (x, y)
@@ -79,6 +113,8 @@ void gc_prim_3bit_set_pixel(gc_handle_t *handle, int16_t x, int16_t y,
  */
 void gc_prim_3bit_get_pixel(gc_handle_t *handle, int16_t x, int16_t y,
                             uint16_t *color) {
+
+
   if ((x >= 0) && (x < handle->width) && (y >= 0) && (y < handle->height)) {
     switch (handle->rotation) {
       case 1:
@@ -95,11 +131,13 @@ void gc_prim_3bit_get_pixel(gc_handle_t *handle, int16_t x, int16_t y,
         break;
     }
     uint32_t idx = ((y * handle->device_width) + x) / 2;
+
+    
     if ((x & 1) != 0) {
-        *color = (handle->buffer[idx] & 0x07);
+        *color = color_from_3bit(handle->buffer[idx] & 0x07);
     }
     else {
-        *color = (handle->buffer[idx] & 0x38) >> 3;
+        *color = color_from_3bit((handle->buffer[idx] & 0x38) >> 3);
     }
     return;
   }
@@ -159,10 +197,12 @@ void gc_prim_3bit_fill_rect(gc_handle_t *handle, int16_t x, int16_t y,
  * @param color
  */
 void gc_prim_3bit_fill_screen(gc_handle_t *handle, uint16_t color) {
-  uint8_t fillColor = (color & 0x07) | ((color & 0x07) << 3);
+
+  uint8_t tempColor = color_to_3bit(color);
+  uint8_t fillColor = (tempColor) | ((tempColor) << 3);
   for (int16_t y = 0; y < handle->device_height; y++) {
     uint32_t idx = (y * handle->device_width) / 2;
-    for (int16_t x = 0; x < handle->device_width; x += 2) {
+    for (int16_t x = 0; x < (handle->device_width/2); x++) {
       handle->buffer[idx + x] = fillColor;
     }
   }

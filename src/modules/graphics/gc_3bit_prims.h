@@ -4,7 +4,7 @@
 #include "font.h"
 #include "gc.h"
 
-// primitive functions for 3bit color
+// primitive functions for 1bit color
 void gc_prim_3bit_set_pixel(gc_handle_t *handle, int16_t x, int16_t y,
                             uint16_t color);
 void gc_prim_3bit_get_pixel(gc_handle_t *handle, int16_t x, int16_t y,
