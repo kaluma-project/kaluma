@@ -1142,9 +1142,8 @@ JERRYXX_FUN(btoa_fn) {
     jerry_length_t byteOffset = 0;
     jerry_value_t array_buffer =
         jerry_get_typedarray_buffer(binary_data, &byteOffset, &byteLength);
-    size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
     uint8_t *buf = jerry_get_arraybuffer_pointer(array_buffer);
-    encoded_data = km_base64_encode(buf, len, &encoded_data_sz);
+    encoded_data = km_base64_encode(buf + byteOffset, byteLength, &encoded_data_sz);
     jerry_release_value(array_buffer);
   } else if (jerry_value_is_string(binary_data)) { /* for string */
     jerry_size_t len = jerryxx_get_ascii_string_size(binary_data);
