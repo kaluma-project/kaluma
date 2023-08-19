@@ -8,9 +8,9 @@ set(DEBUG 1)
 # optimization
 set(OPT -Og)
 
-# default board: pico
+# default board: pico-w
 if(NOT BOARD)
-  set(BOARD "pico")
+  set(BOARD "pico-w")
 endif()
 
 if(BOARD STREQUAL "pico-w")
