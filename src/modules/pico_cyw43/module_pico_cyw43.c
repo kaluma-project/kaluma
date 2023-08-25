@@ -708,6 +708,7 @@ static err_t __net_socket_close(int8_t fd) {
     jerry_call_function(close_js_cb, this_val, NULL, 0);
     jerry_release_value(this_val);
   }
+  jerry_release_value(close_js_cb);
   if (__socket_info.socket[fd].obj != 0)
     jerry_release_value(__socket_info.socket[fd].obj);
   __socket_info.socket[fd].obj = 0;
