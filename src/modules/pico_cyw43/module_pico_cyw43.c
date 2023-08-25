@@ -1210,8 +1210,16 @@ JERRYXX_FUN(pico_cyw43_network_bind) {
                        __socket_info.socket[fd].lport);
       }
     } else {
-      err = udp_bind(__socket_info.socket[fd].udp_pcb, &(__socket_info.laddr),
+      __socket_info.socket[fd].udp_pcb =
+          udp_new_ip_type(IP_GET_TYPE(&(__socket_info.laddr)));
+      if (__socket_info.socket[fd].udp_pcb != NULL) {
+        err = udp_bind(__socket_info.socket[fd].udp_pcb, &(__socket_info.laddr),
                      __socket_info.socket[fd].lport);
+        if (err == ERR_OK) {
+          udp_recv(__socket_info.socket[fd].udp_pcb, __udp_data_recv_cb,
+                   &(__socket_info.socket[fd].fd));
+        }
+      }
     }
     cyw43_arch_lwip_end();
     if (err != ERR_OK) {
@@ -1263,8 +1271,6 @@ JERRYXX_FUN(pico_cyw43_network_listen) {
       } else {
         err = ERR_CONN;
       }
-    } else {
-      /** Nothing to do for UDP */
     }
     if (err != ERR_OK) {
       jerryxx_set_property_number(JERRYXX_GET_THIS,
