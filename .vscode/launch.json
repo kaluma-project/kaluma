@@ -4,19 +4,22 @@
     {
       "name": "Pico Debug",
       "cwd": "${workspaceRoot}",
-      "executable": "${workspaceRoot}/build/kaluma-rp2-pico-w-1.1.0-beta.2.elf",
+      "executable": "${workspaceRoot}/build/kaluma-rp2-pico-w-1.1.0-beta.3.elf",
       "request": "launch",
       "type": "cortex-debug",
       "servertype": "openocd",
       // This may need to be "arm-none-eabi-gdb" for some previous builds
       "gdbPath": "gdb-multiarch",
       "device": "RP2040",
+      //"loadFiles": [],
       "configFiles": [
-        "interface/raspberrypi-swd.cfg",
+        "interface/cmsis-dap.cfg",
         "target/rp2040.cfg"
       ],
       "svdFile": "${workspaceRoot}lib/pico-sdk/src/rp2040/hardware_regs/rp2040.svd",
       "runToEntryPoint": "main",
+      "showDevDebugOutput": "raw",
+      "preLaunchTask": "${defaultBuildTask}",
       // Work around for stopping at main on restart
       "postRestartCommands": [
         "break main",
