@@ -21,6 +21,8 @@ set(JERRY_INC
 
 set(JERRY_ARGS
   --toolchain=cmake/${JERRY_TOOLCHAIN}
+  #--build-type=Debug
+  --compile-flag="-DJERRY_NDEBUG=1 -DJERRY_LCACHE=0 -DJERRY_PROPRETY_HASHMAP=0"
   --lto=OFF
   --error-messages=ON
   --js-parser=ON
@@ -31,6 +33,9 @@ set(JERRY_ARGS
   --vm-exec-stop=ON
   --profile=es.next #es2015-subset
   --jerry-cmdline=OFF
+  #--logging=ON
+  #--stack-limit=1024
+  #--gc-limit=100000
   --cpointer-32bit=ON)
 
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)

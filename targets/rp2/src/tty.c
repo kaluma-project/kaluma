@@ -75,7 +75,11 @@ uint32_t km_tty_read_sync(uint8_t *buf, size_t len, uint32_t timeout) {
   absolute_time_t timeout_ms = delayed_by_ms(get_absolute_time(), timeout);
   do {
     sz = km_tty_available();
-  } while (get_absolute_time() < timeout_ms && sz < len);
+#ifdef NDEBUG
+  } while ((get_absolute_time() < timeout_ms) && (sz < len));
+#else
+  } while ((get_absolute_time()._private_us_since_boot < timeout_ms._private_us_since_boot) && (sz < len));
+#endif
   if (sz >= len) {
     ringbuffer_read(&__tty_rx_ringbuffer, buf, len);
     return len;

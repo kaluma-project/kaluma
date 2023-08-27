@@ -6,9 +6,9 @@
     {
       "label": "make",
       "type": "shell",
-      "command": "node build --target=linux",
+      "command": "make",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}/build"
       },
       "group": {
         "kind": "build",
@@ -24,31 +24,15 @@
     {
       "label": "make clean",
       "type": "shell",
-      "command": "node build --clean",
+      "command": "make clean",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}/build"
       },
       "group": "build",
       "presentation": {
         "reveal": "always",
         "panel": "new"
       }
-    },
-    {
-      "label": "flash",
-      "type": "shell",
-      "command": "st-flash write build/kameleon-core.bin 0x8000000",
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "new"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "st-util",
-      "type": "shell",
-      "command": "st-util"
     }
   ]
 }
