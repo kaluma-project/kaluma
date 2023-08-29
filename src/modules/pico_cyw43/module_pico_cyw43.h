@@ -23,3 +23,4 @@
 
 jerry_value_t module_pico_cyw43_init();
 void km_cyw43_deinit();
+void km_cyw43_infinite_loop();

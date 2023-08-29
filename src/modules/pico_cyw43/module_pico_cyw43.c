@@ -151,11 +151,20 @@ void km_cyw43_deinit() {
       }
       __socket_info.socket[i].fd = -1;
     }
-    cyw43_arch_lwip_end();
   }
+  __cyw43_drv.status_flag = KM_CYW43_STATUS_DISABLED;
+  cyw43_arch_lwip_end();
+  cyw43_arch_deinit();
+  cyw43_hal_pin_low(CYW43_PIN_WL_REG_ON);
+  km_delay(50);
+  cyw43_hal_pin_high(CYW43_PIN_WL_REG_ON);
+  km_delay(200);
+}
+
+void km_cyw43_infinite_loop() {
   if (__cyw43_drv.status_flag & KM_CYW43_STATUS_INIT) {
-    cyw43_arch_deinit();
-    __cyw43_drv.status_flag = KM_CYW43_STATUS_DISABLED;
+    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, (km_gettime() / 500) % 2 == 0 ? 1 : 0);
+    cyw43_arch_poll();
   }
 }
 
@@ -220,13 +229,9 @@ JERRYXX_FUN(pico_cyw43_wifi_ctor_fn) {
 
 JERRYXX_FUN(pico_cyw43_wifi_reset) {
   JERRYXX_CHECK_ARG_FUNCTION_OPT(0, "callback");
-  cyw43_arch_deinit();
-  /* Reset and power up the WL chip */
-  cyw43_hal_pin_low(CYW43_PIN_WL_REG_ON);
-  cyw43_delay_ms(20);
-  cyw43_hal_pin_high(CYW43_PIN_WL_REG_ON);
-  cyw43_delay_ms(50);
   __cyw43_drv.status_flag = KM_CYW43_STATUS_DISABLED;
+  km_cyw43_deinit();
+  km_delay(500);
   if (__cyw43_init()) {
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO,
                                 -1);
@@ -297,21 +302,15 @@ JERRYXX_FUN(pico_cyw43_wifi_scan) {
       jerry_release_value(errno);
       jerry_release_value(this_val);
     } else {
-      uint64_t diff = 0;
-      do {
+      while(cyw43_wifi_scan_active(&cyw43_state)) {
+        __p_scan_result->scanning = true;
 #if PICO_CYW43_ARCH_POLL
         cyw43_arch_poll();
-        cyw43_arch_wait_for_work_until(make_timeout_time_ms(200));
+        cyw43_arch_wait_for_work_until(make_timeout_time_ms(20));
 #else
-        km_delay(200);
+        km_delay(20);
 #endif
-        uint64_t current_time = km_gettime();
-        if (current_time < __p_scan_result->prev_time_ms) {
-          diff = __UINT64_MAX__ - __p_scan_result->prev_time_ms + current_time;
-        } else {
-          diff = current_time - __p_scan_result->prev_time_ms;
-        }
-      } while (diff < SCAN_TIMEOUT);
+      }
       __p_scan_result->scanning = false;
       jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO,
                                   0);
@@ -643,7 +642,7 @@ JERRYXX_FUN(pico_cyw43_network_socket) {
   struct netif *p_netif = &(cyw43_state.netif[CYW43_ITF_STA]);
   const ip_addr_t *laddr = netif_ip_addr4(p_netif);
   __socket_info.laddr = *laddr;
-  strncpy(p_str_buff, ipaddr_ntoa(laddr), sizeof(p_str_buff));
+  strncpy(p_str_buff, ipaddr_ntoa(laddr), sizeof(p_str_buff) - 1);
   jerryxx_set_property_string(__socket_info.socket[fd].obj,
                               MSTR_PICO_CYW43_SOCKET_LADDR, p_str_buff);
   jerryxx_set_property_string(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_IP,
@@ -651,7 +650,7 @@ JERRYXX_FUN(pico_cyw43_network_socket) {
   jerryxx_set_property_number(__socket_info.socket[fd].obj,
                               MSTR_PICO_CYW43_SOCKET_LPORT,
                               __socket_info.socket[fd].lport);
-  strncpy(p_str_buff, ipaddr_ntoa(&(__socket_info.socket[fd].raddr)), sizeof(p_str_buff));
+  strncpy(p_str_buff, ipaddr_ntoa(&(__socket_info.socket[fd].raddr)), sizeof(p_str_buff) - 1);
   jerryxx_set_property_string(__socket_info.socket[fd].obj,
                               MSTR_PICO_CYW43_SOCKET_RADDR, p_str_buff);
   jerryxx_set_property_number(__socket_info.socket[fd].obj,
@@ -734,9 +733,8 @@ static err_t __net_data_received(int8_t fd, struct tcp_pcb *tpcb,
           strncat(receiver_buffer, q->payload, q->len);
         }
         if (tpcb) {
-          cyw43_arch_lwip_begin();
+          cyw43_arch_lwip_check();
           tcp_recved(tpcb, p->tot_len);
-          cyw43_arch_lwip_end();
         }
         if ( __socket_info.socket[read_fd].obj == 0) return err;
         jerry_value_t read_js_cb = jerryxx_get_property(
@@ -842,13 +840,12 @@ static err_t __tcp_server_accept_cb(void *arg, struct tcp_pcb *newpcb,
                                   __socket_info.socket[fd].rport);
       free(p_str_buff);
       __socket_info.socket[fd].tcp_pcb = newpcb;
-      cyw43_arch_lwip_begin();
+      cyw43_arch_lwip_check();
       tcp_arg(__socket_info.socket[fd].tcp_pcb, &(__socket_info.socket[fd].fd));
       tcp_poll(__socket_info.socket[fd].tcp_pcb, NULL, 0);
       tcp_sent(__socket_info.socket[fd].tcp_pcb, NULL);
       tcp_err(__socket_info.socket[fd].tcp_pcb, NULL);
       tcp_recv(__socket_info.socket[fd].tcp_pcb, __tcp_data_recv_cb);
-      cyw43_arch_lwip_end();
       jerry_value_t acept_js_cb =
           jerryxx_get_property(__socket_info.socket[*server_fd].obj,
                                MSTR_PICO_CYW43_SOCKET_ACCEPT_CB);
@@ -894,6 +891,7 @@ JERRYXX_FUN(pico_cyw43_network_connect) {
     err = dns_gethostbyname_addrtype((const char *)addr_str, &(__socket_info.socket[fd].raddr),
                                       __dns_found_cb, &(__socket_info.socket[fd].raddr),
                                       LWIP_DNS_ADDRTYPE_IPV4);
+    cyw43_arch_lwip_end();
     if (err == ERR_INPROGRESS) {
       int16_t timeout = 300; // 3 Sec
       while((__cyw43_drv.status_flag & KM_CYW43_STATUS_DNS_DONE) == 0) {
@@ -920,7 +918,6 @@ JERRYXX_FUN(pico_cyw43_network_connect) {
       return jerry_create_error(JERRY_ERROR_COMMON,
                                 (const jerry_char_t *)"DNS Error: DNS access error.");
     }
-    cyw43_arch_lwip_end();
     __socket_info.socket[fd].rport = port;
     char *p_str_buff = (char *)malloc(16);
     sprintf(p_str_buff, "%s", ipaddr_ntoa(&(__socket_info.socket[fd].raddr)));
@@ -960,7 +957,6 @@ JERRYXX_FUN(pico_cyw43_network_connect) {
         err = udp_connect(__socket_info.socket[fd].udp_pcb,
                           &(__socket_info.socket[fd].raddr),
                           __socket_info.socket[fd].rport);
-        __net_client_connect_cb(&(__socket_info.socket[fd].fd), NULL, ERR_OK);
       }
     }
     cyw43_arch_lwip_end();
@@ -1161,12 +1157,12 @@ JERRYXX_FUN(pico_cyw43_network_bind) {
     err = dns_gethostbyname_addrtype((const char *)addr_str, &(laddr),
                                       __dns_found_cb, &(laddr),
                                       LWIP_DNS_ADDRTYPE_IPV4);
+    cyw43_arch_lwip_end();
     if (err == ERR_INPROGRESS) {
       int16_t timeout = 300; // 3 Sec
       while((__cyw43_drv.status_flag & KM_CYW43_STATUS_DNS_DONE) == 0) {
         if (timeout-- <= 0) {
           jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, -1);
-          cyw43_arch_lwip_end();
           return jerry_create_error(JERRY_ERROR_COMMON,
                                   (const jerry_char_t *)"DNS response timeout.");
           }
@@ -1188,7 +1184,6 @@ JERRYXX_FUN(pico_cyw43_network_bind) {
       return jerry_create_error(JERRY_ERROR_COMMON,
                                 (const jerry_char_t *)"DNS Error: DNS access error.");
     }
-    cyw43_arch_lwip_end();
     __socket_info.socket[fd].lport = port;
     char *p_str_buff = (char *)malloc(16);
     sprintf(p_str_buff, "%s", ipaddr_ntoa(&(laddr)));
@@ -1430,13 +1425,7 @@ JERRYXX_FUN(pico_cyw43_wifi_disable_ap_mode) {
 
   // deinit DHCP server
   dhcp_server_deinit(&dhcp_server);
-  cyw43_arch_deinit();
-  /* Reset and power up the WL chip */
-  cyw43_hal_pin_low(CYW43_PIN_WL_REG_ON);
-  cyw43_delay_ms(20);
-  cyw43_hal_pin_high(CYW43_PIN_WL_REG_ON);
-  cyw43_delay_ms(50);
-  __cyw43_drv.status_flag = KM_CYW43_STATUS_DISABLED;
+  km_cyw43_deinit();
   // init the WiFi chip
   if (__cyw43_init()) {
     return jerry_create_error_from_value(create_system_error(EAGAIN), true);
