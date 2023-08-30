@@ -163,7 +163,9 @@ void km_cyw43_deinit() {
 
 void km_cyw43_infinite_loop() {
   if (__cyw43_drv.status_flag & KM_CYW43_STATUS_INIT) {
+#ifndef NDEBUG
     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, (km_gettime() / 500) % 2 == 0 ? 1 : 0);
+#endif
     cyw43_arch_poll();
   }
 }
