@@ -77,14 +77,11 @@ uint64_t km_micro_gettime() { return get_absolute_time()._private_us_since_boot;
 void km_micro_delay(uint32_t usec) { sleep_us(usec); }
 
 static void km_pio_init() {
-  pio_clear_instruction_memory(pio0);
-  pio_clear_instruction_memory(pio1);
-}
-
-static void km_pio_cleanup() {
   for (int i = 0; i < PIO_SM_NUM; i++) {
-    pio_sm_unclaim(pio0, i);
-    pio_sm_unclaim(pio1, i);
+    if (pio_sm_is_claimed(pio0, i))
+      pio_sm_unclaim(pio0, i);
+    if (pio_sm_is_claimed(pio1, i))
+      pio_sm_unclaim(pio1, i);
   }
   pio_clear_instruction_memory(pio0);
   pio_clear_instruction_memory(pio1);
@@ -109,8 +106,7 @@ void km_system_init() {
 void km_system_cleanup() {
 #ifdef PICO_CYW43
   km_cyw43_deinit();
-#endif /* PICO_CYW43 */
-  km_pio_cleanup();
+#endif
   km_adc_cleanup();
   km_pwm_cleanup();
   km_i2c_cleanup();
@@ -130,7 +126,7 @@ uint8_t km_running_script_check() {
 }
 
 void km_custom_infinite_loop() {
-#if PICO_CYW43_ARCH_POLL
-  cyw43_arch_poll();
-#endif /* PICO_CYW43_ARCH_POLL */
+#ifdef PICO_CYW43
+  km_cyw43_infinite_loop();
+#endif
 }

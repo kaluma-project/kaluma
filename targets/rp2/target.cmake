@@ -117,7 +117,6 @@ if(BOARD STREQUAL "pico-w")
   set(TARGET_LIBS
   ${TARGET_LIBS}
   pico_lwip
-  # pico_cyw43_arch_lwip_threadsafe_background || pico_cyw43_arch_lwip_poll
   pico_cyw43_arch_lwip_poll)
 endif()
 
