@@ -80,6 +80,9 @@ class WiFi extends EventEmitter {
       if (!connectInfo.password) {
         connectInfo.password = storage ? storage.getItem('WIFI_PASSWORD') : null
       }
+      if (!connectInfo.security) {
+        connectInfo.security = storage ? storage.getItem('WIFI_SECURITY') : null
+      }
       if (connectInfo.enforce) {
         this._dev.connect(connectInfo, err => {
           if (err) {

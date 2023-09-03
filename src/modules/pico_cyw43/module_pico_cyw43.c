@@ -390,7 +390,7 @@ JERRYXX_FUN(pico_cyw43_wifi_connect) {
   uint8_t *pw_str = NULL;
   jerry_value_t security =
       jerryxx_get_property(connect_info, MSTR_PICO_CYW43_SCANINFO_SECURITY);
-  uint32_t auth = -1;
+  uint32_t auth = CYW43_AUTH_OPEN; // Default is OPEN
   if (jerry_value_is_string(ssid)) {
     jerry_size_t len = jerryxx_get_ascii_string_size(ssid);
     if (len > 32) {
@@ -420,6 +420,9 @@ JERRYXX_FUN(pico_cyw43_wifi_connect) {
     jerry_size_t len = jerryxx_get_ascii_string_size(pw);
     pw_str = (uint8_t *)malloc(len + 1);
     jerryxx_string_to_ascii_char_buffer(pw, pw_str, len);
+    if (len >= 8) { // Min lenght of the WPA is 8.
+      auth = CYW43_AUTH_WPA2_MIXED_PSK; // Default auth is changed.
+    }
     pw_str[len] = '\0';
   }
   if (jerry_value_is_string(security)) {
@@ -427,15 +430,15 @@ JERRYXX_FUN(pico_cyw43_wifi_connect) {
     uint8_t *security_str = (uint8_t *)malloc(len + 1);
     jerryxx_string_to_ascii_char_buffer(security, security_str, len);
     security_str[len] = '\0';
-    if (strcmp((const char *)security_str, "WPA2_WPA_PSK")) {
+    if (!strcmp((const char *)security_str, "WPA2_WPA_PSK")) {
       auth = CYW43_AUTH_WPA2_MIXED_PSK;
-    } else if (strcmp((const char *)security_str, "WPA2_PSK")) {
+    } else if (!strcmp((const char *)security_str, "WPA2_PSK")) {
       auth = CYW43_AUTH_WPA2_AES_PSK;
-    } else if (strcmp((const char *)security_str, "WPA_PSK")) {
+    } else if (!strcmp((const char *)security_str, "WPA_PSK")) {
       auth = CYW43_WIFI_AUTH_WPA;
-    } else if (strcmp((const char *)security_str, "WEP_PSK")) {
+    } else if (!strcmp((const char *)security_str, "WEP_PSK")) {
       auth = 0x00100001; // no idea if this works
-    } else if (strcmp((const char *)security_str, "OPEN")) {
+    } else if (!strcmp((const char *)security_str, "OPEN")) {
       auth = CYW43_AUTH_OPEN;
     }
     free(security_str);
