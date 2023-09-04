@@ -45,6 +45,7 @@ if(NOT MODULES)
     vfs_lfs
     vfs_fat
     sdcard
+    wdt
     startup)
 endif()
 
@@ -72,6 +73,7 @@ set(SOURCES
   ${TARGET_SRC_DIR}/i2c.c
   ${TARGET_SRC_DIR}/spi.c
   ${TARGET_SRC_DIR}/rtc.c
+  ${TARGET_SRC_DIR}/wdt.c
   ${TARGET_SRC_DIR}/main.c
   ${BOARD_DIR}/board.c)
 
@@ -104,6 +106,7 @@ set(TARGET_LIBS c nosys m
   hardware_pio
   hardware_flash
   hardware_rtc
+  hardware_watchdog
   hardware_sync)
 set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -Wl,-Map=${OUTPUT_TARGET}.map,--cref,--gc-sections")
 
