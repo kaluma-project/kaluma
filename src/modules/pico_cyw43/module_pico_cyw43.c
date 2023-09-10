@@ -997,7 +997,7 @@ JERRYXX_FUN(pico_cyw43_network_connect) {
 
 JERRYXX_FUN(pico_cyw43_network_write) {
   JERRYXX_CHECK_ARG_NUMBER(0, "fd");
-  JERRYXX_CHECK_ARG_STRING(1, "string");
+  JERRYXX_CHECK_ARG_STRING(1, "data");
   JERRYXX_CHECK_ARG_FUNCTION_OPT(2, "callback");
   int8_t fd = JERRYXX_GET_ARG_NUMBER(0);
   if (km_is_valid_fd(fd) && (((__socket_info.socket[fd].ptcl == NET_SOCKET_DGRAM) &&
