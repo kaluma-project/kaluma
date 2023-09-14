@@ -98,6 +98,7 @@ set(CMAKE_OBJCOPY ${PREFIX}objcopy)
 
 set(TARGET_LIBS c nosys m
   pico_stdlib
+  pico_unique_id
   hardware_adc
   hardware_pwm
   hardware_i2c

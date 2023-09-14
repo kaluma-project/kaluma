@@ -49,6 +49,11 @@ void km_delay(uint32_t msec);
 uint64_t km_gettime();
 
 /**
+ * Return uid of device
+ */
+char *km_getuid();
+
+/**
  * Return MAX of the microsecond counter
  * Use this value to detect counter overflow
  */
