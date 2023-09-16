@@ -1353,6 +1353,7 @@ static void run_board_module() {
   jerry_value_t exports = jerry_create_object();
   jerry_value_t module = jerry_create_object();
   jerry_value_t args[3] = {exports, require, module};
+  jerryxx_set_property_string(global, MSTR_UID, km_getuid());
   jerry_value_t ret_val = jerry_call_function(board_js, this_val, args, 3);
   if (jerry_value_is_error(ret_val)) {
     // print error

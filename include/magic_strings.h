@@ -95,6 +95,7 @@
 #define MSTR_GET_BUILTIN_MODULE "getBuiltinModule"
 #define MSTR_DEVICES "devices"
 #define MSTR_BOARD "board"
+#define MSTR_UID "uid"
 #define MSTR_NAME "name"
 #define MSTR_PIN_NUM "PIN_NUM"
 #define MSTR_LED_NUM "LED_NUM"

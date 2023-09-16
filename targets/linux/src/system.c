@@ -52,6 +52,13 @@ uint64_t km_gettime() {
 }
 
 /**
+ */
+char *km_getuid() {
+  return "";
+}
+
+
+/**
  * Return MAX of the micro seconde counter 44739242
  */
 uint64_t km_micro_maxtime() { return UINT32_MAX; }

@@ -77,5 +77,5 @@ global.board = {
   uart: function (...args) {
     var UART = global.require("uart").UART;
     return new UART(...args);
-  },
+  }
 };

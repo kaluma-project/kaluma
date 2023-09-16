@@ -34,6 +34,7 @@
 #include "i2c.h"
 #include "io.h"
 #include "pico/stdlib.h"
+#include "pico/unique_id.h"
 #include "pwm.h"
 #include "rtc.h"
 #include "spi.h"
@@ -45,6 +46,8 @@
 #include <pico/cyw43_arch.h>
 #endif /* PICO_CYW43 */
 
+static char serial[2 * PICO_UNIQUE_BOARD_ID_SIZE_BYTES + 1];
+
 /**
  * Delay in milliseconds
  */
@@ -54,6 +57,13 @@ void km_delay(uint32_t msec) { sleep_ms(msec); }
  * Return current time (UNIX timestamp in milliseconds)
  */
 uint64_t km_gettime() { return to_ms_since_boot(get_absolute_time()); }
+
+/**
+ * Return uid of device
+ */
+char *km_getuid() {
+  return serial;
+}
 
 /**
  * Return MAX of the microsecond counter 44739242
@@ -76,6 +86,10 @@ uint64_t km_micro_gettime() { return get_absolute_time()._private_us_since_boot;
  */
 void km_micro_delay(uint32_t usec) { sleep_us(usec); }
 
+static void km_uid_init() {
+  pico_get_unique_board_id_string(serial, sizeof(serial));
+}
+
 static void km_pio_init() {
   for (int i = 0; i < PIO_SM_NUM; i++) {
     if (pio_sm_is_claimed(pio0, i))
@@ -92,6 +106,7 @@ static void km_pio_init() {
  */
 void km_system_init() {
   stdio_init_all();
+  km_uid_init();
   km_pio_init();
   km_gpio_init();
   km_adc_init();
