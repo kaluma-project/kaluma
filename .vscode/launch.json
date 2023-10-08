@@ -4,7 +4,7 @@
     {
       "name": "Pico Debug",
       "cwd": "${workspaceRoot}",
-      "executable": "${workspaceRoot}/build/kaluma-rp2-pico-w-1.1.0-beta.3.elf",
+      "executable": "${workspaceRoot}/build/kaluma-rp2-pico-w-1.1.0-beta.4.elf",
       "request": "launch",
       "type": "cortex-debug",
       "servertype": "openocd",
