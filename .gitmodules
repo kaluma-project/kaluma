@@ -3,7 +3,7 @@
   url = https://github.com/kaluma-project/jerryscript.git
 [submodule "lib/pico-sdk"]
 	path = lib/pico-sdk
-	url = git@github.com:raspberrypi/pico-sdk.git
+	url = https://github.com/raspberrypi/pico-sdk.git
 [submodule "lib/littlefs"]
 	path = lib/littlefs
 	url = https://github.com/littlefs-project/littlefs.git
