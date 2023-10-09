@@ -18,5 +18,7 @@
   },
   "cmake.buildBeforeRun": true,
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-  "cmake.configureOnOpen": false
+  "cmake.configureOnOpen": false,
+  "git.detectSubmodules": false,
+  "git.ignoreSubmodules": true
 }
