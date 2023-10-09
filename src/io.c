@@ -125,6 +125,64 @@ void km_io_run(bool infinite) {
   }
 }
 
+/* stream function */
+
+void km_io_stream_init(km_io_stream_handle_t *stream) {
+  km_io_handle_init((km_io_handle_t *)stream, KM_IO_STREAM);
+}
+
+void km_io_stream_set_blocking(km_io_stream_handle_t *stream, bool blocking) {
+  stream->blocking = blocking;
+}
+
+void km_io_stream_read_start(km_io_stream_handle_t *stream,
+                             km_io_stream_available_cb available_cb,
+                             km_io_stream_read_cb read_cb) {
+  KM_IO_SET_FLAG_ON(stream->flags, KM_IO_FLAG_ACTIVE);
+  stream->blocking = false;  // non-blocking
+  stream->available_cb = available_cb;
+  stream->read_cb = read_cb;
+  km_list_append(&loop.stream_handles, (km_list_node_t *)stream);
+}
+
+void km_io_stream_read_stop(km_io_stream_handle_t *stream) {
+  KM_IO_SET_FLAG_OFF(stream->flags, KM_IO_FLAG_ACTIVE);
+  km_list_remove(&loop.stream_handles, (km_list_node_t *)stream);
+}
+
+void km_io_stream_cleanup() {
+  km_io_stream_handle_t *handle =
+      (km_io_stream_handle_t *)loop.stream_handles.head;
+  while (handle != NULL) {
+    km_io_stream_handle_t *next =
+        (km_io_stream_handle_t *)((km_list_node_t *)handle)->next;
+    free(handle);
+    handle = next;
+  }
+  km_list_init(&loop.stream_handles);
+}
+
+/*
+static void km_io_stream_run() {
+  km_io_stream_handle_t *handle =
+      (km_io_stream_handle_t *)loop.stream_handles.head;
+  while (handle != NULL) {
+    if (KM_IO_HAS_FLAG(handle->flags, KM_IO_FLAG_ACTIVE)) {
+      if (!handle->blocking && handle->available_cb != NULL &&
+          handle->read_cb != NULL) {
+        int len = handle->available_cb(handle);
+        if (len > 0) {
+          uint8_t buf[len];
+          // km_stream_read(handle->port, buf, len);
+          handle->read_cb(handle, buf, len);
+        }
+      }
+    }
+    handle = (km_io_stream_handle_t *)((km_list_node_t *)handle)->next;
+  }
+}
+*/
+
 /* timer functions */
 
 uint32_t timer_count = 0;
@@ -136,7 +194,7 @@ void km_io_timer_init(km_io_timer_handle_t *timer) {
 
 void km_io_timer_start(km_io_timer_handle_t *timer, km_io_timer_cb timer_cb,
                        uint64_t interval, bool repeat) {
-  KM_IO_SET_FLAG_ON(timer->base.flags, KM_IO_FLAG_ACTIVE);
+  KM_IO_SET_FLAG_ON(timer->flags, KM_IO_FLAG_ACTIVE);
   timer->timer_cb = timer_cb;
   timer->clamped_timeout = loop.time + interval;
   timer->interval = interval;
@@ -145,7 +203,7 @@ void km_io_timer_start(km_io_timer_handle_t *timer, km_io_timer_cb timer_cb,
 }
 
 void km_io_timer_stop(km_io_timer_handle_t *timer) {
-  KM_IO_SET_FLAG_OFF(timer->base.flags, KM_IO_FLAG_ACTIVE);
+  KM_IO_SET_FLAG_OFF(timer->flags, KM_IO_FLAG_ACTIVE);
   km_list_remove(&loop.timer_handles, (km_list_node_t *)timer);
 }
 
@@ -170,12 +228,12 @@ static void km_io_timer_run() {
   km_io_timer_handle_t *handle =
       (km_io_timer_handle_t *)loop.timer_handles.head;
   while (handle != NULL) {
-    if (KM_IO_HAS_FLAG(handle->base.flags, KM_IO_FLAG_ACTIVE)) {
+    if (KM_IO_HAS_FLAG(handle->flags, KM_IO_FLAG_ACTIVE)) {
       if (handle->clamped_timeout < loop.time) {
         if (handle->repeat) {
           handle->clamped_timeout = handle->clamped_timeout + handle->interval;
         } else {
-          KM_IO_SET_FLAG_OFF(handle->base.flags, KM_IO_FLAG_ACTIVE);
+          KM_IO_SET_FLAG_OFF(handle->flags, KM_IO_FLAG_ACTIVE);
         }
         if (handle->timer_cb) {
           handle->timer_cb(handle);
@@ -194,13 +252,13 @@ void km_io_tty_init(km_io_tty_handle_t *tty) {
 }
 
 void km_io_tty_read_start(km_io_tty_handle_t *tty, km_io_tty_read_cb read_cb) {
-  KM_IO_SET_FLAG_ON(tty->base.flags, KM_IO_FLAG_ACTIVE);
+  KM_IO_SET_FLAG_ON(tty->flags, KM_IO_FLAG_ACTIVE);
   tty->read_cb = read_cb;
   km_list_append(&loop.tty_handles, (km_list_node_t *)tty);
 }
 
 void km_io_tty_read_stop(km_io_tty_handle_t *tty) {
-  KM_IO_SET_FLAG_OFF(tty->base.flags, KM_IO_FLAG_ACTIVE);
+  KM_IO_SET_FLAG_OFF(tty->flags, KM_IO_FLAG_ACTIVE);
   km_list_remove(&loop.tty_handles, (km_list_node_t *)tty);
 }
 
@@ -218,7 +276,7 @@ void km_io_tty_cleanup() {
 static void km_io_tty_run() {
   km_io_tty_handle_t *handle = (km_io_tty_handle_t *)loop.tty_handles.head;
   while (handle != NULL) {
-    if (KM_IO_HAS_FLAG(handle->base.flags, KM_IO_FLAG_ACTIVE)) {
+    if (KM_IO_HAS_FLAG(handle->flags, KM_IO_FLAG_ACTIVE)) {
       uint32_t len = km_tty_available();
       if (handle->read_cb != NULL && len > 0) {
         // for (int i = 0; i < size; i++) {
@@ -243,7 +301,7 @@ void km_io_watch_init(km_io_watch_handle_t *watch) {
 void km_io_watch_start(km_io_watch_handle_t *watch, km_io_watch_cb watch_cb,
                        uint8_t pin, km_io_watch_mode_t mode,
                        uint32_t debounce) {
-  KM_IO_SET_FLAG_ON(watch->base.flags, KM_IO_FLAG_ACTIVE);
+  KM_IO_SET_FLAG_ON(watch->flags, KM_IO_FLAG_ACTIVE);
   watch->watch_cb = watch_cb;
   watch->pin = pin;
   watch->mode = mode;
@@ -255,7 +313,7 @@ void km_io_watch_start(km_io_watch_handle_t *watch, km_io_watch_cb watch_cb,
 }
 
 void km_io_watch_stop(km_io_watch_handle_t *watch) {
-  KM_IO_SET_FLAG_OFF(watch->base.flags, KM_IO_FLAG_ACTIVE);
+  KM_IO_SET_FLAG_OFF(watch->flags, KM_IO_FLAG_ACTIVE);
   km_list_remove(&loop.watch_handles, (km_list_node_t *)watch);
 }
 
@@ -280,7 +338,7 @@ static void km_io_watch_run() {
   km_io_watch_handle_t *handle =
       (km_io_watch_handle_t *)loop.watch_handles.head;
   while (handle != NULL) {
-    if (KM_IO_HAS_FLAG(handle->base.flags, KM_IO_FLAG_ACTIVE)) {
+    if (KM_IO_HAS_FLAG(handle->flags, KM_IO_FLAG_ACTIVE)) {
       uint8_t reading = (uint8_t)km_gpio_read(handle->pin);
       if (handle->last_val != reading) { /* changed by noise or pressing */
         handle->debounce_time = km_gettime();
@@ -332,7 +390,7 @@ void km_io_uart_init(km_io_uart_handle_t *uart) {
 void km_io_uart_read_start(km_io_uart_handle_t *uart, uint8_t port,
                            km_io_uart_available_cb available_cb,
                            km_io_uart_read_cb read_cb) {
-  KM_IO_SET_FLAG_ON(uart->base.flags, KM_IO_FLAG_ACTIVE);
+  KM_IO_SET_FLAG_ON(uart->flags, KM_IO_FLAG_ACTIVE);
   uart->port = port;
   uart->available_cb = available_cb;
   uart->read_cb = read_cb;
@@ -340,7 +398,7 @@ void km_io_uart_read_start(km_io_uart_handle_t *uart, uint8_t port,
 }
 
 void km_io_uart_read_stop(km_io_uart_handle_t *uart) {
-  KM_IO_SET_FLAG_OFF(uart->base.flags, KM_IO_FLAG_ACTIVE);
+  KM_IO_SET_FLAG_OFF(uart->flags, KM_IO_FLAG_ACTIVE);
   km_list_remove(&loop.uart_handles, (km_list_node_t *)uart);
 }
 
@@ -362,7 +420,7 @@ void km_io_uart_cleanup() {
 static void km_io_uart_run() {
   km_io_uart_handle_t *handle = (km_io_uart_handle_t *)loop.uart_handles.head;
   while (handle != NULL) {
-    if (KM_IO_HAS_FLAG(handle->base.flags, KM_IO_FLAG_ACTIVE)) {
+    if (KM_IO_HAS_FLAG(handle->flags, KM_IO_FLAG_ACTIVE)) {
       if (handle->available_cb != NULL && handle->read_cb != NULL) {
         int len = handle->available_cb(handle);
         if (len > 0) {
@@ -384,13 +442,13 @@ void km_io_idle_init(km_io_idle_handle_t *idle) {
 }
 
 void km_io_idle_start(km_io_idle_handle_t *idle, km_io_idle_cb idle_cb) {
-  KM_IO_SET_FLAG_ON(idle->base.flags, KM_IO_FLAG_ACTIVE);
+  KM_IO_SET_FLAG_ON(idle->flags, KM_IO_FLAG_ACTIVE);
   idle->idle_cb = idle_cb;
   km_list_append(&loop.idle_handles, (km_list_node_t *)idle);
 }
 
 void km_io_idle_stop(km_io_idle_handle_t *idle) {
-  KM_IO_SET_FLAG_OFF(idle->base.flags, KM_IO_FLAG_ACTIVE);
+  KM_IO_SET_FLAG_OFF(idle->flags, KM_IO_FLAG_ACTIVE);
   km_list_remove(&loop.idle_handles, (km_list_node_t *)idle);
 }
 
@@ -412,7 +470,7 @@ void km_io_idle_cleanup() {
 static void km_io_idle_run() {
   km_io_idle_handle_t *handle = (km_io_idle_handle_t *)loop.idle_handles.head;
   while (handle != NULL) {
-    if (KM_IO_HAS_FLAG(handle->base.flags, KM_IO_FLAG_ACTIVE)) {
+    if (KM_IO_HAS_FLAG(handle->flags, KM_IO_FLAG_ACTIVE)) {
       if (handle->idle_cb) {
         handle->idle_cb(handle);
       }
@@ -420,61 +478,3 @@ static void km_io_idle_run() {
     handle = (km_io_idle_handle_t *)((km_list_node_t *)handle)->next;
   }
 }
-
-/* stream function */
-
-void km_io_stream_init(km_io_stream_handle_t *stream) {
-  km_io_handle_init((km_io_handle_t *)stream, KM_IO_STREAM);
-}
-
-void km_io_stream_set_blocking(km_io_stream_handle_t *stream, bool blocking) {
-  stream->blocking = blocking;
-}
-
-void km_io_stream_read_start(km_io_stream_handle_t *stream,
-                             km_io_stream_available_cb available_cb,
-                             km_io_stream_read_cb read_cb) {
-  KM_IO_SET_FLAG_ON(stream->base.flags, KM_IO_FLAG_ACTIVE);
-  stream->blocking = false;  // non-blocking
-  stream->available_cb = available_cb;
-  stream->read_cb = read_cb;
-  km_list_append(&loop.stream_handles, (km_list_node_t *)stream);
-}
-
-void km_io_stream_read_stop(km_io_stream_handle_t *stream) {
-  KM_IO_SET_FLAG_OFF(stream->base.flags, KM_IO_FLAG_ACTIVE);
-  km_list_remove(&loop.stream_handles, (km_list_node_t *)stream);
-}
-
-void km_io_stream_cleanup() {
-  km_io_stream_handle_t *handle =
-      (km_io_stream_handle_t *)loop.stream_handles.head;
-  while (handle != NULL) {
-    km_io_stream_handle_t *next =
-        (km_io_stream_handle_t *)((km_list_node_t *)handle)->next;
-    free(handle);
-    handle = next;
-  }
-  km_list_init(&loop.stream_handles);
-}
-
-/*
-static void km_io_stream_run() {
-  km_io_stream_handle_t *handle =
-      (km_io_stream_handle_t *)loop.stream_handles.head;
-  while (handle != NULL) {
-    if (KM_IO_HAS_FLAG(handle->base.flags, KM_IO_FLAG_ACTIVE)) {
-      if (!handle->blocking && handle->available_cb != NULL &&
-          handle->read_cb != NULL) {
-        int len = handle->available_cb(handle);
-        if (len > 0) {
-          uint8_t buf[len];
-          // km_stream_read(handle->port, buf, len);
-          handle->read_cb(handle, buf, len);
-        }
-      }
-    }
-    handle = (km_io_stream_handle_t *)((km_list_node_t *)handle)->next;
-  }
-}
-*/

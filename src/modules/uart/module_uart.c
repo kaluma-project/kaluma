@@ -128,7 +128,7 @@ JERRYXX_FUN(uart_ctor_fn) {
   km_io_uart_handle_t *handle = malloc(sizeof(km_io_uart_handle_t));
   km_io_uart_init(handle);
   handle->read_js_cb = jerry_acquire_value(callback);
-  jerryxx_set_property_number(JERRYXX_GET_THIS, "handle_id", handle->base.id);
+  jerryxx_set_property_number(JERRYXX_GET_THIS, "handle_id", handle->id);
   km_io_uart_read_start(handle, port, uart_available_cb, uart_read_cb);
 
   return jerry_create_undefined();

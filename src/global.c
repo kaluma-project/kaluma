@@ -367,7 +367,7 @@ JERRYXX_FUN(set_watch_fn) {
   km_io_watch_init(watch);
   watch->watch_js_cb = jerry_acquire_value(callback);
   km_io_watch_start(watch, set_watch_cb, pin, events, debounce);
-  return jerry_create_number(watch->base.id);
+  return jerry_create_number(watch->id);
 }
 
 JERRYXX_FUN(clear_watch_fn) {
@@ -549,7 +549,7 @@ JERRYXX_FUN(set_timeout_fn) {
   km_io_timer_init(timer);
   timer->timer_js_cb = jerry_acquire_value(callback);
   km_io_timer_start(timer, set_timer_cb, delay, false);
-  return jerry_create_number(timer->base.id);
+  return jerry_create_number(timer->id);
 }
 
 JERRYXX_FUN(set_interval_fn) {
@@ -561,7 +561,7 @@ JERRYXX_FUN(set_interval_fn) {
   km_io_timer_init(timer);
   timer->timer_js_cb = jerry_acquire_value(callback);
   km_io_timer_start(timer, set_timer_cb, delay, true);
-  return jerry_create_number(timer->base.id);
+  return jerry_create_number(timer->id);
 }
 
 JERRYXX_FUN(clear_timer_fn) {

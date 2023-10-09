@@ -49,7 +49,8 @@ typedef struct km_io_stream_handle_s km_io_stream_handle_t;
 
 /* general handle types */
 
-typedef enum km_io_type {
+typedef enum km_io_type
+{
   KM_IO_TIMER,
   KM_IO_TTY,
   KM_IO_WATCH,
@@ -58,53 +59,80 @@ typedef enum km_io_type {
   KM_IO_STREAM
 } km_io_type_t;
 
+/* base handle type */
+
 typedef void (*km_io_close_cb)(km_io_handle_t *);
 
-struct km_io_handle_s {
-  km_list_node_t base;
-  uint32_t id;
-  km_io_type_t type;
-  uint8_t flags;
+#define KM_IO_HANDLE_FIELDS \
+  km_list_node_t base;      \
+  uint32_t id;              \
+  km_io_type_t type;        \
+  uint8_t flags;            \
   km_io_close_cb close_cb;
+
+struct km_io_handle_s
+{
+  KM_IO_HANDLE_FIELDS
+};
+
+/* stream handle type */
+
+typedef int (*km_io_stream_available_cb)(km_io_stream_handle_t *);
+typedef void (*km_io_stream_read_cb)(km_io_stream_handle_t *, uint8_t *,
+                                     size_t);
+
+#define KM_IO_STREAM_FIELDS \
+  bool blocking;            \
+  km_io_stream_available_cb available_cb; \
+  km_io_stream_read_cb read_cb;
+
+struct km_io_stream_handle_s
+{
+  KM_IO_HANDLE_FIELDS
+  KM_IO_STREAM_FIELDS
 };
 
 /* timer handle types */
 
 typedef void (*km_io_timer_cb)(km_io_timer_handle_t *);
 
-struct km_io_timer_handle_s {
-  km_io_handle_t base;
+struct km_io_timer_handle_s
+{
+  KM_IO_HANDLE_FIELDS
   km_io_timer_cb timer_cb;
   jerry_value_t timer_js_cb;
   uint64_t clamped_timeout;
   uint64_t interval;
   bool repeat;
-  uint32_t tag;  // for application use
+  uint32_t tag; // for application use
 };
 
 /* TTY handle types */
 
 typedef void (*km_io_tty_read_cb)(uint8_t *, size_t);
 
-struct km_io_tty_handle_s {
-  km_io_handle_t base;
+struct km_io_tty_handle_s
+{
+  KM_IO_HANDLE_FIELDS
   km_io_tty_read_cb read_cb;
 };
 
 /* GPIO watch handle types */
 
-typedef enum {
-  KM_IO_WATCH_MODE_LOW_LEVEL = 1,   // BIT0
-  KM_IO_WATCH_MODE_HIGH_LEVEL = 2,  // BIT1
-  KM_IO_WATCH_MODE_FALLING = 4,     // BIT2
-  KM_IO_WATCH_MODE_RISING = 8,      // BIT3
-  KM_IO_WATCH_MODE_CHANGE = 12,     // BIT2 | BIT3
+typedef enum
+{
+  KM_IO_WATCH_MODE_LOW_LEVEL = 1,  // BIT0
+  KM_IO_WATCH_MODE_HIGH_LEVEL = 2, // BIT1
+  KM_IO_WATCH_MODE_FALLING = 4,    // BIT2
+  KM_IO_WATCH_MODE_RISING = 8,     // BIT3
+  KM_IO_WATCH_MODE_CHANGE = 12,    // BIT2 | BIT3
 } km_io_watch_mode_t;
 
 typedef void (*km_io_watch_cb)(km_io_watch_handle_t *);
 
-struct km_io_watch_handle_s {
-  km_io_handle_t base;
+struct km_io_watch_handle_s
+{
+  KM_IO_HANDLE_FIELDS
   km_io_watch_mode_t mode;
   uint8_t pin;
   uint64_t debounce_time;
@@ -120,8 +148,9 @@ struct km_io_watch_handle_s {
 typedef int (*km_io_uart_available_cb)(km_io_uart_handle_t *);
 typedef void (*km_io_uart_read_cb)(km_io_uart_handle_t *, uint8_t *, size_t);
 
-struct km_io_uart_handle_s {
-  km_io_handle_t base;
+struct km_io_uart_handle_s
+{
+  KM_IO_HANDLE_FIELDS
   uint8_t port;
   km_io_uart_available_cb available_cb;
   km_io_uart_read_cb read_cb;
@@ -132,27 +161,16 @@ struct km_io_uart_handle_s {
 
 typedef void (*km_io_idle_cb)(km_io_idle_handle_t *);
 
-struct km_io_idle_handle_s {
-  km_io_handle_t base;
+struct km_io_idle_handle_s
+{
+  KM_IO_HANDLE_FIELDS
   km_io_idle_cb idle_cb;
-};
-
-/* stream handle type */
-
-typedef int (*km_io_stream_available_cb)(km_io_stream_handle_t *);
-typedef void (*km_io_stream_read_cb)(km_io_stream_handle_t *, uint8_t *,
-                                     size_t);
-
-struct km_io_stream_handle_s {
-  km_io_handle_t base;
-  bool blocking;
-  km_io_stream_available_cb available_cb;
-  km_io_stream_read_cb read_cb;
 };
 
 /* loop type */
 
-struct km_io_loop_s {
+struct km_io_loop_s
+{
   bool stop_flag;
   uint64_t time;
   km_list_t timer_handles;
@@ -176,7 +194,21 @@ void km_io_handle_init(km_io_handle_t *handle, km_io_type_t type);
 void km_io_handle_close(km_io_handle_t *handle, km_io_close_cb close_cb);
 km_io_handle_t *km_io_handle_get_by_id(uint32_t id, km_list_t *handle_list);
 
-/* timer functions */
+/* stream handle functions */
+
+void km_io_stream_init(km_io_stream_handle_t *stream);
+// void km_io_stream_set_blocking(km_io_stream_handle_t *stream, bool blocking);
+void km_io_stream_read_start(km_io_stream_handle_t *stream,
+                             km_io_stream_available_cb available_cb,
+                             km_io_stream_read_cb read_cb);
+void km_io_stream_read_stop(km_io_stream_handle_t *stream);
+void km_io_stream_cleanup();
+// int km_io_stream_is_readable(km_io_stream_handle_t *stream);
+// int km_io_stream_read(km_io_stream_handle_t *stream);
+// void km_io_stream_push(km_io_stream_handle_t *stream, uint8_t *buffer, size_t
+// size); // push to read buffer
+
+/* timer handle functions */
 
 void km_io_timer_init(km_io_timer_handle_t *timer);
 void km_io_timer_start(km_io_timer_handle_t *timer, km_io_timer_cb timer_cb,
@@ -185,14 +217,14 @@ void km_io_timer_stop(km_io_timer_handle_t *timer);
 km_io_timer_handle_t *km_io_timer_get_by_id(uint32_t id);
 void km_io_timer_cleanup();
 
-/* TTY functions */
+/* TTY handle functions */
 
 void km_io_tty_init(km_io_tty_handle_t *tty);
 void km_io_tty_read_start(km_io_tty_handle_t *tty, km_io_tty_read_cb read_cb);
 void km_io_tty_read_stop(km_io_tty_handle_t *tty);
 void km_io_tty_cleanup();
 
-/* GPIO watch functions */
+/* watch handle functions */
 
 void km_io_watch_init(km_io_watch_handle_t *watch);
 void km_io_watch_start(km_io_watch_handle_t *watch, km_io_watch_cb watch_cb,
@@ -201,7 +233,7 @@ void km_io_watch_stop(km_io_watch_handle_t *watch);
 km_io_watch_handle_t *km_io_watch_get_by_id(uint32_t id);
 void km_io_watch_cleanup();
 
-/* UART function */
+/* UART handle function */
 
 void km_io_uart_init(km_io_uart_handle_t *uart);
 void km_io_uart_read_start(km_io_uart_handle_t *uart, uint8_t port,
@@ -218,19 +250,5 @@ void km_io_idle_start(km_io_idle_handle_t *idle, km_io_idle_cb idle_cb);
 void km_io_idle_stop(km_io_idle_handle_t *idle);
 km_io_idle_handle_t *km_io_idle_get_by_id(uint32_t id);
 void km_io_idle_cleanup();
-
-/* stream functions */
-
-void km_io_stream_init(km_io_stream_handle_t *stream);
-void km_io_stream_set_blocking(km_io_stream_handle_t *stream, bool blocking);
-void km_io_stream_read_start(km_io_stream_handle_t *stream,
-                             km_io_stream_available_cb available_cb,
-                             km_io_stream_read_cb read_cb);
-void km_io_stream_read_stop(km_io_stream_handle_t *stream);
-void km_io_stream_cleanup();
-// int km_io_stream_is_readable(km_io_stream_handle_t *stream);
-// int km_io_stream_read(km_io_stream_handle_t *stream);
-// void km_io_stream_push(km_io_stream_handle_t *stream, uint8_t *buffer, size_t
-// size); // push to read buffer
 
 #endif /* ___KM_IO_H */
