@@ -31,12 +31,13 @@
 typedef struct km_io_loop_s km_io_loop_t;
 typedef struct km_io_handle_s km_io_handle_t;
 typedef struct km_io_handle_list_s km_io_handle_list_t;
+typedef struct km_io_stream_handle_s km_io_stream_handle_t;
 typedef struct km_io_timer_handle_s km_io_timer_handle_t;
 typedef struct km_io_tty_handle_s km_io_tty_handle_t;
 typedef struct km_io_watch_handle_s km_io_watch_handle_t;
 typedef struct km_io_uart_handle_s km_io_uart_handle_t;
 typedef struct km_io_idle_handle_s km_io_idle_handle_t;
-typedef struct km_io_stream_handle_s km_io_stream_handle_t;
+typedef struct km_io_tcp_handle_s km_io_tcp_handle_t;
 
 /* handle flags */
 
@@ -56,7 +57,8 @@ typedef enum km_io_type
   KM_IO_WATCH,
   KM_IO_UART,
   KM_IO_IDLE,
-  KM_IO_STREAM
+  KM_IO_STREAM,
+  KM_IO_SOCKET
 } km_io_type_t;
 
 /* base handle type */
@@ -81,8 +83,8 @@ typedef int (*km_io_stream_available_cb)(km_io_stream_handle_t *);
 typedef void (*km_io_stream_read_cb)(km_io_stream_handle_t *, uint8_t *,
                                      size_t);
 
-#define KM_IO_STREAM_FIELDS \
-  bool blocking;            \
+#define KM_IO_STREAM_FIELDS               \
+  bool blocking;                          \
   km_io_stream_available_cb available_cb; \
   km_io_stream_read_cb read_cb;
 
@@ -167,6 +169,32 @@ struct km_io_idle_handle_s
   km_io_idle_cb idle_cb;
 };
 
+/* tcp handle types */
+
+typedef void (*km_io_tcp_cb)(km_io_tcp_handle_t *);
+typedef void (*km_io_tcp_connect_cb)(km_io_tcp_handle_t *, int);
+typedef void (*km_io_tcp_accept_cb)(km_io_tcp_handle_t *);
+typedef int (*km_io_tcp_available_cb)(km_io_tcp_handle_t *);
+typedef void (*km_io_tcp_read_cb)(km_io_tcp_handle_t *, uint8_t *,
+                                  size_t);
+
+#define KM_IO_TCP_FIELDS                   \
+  int fd;                                  \
+  km_io_tcp_connect_cb tcp_connect_cb;     \
+  km_io_tcp_accept_cb tcp_accept_cb;       \
+  km_io_tcp_available_cb tcp_available_cb; \
+  /* km_io_tcp_write_cb tcp_write_cb */    \
+  km_io_tcp_read_cb tcp_read_cb;           \
+  /* km_io_tcp_error_cb tcp_error_cb */    \
+  km_io_tcp_cb tcp_close_cb;
+
+struct km_io_tcp_handle_s
+{
+  KM_IO_HANDLE_FIELDS
+  KM_IO_STREAM_FIELDS
+  KM_IO_TCP_FIELDS
+};
+
 /* loop type */
 
 struct km_io_loop_s
@@ -179,6 +207,7 @@ struct km_io_loop_s
   km_list_t uart_handles;
   km_list_t idle_handles;
   km_list_t stream_handles;
+  km_list_t socket_handles;
   km_list_t closing_handles;
 };
 
@@ -194,7 +223,7 @@ void km_io_handle_init(km_io_handle_t *handle, km_io_type_t type);
 void km_io_handle_close(km_io_handle_t *handle, km_io_close_cb close_cb);
 km_io_handle_t *km_io_handle_get_by_id(uint32_t id, km_list_t *handle_list);
 
-/* stream handle functions */
+/* stream functions */
 
 void km_io_stream_init(km_io_stream_handle_t *stream);
 // void km_io_stream_set_blocking(km_io_stream_handle_t *stream, bool blocking);
@@ -208,7 +237,7 @@ void km_io_stream_cleanup();
 // void km_io_stream_push(km_io_stream_handle_t *stream, uint8_t *buffer, size_t
 // size); // push to read buffer
 
-/* timer handle functions */
+/* timer functions */
 
 void km_io_timer_init(km_io_timer_handle_t *timer);
 void km_io_timer_start(km_io_timer_handle_t *timer, km_io_timer_cb timer_cb,
@@ -217,14 +246,14 @@ void km_io_timer_stop(km_io_timer_handle_t *timer);
 km_io_timer_handle_t *km_io_timer_get_by_id(uint32_t id);
 void km_io_timer_cleanup();
 
-/* TTY handle functions */
+/* TTY functions */
 
 void km_io_tty_init(km_io_tty_handle_t *tty);
 void km_io_tty_read_start(km_io_tty_handle_t *tty, km_io_tty_read_cb read_cb);
 void km_io_tty_read_stop(km_io_tty_handle_t *tty);
 void km_io_tty_cleanup();
 
-/* watch handle functions */
+/* GPIO watch functions */
 
 void km_io_watch_init(km_io_watch_handle_t *watch);
 void km_io_watch_start(km_io_watch_handle_t *watch, km_io_watch_cb watch_cb,
@@ -233,7 +262,7 @@ void km_io_watch_stop(km_io_watch_handle_t *watch);
 km_io_watch_handle_t *km_io_watch_get_by_id(uint32_t id);
 void km_io_watch_cleanup();
 
-/* UART handle function */
+/* UART function */
 
 void km_io_uart_init(km_io_uart_handle_t *uart);
 void km_io_uart_read_start(km_io_uart_handle_t *uart, uint8_t port,
@@ -243,12 +272,25 @@ void km_io_uart_read_stop(km_io_uart_handle_t *uart);
 km_io_uart_handle_t *km_io_uart_get_by_id(uint32_t id);
 void km_io_uart_cleanup();
 
-/* idle function */
+/* idle functions */
 
 void km_io_idle_init(km_io_idle_handle_t *idle);
 void km_io_idle_start(km_io_idle_handle_t *idle, km_io_idle_cb idle_cb);
 void km_io_idle_stop(km_io_idle_handle_t *idle);
 km_io_idle_handle_t *km_io_idle_get_by_id(uint32_t id);
 void km_io_idle_cleanup();
+
+/* tcp functions */
+
+void km_io_tcp_init(km_io_tcp_handle_t *tcp);
+void km_io_tcp_open(km_io_tcp_handle_t *tcp);
+void km_io_tcp_connect(km_io_tcp_handle_t *tcp, char *host, uint16_t port);
+void km_io_tcp_read_start(km_io_tcp_handle_t *tcp,
+                          km_io_tcp_available_cb available_cb,
+                          km_io_tcp_read_cb read_cb);
+void km_io_tcp_read_stop(km_io_tcp_handle_t *tcp);
+void km_io_tcp_write(km_io_tcp_handle_t *tcp, const uint8_t *buf, size_t size);
+void km_io_tcp_close(km_io_tcp_handle_t *tcp);
+void km_io_tcp_cleanup();
 
 #endif /* ___KM_IO_H */
