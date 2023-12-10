@@ -1000,26 +1000,26 @@ JERRYXX_FUN(pico_cyw43_network_write) {
   JERRYXX_CHECK_ARG_STRING(1, "data");
   JERRYXX_CHECK_ARG_FUNCTION_OPT(2, "callback");
   int8_t fd = JERRYXX_GET_ARG_NUMBER(0);
+  jerry_value_t data = JERRYXX_GET_ARG(1);
   if (km_is_valid_fd(fd) && (((__socket_info.socket[fd].ptcl == NET_SOCKET_DGRAM) &&
                           (__socket_info.socket[fd].state != NET_SOCKET_STATE_CLOSED)) ||
                          ((__socket_info.socket[fd].ptcl == NET_SOCKET_STREAM) &&
                           (__socket_info.socket[fd].state >= NET_SOCKET_STATE_CONNECTED)))) {
-    jerry_size_t data_str_sz = jerry_get_string_size(args_p[1]);
+    jerry_size_t data_str_sz = jerryxx_get_ascii_string_size(data);
     char *data_str = calloc(1, data_str_sz + 1);
-    jerry_string_to_char_buffer(args_p[1], (jerry_char_t *)data_str,
-                                data_str_sz);
+    jerryxx_string_to_ascii_char_buffer(data, (uint8_t *)data_str, data_str_sz);
     err_t err = ERR_OK;
     cyw43_arch_lwip_begin();
     if (__socket_info.socket[fd].ptcl == NET_SOCKET_STREAM) {
       err = tcp_write(__socket_info.socket[fd].tcp_pcb, data_str,
-                      strlen(data_str), TCP_WRITE_FLAG_COPY);
+                      data_str_sz, TCP_WRITE_FLAG_COPY);
       if (err == ERR_OK) {
         err = tcp_output(__socket_info.socket[fd].tcp_pcb);
       }
     } else {
-      struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, strlen(data_str), PBUF_POOL);
+      struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, data_str_sz, PBUF_POOL);
       if (p) {
-        pbuf_take(p, data_str, strlen(data_str));
+        pbuf_take(p, data_str, data_str_sz);
         err = udp_send(__socket_info.socket[fd].udp_pcb, p);
         pbuf_free(p);
       }
