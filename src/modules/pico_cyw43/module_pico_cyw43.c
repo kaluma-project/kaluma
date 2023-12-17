@@ -103,6 +103,8 @@ __socket_t __socket_info;
 
 dhcp_server_t dhcp_server;
 
+static void buffer_free_cb(void *native_p) { free(native_p); }
+
 bool km_is_valid_fd(int8_t fd) {
   if ((fd >= 0) && (fd < KM_MAX_SOCKET_NO)) {
     return true;
@@ -727,34 +729,39 @@ static err_t __net_data_received(int8_t fd, struct tcp_pcb *tpcb,
       err = __net_socket_close(fd);
   } else {
     int8_t read_fd = km_is_valid_fd(__socket_info.socket[fd].server_fd)
-                          ? __socket_info.socket[fd].server_fd
-                          : fd;
+                          ? __socket_info.socket[fd].server_fd : fd;
     if (km_is_valid_fd(read_fd)) {
       if (__socket_info.socket[read_fd].state == NET_SOCKET_STATE_CLOSED)
         return err;
       if (p->tot_len > 0) {
-        char *receiver_buffer = (char *)calloc(sizeof(char), p->tot_len + 1);
+        uint8_t *receiver_buffer = (uint8_t *)malloc(sizeof(uint8_t) * p->tot_len);
+        uint32_t buff_offset = 0;
         for (struct pbuf *q = p; q != NULL; q = q->next) {
-          strncat(receiver_buffer, q->payload, q->len);
+          memcpy((uint8_t *)(receiver_buffer + buff_offset), q->payload, q->len);
+          buff_offset += q->len;
         }
         if (tpcb) {
           cyw43_arch_lwip_check();
           tcp_recved(tpcb, p->tot_len);
         }
-        if ( __socket_info.socket[read_fd].obj == 0) return err;
+        if ( __socket_info.socket[read_fd].obj == 0) {
+          free(receiver_buffer);
+          return err;
+        }
         jerry_value_t read_js_cb = jerryxx_get_property(
             __socket_info.socket[read_fd].obj, MSTR_PICO_CYW43_SOCKET_READ_CB);
         if (jerry_value_is_function(read_js_cb)) {
           jerry_value_t this_val = jerry_create_undefined();
           jerry_value_t data =
-              jerry_create_string((const jerry_char_t *)receiver_buffer);
+              jerry_create_arraybuffer_external(p->tot_len, receiver_buffer, buffer_free_cb);
           jerry_value_t args_p[1] = {data};
           jerry_call_function(read_js_cb, this_val, args_p, 2);
           jerry_release_value(data);
           jerry_release_value(this_val);
+        } else {
+          free(receiver_buffer);
         }
         jerry_release_value(read_js_cb);
-        free(receiver_buffer);
       }
     } else {
       err = ERANGE;
