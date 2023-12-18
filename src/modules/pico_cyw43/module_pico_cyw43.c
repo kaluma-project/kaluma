@@ -752,8 +752,11 @@ static err_t __net_data_received(int8_t fd, struct tcp_pcb *tpcb,
             __socket_info.socket[read_fd].obj, MSTR_PICO_CYW43_SOCKET_READ_CB);
         if (jerry_value_is_function(read_js_cb)) {
           jerry_value_t this_val = jerry_create_undefined();
-          jerry_value_t data =
+          jerry_value_t buffer =
               jerry_create_arraybuffer_external(p->tot_len, receiver_buffer, buffer_free_cb);
+          jerry_value_t data = jerry_create_typedarray_for_arraybuffer(
+              JERRY_TYPEDARRAY_UINT8, buffer);
+          jerry_release_value(buffer);
           jerry_value_t args_p[1] = {data};
           jerry_call_function(read_js_cb, this_val, args_p, 2);
           jerry_release_value(data);
