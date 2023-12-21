@@ -103,6 +103,8 @@ __socket_t __socket_info;
 
 dhcp_server_t dhcp_server;
 
+static void buffer_free_cb(void *native_p) { free(native_p); }
+
 bool km_is_valid_fd(int8_t fd) {
   if ((fd >= 0) && (fd < KM_MAX_SOCKET_NO)) {
     return true;
@@ -727,34 +729,42 @@ static err_t __net_data_received(int8_t fd, struct tcp_pcb *tpcb,
       err = __net_socket_close(fd);
   } else {
     int8_t read_fd = km_is_valid_fd(__socket_info.socket[fd].server_fd)
-                          ? __socket_info.socket[fd].server_fd
-                          : fd;
+                          ? __socket_info.socket[fd].server_fd : fd;
     if (km_is_valid_fd(read_fd)) {
       if (__socket_info.socket[read_fd].state == NET_SOCKET_STATE_CLOSED)
         return err;
       if (p->tot_len > 0) {
-        char *receiver_buffer = (char *)calloc(sizeof(char), p->tot_len + 1);
+        uint8_t *receiver_buffer = (uint8_t *)malloc(sizeof(uint8_t) * p->tot_len);
+        uint32_t buff_offset = 0;
         for (struct pbuf *q = p; q != NULL; q = q->next) {
-          strncat(receiver_buffer, q->payload, q->len);
+          memcpy((uint8_t *)(receiver_buffer + buff_offset), q->payload, q->len);
+          buff_offset += q->len;
         }
         if (tpcb) {
           cyw43_arch_lwip_check();
           tcp_recved(tpcb, p->tot_len);
         }
-        if ( __socket_info.socket[read_fd].obj == 0) return err;
+        if ( __socket_info.socket[read_fd].obj == 0) {
+          free(receiver_buffer);
+          return err;
+        }
         jerry_value_t read_js_cb = jerryxx_get_property(
             __socket_info.socket[read_fd].obj, MSTR_PICO_CYW43_SOCKET_READ_CB);
         if (jerry_value_is_function(read_js_cb)) {
           jerry_value_t this_val = jerry_create_undefined();
-          jerry_value_t data =
-              jerry_create_string((const jerry_char_t *)receiver_buffer);
+          jerry_value_t buffer =
+              jerry_create_arraybuffer_external(p->tot_len, receiver_buffer, buffer_free_cb);
+          jerry_value_t data = jerry_create_typedarray_for_arraybuffer(
+              JERRY_TYPEDARRAY_UINT8, buffer);
+          jerry_release_value(buffer);
           jerry_value_t args_p[1] = {data};
           jerry_call_function(read_js_cb, this_val, args_p, 2);
           jerry_release_value(data);
           jerry_release_value(this_val);
+        } else {
+          free(receiver_buffer);
         }
         jerry_release_value(read_js_cb);
-        free(receiver_buffer);
       }
     } else {
       err = ERANGE;
@@ -1000,26 +1010,26 @@ JERRYXX_FUN(pico_cyw43_network_write) {
   JERRYXX_CHECK_ARG_STRING(1, "data");
   JERRYXX_CHECK_ARG_FUNCTION_OPT(2, "callback");
   int8_t fd = JERRYXX_GET_ARG_NUMBER(0);
+  jerry_value_t data = JERRYXX_GET_ARG(1);
   if (km_is_valid_fd(fd) && (((__socket_info.socket[fd].ptcl == NET_SOCKET_DGRAM) &&
                           (__socket_info.socket[fd].state != NET_SOCKET_STATE_CLOSED)) ||
                          ((__socket_info.socket[fd].ptcl == NET_SOCKET_STREAM) &&
                           (__socket_info.socket[fd].state >= NET_SOCKET_STATE_CONNECTED)))) {
-    jerry_size_t data_str_sz = jerry_get_string_size(args_p[1]);
+    jerry_size_t data_str_sz = jerryxx_get_ascii_string_size(data);
     char *data_str = calloc(1, data_str_sz + 1);
-    jerry_string_to_char_buffer(args_p[1], (jerry_char_t *)data_str,
-                                data_str_sz);
+    jerryxx_string_to_ascii_char_buffer(data, (uint8_t *)data_str, data_str_sz);
     err_t err = ERR_OK;
     cyw43_arch_lwip_begin();
     if (__socket_info.socket[fd].ptcl == NET_SOCKET_STREAM) {
       err = tcp_write(__socket_info.socket[fd].tcp_pcb, data_str,
-                      strlen(data_str), TCP_WRITE_FLAG_COPY);
+                      data_str_sz, TCP_WRITE_FLAG_COPY);
       if (err == ERR_OK) {
         err = tcp_output(__socket_info.socket[fd].tcp_pcb);
       }
     } else {
-      struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, strlen(data_str), PBUF_POOL);
+      struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, data_str_sz, PBUF_POOL);
       if (p) {
-        pbuf_take(p, data_str, strlen(data_str));
+        pbuf_take(p, data_str, data_str_sz);
         err = udp_send(__socket_info.socket[fd].udp_pcb, p);
         pbuf_free(p);
       }
