@@ -63,15 +63,16 @@ int km_gpio_set_io_mode(uint8_t pin, km_gpio_io_mode_t mode) {
     return EINVPIN;
   }
   if (mode == KM_GPIO_IO_MODE_OUTPUT) {
-    gpio_set_dir(pin, true);  // Set OUTPUT
+    gpio_set_dir(pin, GPIO_OUT);  // Set OUTPUT
+    gpio_set_input_enabled(pin, false);
   } else {
-    gpio_set_dir(pin, false);
+    gpio_set_dir(pin, GPIO_IN);  // Set INPUT
+    gpio_set_input_enabled(pin, true);
     if (mode == KM_GPIO_IO_MODE_INPUT_PULLUP) {
       gpio_pull_up(pin);
     } else if (mode == KM_GPIO_IO_MODE_INPUT_PULLDOWN) {
       gpio_pull_down(pin);
     }
-    gpio_set_input_enabled(pin, true);  // Set INPUT
   }
   return 0;
 }
