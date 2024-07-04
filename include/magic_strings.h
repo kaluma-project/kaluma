@@ -72,6 +72,7 @@
 #define MSTR_CLEAR_INTERVAL "clearInterval"
 #define MSTR_DELAY "delay"
 #define MSTR_MILLIS "millis"
+#define MSTR_PINS "pins"
 #define MSTR_DELAY_MICROSECONDS "delayMicroseconds"
 #define MSTR_MICROS "micros"
 #define MSTR_CONSOLE "console"

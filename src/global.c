@@ -588,6 +588,11 @@ JERRYXX_FUN(millis_fn) {
   return jerry_create_number(msec);
 }
 
+JERRYXX_FUN(pins_fn) {
+  km_gpio_overview();
+  return jerry_create_undefined();
+}
+
 JERRYXX_FUN(delay_microseconds_fn) {
   JERRYXX_CHECK_ARG_NUMBER_OPT(0, "usec");
   uint32_t delay_val = (uint32_t)JERRYXX_GET_ARG_NUMBER_OPT(0, 0);
@@ -608,6 +613,7 @@ static void register_global_timers() {
   jerryxx_set_property_function(global, MSTR_CLEAR_INTERVAL, clear_timer_fn);
   jerryxx_set_property_function(global, MSTR_DELAY, delay_fn);
   jerryxx_set_property_function(global, MSTR_MILLIS, millis_fn);
+  jerryxx_set_property_function(global, MSTR_PINS, pins_fn);
   jerryxx_set_property_function(global, MSTR_DELAY_MICROSECONDS,
                                 delay_microseconds_fn);
   jerryxx_set_property_function(global, MSTR_MICROS, micros_fn);

@@ -26,6 +26,10 @@
 
 #include "io.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Initialize the system
  */
@@ -78,4 +82,9 @@ uint8_t km_running_script_check();
  * custom process which need to be run in the infinite loop
  */
 void km_custom_infinite_loop();
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* __KM_SYSTEM_H */

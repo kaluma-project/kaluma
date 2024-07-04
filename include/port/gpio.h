@@ -25,6 +25,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
   KM_GPIO_IO_MODE_INPUT,
   KM_GPIO_IO_MODE_OUTPUT,
@@ -59,5 +63,10 @@ int km_gpio_irq_attach(uint8_t pin, uint8_t events);
 int km_gpio_irq_detach(uint8_t pin);
 void km_gpio_irq_enable();
 void km_gpio_irq_disable();
+void km_gpio_overview();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __KM_GPIO_H */

@@ -62,6 +62,7 @@ int km_gpio_set_io_mode(uint8_t pin, km_gpio_io_mode_t mode) {
   if (__check_gpio(pin) < 0) {
     return EINVPIN;
   }
+  gpio_set_function(pin, GPIO_FUNC_SIO);
   if (mode == KM_GPIO_IO_MODE_OUTPUT) {
     gpio_set_dir(pin, true);  // Set OUTPUT
   } else {
@@ -130,3 +131,38 @@ void km_gpio_irq_enable() {
 }
 
 void km_gpio_irq_disable() { irq_set_enabled(IO_IRQ_BANK0, false); }
+
+static const char* km_gpio_function(const uint8_t pin) {
+    const char* mode = "????";
+    switch(gpio_get_function(pin)){
+        case GPIO_FUNC_XIP:  mode = "XIP "; break;
+        case GPIO_FUNC_SPI:  mode = "SPI "; break;
+        case GPIO_FUNC_UART: mode = "UART"; break;
+        case GPIO_FUNC_I2C:  mode = "I2C "; break;
+        case GPIO_FUNC_PWM:  mode = "PWM "; break;
+        case GPIO_FUNC_SIO:  mode = "SIO "; break;
+        case GPIO_FUNC_PIO0: mode = "PIO0"; break;
+        case GPIO_FUNC_PIO1: mode = "PIO1"; break;
+        case GPIO_FUNC_GPCK: mode = "GPCK"; break;
+        case GPIO_FUNC_USB:  mode = "USB "; break;
+        case GPIO_FUNC_NULL: mode = "NULL"; break;
+    }
+    return(mode);
+}
+
+static void show_pin_details(const uint8_t pin) {
+    const char* pullUp = (gpio_is_pulled_up(pin) ? " up " : gpio_is_pulled_down(pin) ? "down" : "    ");
+    const char* direction = (gpio_get_dir(pin) == 1 ? "[out]," : "[in], ");
+    const char* value = gpio_get(pin) ? "high," : "low, ";
+    printf("GPIO%02d=%s Dir: %s Mode: [%s], Pull: [%s] \n\r", pin, value, direction, km_gpio_function(pin), pullUp);
+}
+
+void km_gpio_overview () {
+    for (uint8_t index = 0; index <= 22; index++) {
+        show_pin_details(index);
+    }
+    for (uint8_t index = 25; index <= 28; index++) {
+        show_pin_details(index);
+    }
+}
+
