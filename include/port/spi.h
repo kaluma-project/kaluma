@@ -26,6 +26,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
   KM_SPI_MODE_0,  // (CPOL=0/CPHA=0)
   KM_SPI_MODE_1,  // (CPOL=0/CPHA=1)
@@ -122,5 +126,9 @@ int km_set_spi_baudrate(uint8_t bus, uint32_t baudrate);
  * Close the SPI bus
  */
 int km_spi_close(uint8_t bus);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __KM_SPI_H */
