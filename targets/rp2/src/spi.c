@@ -148,16 +148,22 @@ int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
   spi_init(spi, baudrate);
   spi_set_format(spi, 8, pol, pha, order);
   if (pins.miso >= 0) {
+    gpio_init(pins.miso);
     gpio_set_function(pins.miso, GPIO_FUNC_SPI);
+    if (miso_pullup) {
+      gpio_pull_up(pins.miso);
+    }
   }
   if (pins.mosi >= 0) {
+    gpio_init(pins.mosi);
     gpio_set_function(pins.mosi, GPIO_FUNC_SPI);
+    if (miso_pullup) {
+      gpio_pull_up(pins.mosi);
+    }
   }
   if (pins.sck >= 0) {
+    gpio_init(pins.sck);
     gpio_set_function(pins.sck, GPIO_FUNC_SPI);
-  }
-  if (miso_pullup) {
-    gpio_pull_up(pins.miso);
   }
   __spi_status[bus].enabled = true;
   return 0;

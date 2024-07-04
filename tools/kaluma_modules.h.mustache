@@ -28,6 +28,10 @@
 typedef jerry_value_t (* initialize_fn)();
 
 {{#modules}}
+{{#native}}
+#include <{{name}}/module_{{name}}.h>
+{{/native}}
+#define MODULE_{{nameUC}}_SELECTED 1
 extern const char module_{{name}}_name[];
 extern const uint8_t module_{{name}}_code[];
 extern const size_t module_{{name}}_size;

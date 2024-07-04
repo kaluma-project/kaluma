@@ -41,6 +41,7 @@ JERRYXX_FUN(spi_ctor_fn) {
   JERRYXX_CHECK_ARG_OBJECT_OPT(1, "options");
 
   // read parameters
+  bool pullup = false;
   uint8_t bus = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
   uint8_t mode = SPI_DEFAULT_MODE;
   uint32_t baudrate = SPI_DEFAULT_BAUDRATE;
@@ -65,6 +66,8 @@ JERRYXX_FUN(spi_ctor_fn) {
                                                     def_pins.mosi);
     pins.sck = (int8_t)jerryxx_get_property_number(options, MSTR_SPI_SCK,
                                                    def_pins.sck);
+    pullup = (int8_t)jerryxx_get_property_boolean(options, MSTR_SPI_PULL,
+                                                   false);
   }
 
   if (bitorder != KM_SPI_BITORDER_LSB) bitorder = KM_SPI_BITORDER_MSB;
@@ -73,7 +76,7 @@ JERRYXX_FUN(spi_ctor_fn) {
                               (const jerry_char_t *)"SPI mode error.");
   // initialize the bus
   int ret = km_spi_setup(bus, (km_spi_mode_t)mode, baudrate,
-                         (km_spi_bitorder_t)bitorder, pins, false);
+                         (km_spi_bitorder_t)bitorder, pins, pullup);
   if (ret < 0) {
     return jerry_create_error_from_value(create_system_error(ret), true);
   } else {
