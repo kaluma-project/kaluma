@@ -27,7 +27,7 @@
 #include "err.h"
 
 extern void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-static uint8_t pwm_configured[PWM_NUM];
+static uint8_t pwm_configured[KALUMA_PWM_NUM];
 static void tim1_pwm_setup(uint32_t, uint32_t, uint32_t, uint32_t);
 static void tim2_pwm_setup(uint32_t, uint32_t, uint32_t, uint32_t);
 static void tim3_pwm_setup(uint32_t, uint32_t, uint32_t, uint32_t);

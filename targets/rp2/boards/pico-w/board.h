@@ -27,6 +27,7 @@
 // system
 #define KALUMA_SYSTEM_ARCH "cortex-m0-plus"
 #define KALUMA_SYSTEM_PLATFORM "rp2"
+#define PICO_CYW43
 
 // repl
 #define KALUMA_REPL_BUFFER_SIZE 1024
@@ -69,21 +70,20 @@
 // -----------------------------------------------------------------
 
 #define KALUMA_GPIO_COUNT 29
-// #define ADC_NUM 3
-#define PWM_NUM 27
-#define I2C_NUM 2
-#define SPI_NUM 2
-#define UART_NUM 2
-// #define LED_NUM 1
-// #define BUTTON_NUM 0
-#define PIO_NUM 2
-#define PIO_SM_NUM 4
+// #define KALUMA_ADC_NUM 3
+#define KALUMA_PWM_NUM 27
+#define KALUMA_I2C_NUM 2
+#define KALUMA_SPI_NUM 2
+#define KALUMA_UART_NUM 2
+// #define KALUMA_LED_NUM 1
+// #define KALUMA_BUTTON_NUM 0
+#define KALUMA_PIO_NUM 2
+#define KALUMA_PIO_SM_NUM 4
 
 #define ADC_RESOLUTION_BIT 12
 #define PWM_CLK_REF 1250
 #define I2C_MAX_CLOCK 1000000
 #define SCR_LOAD_GPIO 22  // GPIO 22
-#define PICO_CYW43
 #ifdef PICO_CYW43
 #define WIFI_EN_GPIO 23  // GPIO 23
 #endif                   /* PICO_CWY43 */

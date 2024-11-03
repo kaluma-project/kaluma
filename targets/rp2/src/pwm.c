@@ -34,7 +34,7 @@ static struct __pwm_config_s {
   double duty;
   uint16_t period;
   bool enabled;
-} __pwm_config[PWM_NUM];
+} __pwm_config[KALUMA_PWM_NUM];
 
 static int __get_pwm_index(uint8_t pin) {
   if (pin <= 22) {
@@ -49,7 +49,7 @@ static int __get_pwm_index(uint8_t pin) {
  * Initialize all PWM when system started
  */
 void km_pwm_init() {
-  for (int i = 0; i < PWM_NUM; i++) {
+  for (int i = 0; i < KALUMA_PWM_NUM; i++) {
     __pwm_config[i].freq = 0;
     __pwm_config[i].duty = 0;
     __pwm_config[i].period = 0;

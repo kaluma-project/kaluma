@@ -13,8 +13,14 @@ if(NOT BOARD)
   set(BOARD "pico-w")
 endif()
 
-if(BOARD STREQUAL "pico-w")
+if(BOARD STREQUAL "pico")
+  set(PICO_BOARD pico)
+elseif(BOARD STREQUAL "pico-w")
   set(PICO_BOARD pico_w)
+elseif(BOARD STREQUAL "pico2")
+  set(PICO_BOARD pico2)
+else()
+  message(FATAL_ERROR "KalumaJS does not support this board yet.")
 endif()
 
 # default modules
@@ -79,16 +85,24 @@ set(SOURCES
 
 include_directories(${TARGET_INC_DIR} ${BOARD_DIR})
 
-set(TARGET_HEAPSIZE 180)
-set(JERRY_TOOLCHAIN toolchain_mcu_cortexm0plus.cmake)
+if(BOARD STREQUAL "pico2")
+  # For RP2350
+  set(CMAKE_SYSTEM_PROCESSOR cortex-m33)
+  set(CMAKE_C_FLAGS "-march=armv8-m.main+dsp+fp -mcpu=cortex-m33 -mthumb -mfloat-abi=softfp")
+  set(JERRY_TOOLCHAIN toolchain_mcu_cortexm33.cmake)
+  set(TARGET_HEAPSIZE 256)
+else() # pico and pico-w have the same settings
+  # For RP2040
+  set(CMAKE_SYSTEM_PROCESSOR cortex-m0plus)
+  set(CMAKE_C_FLAGS "-march=armv6-m -mcpu=cortex-m0plus -mthumb")
+  set(JERRY_TOOLCHAIN toolchain_mcu_cortexm0plus.cmake)
+  set(TARGET_HEAPSIZE 180)
+endif()
 
-set(CMAKE_SYSTEM_PROCESSOR cortex-m0plus)
-set(CMAKE_C_FLAGS "-march=armv6-m -mcpu=cortex-m0plus -mthumb ${OPT} -Wall -fdata-sections -ffunction-sections")
 if(DEBUG EQUAL 1)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -gdwarf-2")
 endif()
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -MMD -MP")
-
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPT} -Wall -fdata-sections -ffunction-sections -MMD -MP")
 set(PREFIX arm-none-eabi-)
 set(CMAKE_ASM_COMPILER ${PREFIX}gcc)
 set(CMAKE_C_COMPILER ${PREFIX}gcc)
@@ -106,7 +120,7 @@ set(TARGET_LIBS c nosys m
   hardware_uart
   hardware_pio
   hardware_flash
-  hardware_rtc
+  pico_aon_timer
   hardware_watchdog
   hardware_sync)
 set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -Wl,-Map=${OUTPUT_TARGET}.map,--cref,--gc-sections")

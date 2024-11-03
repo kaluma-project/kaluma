@@ -37,7 +37,7 @@ static const uint32_t uart_parity[] = {UART_PARITY_NONE, UART_PARITY_ODD,
 static const uint32_t uart_hw_control[] = {
     UART_HWCONTROL_NONE, UART_HWCONTROL_RTS, UART_HWCONTROL_CTS,
     UART_HWCONTROL_RTS_CTS};
-static ringbuffer_t uart_rx_ringbuffer[UART_NUM];
+static ringbuffer_t uart_rx_ringbuffer[KALUMA_UART_NUM];
 static uint8_t *read_buffer[] = {NULL, NULL};
 
 /**
@@ -76,7 +76,7 @@ void km_uart_init() {}
  * Cleanup all UART when system cleanup
  */
 void km_uart_cleanup() {
-  for (int k = 0; k < UART_NUM; k++) {
+  for (int k = 0; k < KALUMA_UART_NUM; k++) {
     if (uart_handle[k]->Instance == uart_ch[k]) km_uart_close(k);
   }
 }

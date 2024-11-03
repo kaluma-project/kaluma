@@ -19,52 +19,58 @@
  * SOFTWARE.
  */
 
-#ifndef __RP2_PICO_H
-#define __RP2_PICO_H
+#ifndef __RP2_PICO2_H
+#define __RP2_PICO2_H
 
 #include "jerryscript.h"
 
 // system
-#define KALUMA_SYSTEM_ARCH "cortex-m0-plus"
+#define KALUMA_SYSTEM_ARCH "cortex-m33"
 #define KALUMA_SYSTEM_PLATFORM "rp2"
 
 // repl
 #define KALUMA_REPL_BUFFER_SIZE 1024
 #define KALUMA_REPL_HISTORY_SIZE 10
 
-// Flash allocation map
+// Flash allocation map 4MB for pico 2
 //
-// |         A        | B |     C     |     D     |
-// |------------------|---|-----------|-----------|
-// |      1008K       |16K|   512K    |   512K    |
+// |------------------------------------------------|
+// |      A     | B |       C       |       D       |
+// |--------------------|---|-----------|-----------|
+// |    960K    |64K|     1536K     |     1536K     |
+// |------------------------------------------------|
+//              |------------- flash.c -------------|
+
+// |------ 1MB -----|------------- 3MB -------------|
+// |---------------------- 4MB ---------------------|
 //
 // - A : binary (firmware)
 // - B : storage (key-value database)
 // - C : user program (js)
 // - D : file system (lfs)
-// (Total : 2MB)
+// (Total : 4MB)
 
 // binary (1008KB)
-#define KALUMA_BINARY_MAX 0xFC000
+#define KALUMA_BINARY_MAX 0xF0000
 
-// flash (B + C + D = 1040KB (=16KB + 1024KB))
+// flash (B + C + D = 1040KB (=64KB + 2048KB))
 #define KALUMA_FLASH_OFFSET KALUMA_BINARY_MAX
 #define KALUMA_FLASH_SECTOR_SIZE 4096
-#define KALUMA_FLASH_SECTOR_COUNT 260
+#define KALUMA_FLASH_SECTOR_COUNT 784
 #define KALUMA_FLASH_PAGE_SIZE 256
 
-// user program on flash (512KB)
-#define KALUMA_PROG_SECTOR_BASE 4
-#define KALUMA_PROG_SECTOR_COUNT 128
+// user program on flash (1024KB)
+#define KALUMA_PROG_SECTOR_BASE 16
+#define KALUMA_PROG_SECTOR_COUNT 384
 
-// storage on flash (16KB)
+// storage on flash (64KB)
 #define KALUMA_STORAGE_SECTOR_BASE 0
-#define KALUMA_STORAGE_SECTOR_COUNT 4
+#define KALUMA_STORAGE_SECTOR_COUNT 16
 
-// file system on flash (512K)
-// - sector base : 132
-// - sector count : 128
-// - use block device : new Flash(132, 128)
+// file system on flash (1024K)
+// - sector base : 400
+// - sector count : 384
+// - use block device : new Flash(400, 384)
 
 // -----------------------------------------------------------------
 
@@ -84,6 +90,7 @@
 #define I2C_MAX_CLOCK 1000000
 #define SCR_LOAD_GPIO 22  // GPIO 22
 
+
 void board_init();
 
-#endif /* __RP2_PICO_H */
+#endif /* __RP2_PICO2_H */

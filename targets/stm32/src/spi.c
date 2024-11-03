@@ -94,7 +94,7 @@ void km_spi_init() {}
  * Cleanup all SPI when system cleanup
  */
 void km_spi_cleanup() {
-  for (int k = 0; k < SPI_NUM; k++) {
+  for (int k = 0; k < KALUMA_SPI_NUM; k++) {
     if (spi_handle[k]->Instance == spi_ch[k]) km_spi_close(k);
   }
 }
