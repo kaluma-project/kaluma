@@ -29,7 +29,7 @@
 
 static struct __i2c_status_s {
   km_i2c_mode_t mode;
-} __i2c_status[I2C_NUM];
+} __i2c_status[KALUMA_I2C_NUM];
 
 static bool __check_i2c_pins(uint8_t bus, km_i2c_pins_t pins) {
   if ((pins.sda > 27) || (pins.scl > 27)) {
@@ -79,7 +79,7 @@ km_i2c_pins_t km_i2c_get_default_pins(uint8_t bus) {
  * Initialize all I2C when system started
  */
 void km_i2c_init() {
-  for (int i = 0; i < I2C_NUM; i++) {
+  for (int i = 0; i < KALUMA_I2C_NUM; i++) {
     __i2c_status[i].mode = KM_I2C_NONE;
   }
 }

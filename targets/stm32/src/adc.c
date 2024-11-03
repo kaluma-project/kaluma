@@ -27,8 +27,8 @@
 #include "err.h"
 
 DMA_HandleTypeDef hdma_adc1;
-static uint16_t adc_buf[ADC_NUM];
-static uint8_t adc_configured[ADC_NUM];
+static uint16_t adc_buf[KALUMA_ADC_NUM];
+static uint8_t adc_configured[KALUMA_ADC_NUM];
 static ADC_HandleTypeDef hadc1;
 
 static const struct __adc_config {
@@ -37,7 +37,7 @@ static const struct __adc_config {
   uint32_t pin;
   uint32_t channel;
 } adc_config[] = {
-    // Same as ADC_NUM
+    // Same as KALUMA_ADC_NUM
     {3, GPIOA, GPIO_PIN_1, ADC_CHANNEL_1},
     {4, GPIOA, GPIO_PIN_2, ADC_CHANNEL_2},
     {5, GPIOA, GPIO_PIN_3, ADC_CHANNEL_3},
@@ -87,7 +87,7 @@ void adc1_init() {
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = ADC_NUM;
+  hadc1.Init.NbrOfConversion = KALUMA_ADC_NUM;
   hadc1.Init.DMAContinuousRequests = DISABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK) {
@@ -136,7 +136,7 @@ void km_adc_cleanup() {
 double km_adc_read(uint8_t adcIndex) {
   HAL_ADC_Start(&hadc1);
 
-  for (int k = 0; k < ADC_NUM; k++) {
+  for (int k = 0; k < KALUMA_ADC_NUM; k++) {
     HAL_StatusTypeDef status = HAL_ADC_PollForConversion(&hadc1, 100);
 
     if (status == HAL_TIMEOUT) {
@@ -157,7 +157,7 @@ int km_adc_setup(uint8_t pin) {
   if (n < 0) return ENOPHRPL;
 
   uint8_t adc_need_init = 1;
-  for (int k = 0; k < ADC_NUM; k++) {
+  for (int k = 0; k < KALUMA_ADC_NUM; k++) {
     if (adc_configured[k]) {
       adc_need_init = 0;
       break;
@@ -184,7 +184,7 @@ int km_adc_close(uint8_t pin) {
   adc_configured[n] = 0;
 
   uint8_t adc_need_deinit = 1;
-  for (int k = 0; k < ADC_NUM; k++) {
+  for (int k = 0; k < KALUMA_ADC_NUM; k++) {
     if (adc_configured[k]) {
       adc_need_deinit = 0;
       break;

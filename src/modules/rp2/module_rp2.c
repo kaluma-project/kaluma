@@ -48,7 +48,7 @@
 
 #define __RP2_TEMP_ADC_PORT 30
 
-static jerry_value_t __pio_call_back[PIO_NUM];
+static jerry_value_t __pio_call_back[KALUMA_PIO_NUM];
 
 static PIO __pio(uint8_t pio) {
   if (pio == 0) {
@@ -447,10 +447,12 @@ JERRYXX_FUN(dormant_fn) {
   clock_stop(clk_usb);
   // CLK ADC = 0MHz
   clock_stop(clk_adc);
+#ifdef PICO_RP2040
   // CLK RTC = ideally XOSC (12MHz) / 256 = 46875Hz but could be rosc
   uint clk_rtc_src = CLOCKS_CLK_RTC_CTRL_AUXSRC_VALUE_XOSC_CLKSRC;
   clock_configure(clk_rtc, 0,  // No GLMUX
                   clk_rtc_src, src_hz, 46875);
+#endif
   // CLK PERI = clk_sys. Used as reference clock for Peripherals. No dividers so
   // just select and enable
   clock_configure(clk_peri, 0, CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLK_SYS,
@@ -497,10 +499,12 @@ JERRYXX_FUN(dormant_fn) {
                   CLOCKS_CLK_ADC_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB, 48 * MHZ,
                   48 * MHZ);
   // CLK RTC = PLL USB (48MHz) / 1024 = 46875Hz
+#ifdef PICO_RP2040
   clock_configure(clk_rtc,
                   0,  // No GLMUX
                   CLOCKS_CLK_RTC_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB, 48 * MHZ,
                   46875);
+#endif
   // CLK PERI = clk_sys. Used as reference clock for Peripherals. No dividers so
   // just select and enable Normally choose clk_sys or clk_usb
   clock_configure(clk_peri, 0, CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLK_SYS,
@@ -513,7 +517,7 @@ JERRYXX_FUN(dormant_fn) {
 jerry_value_t module_rp2_init() {
   irq_set_exclusive_handler(PIO0_IRQ_0, __pio0_irq_0_handler);
   irq_set_exclusive_handler(PIO1_IRQ_0, __pio1_irq_0_handler);
-  for (int i = 0; i < PIO_NUM; i++) {
+  for (int i = 0; i < KALUMA_PIO_NUM; i++) {
     __pio_call_back[i] = jerry_create_undefined();
   }
 

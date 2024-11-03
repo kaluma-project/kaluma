@@ -59,7 +59,7 @@ void km_i2c_init() {}
  * Cleanup all I2C when system cleanup
  */
 void km_i2c_cleanup() {
-  for (int k = 0; k < I2C_NUM; k++) {
+  for (int k = 0; k < KALUMA_I2C_NUM; k++) {
     if (handle[k]->Instance == instance[k]) km_i2c_close(k);
   }
 }

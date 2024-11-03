@@ -91,7 +91,7 @@ static void km_uid_init() {
 }
 
 static void km_pio_init() {
-  for (int i = 0; i < PIO_SM_NUM; i++) {
+  for (int i = 0; i < KALUMA_PIO_SM_NUM; i++) {
     if (pio_sm_is_claimed(pio0, i))
       pio_sm_unclaim(pio0, i);
     if (pio_sm_is_claimed(pio1, i))

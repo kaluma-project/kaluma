@@ -28,7 +28,7 @@
 
 struct __spi_status_s {
   bool enabled;
-} __spi_status[SPI_NUM];
+} __spi_status[KALUMA_SPI_NUM];
 
 static bool __check_spi_pins(uint8_t bus, km_spi_pins_t pins) {
   if (bus == 0) {
@@ -95,7 +95,7 @@ static spi_inst_t *__get_spi_no(uint8_t bus) {
  * Initialize all SPI when system started
  */
 void km_spi_init() {
-  for (int i = 0; i < SPI_NUM; i++) {
+  for (int i = 0; i < KALUMA_SPI_NUM; i++) {
     __spi_status[i].enabled = false;
   }
 }

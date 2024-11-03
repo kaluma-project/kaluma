@@ -19,45 +19,9 @@
  * SOFTWARE.
  */
 
-#ifndef __LINUX_H
-#define __LINUX_H
+#include "board.h"
 
-#include "jerryscript.h"
-
-// system
-#define KALUMA_SYSTEM_ARCH "x86"
-#define KALUMA_SYSTEM_PLATFORM "linux"
-
-// repl
-#define KALUMA_REPL_BUFFER_SIZE 1024
-#define KALUMA_REPL_HISTORY_SIZE 10
-
-// binary (1008KB)
-#define KALUMA_BINARY_MAX 0x100000
-
-// flash (B + C + D = 1040KB (=16KB + 1024KB))
-#define KALUMA_FLASH_OFFSET KALUMA_BINARY_MAX
-#define KALUMA_FLASH_SECTOR_SIZE 4096
-#define KALUMA_FLASH_SECTOR_COUNT 260
-#define KALUMA_FLASH_PAGE_SIZE 256
-
-// user program on flash (512KB)
-#define KALUMA_PROG_SECTOR_BASE 4
-#define KALUMA_PROG_SECTOR_COUNT 128
-
-// storage on flash (16KB)
-#define KALUMA_STORAGE_SECTOR_BASE 0
-#define KALUMA_STORAGE_SECTOR_COUNT 4
-
-// #define KALUMA_GPIO_COUNT 22
-// #define KALUMA_ADC_NUM 6
-// #define KALUMA_PWM_NUM 6
-// #define KALUMA_I2C_NUM 2
-// #define KALUMA_SPI_NUM 2
-// #define KALUMA_UART_NUM 2
-// #define KALUMA_LED_NUM 1
-// #define KALUMA_BUTTON_NUM 1
-
-void board_init();
-
-#endif /* __LINUX_H */
+/**
+ * Initialize board
+ */
+void board_init() {}

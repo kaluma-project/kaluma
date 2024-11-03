@@ -23,47 +23,32 @@
 
 #include <time.h>
 
-#include "hardware/rtc.h"
+#include "pico/aon_timer.h"
 #include "pico/stdlib.h"
 #include "pico/util/datetime.h"
 
+#define DIV_NS_2_MS 1000000
+#define MUL_MS_2_NS 1000000
+#define DIV_MS_2_S  1000
+#define MUL_S_2_MS  1000
+#define TAKE_MS     1000
+
 void km_rtc_init() {
-  rtc_init();
-  // set as unix epoch time
-  datetime_t t = {
-      .year = 1970, .month = 1, .day = 1, .dotw = 4, .min = 0, .sec = 0};
-  rtc_set_datetime(&t);
+  aon_timer_start_with_timeofday();
 }
 
 void km_rtc_cleanup() {}
 
 void km_rtc_set_time(uint64_t time) {
-  struct tm* ptm;
-  uint64_t stime = time / 1000;
-  // uint64_t ms = time % 1000;
-  time_t t = (time_t)stime;
-  ptm = gmtime(&t);
-  datetime_t datetime;
-  datetime.sec = ptm->tm_sec;
-  datetime.min = ptm->tm_min;
-  datetime.hour = ptm->tm_hour;
-  datetime.day = ptm->tm_mday;
-  datetime.dotw = ptm->tm_wday;
-  datetime.month = ptm->tm_mon + 1;
-  datetime.year = ptm->tm_year + 1900;
-  rtc_set_datetime(&datetime);
+  struct timespec ts;
+  ts.tv_sec = time / DIV_MS_2_S;
+  ts.tv_nsec = (time % TAKE_MS) * MUL_MS_2_NS;
+  aon_timer_set_time(&ts);
 }
 
 uint64_t km_rtc_get_time() {
-  datetime_t datetime;
-  rtc_get_datetime(&datetime);
-  struct tm ts;
-  ts.tm_sec = datetime.sec;
-  ts.tm_min = datetime.min;
-  ts.tm_hour = datetime.hour;
-  ts.tm_mday = datetime.day;
-  ts.tm_mon = datetime.month - 1;
-  ts.tm_year = datetime.year - 1900;
-  time_t tsec = mktime(&ts);
-  return (uint64_t)(tsec * 1000);
+  struct timespec ts;
+  aon_timer_get_time(&ts);
+  uint32_t msec = (uint32_t)(ts.tv_nsec / DIV_NS_2_MS) % TAKE_MS;
+  return (uint64_t)(ts.tv_sec * MUL_S_2_MS + msec);
 }

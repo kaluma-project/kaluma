@@ -46,13 +46,13 @@
 #define SRAM_BASE_ADDR (0x20000000)
 
 #define KALUMA_GPIO_COUNT 22
-#define ADC_NUM 6
-#define PWM_NUM 6
-#define I2C_NUM 2
-#define SPI_NUM 2
-#define UART_NUM 2
-#define LED_NUM 1
-#define BUTTON_NUM 1
+#define KALUMA_ADC_NUM 6
+#define KALUMA_PWM_NUM 6
+#define KALUMA_I2C_NUM 2
+#define KALUMA_SPI_NUM 2
+#define KALUMA_UART_NUM 2
+#define KALUMA_LED_NUM 1
+#define KALUMA_BUTTON_NUM 1
 
 #define APB1 0
 #define APB2 1

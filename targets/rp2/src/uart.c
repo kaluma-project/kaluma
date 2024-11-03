@@ -29,11 +29,11 @@
 #include "pico/stdlib.h"
 #include "ringbuffer.h"
 
-static ringbuffer_t __uart_rx_ringbuffer[UART_NUM];
-static uint8_t *__read_buffer[UART_NUM];
+static ringbuffer_t __uart_rx_ringbuffer[KALUMA_UART_NUM];
+static uint8_t *__read_buffer[KALUMA_UART_NUM];
 static struct __uart_status_s {
   bool enabled;
-} __uart_status[UART_NUM];
+} __uart_status[KALUMA_UART_NUM];
 
 static uart_inst_t *__get_uart_no(uint8_t bus) {
   if (bus == 0) {
@@ -120,7 +120,7 @@ km_uart_pins_t km_uart_get_default_pins(uint8_t port) {
  * Initialize all UART when system started
  */
 void km_uart_init() {
-  for (int i = 0; i < UART_NUM; i++) {
+  for (int i = 0; i < KALUMA_UART_NUM; i++) {
     __uart_status[i].enabled = false;
     __read_buffer[i] = NULL;
   }
@@ -130,7 +130,7 @@ void km_uart_init() {
  * Cleanup all UART when system cleanup
  */
 void km_uart_cleanup() {
-  for (int i = 0; i < UART_NUM; i++) {
+  for (int i = 0; i < KALUMA_UART_NUM; i++) {
     if (__uart_status[i].enabled) {
       km_uart_close(i);
     }
