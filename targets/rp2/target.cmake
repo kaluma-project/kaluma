@@ -121,6 +121,7 @@ set(TARGET_LIBS c nosys m
   hardware_pio
   hardware_flash
   pico_aon_timer
+  pico_rand
   hardware_watchdog
   hardware_sync)
 set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -Wl,-Map=${OUTPUT_TARGET}.map,--cref,--gc-sections")

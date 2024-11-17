@@ -116,5 +116,6 @@
 #define MSTR_RP2_PIO_SM_IRQ "pio_sm_irq"
 
 #define MSTR_RP2_DORMANT "dormant"
+#define MSTR_RP2_RANDOM_BIG_INT "randomBigInt"
 
 #endif /* __PIO_MAGIC_STRINGS_H */

@@ -492,8 +492,13 @@ function dormant(pins, events) {
   rp2_native.dormant(pins, events);
 }
 
+function randomBigInt() {
+  return rp2_native.randomBigInt();
+}
+
 exports.PIO = PIO;
 exports.ASM = ASM;
 exports.StateMachine = StateMachine;
 exports.dormant = dormant;
+exports.randomBigInt = randomBigInt;
 exports.TEMPERATURE_ADC = TEMPERATURE_ADC;
