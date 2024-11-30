@@ -259,6 +259,13 @@ class ClientRequest extends OutgoingMessage {
       // Disable automatic chunked header - some http server do not accept it.
       // this.setHeader('transfer-encoding', 'chunked');
     }
+    if (
+      !this.headers.hasOwnProperty('Host') &&
+      !this.headers.hasOwnProperty('host')
+    ) {
+      // Host header is required for HTTP/1.1
+      this.setHeader('host', this.options.host)
+    }
     this._wbuf += `${this.options.method} ${this.path} HTTP/1.1\r\n`;
     for (var key in this.headers) {
       this._wbuf += `${key}: ${this.headers[key]}\r\n`;
