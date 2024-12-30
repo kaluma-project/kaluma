@@ -33,6 +33,7 @@
 #include "jerryscript.h"
 #include "jerryxx.h"
 #include "pico/stdlib.h"
+#include "pico/rand.h"
 #include "rp2_magic_strings.h"
 
 #define __PIO_INT_EN_PIO0_0 1
@@ -511,6 +512,20 @@ JERRYXX_FUN(dormant_fn) {
                   125 * MHZ, 125 * MHZ);
   return jerry_create_undefined();
 }
+
+/**
+ * random_big_int_fn()
+ * args:
+ *   min {number}, optional
+ *   max {number}
+ *   callback {function}
+ */
+JERRYXX_FUN(random_big_int_fn) {
+  rng_128_t random;
+  get_rand_128 (&random);
+  return jerry_create_bigint(random.r, 2, false);
+}
+
 /**
  * Initialize 'rp2' module and return exports
  */
@@ -545,5 +560,6 @@ jerry_value_t module_rp2_init() {
                                 pio_sm_drain_txfifo_fn);
   jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_IRQ, pio_sm_irq_fn);
   jerryxx_set_property_function(exports, MSTR_RP2_DORMANT, dormant_fn);
+  jerryxx_set_property_function(exports, MSTR_RP2_RANDOM_BIG_INT, random_big_int_fn);
   return exports;
 }
