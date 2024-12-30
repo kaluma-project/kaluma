@@ -19,27 +19,28 @@
  * SOFTWARE.
  */
 
-#ifndef __RP2_PICO2_H
-#define __RP2_PICO2_H
+#ifndef __RP2_PICO2_W_H
+#define __RP2_PICO2_W_H
 
 #include "jerryscript.h"
 
 // system
 #define KALUMA_SYSTEM_ARCH "cortex-m33"
 #define KALUMA_SYSTEM_PLATFORM "rp2"
+#define PICO_CYW43
 
 // repl
 #define KALUMA_REPL_BUFFER_SIZE 1024
 #define KALUMA_REPL_HISTORY_SIZE 10
 
-// Flash allocation map 4MB for pico 2
+// Flash allocation map 4MB for pico 2W
 //
 // |------------------------------------------------|
-// |      A     | B |       C       |       D       |
-// |------------|---|---------------|---------------|
-// |    960K    |64K|     1536K     |     1536K     |
+// |      A         | B |     C     |       D       |
+// |----------------|---|-----------|---------------|
+// |      1024K     |64K|  1472K    |     1536K     |
 // |------------------------------------------------|
-//              |------------- flash.c -------------|
+//                  |----------- flash.c -----------|
 
 // |------ 1MB -----|------------- 3MB -------------|
 // |---------------------- 4MB ---------------------|
@@ -50,18 +51,18 @@
 // - D : file system (lfs)
 // (Total : 4MB)
 
-// binary (960KB)
-#define KALUMA_BINARY_MAX 0xF0000
+// binary (1024K)
+#define KALUMA_BINARY_MAX 0x100000
 
-// flash (B + C + D = 3136KB (=64KB + 3072KB))
+// flash (B + C + D = 3072KB (=64KB + 1472KB + 1536KB))
 #define KALUMA_FLASH_OFFSET KALUMA_BINARY_MAX
 #define KALUMA_FLASH_SECTOR_SIZE 4096
-#define KALUMA_FLASH_SECTOR_COUNT 784
+#define KALUMA_FLASH_SECTOR_COUNT 768
 #define KALUMA_FLASH_PAGE_SIZE 256
 
-// user program on flash (1536KB)
+// user program on flash (1472KB)
 #define KALUMA_PROG_SECTOR_BASE 16
-#define KALUMA_PROG_SECTOR_COUNT 384
+#define KALUMA_PROG_SECTOR_COUNT 368
 
 // storage on flash (64KB)
 #define KALUMA_STORAGE_SECTOR_BASE 0
@@ -89,8 +90,9 @@
 #define PWM_CLK_REF 1250
 #define I2C_MAX_CLOCK 1000000
 #define SCR_LOAD_GPIO 22  // GPIO 22
-
-
+#ifdef PICO_CYW43
+#define WIFI_EN_GPIO 23  // GPIO 23
+#endif                   /* PICO_CWY43 */
 void board_init();
 
-#endif /* __RP2_PICO2_H */
+#endif /* __RP2_PICO2_W_H */

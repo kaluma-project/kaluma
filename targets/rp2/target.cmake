@@ -8,9 +8,9 @@ set(DEBUG 1)
 # optimization
 set(OPT -Og)
 
-# default board: pico-w
+# default board: pico2-w
 if(NOT BOARD)
-  set(BOARD "pico-w")
+  set(BOARD "pico2-w")
 endif()
 
 if(BOARD STREQUAL "pico")
@@ -19,6 +19,8 @@ elseif(BOARD STREQUAL "pico-w")
   set(PICO_BOARD pico_w)
 elseif(BOARD STREQUAL "pico2")
   set(PICO_BOARD pico2)
+elseif(BOARD STREQUAL "pico2-w")
+  set(PICO_BOARD pico2_w)
 else()
   message(FATAL_ERROR "KalumaJS does not support this board yet.")
 endif()
@@ -85,7 +87,7 @@ set(SOURCES
 
 include_directories(${TARGET_INC_DIR} ${BOARD_DIR})
 
-if(BOARD STREQUAL "pico2")
+if(BOARD STREQUAL "pico2" OR BOARD STREQUAL "pico2-w")
   # For RP2350
   set(CMAKE_SYSTEM_PROCESSOR cortex-m33)
   set(CMAKE_C_FLAGS "-march=armv8-m.main+dsp+fp -mcpu=cortex-m33 -mthumb -mfloat-abi=softfp")
@@ -127,7 +129,7 @@ set(TARGET_LIBS c nosys m
 set(CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -u _printf_float -Wl,-Map=${OUTPUT_TARGET}.map,--cref,--gc-sections")
 
 # For the pico-w board
-if(BOARD STREQUAL "pico-w")
+if(BOARD STREQUAL "pico-w" OR BOARD STREQUAL "pico2-w")
   # modules for pico-w
   set(MODULES
   ${MODULES}
