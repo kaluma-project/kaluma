@@ -154,10 +154,12 @@ int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
   if ((flow & KM_UART_FLOW_RTS) && (pins.rts >= 0)) {
     rts_en = true;
     gpio_set_function(pins.rts, GPIO_FUNC_UART);
+    gpio_set_pulls(pins.rts, false, false);
   }
   if ((flow & KM_UART_FLOW_CTS) && (pins.cts >= 0)) {
     cts_en = true;
     gpio_set_function(pins.cts, GPIO_FUNC_UART);
+    gpio_set_pulls(pins.cts, false, false);
   }
   uart_set_hw_flow(uart, cts_en, rts_en);
   if (parity == KM_UART_PARITY_TYPE_EVEN) {
@@ -176,9 +178,11 @@ int km_uart_setup(uint8_t port, uint32_t baudrate, uint8_t bits,
   uart_set_fifo_enabled(uart, true);
   if (pins.tx >= 0) {
     gpio_set_function(pins.tx, GPIO_FUNC_UART);
+    gpio_set_pulls(pins.tx, false, false);
   }
   if (pins.rx >= 0) {
     gpio_set_function(pins.rx, GPIO_FUNC_UART);
+    gpio_set_pulls(pins.rx, false, false);
   }
   if (port == 0) {
     irq_set_exclusive_handler(UART0_IRQ, __uart_irq_handler_0);

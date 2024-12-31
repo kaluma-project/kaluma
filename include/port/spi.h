@@ -27,6 +27,13 @@
 #include <stdint.h>
 
 typedef enum {
+  KM_SPI_DATA_NOPULL,  // Both MOSI and MISO NO PULL
+  KM_SPI_MOSI_PULLUP,  // MOSI PULL UP
+  KM_SPI_MISO_PULLUP,  // MISO PULL UP
+  KM_SPI_DATA_PULLUP   // Both MOSI and MISO PULL UP
+} km_spi_pullup_t;
+
+typedef enum {
   KM_SPI_MODE_0,  // (CPOL=0/CPHA=0)
   KM_SPI_MODE_1,  // (CPOL=0/CPHA=1)
   KM_SPI_MODE_2,  // (CPOL=1/CPHA=0)
@@ -64,12 +71,12 @@ void km_spi_cleanup();
  * @param bit_order Bit order (MSB or LSB).
  * @param bits Number of bits in each transferred word.
  * @param pins pin numbers for the SCK/MISO/MOSI
- * @param miso_pullup true when MISO internal pull up is needed.
+ * @param data_pullup MISO, MOSI pull up settings, Use km_spi_pullup_t type
  * @return Returns 0 on success or minus value (err) on failure.
  */
 int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
                  km_spi_bitorder_t bitorder, km_spi_pins_t pins,
-                 bool miso_pullup);
+                 km_spi_pullup_t data_pullup);
 
 /**
  * Send and receive data simultaneously to the SPI bus

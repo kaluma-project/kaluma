@@ -103,6 +103,7 @@ int km_pwm_set_inversion(uint8_t pin, uint8_t inv_pin) {
                      pwm_gpio_to_channel(inv_pin), uint_duty);
   pwm_set_output_polarity(pwm_gpio_to_slice_num(inv_pin), inv_a, inv_b);
   gpio_set_function(inv_pin, GPIO_FUNC_PWM);
+  gpio_set_pulls(inv_pin, false, false);
   return 0;
 }
 
@@ -122,6 +123,7 @@ int km_pwm_setup(uint8_t pin, double frequency, double duty) {
   bool enabled = false;
   uint16_t uint_duty = (uint16_t)(duty * period);
   gpio_set_function(pin, GPIO_FUNC_PWM);
+  gpio_set_pulls(pin, false, false);
   pwm_config config = pwm_get_default_config();
   pwm_config_set_clkdiv(&config, clk_div);
   pwm_config_set_wrap(&config, period - 1);

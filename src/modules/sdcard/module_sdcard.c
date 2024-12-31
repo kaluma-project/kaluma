@@ -390,7 +390,7 @@ JERRYXX_FUN(sdcard_ctor_fn) {
   }
   CS_HIGH;
   ret = km_spi_setup(bus, (km_spi_mode_t)mode, baudrate,
-                     (km_spi_bitorder_t)bitorder, pins, true);
+                     (km_spi_bitorder_t)bitorder, pins, KM_SPI_MISO_PULLUP);
   if (ret < 0) {
     return jerry_create_error(JERRY_ERROR_COMMON,
                               (const jerry_char_t *)"SD Card SPI setup error.");
