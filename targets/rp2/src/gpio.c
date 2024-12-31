@@ -64,6 +64,7 @@ int km_gpio_set_io_mode(uint8_t pin, km_gpio_io_mode_t mode) {
   }
   if (mode == KM_GPIO_IO_MODE_OUTPUT) {
     gpio_set_dir(pin, true);  // Set OUTPUT
+    gpio_set_pulls(pin, false, false);
   } else {
     gpio_set_dir(pin, false);
     if (mode == KM_GPIO_IO_MODE_INPUT_PULLUP) {

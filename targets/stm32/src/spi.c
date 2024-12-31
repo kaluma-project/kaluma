@@ -103,7 +103,7 @@ void km_spi_cleanup() {
  */
 int km_spi_setup(uint8_t bus, km_spi_mode_t mode, uint32_t baudrate,
                  km_spi_bitorder_t bitorder, km_spi_pins_t pins,
-                 bool miso_pullup) {
+                 km_spi_pullup_t data_pullup) {
   if ((bus != 0) && (bus != 1)) return ENOPHRPL;
 
   SPI_HandleTypeDef *pspi = spi_handle[bus];

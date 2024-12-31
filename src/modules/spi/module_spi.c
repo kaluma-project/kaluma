@@ -30,6 +30,7 @@
 #define SPI_DEFAULT_MODE KM_SPI_MODE_0
 #define SPI_DEFAULT_BAUDRATE 3000000
 #define SPI_DEFAULT_BITORDER KM_SPI_BITORDER_MSB
+#define SPI_DEFAULT_PULL KM_SPI_DATA_NOPULL
 
 static void buffer_free_cb(void *native_p) { free(native_p); }
 
@@ -45,6 +46,7 @@ JERRYXX_FUN(spi_ctor_fn) {
   uint8_t mode = SPI_DEFAULT_MODE;
   uint32_t baudrate = SPI_DEFAULT_BAUDRATE;
   uint8_t bitorder = SPI_DEFAULT_BITORDER;
+  km_spi_pullup_t pullup = SPI_DEFAULT_PULL;
   km_spi_pins_t def_pins = km_spi_get_default_pins(bus);
   km_spi_pins_t pins = {
       .miso = def_pins.miso,
@@ -59,6 +61,8 @@ JERRYXX_FUN(spi_ctor_fn) {
                                                      SPI_DEFAULT_BAUDRATE);
     bitorder = (uint8_t)jerryxx_get_property_number(options, MSTR_SPI_BITORDER,
                                                     SPI_DEFAULT_BITORDER);
+    pullup = (uint8_t)jerryxx_get_property_number(options, MSTR_SPI_PULLUP,
+                                                    KM_SPI_DATA_NOPULL);
     pins.miso = (int8_t)jerryxx_get_property_number(options, MSTR_SPI_MISO,
                                                     def_pins.miso);
     pins.mosi = (int8_t)jerryxx_get_property_number(options, MSTR_SPI_MOSI,
@@ -73,7 +77,7 @@ JERRYXX_FUN(spi_ctor_fn) {
                               (const jerry_char_t *)"SPI mode error.");
   // initialize the bus
   int ret = km_spi_setup(bus, (km_spi_mode_t)mode, baudrate,
-                         (km_spi_bitorder_t)bitorder, pins, false);
+                         (km_spi_bitorder_t)bitorder, pins, pullup);
   if (ret < 0) {
     return jerry_create_error_from_value(create_system_error(ret), true);
   } else {
@@ -294,6 +298,10 @@ jerry_value_t module_spi_init() {
   jerryxx_set_property_number(spi_ctor, MSTR_SPI_MODE1, KM_SPI_MODE_1);
   jerryxx_set_property_number(spi_ctor, MSTR_SPI_MODE2, KM_SPI_MODE_2);
   jerryxx_set_property_number(spi_ctor, MSTR_SPI_MODE3, KM_SPI_MODE_3);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_DATA_NOPULL, KM_SPI_DATA_NOPULL);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_MOSI_PULLUP, KM_SPI_MOSI_PULLUP);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_MISO_PULLUP, KM_SPI_MISO_PULLUP);
+  jerryxx_set_property_number(spi_ctor, MSTR_SPI_DATA_PULLUP, KM_SPI_DATA_PULLUP);
   jerryxx_set_property_number(spi_ctor, MSTR_SPI_MSB, KM_SPI_BITORDER_MSB);
   jerryxx_set_property_number(spi_ctor, MSTR_SPI_LSB, KM_SPI_BITORDER_LSB);
   jerryxx_set_property_function(spi_prototype, MSTR_SPI_TRANSFER,
