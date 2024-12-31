@@ -62,7 +62,7 @@ JERRYXX_FUN(spi_ctor_fn) {
     bitorder = (uint8_t)jerryxx_get_property_number(options, MSTR_SPI_BITORDER,
                                                     SPI_DEFAULT_BITORDER);
     pullup = (uint8_t)jerryxx_get_property_number(options, MSTR_SPI_PULLUP,
-                                                    KM_SPI_DATA_NOPULL);
+                                                    SPI_DEFAULT_PULL);
     pins.miso = (int8_t)jerryxx_get_property_number(options, MSTR_SPI_MISO,
                                                     def_pins.miso);
     pins.mosi = (int8_t)jerryxx_get_property_number(options, MSTR_SPI_MOSI,
