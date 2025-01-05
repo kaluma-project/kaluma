@@ -49,14 +49,15 @@
 
 #define KM_MAX_SOCKET_NO 16
 
-#define KM_CYW43_STATUS_DISABLED 0
-#define KM_CYW43_STATUS_INIT 1 /* BIT 0 */
-#define KM_CYW43_STATUS_DNS_DONE 2 /* BIT 1 */
+#define KM_CYW43_STATUS_DISABLED  0
+#define KM_CYW43_STATUS_INIT      1 /* BIT 0 */
+#define KM_CYW43_STATUS_DNS_DONE  2 /* BIT 1 */
+#define KM_CYW43_STATUS_AP_MODE   4 /* BIT 2 */
 
-#define CYW43_WIFI_AUTH_OPEN 0
-#define CYW43_WIFI_AUTH_WEP_PSK 1 /* BIT 0 */
-#define CYW43_WIFI_AUTH_WPA 2 /* BIT 1 */
-#define CYW43_WIFI_AUTH_WPA2 4 /* BIT 2 */
+#define CYW43_WIFI_AUTH_OPEN      0
+#define CYW43_WIFI_AUTH_WEP_PSK   1 /* BIT 0 */
+#define CYW43_WIFI_AUTH_WPA       2 /* BIT 1 */
+#define CYW43_WIFI_AUTH_WPA2      4 /* BIT 2 */
 
 typedef struct {
   int8_t fd;
@@ -95,6 +96,7 @@ typedef struct {
   volatile uint8_t status_flag;
   char current_ssid[33];
   char current_bssid[18];
+  char ap_gateway_ip4[16];
 } __cyw43_t;
 
 __cyw43_t __cyw43_drv;
@@ -605,8 +607,7 @@ JERRYXX_FUN(pico_cyw43_network_socket) {
         (const jerry_char_t *)"PICO-W CYW43 WiFi is not initialized.");
   }
   int wifi_status = cyw43_tcpip_link_status(&cyw43_state, CYW43_ITF_STA);
-  int wifi_ap_status = cyw43_tcpip_link_status(&cyw43_state, CYW43_ITF_AP);
-  if (wifi_status != CYW43_LINK_UP && wifi_ap_status != CYW43_LINK_UP) {
+  if ((wifi_status != CYW43_LINK_UP) && ((__cyw43_drv.status_flag & KM_CYW43_STATUS_AP_MODE) == 0)) {
     return jerry_create_error(JERRY_ERROR_COMMON,
                               (const jerry_char_t *)"WiFi is not connected.");
   }
@@ -646,10 +647,14 @@ JERRYXX_FUN(pico_cyw43_network_socket) {
   jerryxx_set_property_number(__socket_info.socket[fd].obj,
                               MSTR_PICO_CYW43_SOCKET_STATE,
                               __socket_info.socket[fd].state);
-  struct netif *p_netif = &(cyw43_state.netif[CYW43_ITF_STA]);
-  const ip_addr_t *laddr = netif_ip_addr4(p_netif);
-  __socket_info.laddr = *laddr;
-  strncpy(p_str_buff, ipaddr_ntoa(laddr), sizeof(p_str_buff) - 1);
+  if (__cyw43_drv.status_flag & KM_CYW43_STATUS_AP_MODE) {
+    sprintf(p_str_buff, "%s", __cyw43_drv.ap_gateway_ip4);
+  } else {
+    struct netif *p_netif = &(cyw43_state.netif[CYW43_ITF_STA]);
+    const ip_addr_t *laddr = netif_ip_addr4(p_netif);
+    __socket_info.laddr = *laddr;
+    strncpy(p_str_buff, ipaddr_ntoa(laddr), sizeof(p_str_buff) - 1);
+  }
   jerryxx_set_property_string(__socket_info.socket[fd].obj,
                               MSTR_PICO_CYW43_SOCKET_LADDR, p_str_buff);
   jerryxx_set_property_string(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_IP,
@@ -1322,7 +1327,6 @@ JERRYXX_FUN(pico_cyw43_wifi_ap_mode) {
   jerry_value_t ap_info = JERRYXX_GET_ARG(0);
   jerry_size_t len;
   uint8_t *pw_str = NULL;
-  uint8_t *str_buffer = NULL;
   ip4_addr_t gw, mask;
 
   // validate SSID
@@ -1356,50 +1360,49 @@ JERRYXX_FUN(pico_cyw43_wifi_ap_mode) {
   jerry_release_value(password);
 
   // validate Gateway
+  uint8_t *str_buffer = (uint8_t *)malloc(16);
   jerry_value_t gateway = jerryxx_get_property(ap_info, MSTR_PICO_CYW43_WIFI_APMODE_GATEWAY);
   if (jerry_value_is_string(gateway)) {
     len = jerryxx_get_ascii_string_size(gateway);
-    str_buffer = (uint8_t *)malloc(len + 1);
     jerryxx_string_to_ascii_char_buffer(gateway, str_buffer, len);
-    str_buffer[len] = '\0';
-    if (ipaddr_aton((const char *)str_buffer, &(gw)) == false) {
-      free(pw_str);
-      free(str_buffer);
-      jerry_release_value(gateway);
-      return jerry_create_error(JERRY_ERROR_COMMON,
-                                (const jerry_char_t *)"Can't decode Gateway IP Address");
-    }
-    jerryxx_set_property_string(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_APMODE_GATEWAY,
-                                (char *)str_buffer);
   } else {
-    IP4_ADDR(&gw, 192, 168, 4, 1);
-    jerryxx_set_property_string(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_APMODE_GATEWAY,
-                                "192.168.4.1");
+    const char *gate_ip4 = "192.168.4.1";
+    len = 11;
+    sprintf((char*)str_buffer, "%s", gate_ip4);
   }
-  free(str_buffer);
+  str_buffer[len] = '\0';
+  if (ipaddr_aton((const char *)str_buffer, &(gw)) == false) {
+    free(pw_str);
+    free(str_buffer);
+    jerry_release_value(gateway);
+    return jerry_create_error(JERRY_ERROR_COMMON,
+                              (const jerry_char_t *)"Can't decode Gateway IP Address");
+  }
+  jerryxx_set_property_string(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_APMODE_GATEWAY,
+                              (char *)str_buffer);
+  sprintf(__cyw43_drv.ap_gateway_ip4, "%s", str_buffer);
   jerry_release_value(gateway);
 
   // validate subnet mask
   jerry_value_t subnet_mask = jerryxx_get_property(ap_info, MSTR_PICO_CYW43_WIFI_APMODE_SUBNET_MASK);
   if (jerry_value_is_string(subnet_mask)) {
     len = jerryxx_get_ascii_string_size(subnet_mask);
-    str_buffer = (uint8_t *)malloc(len + 1);
     jerryxx_string_to_ascii_char_buffer(subnet_mask, str_buffer, len);
-    str_buffer[len] = '\0';
-    if (ipaddr_aton((const char *)str_buffer, &(mask)) == false) {
-      free(pw_str);
-      free(str_buffer);
-      jerry_release_value(subnet_mask);
-      return jerry_create_error(JERRY_ERROR_COMMON,
-                                (const jerry_char_t *)"Can't decode Subnet Mask");
-    }
-    jerryxx_set_property_string(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_APMODE_SUBNET_MASK,
-                                (char *)str_buffer);
   } else {
-    IP4_ADDR(&mask, 255, 255, 255, 0);
-    jerryxx_set_property_string(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_APMODE_SUBNET_MASK,
-                                "255.255.255.0");
+    const char *subnet_ip4 = "255.255.255.0";
+    len = 13;
+    sprintf((char *)str_buffer, "%s", subnet_ip4);
   }
+  str_buffer[len] = '\0';
+  if (ipaddr_aton((const char *)str_buffer, &(mask)) == false) {
+    free(pw_str);
+    free(str_buffer);
+    jerry_release_value(subnet_mask);
+    return jerry_create_error(JERRY_ERROR_COMMON,
+                              (const jerry_char_t *)"Can't decode Subnet Mask");
+  }
+  jerryxx_set_property_string(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_APMODE_SUBNET_MASK,
+                              (char *)str_buffer);
   free(str_buffer);
   jerry_release_value(subnet_mask);
 
@@ -1412,6 +1415,7 @@ JERRYXX_FUN(pico_cyw43_wifi_ap_mode) {
   free(pw_str);
   // start DHCP server
 	dhcp_server_init(&dhcp_server, &gw, &mask);
+  __cyw43_drv.status_flag |= KM_CYW43_STATUS_AP_MODE;
 
   // call callback
   if (JERRYXX_HAS_ARG(1)) {
@@ -1432,12 +1436,11 @@ JERRYXX_FUN(pico_cyw43_wifi_ap_mode) {
 
 JERRYXX_FUN(pico_cyw43_wifi_disable_ap_mode) {
   // verify if AP_mode is enabled
-  int wifi_ap_status = cyw43_tcpip_link_status(&cyw43_state, CYW43_ITF_AP);
-  if (wifi_ap_status != CYW43_LINK_UP) {
+  if ((__cyw43_drv.status_flag & KM_CYW43_STATUS_AP_MODE) == 0) {
     return jerry_create_error(JERRY_ERROR_COMMON,
                               (const jerry_char_t *)"WiFi AP_mode is not enabled.");
   }
-
+  __cyw43_drv.status_flag &= ~KM_CYW43_STATUS_AP_MODE;
   // deinit DHCP server
   dhcp_server_deinit(&dhcp_server);
   km_cyw43_deinit();
@@ -1451,8 +1454,7 @@ JERRYXX_FUN(pico_cyw43_wifi_disable_ap_mode) {
 // Function to get the MAC address of connected clients
 JERRYXX_FUN(pico_cyw43_wifi_ap_get_stas) {
   // verify if AP_mode is enabled
-  int wifi_ap_status = cyw43_tcpip_link_status(&cyw43_state, CYW43_ITF_AP);
-  if (wifi_ap_status != CYW43_LINK_UP) {
+  if ((__cyw43_drv.status_flag & KM_CYW43_STATUS_AP_MODE) == 0) {
     return jerry_create_error(JERRY_ERROR_COMMON,
                               (const jerry_char_t *)"WiFi AP_mode is not enabled.");
   }
