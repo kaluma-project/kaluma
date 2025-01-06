@@ -151,6 +151,71 @@ class WiFi extends EventEmitter {
       if (cb) cb(new SystemError(6)); // ENXIO      
     }
   }
+
+  /**
+   * Wifi AP mode (Optional driver function)
+   * @param {object} apmodeInfo
+   *   .ssid {string}
+   *   .password {string}
+   * @param {function} cb
+   */
+  wifiApMode(apmodeInfo, cb) {
+    console.log(typeof this._dev.ap_mode)
+    if ((this._dev) && (typeof this._dev.ap_mode === 'function')) {
+      if (typeof apmodeInfo === 'function') {
+        cb = apmodeInfo
+        apmodeInfo = null
+      }
+      if (!apmodeInfo) {
+        apmodeInfo = {ssid: "Kaluma_AP",
+                      password: "kalumaAp",
+                      gateway: "192.168.4.1",
+                      subnet_mask: "255.255.255.0"}
+      }
+      if (!apmodeInfo.ssid) {
+        apmodeInfo.ssid = storage ? storage.getItem('WIFI_AP_SSID') : "Kaluma_AP"
+      }
+      if (!apmodeInfo.password) {
+        apmodeInfo.password = storage ? storage.getItem('WIFI_AP_PASSWORD') : "kalumaAp"
+      }
+      if (!apmodeInfo.gateway) {
+        apmodeInfo.gateway = storage ? storage.getItem('WIFI_AP_GATEWAY') : "192.168.4.1"
+      }
+      if (!apmodeInfo.subnet_mask) {
+        apmodeInfo.subnet_mask = storage ? storage.getItem('WIFI_AP_SUBNET_MASK') : "255.255.255.0"
+      }
+      this._dev.ap_mode(apmodeInfo, err => {
+        if (err) {
+          if (cb) cb(new SystemError(this._dev.errno));
+        } else {
+          if (cb) cb(null, apmodeInfo);
+        }
+      });
+    } else {
+      if (cb) cb(new SystemError(6)); // ENXIO
+    }
+  }
+
+  /**
+   * Disable Wifi AP mode (Optional driver function)
+   */
+  disableWifiApMode() {
+    if ((this._dev) && (typeof this._dev.disable_ap_mode === 'function')) {
+      return this._dev.disable_ap_mode();
+    } else {
+      if (cb) cb(new SystemError(6)); // ENXIO
+    }
+  }
+  /**
+   * Return Wifi AP clients (Optional driver function)
+   */
+  getWifiApClients() {
+    if ((this._dev) && (typeof this._dev.get_ap_client === 'function')) {
+      return this._dev.get_ap_client();
+    } else {
+      if (cb) cb(new SystemError(6)); // ENXIO
+    }
+  }
 }
 
 // var wifi = new WiFi();

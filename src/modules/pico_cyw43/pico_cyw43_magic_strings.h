@@ -70,14 +70,17 @@
 #define MSTR_PICO_CYW43_SOCKET_SHUTDOWN_CB "shutdown_cb"
 
 /* AP_mode strings */
+#define MSTR_PICO_CYW43_WIFI_APMODE_DRV_FN "ap_mode"
+#define MSTR_PICO_CYW43_WIFI_APMODE_DISABLE_DRV_FN "disable_ap_mode"
+#define MSTR_PICO_CYW43_WIFI_APMODE_GET_STAS_DRV_FN "get_ap_client"
 #define MSTR_PICO_CYW43_WIFI_APMODE_FN "wifiApMode"
 #define MSTR_PICO_CYW43_WIFI_APMODE_DISABLE_FN "disableWifiApMode"
+#define MSTR_PICO_CYW43_WIFI_APMODE_GET_STAS_FN "getWifiApClients"
 
 #define MSTR_PICO_CYW43_WIFI_APMODE_SSID "ssid"
 #define MSTR_PICO_CYW43_WIFI_APMODE_PASSWORD "password"
 #define MSTR_PICO_CYW43_WIFI_APMODE_GATEWAY "gateway"
 #define MSTR_PICO_CYW43_WIFI_APMODE_SUBNET_MASK "subnetMask"
-#define MSTR_PICO_CYW43_WIFI_APMODE_GET_STAS_FN "getWifiApClients"
 
 #define MSTR_PICO_CYW43_PASSWORD "password"
 #endif /* __PICO_CYW43_MAGIC_STRINGS_H */
