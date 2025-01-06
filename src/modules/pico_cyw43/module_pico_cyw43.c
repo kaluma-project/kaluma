@@ -38,6 +38,7 @@
 #define MAX_GPIO_NUM 2
 #define SCAN_TIMEOUT 2000     /* 2 sec */
 #define CONNECT_TIMEOUT 30000 /* 30 sec */
+#define MAC_STR_LENGTH 19
 
 #define NET_SOCKET_STREAM 0 /* TCP SOCKET */
 #define NET_SOCKET_DGRAM 1  /* UDP SOCKET */
@@ -1459,24 +1460,27 @@ JERRYXX_FUN(pico_cyw43_wifi_ap_get_stas) {
                               (const jerry_char_t *)"WiFi AP_mode is not enabled.");
   }
 
-  int num_stas, max_stas, MAC_len = 18;
+  int num_stas;
+  int max_stas;
   // get max stas
   cyw43_wifi_ap_get_max_stas(&cyw43_state, &max_stas);
   // declare
-  uint8_t *macs = (uint8_t*)malloc(num_stas * 6);
-  jerry_value_t MAC_array = jerry_create_array (num_stas);
+  uint8_t *macs = (uint8_t*)malloc(max_stas * 6);
   //uint8_t macs[32 * 6];
   cyw43_wifi_ap_get_stas(&cyw43_state, &num_stas, macs);
+  jerry_value_t MAC_array = jerry_create_array (num_stas);
   char **mac_strs = (char **)malloc(num_stas * sizeof(char *));
   for (int i = 0; i < num_stas; i++) {
-    mac_strs[i] = (char *)malloc(MAC_len * sizeof(char));
+    mac_strs[i] = (char *)malloc(MAC_STR_LENGTH * sizeof(char));
     sprintf(mac_strs[i], "%02x:%02x:%02x:%02x:%02x:%02x", macs[i*6], macs[i*6+1], macs[i*6+2], macs[i*6+3], macs[i*6+4], macs[i*6+5]);
     // add to the array
     jerry_value_t prop = jerry_create_string((const jerry_char_t *)mac_strs[i]);
     jerry_release_value(jerry_set_property_by_index(MAC_array, i, prop));
     jerry_release_value(prop);
+    free(mac_strs[i]);
   }
   // deallocate memory
+  free(mac_strs);
   free(macs);
   // return the list of macs
   return MAC_array;
@@ -1517,6 +1521,15 @@ jerry_value_t module_pico_cyw43_init() {
                                 pico_cyw43_wifi_ap_get_stas);
   jerryxx_set_property_function(wifi_prototype,
                                 MSTR_PICO_CYW43_WIFI_APMODE_DISABLE_FN,
+                                pico_cyw43_wifi_disable_ap_mode);
+  jerryxx_set_property_function(wifi_prototype,
+                                MSTR_PICO_CYW43_WIFI_APMODE_DRV_FN,
+                                pico_cyw43_wifi_ap_mode);
+  jerryxx_set_property_function(wifi_prototype,
+                                MSTR_PICO_CYW43_WIFI_APMODE_GET_STAS_DRV_FN,
+                                pico_cyw43_wifi_ap_get_stas);
+  jerryxx_set_property_function(wifi_prototype,
+                                MSTR_PICO_CYW43_WIFI_APMODE_DISABLE_DRV_FN,
                                 pico_cyw43_wifi_disable_ap_mode);
   jerry_release_value(wifi_prototype);
 
