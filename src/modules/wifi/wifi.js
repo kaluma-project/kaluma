@@ -202,8 +202,6 @@ class WiFi extends EventEmitter {
   disableWifiApMode() {
     if ((this._dev) && (typeof this._dev.disable_ap_mode === 'function')) {
       return this._dev.disable_ap_mode();
-    } else {
-      if (cb) cb(new SystemError(6)); // ENXIO
     }
   }
   /**
@@ -212,8 +210,6 @@ class WiFi extends EventEmitter {
   getWifiApClients() {
     if ((this._dev) && (typeof this._dev.get_ap_client === 'function')) {
       return this._dev.get_ap_client();
-    } else {
-      if (cb) cb(new SystemError(6)); // ENXIO
     }
   }
 }
