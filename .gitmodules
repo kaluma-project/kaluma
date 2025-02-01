@@ -7,3 +7,6 @@
 [submodule "lib/littlefs"]
 	path = lib/littlefs
 	url = https://github.com/littlefs-project/littlefs.git
+[submodule "lib/pico-sdk-2.0.0"]
+	path = lib/pico-sdk-2.0.0
+	url = https://github.com/raspberrypi/pico-sdk.git

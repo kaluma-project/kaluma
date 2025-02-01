@@ -1413,7 +1413,6 @@ JERRYXX_FUN(pico_cyw43_wifi_ap_mode) {
     cyw43_arch_enable_ap_mode((char *) __cyw43_drv.current_ssid, (char *) pw_str, CYW43_AUTH_WPA2_AES_PSK);
     free(pw_str);
     // start DHCP server
-    memset(&dhcp_server, 0, sizeof(dhcp_server_t));
     err = dhcp_server_init(&dhcp_server, &gw, &mask);
     if (err != 0) {
       km_cyw43_deinit();
