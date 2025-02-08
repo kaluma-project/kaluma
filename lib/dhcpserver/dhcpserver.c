@@ -288,14 +288,16 @@ ignore_request:
     pbuf_free(p);
 }
 
-void dhcp_server_init(dhcp_server_t *d, ip_addr_t *ip, ip_addr_t *nm) {
+int dhcp_server_init(dhcp_server_t *d, ip_addr_t *ip, ip_addr_t *nm) {
     ip_addr_copy(d->ip, *ip);
     ip_addr_copy(d->nm, *nm);
     memset(d->lease, 0, sizeof(d->lease));
-    if (dhcp_socket_new_dgram(&d->udp, d, dhcp_server_process) != 0) {
-        return;
+    int err = dhcp_socket_new_dgram(&d->udp, d, dhcp_server_process);
+    if (err != 0) {
+        return err;
     }
     dhcp_socket_bind(&d->udp, PORT_DHCP_SERVER);
+    return 0; // OK.
 }
 
 void dhcp_server_deinit(dhcp_server_t *d) {

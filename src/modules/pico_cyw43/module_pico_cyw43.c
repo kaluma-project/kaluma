@@ -1408,16 +1408,21 @@ JERRYXX_FUN(pico_cyw43_wifi_ap_mode) {
   jerry_release_value(subnet_mask);
 
   // init driver
-  if (__cyw43_init()) {
-    return jerry_create_error_from_value(create_system_error(EAGAIN), true);
+  int err = __cyw43_init();
+  if (err == 0) {
+    cyw43_arch_enable_ap_mode((char *) __cyw43_drv.current_ssid, (char *) pw_str, CYW43_AUTH_WPA2_AES_PSK);
+    free(pw_str);
+    // start DHCP server
+    err = dhcp_server_init(&dhcp_server, &gw, &mask);
+    if (err != 0) {
+      km_cyw43_deinit();
+      __cyw43_init();
+    } else {
+      __cyw43_drv.status_flag |= KM_CYW43_STATUS_AP_MODE;
+    }
   }
-
-  cyw43_arch_enable_ap_mode((char *) __cyw43_drv.current_ssid, (char *) pw_str, CYW43_AUTH_WPA2_AES_PSK);
-  free(pw_str);
-  // start DHCP server
-	dhcp_server_init(&dhcp_server, &gw, &mask);
-  __cyw43_drv.status_flag |= KM_CYW43_STATUS_AP_MODE;
-
+  jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO,
+                              err);
   // call callback
   if (JERRYXX_HAS_ARG(1)) {
     jerry_value_t callback = JERRYXX_GET_ARG(1);

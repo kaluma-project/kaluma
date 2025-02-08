@@ -57,7 +57,11 @@ if(NOT MODULES)
     startup)
 endif()
 
-set(PICO_SDK_PATH ${CMAKE_SOURCE_DIR}/lib/pico-sdk)
+if(BOARD STREQUAL "pico-w")
+  set(PICO_SDK_PATH ${CMAKE_SOURCE_DIR}/lib/pico-sdk-2.0.0)
+else()
+  set(PICO_SDK_PATH ${CMAKE_SOURCE_DIR}/lib/pico-sdk)
+endif()
 include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
 
 project(kaluma-project C CXX ASM)
