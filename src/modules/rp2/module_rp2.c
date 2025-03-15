@@ -106,6 +106,7 @@ JERRYXX_FUN(pio_add_program_fn) {
     jerry_value_t array_buffer =
         jerry_get_typedarray_buffer(prog, &byteOffset, &byteLength);
     pio_prog.origin = -1;
+    pio_prog.pio_version = PICO_PIO_VERSION;
     pio_prog.instructions =
         (uint16_t *)jerry_get_arraybuffer_pointer(array_buffer),
     pio_prog.length = jerry_get_arraybuffer_byte_length(array_buffer) / 2,
