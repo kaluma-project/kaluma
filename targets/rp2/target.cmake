@@ -96,7 +96,7 @@ if(BOARD STREQUAL "pico2" OR BOARD STREQUAL "pico2-w")
   set(CMAKE_SYSTEM_PROCESSOR cortex-m33)
   set(CMAKE_C_FLAGS "-march=armv8-m.main+dsp+fp -mcpu=cortex-m33 -mthumb -mfloat-abi=softfp")
   set(JERRY_TOOLCHAIN toolchain_mcu_cortexm33.cmake)
-  set(TARGET_HEAPSIZE 256)
+  set(TARGET_HEAPSIZE 384)
 else() # pico and pico-w have the same settings
   # For RP2040
   set(CMAKE_SYSTEM_PROCESSOR cortex-m0plus)
