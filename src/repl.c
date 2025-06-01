@@ -170,9 +170,11 @@ static void run_code() {
     history_push(data);
 
     /* evaluate code */
+    jerry_parse_options_t parse_options;
+    parse_options.options = JERRY_PARSE_STRICT_MODE;
     jerry_value_t parsed_code =
-        jerry_parse(NULL, 0, (const jerry_char_t *)data, strlen(data),
-                    JERRY_PARSE_STRICT_MODE);
+        jerry_parse((const jerry_char_t *)data, strlen(data),
+                    &parse_options);
     if (jerry_value_is_error(parsed_code)) {
       jerryxx_print_error(parsed_code, false);
     } else {
@@ -183,9 +185,9 @@ static void run_code() {
         km_repl_pretty_print(0, 3, ret_value);
         km_repl_println();
       }
-      jerry_release_value(ret_value);
+      jerry_value_free(ret_value);
     }
-    jerry_release_value(parsed_code);
+    jerry_value_free(parsed_code);
   }
 }
 
@@ -549,7 +551,7 @@ static void cmd_load(km_repl_state_t *state, char *arg) {
  */
 static void cmd_mem(km_repl_state_t *state, char *arg) {
   jerry_heap_stats_t stats = {0};
-  bool stats_ret = jerry_get_memory_stats(&stats);
+  bool stats_ret = jerry_heap_stats(&stats);
   if (stats_ret) {
     km_repl_printf("total: %u, occupied: %u, peak: %u\r\n", stats.size,
                    stats.allocated_bytes, stats.peak_allocated_bytes);
@@ -562,7 +564,7 @@ static void cmd_mem(km_repl_state_t *state, char *arg) {
  * .gc command
  */
 static void cmd_gc(km_repl_state_t *state, char *arg) {
-  jerry_gc(JERRY_GC_PRESSURE_HIGH);
+  jerry_heap_gc(JERRY_GC_PRESSURE_HIGH);
 }
 
 /**
@@ -675,7 +677,7 @@ static bool km_repl_pretty_print_object_foreach(const jerry_value_t prop_name,
   if (jerry_value_is_string(prop_name)) {
     jerry_char_t buf[128];
     jerry_size_t len =
-        jerry_substring_to_char_buffer(prop_name, 0, 127, buf, 127);
+    jerry_string_to_buffer(prop_name, JERRY_ENCODING_CESU8, buf, 127);
     buf[len] = '\0';
     struct km_repl_pretty_print_object_foreach_data *data =
         (struct km_repl_pretty_print_object_foreach_data *)user_data_p;
@@ -706,7 +708,7 @@ void km_repl_pretty_print(uint8_t indent, uint8_t depth, jerry_value_t value) {
       km_tty_printf("\33[0m");
     } else if (jerry_value_is_typedarray(value)) {
       km_tty_printf("\33[96m");  // cyan
-      jerry_typedarray_type_t type = jerry_get_typedarray_type(value);
+      jerry_typedarray_type_t type = jerry_typedarray_type(value);
       switch (type) {
         case JERRY_TYPEDARRAY_UINT8:
           km_tty_printf("[Uint8Array]");
@@ -741,7 +743,7 @@ void km_repl_pretty_print(uint8_t indent, uint8_t depth, jerry_value_t value) {
       }
       km_tty_printf("\33[0m");
     } else if (jerry_value_is_arraybuffer(value)) {
-      jerry_length_t len = jerry_get_arraybuffer_byte_length(value);
+      jerry_length_t len = jerry_arraybuffer_size(value);
       km_tty_printf("ArrayBuffer { byteLength:");
       km_tty_printf("\33[95m");  // magenta
       km_tty_printf("%d", len);
@@ -802,15 +804,15 @@ void km_repl_pretty_print(uint8_t indent, uint8_t depth, jerry_value_t value) {
     if (jerry_value_is_abort(value)) {
       km_repl_pretty_print(indent, 0, value);
     } else if (jerry_value_is_array(value)) {
-      uint32_t len = jerry_get_array_length(value);
+      uint32_t len = jerry_array_length(value);
       km_tty_printf("[");
       if (len > 0) {
         km_tty_printf("\r\n");
         for (int i = 0; i < len; i++) {
-          jerry_value_t item = jerry_get_property_by_index(value, i);
+          jerry_value_t item = jerry_object_get_index(value, i);
           km_repl_pretty_print_indent(indent + 2);
           km_repl_pretty_print(indent + 2, depth - 1, item);
-          jerry_release_value(item);
+          jerry_value_free(item);
           if (i < len - 1) km_tty_printf(",");
           km_tty_printf("\r\n");
         }
@@ -818,7 +820,7 @@ void km_repl_pretty_print(uint8_t indent, uint8_t depth, jerry_value_t value) {
       }
       km_tty_printf("]");
     } else if (jerry_value_is_typedarray(value)) {
-      jerry_typedarray_type_t type = jerry_get_typedarray_type(value);
+      jerry_typedarray_type_t type = jerry_typedarray_type(value);
       switch (type) {
         case JERRY_TYPEDARRAY_UINT8:
           km_tty_printf("Uint8Array [");
@@ -851,16 +853,16 @@ void km_repl_pretty_print(uint8_t indent, uint8_t depth, jerry_value_t value) {
           km_tty_printf("TypedArray [");
           break;
       }
-      uint32_t len = jerry_get_typedarray_length(value);
+      uint32_t len = jerry_typedarray_length(value);
       if (len > 0) {
         km_tty_printf("\r\n");
         for (int i = 0; i < len; i++) {
-          jerry_value_t item = jerry_get_property_by_index(value, i);
+          jerry_value_t item = jerry_object_get_index(value, i);
           km_repl_pretty_print_indent(indent + 2);
           km_repl_pretty_print(indent + 2, depth - 1, item);
           if (i < len - 1) km_tty_printf(",");
           km_tty_printf("\r\n");
-          jerry_release_value(item);
+          jerry_value_free(item);
         }
         km_repl_pretty_print_indent(indent);
       }
@@ -885,35 +887,35 @@ void km_repl_pretty_print(uint8_t indent, uint8_t depth, jerry_value_t value) {
       km_repl_pretty_print(indent, 0, value);
     } else if (jerry_value_is_object(value)) {
       // Check value is instanceof Error
-      jerry_value_t global = jerry_get_global_object();
+      jerry_value_t global = jerry_current_realm();
       jerry_value_t error_ctr = jerryxx_get_property(global, "Error");
       jerry_value_t result =
-          jerry_binary_operation(JERRY_BIN_OP_INSTANCEOF, value, error_ctr);
-      if (jerry_get_boolean_value(result)) {
+          jerry_binary_op(JERRY_BIN_OP_INSTANCEOF, value, error_ctr);
+      if (jerry_value_is_true(result)) {
         km_tty_printf("\33[31m");  // red
         jerry_value_t tostr_fun = jerryxx_get_property(value, "toString");
-        jerry_value_t ret_val = jerry_call_function(tostr_fun, value, NULL, 0);
+        jerry_value_t ret_val = jerry_call(tostr_fun, value, NULL, 0);
         km_repl_print_value(ret_val);
-        jerry_release_value(ret_val);
-        jerry_release_value(tostr_fun);
+        jerry_value_free(ret_val);
+        jerry_value_free(tostr_fun);
         km_tty_printf("\33[0m");
       } else {
         struct km_repl_pretty_print_object_foreach_data foreach_data = {indent,
                                                                         depth};
-        jerry_foreach_object_property(
+        jerry_object_foreach(
             value, km_repl_pretty_print_object_foreach_count, &foreach_data);
         km_tty_printf("{");
         if (foreach_data.count > 0) {
           km_tty_printf("\r\n");
-          jerry_foreach_object_property(
+          jerry_object_foreach(
               value, km_repl_pretty_print_object_foreach, &foreach_data);
           km_repl_pretty_print_indent(indent);
         }
         km_tty_printf("}");
       }
-      jerry_release_value(result);
-      jerry_release_value(error_ctr);
-      jerry_release_value(global);
+      jerry_value_free(result);
+      jerry_value_free(error_ctr);
+      jerry_value_free(global);
     } else if (jerry_value_is_string(value)) {
       km_repl_pretty_print(indent, 0, value);
     } else if (jerry_value_is_symbol(value)) {

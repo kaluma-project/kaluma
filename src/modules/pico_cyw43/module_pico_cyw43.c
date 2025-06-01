@@ -106,8 +106,6 @@ __socket_t __socket_info;
 
 dhcp_server_t dhcp_server;
 
-static void buffer_free_cb(void *native_p) { free(native_p); }
-
 bool km_is_valid_fd(int8_t fd) {
   if ((fd >= 0) && (fd < KM_MAX_SOCKET_NO)) {
     return true;
@@ -140,7 +138,7 @@ void km_cyw43_deinit() {
   for (int i = 0; i < KM_MAX_SOCKET_NO; i++) {
     if (__socket_info.socket[i].fd >= 0) {
       if (__socket_info.socket[i].obj != 0)
-        jerry_release_value(__socket_info.socket[i].obj);
+        jerry_value_free(__socket_info.socket[i].obj);
       __socket_info.socket[i].obj = 0;
       if (__socket_info.socket[i].ptcl == NET_SOCKET_STREAM) {
         if (__socket_info.socket[i].tcp_pcb) {
@@ -190,9 +188,9 @@ static int __cyw43_init() {
 
 JERRYXX_FUN(pico_cyw43_ctor_fn) {
   if (__cyw43_init()) {
-    return jerry_create_error_from_value(create_system_error(EAGAIN), true);
+    return jerry_exception_value(create_system_error(EAGAIN), true);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 static int __check_gpio(uint32_t pin) {
@@ -206,11 +204,11 @@ JERRYXX_FUN(pico_cyw43_get_gpio) {
   JERRYXX_CHECK_ARG_NUMBER(0, "gpio");
   uint32_t gpio = JERRYXX_GET_ARG_NUMBER(0);
   if (__check_gpio(gpio) < 0) {
-    return jerry_create_error(JERRY_ERROR_TYPE,
-                              (const jerry_char_t *)"GPIO pin is not exist");
+    return jerry_error_sz(JERRY_ERROR_TYPE,
+                              "GPIO pin is not exist");
   }
   bool ret = cyw43_arch_gpio_get(gpio);
-  return jerry_create_boolean(ret);
+  return jerry_boolean(ret);
 }
 
 JERRYXX_FUN(pico_cyw43_put_gpio) {
@@ -219,19 +217,19 @@ JERRYXX_FUN(pico_cyw43_put_gpio) {
   uint32_t gpio = JERRYXX_GET_ARG_NUMBER(0);
   bool value = JERRYXX_GET_ARG_BOOLEAN(1);
   if (__check_gpio(gpio) < 0) {
-    return jerry_create_error(JERRY_ERROR_TYPE,
-                              (const jerry_char_t *)"GPIO pin is not exist");
+    return jerry_error_sz(JERRY_ERROR_TYPE,
+                              "GPIO pin is not exist");
   }
   cyw43_arch_gpio_put(gpio, value);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pico_cyw43_wifi_ctor_fn) {
   if (__cyw43_init()) {
-    return jerry_create_error_from_value(create_system_error(EAGAIN), true);
+    return jerry_exception_value(create_system_error(EAGAIN), true);
   }
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO, 0);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pico_cyw43_wifi_reset) {
@@ -248,17 +246,17 @@ JERRYXX_FUN(pico_cyw43_wifi_reset) {
   }
   if (JERRYXX_HAS_ARG(0)) {
     jerry_value_t callback = JERRYXX_GET_ARG(0);
-    jerry_value_t reset_js_cb = jerry_acquire_value(callback);
+    jerry_value_t reset_js_cb = jerry_value_copy(callback);
     jerry_value_t errno = jerryxx_get_property_number(
         JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO, 0);
-    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t this_val = jerry_undefined();
     jerry_value_t args_p[1] = {errno};
-    jerry_call_function(reset_js_cb, this_val, args_p, 1);
-    jerry_release_value(errno);
-    jerry_release_value(this_val);
-    jerry_release_value(reset_js_cb);
+    jerry_call(reset_js_cb, this_val, args_p, 1);
+    jerry_value_free(errno);
+    jerry_value_free(this_val);
+    jerry_value_free(reset_js_cb);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 static int __scan_cb(void *env, const cyw43_ev_scan_result_t *result) {
@@ -290,7 +288,7 @@ JERRYXX_FUN(pico_cyw43_wifi_scan) {
   JERRYXX_CHECK_ARG_FUNCTION_OPT(0, "callback");
   if (JERRYXX_HAS_ARG(0)) {  // Do nothing if callback is NULL
     jerry_value_t callback = JERRYXX_GET_ARG(0);
-    jerry_value_t scan_js_cb = jerry_acquire_value(callback);
+    jerry_value_t scan_js_cb = jerry_value_copy(callback);
     __p_scan_result = (__scan_result_t *)malloc(sizeof(__scan_result_t));
     __p_scan_result->prev_time_ms = km_gettime();
     __p_scan_result->queue_size = 0;
@@ -303,11 +301,11 @@ JERRYXX_FUN(pico_cyw43_wifi_scan) {
                                   -1);
       jerry_value_t errno = jerryxx_get_property_number(
           JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO, -1);
-      jerry_value_t this_val = jerry_create_undefined();
+      jerry_value_t this_val = jerry_undefined();
       jerry_value_t args_p[1] = {errno};
-      jerry_call_function(scan_js_cb, this_val, args_p, 1);
-      jerry_release_value(errno);
-      jerry_release_value(this_val);
+      jerry_call(scan_js_cb, this_val, args_p, 1);
+      jerry_value_free(errno);
+      jerry_value_free(this_val);
     } else {
       while(cyw43_wifi_scan_active(&cyw43_state)) {
         __p_scan_result->scanning = true;
@@ -322,11 +320,11 @@ JERRYXX_FUN(pico_cyw43_wifi_scan) {
       jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO,
                                   0);
       jerry_value_t scan_array =
-          jerry_create_array(__p_scan_result->queue_size);
+          jerry_array(__p_scan_result->queue_size);
       __scan_queue_t *current = __p_scan_result->p_scan_result_queue;
       uint8_t index = 0;
       while (current) {
-        jerry_value_t obj = jerry_create_object();
+        jerry_value_t obj = jerry_object();
         char *str_buff = (char *)calloc(1, 33);
         memcpy(str_buff, current->data.ssid, current->data.ssid_len);
         jerryxx_set_property_string(obj, MSTR_PICO_CYW43_SCANINFO_SSID,
@@ -357,9 +355,9 @@ JERRYXX_FUN(pico_cyw43_wifi_scan) {
         jerryxx_set_property_number(obj, MSTR_PICO_CYW43_SCANINFO_CHANNEL,
                                     current->data.channel);
         jerry_value_t ret =
-            jerry_set_property_by_index(scan_array, index++, obj);
-        jerry_release_value(ret);
-        jerry_release_value(obj);
+            jerry_object_set_index(scan_array, index++, obj);
+        jerry_value_free(ret);
+        jerry_value_free(obj);
         free(str_buff);
         __scan_queue_t *remove = current;
         current = current->next;
@@ -367,18 +365,18 @@ JERRYXX_FUN(pico_cyw43_wifi_scan) {
       }
       jerry_value_t errno = jerryxx_get_property_number(
           JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO, 0);
-      jerry_value_t this_val = jerry_create_undefined();
+      jerry_value_t this_val = jerry_undefined();
       jerry_value_t args_p[2] = {errno, scan_array};
-      jerry_call_function(scan_js_cb, this_val, args_p, 2);
-      jerry_release_value(errno);
-      jerry_release_value(this_val);
-      jerry_release_value(scan_js_cb);
-      jerry_release_value(scan_array);
+      jerry_call(scan_js_cb, this_val, args_p, 2);
+      jerry_value_free(errno);
+      jerry_value_free(this_val);
+      jerry_value_free(scan_js_cb);
+      jerry_value_free(scan_array);
     }
     free(__p_scan_result);
     __p_scan_result = NULL;
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pico_cyw43_wifi_connect) {
@@ -405,8 +403,8 @@ JERRYXX_FUN(pico_cyw43_wifi_connect) {
         ssid, (uint8_t *)__cyw43_drv.current_ssid, len);
     __cyw43_drv.current_ssid[len] = '\0';
   } else {
-    return jerry_create_error(JERRY_ERROR_TYPE,
-                              (const jerry_char_t *)"SSID error");
+    return jerry_error_sz(JERRY_ERROR_TYPE,
+                              "SSID error");
   }
   if (jerry_value_is_string(bssid)) {
     jerry_size_t len = jerryxx_get_ascii_string_size(bssid);
@@ -448,10 +446,10 @@ JERRYXX_FUN(pico_cyw43_wifi_connect) {
     }
     free(security_str);
   }
-  jerry_release_value(ssid);
-  jerry_release_value(bssid);
-  jerry_release_value(pw);
-  jerry_release_value(security);
+  jerry_value_free(ssid);
+  jerry_value_free(bssid);
+  jerry_value_free(pw);
+  jerry_value_free(security);
   int connect_ret = cyw43_arch_wifi_connect_bssid_timeout_ms(
       (char *)__cyw43_drv.current_ssid, bssid_ptr, (char *)pw_str, auth, CONNECT_TIMEOUT);
   if (pw_str) {
@@ -467,16 +465,16 @@ JERRYXX_FUN(pico_cyw43_wifi_connect) {
         jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_CONNECT_CB);
     jerry_value_t assoc_js_cb =
         jerryxx_get_property(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ASSOC_CB);
-    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t this_val = jerry_undefined();
     if (jerry_value_is_function(assoc_js_cb)) {
-      jerry_call_function(assoc_js_cb, this_val, NULL, 0);
+      jerry_call(assoc_js_cb, this_val, NULL, 0);
     }
     if (jerry_value_is_function(connect_js_cb)) {
-      jerry_call_function(connect_js_cb, this_val, NULL, 0);
+      jerry_call(connect_js_cb, this_val, NULL, 0);
     }
-    jerry_release_value(connect_js_cb);
-    jerry_release_value(this_val);
-    jerry_release_value(assoc_js_cb);
+    jerry_value_free(connect_js_cb);
+    jerry_value_free(this_val);
+    jerry_value_free(assoc_js_cb);
 
     /** I can't find the way to get connected device mac address on pico-w SDK.
     // This function return RP-W mac address. need to change it
@@ -488,17 +486,17 @@ JERRYXX_FUN(pico_cyw43_wifi_connect) {
   }
   if (JERRYXX_HAS_ARG(1)) {
     jerry_value_t callback = JERRYXX_GET_ARG(1);
-    jerry_value_t connect_js_cb = jerry_acquire_value(callback);
+    jerry_value_t connect_js_cb = jerry_value_copy(callback);
     jerry_value_t errno = jerryxx_get_property_number(
         JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO, 0);
-    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t this_val = jerry_undefined();
     jerry_value_t args_p[1] = {errno};
-    jerry_call_function(connect_js_cb, this_val, args_p, 1);
-    jerry_release_value(errno);
-    jerry_release_value(this_val);
-    jerry_release_value(connect_js_cb);
+    jerry_call(connect_js_cb, this_val, args_p, 1);
+    jerry_value_free(errno);
+    jerry_value_free(this_val);
+    jerry_value_free(connect_js_cb);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pico_cyw43_wifi_disconnect) {
@@ -510,34 +508,34 @@ JERRYXX_FUN(pico_cyw43_wifi_disconnect) {
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO,
                                 0);
     if (jerry_value_is_function(disconnect_js_cb)) {
-      jerry_value_t this_val = jerry_create_undefined();
-      jerry_call_function(disconnect_js_cb, this_val, NULL, 0);
-      jerry_release_value(this_val);
+      jerry_value_t this_val = jerry_undefined();
+      jerry_call(disconnect_js_cb, this_val, NULL, 0);
+      jerry_value_free(this_val);
     }
-    jerry_release_value(disconnect_js_cb);
+    jerry_value_free(disconnect_js_cb);
   } else {
     jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO,
                                 -1);
   }
   if (JERRYXX_HAS_ARG(0)) {
     jerry_value_t callback = JERRYXX_GET_ARG(0);
-    jerry_value_t js_cb = jerry_acquire_value(callback);
+    jerry_value_t js_cb = jerry_value_copy(callback);
     jerry_value_t errno = jerryxx_get_property_number(
         JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO, 0);
-    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t this_val = jerry_undefined();
     jerry_value_t args_p[1] = {errno};
-    jerry_call_function(js_cb, this_val, args_p, 1);
-    jerry_release_value(errno);
-    jerry_release_value(this_val);
-    jerry_release_value(js_cb);
+    jerry_call(js_cb, this_val, args_p, 1);
+    jerry_value_free(errno);
+    jerry_value_free(this_val);
+    jerry_value_free(js_cb);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pico_cyw43_wifi_get_connection) {
   JERRYXX_CHECK_ARG_FUNCTION_OPT(0, "callback");
   int wifi_status = cyw43_tcpip_link_status(&cyw43_state, CYW43_ITF_STA);
-  jerry_value_t obj = jerry_create_object();
+  jerry_value_t obj = jerry_object();
   if (wifi_status == CYW43_LINK_UP) {
     jerryxx_set_property_string(obj, MSTR_PICO_CYW43_SCANINFO_SSID,
                                 __cyw43_drv.current_ssid);
@@ -559,23 +557,23 @@ JERRYXX_FUN(pico_cyw43_wifi_get_connection) {
   }
   if (JERRYXX_HAS_ARG(0)) {
     jerry_value_t callback = JERRYXX_GET_ARG(0);
-    jerry_value_t get_connect_js_cb = jerry_acquire_value(callback);
+    jerry_value_t get_connect_js_cb = jerry_value_copy(callback);
     jerry_value_t errno = jerryxx_get_property_number(
         JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO, 0);
-    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t this_val = jerry_undefined();
     if (wifi_status == CYW43_LINK_UP) {
       jerry_value_t args_p[2] = {errno, obj};
-      jerry_call_function(get_connect_js_cb, this_val, args_p, 2);
+      jerry_call(get_connect_js_cb, this_val, args_p, 2);
     } else {
       jerry_value_t args_p[1] = {errno};
-      jerry_call_function(get_connect_js_cb, this_val, args_p, 1);
+      jerry_call(get_connect_js_cb, this_val, args_p, 1);
     }
-    jerry_release_value(errno);
-    jerry_release_value(this_val);
-    jerry_release_value(get_connect_js_cb);
+    jerry_value_free(errno);
+    jerry_value_free(this_val);
+    jerry_value_free(get_connect_js_cb);
   }
-  jerry_release_value(obj);
-  return jerry_create_undefined();
+  jerry_value_free(obj);
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pico_cyw43_network_ctor_fn) {
@@ -584,7 +582,7 @@ JERRYXX_FUN(pico_cyw43_network_ctor_fn) {
   for (int i = 0; i < KM_MAX_SOCKET_NO; i++) {
     __socket_info.socket[i].fd = -1;
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pico_cyw43_network_socket) {
@@ -594,27 +592,27 @@ JERRYXX_FUN(pico_cyw43_network_socket) {
   JERRYXX_GET_ARG_STRING_AS_CHAR(1, protocol);
   int protocol_param = NET_SOCKET_STREAM;
   if (strcmp(protocol, "STREAM") && strcmp(protocol, "DGRAM")) {
-    return jerry_create_error(
+    return jerry_error_sz(
         JERRY_ERROR_TYPE,
-        (const jerry_char_t *)"un-supported domain or protocol.");
+        "un-supported domain or protocol.");
   } else {
     if (strcmp(protocol, "STREAM")) {
       protocol_param = NET_SOCKET_DGRAM;
     }
   }
   if (__cyw43_drv.status_flag == KM_CYW43_STATUS_DISABLED) {
-    return jerry_create_error(
+    return jerry_error_sz(
         JERRY_ERROR_COMMON,
-        (const jerry_char_t *)"PICO-W CYW43 WiFi is not initialized.");
+        "PICO-W CYW43 WiFi is not initialized.");
   }
   int wifi_status = cyw43_tcpip_link_status(&cyw43_state, CYW43_ITF_STA);
   if ((wifi_status != CYW43_LINK_UP) && ((__cyw43_drv.status_flag & KM_CYW43_STATUS_AP_MODE) == 0)) {
-    return jerry_create_error(JERRY_ERROR_COMMON,
-                              (const jerry_char_t *)"WiFi is not connected.");
+    return jerry_error_sz(JERRY_ERROR_COMMON,
+                              "WiFi is not connected.");
   }
   int8_t fd = km_get_socket_fd();
   if (!km_is_valid_fd(fd)) {
-    return jerry_create_error_from_value(create_system_error(EREMOTEIO), true);
+    return jerry_exception_value(create_system_error(EREMOTEIO), true);
   }
   __socket_info.socket[fd].server_fd = -1;
   __socket_info.socket[fd].tcp_server_pcb = NULL;
@@ -625,7 +623,7 @@ JERRYXX_FUN(pico_cyw43_network_socket) {
   __socket_info.socket[fd].raddr.addr = 0;
 
   // The socket should be allocated as long as this object we are about to create exists..
-  __socket_info.socket[fd].obj = jerry_create_object();
+  __socket_info.socket[fd].obj = jerry_object();
 
   uint8_t mac_addr[6] = {0};
   char p_str_buff[18];
@@ -670,16 +668,16 @@ JERRYXX_FUN(pico_cyw43_network_socket) {
                               MSTR_PICO_CYW43_SOCKET_RPORT,
                               __socket_info.socket[fd].rport);
 
-  return jerry_create_number(fd);
+  return jerry_number(fd);
 }
 
 JERRYXX_FUN(pico_cyw43_network_get) {
   JERRYXX_CHECK_ARG_NUMBER(0, "fd");
   int8_t fd = JERRYXX_GET_ARG_NUMBER(0);
   if (!km_is_valid_fd(fd) || !km_is_valid_fd(__socket_info.socket[fd].fd)) {
-    return jerry_create_undefined();
+    return jerry_undefined();
   }
-  return jerry_acquire_value(__socket_info.socket[fd].obj);
+  return jerry_value_copy(__socket_info.socket[fd].obj);
 }
 
 static err_t __net_socket_close(int8_t fd) {
@@ -716,13 +714,13 @@ static err_t __net_socket_close(int8_t fd) {
   jerry_value_t close_js_cb = jerryxx_get_property(
       __socket_info.socket[fd].obj, MSTR_PICO_CYW43_SOCKET_CLOSE_CB);
   if (jerry_value_is_function(close_js_cb)) {
-    jerry_value_t this_val = jerry_create_undefined();
-    jerry_call_function(close_js_cb, this_val, NULL, 0);
-    jerry_release_value(this_val);
+    jerry_value_t this_val = jerry_undefined();
+    jerry_call(close_js_cb, this_val, NULL, 0);
+    jerry_value_free(this_val);
   }
-  jerry_release_value(close_js_cb);
+  jerry_value_free(close_js_cb);
   if (__socket_info.socket[fd].obj != 0)
-    jerry_release_value(__socket_info.socket[fd].obj);
+    jerry_value_free(__socket_info.socket[fd].obj);
   __socket_info.socket[fd].obj = 0;
   return err;
 }
@@ -757,20 +755,20 @@ static err_t __net_data_received(int8_t fd, struct tcp_pcb *tpcb,
         jerry_value_t read_js_cb = jerryxx_get_property(
             __socket_info.socket[read_fd].obj, MSTR_PICO_CYW43_SOCKET_READ_CB);
         if (jerry_value_is_function(read_js_cb)) {
-          jerry_value_t this_val = jerry_create_undefined();
+          jerry_value_t this_val = jerry_undefined();
           jerry_value_t buffer =
-              jerry_create_arraybuffer_external(p->tot_len, receiver_buffer, buffer_free_cb);
-          jerry_value_t data = jerry_create_typedarray_for_arraybuffer(
+              jerry_arraybuffer_external(receiver_buffer, p->tot_len, NULL);
+          jerry_value_t data = jerry_typedarray_with_buffer(
               JERRY_TYPEDARRAY_UINT8, buffer);
-          jerry_release_value(buffer);
+          jerry_value_free(buffer);
           jerry_value_t args_p[1] = {data};
-          jerry_call_function(read_js_cb, this_val, args_p, 2);
-          jerry_release_value(data);
-          jerry_release_value(this_val);
+          jerry_call(read_js_cb, this_val, args_p, 2);
+          jerry_value_free(data);
+          jerry_value_free(this_val);
         } else {
           free(receiver_buffer);
         }
-        jerry_release_value(read_js_cb);
+        jerry_value_free(read_js_cb);
       }
     } else {
       err = ERANGE;
@@ -809,11 +807,11 @@ static err_t __net_client_connect_cb(void *arg, struct tcp_pcb *tpcb,
       jerry_value_t connect_js_cb = jerryxx_get_property(
           __socket_info.socket[*fd].obj, MSTR_PICO_CYW43_SOCKET_CONNECT_CB);
       if (jerry_value_is_function(connect_js_cb)) {
-        jerry_value_t this_val = jerry_create_undefined();
-        jerry_call_function(connect_js_cb, this_val, NULL, 0);
-        jerry_release_value(this_val);
+        jerry_value_t this_val = jerry_undefined();
+        jerry_call(connect_js_cb, this_val, NULL, 0);
+        jerry_value_free(this_val);
       }
-      jerry_release_value(connect_js_cb);
+      jerry_value_free(connect_js_cb);
     } else {
       err = ERANGE;
     }
@@ -835,7 +833,7 @@ static err_t __tcp_server_accept_cb(void *arg, struct tcp_pcb *newpcb,
       __socket_info.socket[fd].lport = __socket_info.socket[*server_fd].lport;
       __socket_info.socket[fd].rport = 0;
       __socket_info.socket[fd].raddr.addr = 0;
-      __socket_info.socket[fd].obj = jerry_create_object();
+      __socket_info.socket[fd].obj = jerry_object();
       jerryxx_set_property_number(__socket_info.socket[fd].obj,
                                   MSTR_PICO_CYW43_SOCKET_FD, fd);
       sprintf(p_str_buff, "STREAM");
@@ -871,14 +869,14 @@ static err_t __tcp_server_accept_cb(void *arg, struct tcp_pcb *newpcb,
           jerryxx_get_property(__socket_info.socket[*server_fd].obj,
                                MSTR_PICO_CYW43_SOCKET_ACCEPT_CB);
       if (jerry_value_is_function(acept_js_cb)) {
-        jerry_value_t this_val = jerry_create_undefined();
-        jerry_value_t fd_val = jerry_create_number(fd);
+        jerry_value_t this_val = jerry_undefined();
+        jerry_value_t fd_val = jerry_number(fd);
         jerry_value_t args_p[1] = {fd_val};
-        jerry_call_function(acept_js_cb, this_val, args_p, 1);
-        jerry_release_value(fd_val);
-        jerry_release_value(this_val);
+        jerry_call(acept_js_cb, this_val, args_p, 1);
+        jerry_value_free(fd_val);
+        jerry_value_free(this_val);
       }
-      jerry_release_value(acept_js_cb);
+      jerry_value_free(acept_js_cb);
     } else {
       err = ECONNREFUSED;
     }
@@ -918,8 +916,8 @@ JERRYXX_FUN(pico_cyw43_network_connect) {
       while((__cyw43_drv.status_flag & KM_CYW43_STATUS_DNS_DONE) == 0) {
         if (timeout-- <= 0) {
           jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, -1);
-          return jerry_create_error(JERRY_ERROR_COMMON,
-                                  (const jerry_char_t *)"DNS response timeout.");
+          return jerry_error_sz(JERRY_ERROR_COMMON,
+                                  "DNS response timeout.");
           }
 #if PICO_CYW43_ARCH_POLL
         cyw43_arch_poll();
@@ -930,14 +928,14 @@ JERRYXX_FUN(pico_cyw43_network_connect) {
       }
       if (ip4_addr_get_u32(&(__socket_info.socket[fd].raddr)) == 0) {
         jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, -1);
-        return jerry_create_error(JERRY_ERROR_COMMON,
-                                 (const jerry_char_t *)"DNS Error: IP is not found.");
+        return jerry_error_sz(JERRY_ERROR_COMMON,
+                                 "DNS Error: IP is not found.");
       }
       __cyw43_drv.status_flag &= ~KM_CYW43_STATUS_DNS_DONE;
     } else if (err != ERR_OK) {
       jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, -1);
-      return jerry_create_error(JERRY_ERROR_COMMON,
-                                (const jerry_char_t *)"DNS Error: DNS access error.");
+      return jerry_error_sz(JERRY_ERROR_COMMON,
+                                "DNS Error: DNS access error.");
     }
     __socket_info.socket[fd].rport = port;
     char *p_str_buff = (char *)malloc(16);
@@ -998,17 +996,17 @@ JERRYXX_FUN(pico_cyw43_network_connect) {
   }
   if (JERRYXX_HAS_ARG(3)) {
     jerry_value_t callback = JERRYXX_GET_ARG(3);
-    jerry_value_t js_cb = jerry_acquire_value(callback);
+    jerry_value_t js_cb = jerry_value_copy(callback);
     jerry_value_t errno = jerryxx_get_property_number(
         JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
-    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t this_val = jerry_undefined();
     jerry_value_t args_p[1] = {errno};
-    jerry_call_function(js_cb, this_val, args_p, 1);
-    jerry_release_value(errno);
-    jerry_release_value(this_val);
-    jerry_release_value(js_cb);
+    jerry_call(js_cb, this_val, args_p, 1);
+    jerry_value_free(errno);
+    jerry_value_free(this_val);
+    jerry_value_free(js_cb);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pico_cyw43_network_write) {
@@ -1055,17 +1053,17 @@ JERRYXX_FUN(pico_cyw43_network_write) {
   }
   if (JERRYXX_HAS_ARG(2)) {
     jerry_value_t callback = JERRYXX_GET_ARG(2);
-    jerry_value_t js_cb = jerry_acquire_value(callback);
+    jerry_value_t js_cb = jerry_value_copy(callback);
     jerry_value_t errno = jerryxx_get_property_number(
         JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
-    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t this_val = jerry_undefined();
     jerry_value_t args_p[1] = {errno};
-    jerry_call_function(js_cb, this_val, args_p, 1);
-    jerry_release_value(errno);
-    jerry_release_value(this_val);
-    jerry_release_value(js_cb);
+    jerry_call(js_cb, this_val, args_p, 1);
+    jerry_value_free(errno);
+    jerry_value_free(this_val);
+    jerry_value_free(js_cb);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pico_cyw43_network_close) {
@@ -1085,17 +1083,17 @@ JERRYXX_FUN(pico_cyw43_network_close) {
 
   if (JERRYXX_HAS_ARG(1)) {
     jerry_value_t callback = JERRYXX_GET_ARG(1);
-    jerry_value_t js_cb = jerry_acquire_value(callback);
+    jerry_value_t js_cb = jerry_value_copy(callback);
     jerry_value_t errno = jerryxx_get_property_number(
         JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
-    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t this_val = jerry_undefined();
     jerry_value_t args_p[1] = {errno};
-    jerry_call_function(js_cb, this_val, args_p, 1);
-    jerry_release_value(errno);
-    jerry_release_value(this_val);
-    jerry_release_value(js_cb);
+    jerry_call(js_cb, this_val, args_p, 1);
+    jerry_value_free(errno);
+    jerry_value_free(this_val);
+    jerry_value_free(js_cb);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pico_cyw43_network_shutdown) {
@@ -1141,25 +1139,25 @@ JERRYXX_FUN(pico_cyw43_network_shutdown) {
     jerry_value_t shutdown_js_cb = jerryxx_get_property(
         __socket_info.socket[fd].obj, MSTR_PICO_CYW43_SOCKET_SHUTDOWN_CB);
     if (jerry_value_is_function(shutdown_js_cb)) {
-      jerry_value_t this_val = jerry_create_undefined();
-      jerry_call_function(shutdown_js_cb, this_val, NULL, 0);
-      jerry_release_value(this_val);
+      jerry_value_t this_val = jerry_undefined();
+      jerry_call(shutdown_js_cb, this_val, NULL, 0);
+      jerry_value_free(this_val);
     }
-    jerry_release_value(shutdown_js_cb);
+    jerry_value_free(shutdown_js_cb);
   }
   if (JERRYXX_HAS_ARG(2)) {
     jerry_value_t callback = JERRYXX_GET_ARG(2);
-    jerry_value_t js_cb = jerry_acquire_value(callback);
+    jerry_value_t js_cb = jerry_value_copy(callback);
     jerry_value_t errno = jerryxx_get_property_number(
         JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
-    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t this_val = jerry_undefined();
     jerry_value_t args_p[1] = {errno};
-    jerry_call_function(js_cb, this_val, args_p, 1);
-    jerry_release_value(errno);
-    jerry_release_value(this_val);
-    jerry_release_value(js_cb);
+    jerry_call(js_cb, this_val, args_p, 1);
+    jerry_value_free(errno);
+    jerry_value_free(this_val);
+    jerry_value_free(js_cb);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pico_cyw43_network_bind) {
@@ -1184,8 +1182,8 @@ JERRYXX_FUN(pico_cyw43_network_bind) {
       while((__cyw43_drv.status_flag & KM_CYW43_STATUS_DNS_DONE) == 0) {
         if (timeout-- <= 0) {
           jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, -1);
-          return jerry_create_error(JERRY_ERROR_COMMON,
-                                  (const jerry_char_t *)"DNS response timeout.");
+          return jerry_error_sz(JERRY_ERROR_COMMON,
+                                  "DNS response timeout.");
           }
 #if PICO_CYW43_ARCH_POLL
         cyw43_arch_poll();
@@ -1196,14 +1194,14 @@ JERRYXX_FUN(pico_cyw43_network_bind) {
       }
       if (ip4_addr_get_u32(&(laddr)) == 0) {
         jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, -1);
-        return jerry_create_error(JERRY_ERROR_COMMON,
-                                 (const jerry_char_t *)"DNS Error: IP is not found.");
+        return jerry_error_sz(JERRY_ERROR_COMMON,
+                                 "DNS Error: IP is not found.");
       }
       __cyw43_drv.status_flag &= ~KM_CYW43_STATUS_DNS_DONE;
     } else if (err != ERR_OK) {
       jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, -1);
-      return jerry_create_error(JERRY_ERROR_COMMON,
-                                (const jerry_char_t *)"DNS Error: DNS access error.");
+      return jerry_error_sz(JERRY_ERROR_COMMON,
+                                "DNS Error: DNS access error.");
     }
     __socket_info.socket[fd].lport = port;
     char *p_str_buff = (char *)malloc(16);
@@ -1255,17 +1253,17 @@ JERRYXX_FUN(pico_cyw43_network_bind) {
   }
   if (JERRYXX_HAS_ARG(3)) {
     jerry_value_t callback = JERRYXX_GET_ARG(3);
-    jerry_value_t js_cb = jerry_acquire_value(callback);
+    jerry_value_t js_cb = jerry_value_copy(callback);
     jerry_value_t errno = jerryxx_get_property_number(
         JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
-    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t this_val = jerry_undefined();
     jerry_value_t args_p[1] = {errno};
-    jerry_call_function(js_cb, this_val, args_p, 1);
-    jerry_release_value(errno);
-    jerry_release_value(this_val);
-    jerry_release_value(js_cb);
+    jerry_call(js_cb, this_val, args_p, 1);
+    jerry_value_free(errno);
+    jerry_value_free(this_val);
+    jerry_value_free(js_cb);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pico_cyw43_network_listen) {
@@ -1305,17 +1303,17 @@ JERRYXX_FUN(pico_cyw43_network_listen) {
   }
   if (JERRYXX_HAS_ARG(1)) {
     jerry_value_t callback = JERRYXX_GET_ARG(1);
-    jerry_value_t js_cb = jerry_acquire_value(callback);
+    jerry_value_t js_cb = jerry_value_copy(callback);
     jerry_value_t errno = jerryxx_get_property_number(
         JERRYXX_GET_THIS, MSTR_PICO_CYW43_NETWORK_ERRNO, 0);
-    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t this_val = jerry_undefined();
     jerry_value_t args_p[1] = {errno};
-    jerry_call_function(js_cb, this_val, args_p, 1);
-    jerry_release_value(errno);
-    jerry_release_value(this_val);
-    jerry_release_value(js_cb);
+    jerry_call(js_cb, this_val, args_p, 1);
+    jerry_value_free(errno);
+    jerry_value_free(this_val);
+    jerry_value_free(js_cb);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /*
@@ -1341,24 +1339,24 @@ JERRYXX_FUN(pico_cyw43_wifi_ap_mode) {
         ssid, (uint8_t *)__cyw43_drv.current_ssid, len);
     __cyw43_drv.current_ssid[len] = '\0';
   } else {
-    jerry_release_value(ssid);
-    return jerry_create_error(JERRY_ERROR_TYPE, (const jerry_char_t *)"SSID error");
+    jerry_value_free(ssid);
+    return jerry_error_sz(JERRY_ERROR_TYPE, "SSID error");
   }
-  jerry_release_value(ssid);
+  jerry_value_free(ssid);
 
   // validate password
   jerry_value_t password = jerryxx_get_property(ap_info, MSTR_PICO_CYW43_WIFI_APMODE_PASSWORD);
   if (jerry_value_is_string(password)) {
     len = jerryxx_get_ascii_string_size(password);
     if (len < 8) {
-      jerry_release_value(password);
-      return jerry_create_error(JERRY_ERROR_COMMON, (const jerry_char_t *)"PASSWORD need to have at least 8 characters");
+      jerry_value_free(password);
+      return jerry_error_sz(JERRY_ERROR_COMMON, "PASSWORD need to have at least 8 characters");
     }
     pw_str = (uint8_t *)malloc(len + 1);
     jerryxx_string_to_ascii_char_buffer(password, pw_str, len);
     pw_str[len] = '\0';
   }
-  jerry_release_value(password);
+  jerry_value_free(password);
 
   // validate Gateway
   uint8_t *str_buffer = (uint8_t *)malloc(16);
@@ -1375,14 +1373,14 @@ JERRYXX_FUN(pico_cyw43_wifi_ap_mode) {
   if (ipaddr_aton((const char *)str_buffer, &(gw)) == false) {
     free(pw_str);
     free(str_buffer);
-    jerry_release_value(gateway);
-    return jerry_create_error(JERRY_ERROR_COMMON,
-                              (const jerry_char_t *)"Can't decode Gateway IP Address");
+    jerry_value_free(gateway);
+    return jerry_error_sz(JERRY_ERROR_COMMON,
+                              "Can't decode Gateway IP Address");
   }
   jerryxx_set_property_string(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_APMODE_GATEWAY,
                               (char *)str_buffer);
   sprintf(__cyw43_drv.ap_gateway_ip4, "%s", str_buffer);
-  jerry_release_value(gateway);
+  jerry_value_free(gateway);
 
   // validate subnet mask
   jerry_value_t subnet_mask = jerryxx_get_property(ap_info, MSTR_PICO_CYW43_WIFI_APMODE_SUBNET_MASK);
@@ -1398,14 +1396,14 @@ JERRYXX_FUN(pico_cyw43_wifi_ap_mode) {
   if (ipaddr_aton((const char *)str_buffer, &(mask)) == false) {
     free(pw_str);
     free(str_buffer);
-    jerry_release_value(subnet_mask);
-    return jerry_create_error(JERRY_ERROR_COMMON,
-                              (const jerry_char_t *)"Can't decode Subnet Mask");
+    jerry_value_free(subnet_mask);
+    return jerry_error_sz(JERRY_ERROR_COMMON,
+                              "Can't decode Subnet Mask");
   }
   jerryxx_set_property_string(JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_APMODE_SUBNET_MASK,
                               (char *)str_buffer);
   free(str_buffer);
-  jerry_release_value(subnet_mask);
+  jerry_value_free(subnet_mask);
 
   // init driver
   int err = __cyw43_init();
@@ -1426,25 +1424,25 @@ JERRYXX_FUN(pico_cyw43_wifi_ap_mode) {
   // call callback
   if (JERRYXX_HAS_ARG(1)) {
     jerry_value_t callback = JERRYXX_GET_ARG(1);
-    jerry_value_t js_cb = jerry_acquire_value(callback);
+    jerry_value_t js_cb = jerry_value_copy(callback);
     jerry_value_t errno = jerryxx_get_property_number(
         JERRYXX_GET_THIS, MSTR_PICO_CYW43_WIFI_ERRNO, 0);
-    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t this_val = jerry_undefined();
     jerry_value_t args_p[1] = {errno};
-    jerry_call_function(js_cb, this_val, args_p, 1);
-    jerry_release_value(errno);
-    jerry_release_value(this_val);
-    jerry_release_value(js_cb);
+    jerry_call(js_cb, this_val, args_p, 1);
+    jerry_value_free(errno);
+    jerry_value_free(this_val);
+    jerry_value_free(js_cb);
   }
 
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pico_cyw43_wifi_disable_ap_mode) {
   // verify if AP_mode is enabled
   if ((__cyw43_drv.status_flag & KM_CYW43_STATUS_AP_MODE) == 0) {
-    return jerry_create_error(JERRY_ERROR_COMMON,
-                              (const jerry_char_t *)"WiFi AP_mode is not enabled.");
+    return jerry_error_sz(JERRY_ERROR_COMMON,
+                              "WiFi AP_mode is not enabled.");
   }
   __cyw43_drv.status_flag &= ~KM_CYW43_STATUS_AP_MODE;
   // deinit DHCP server
@@ -1452,17 +1450,17 @@ JERRYXX_FUN(pico_cyw43_wifi_disable_ap_mode) {
   km_cyw43_deinit();
   // init the WiFi chip
   if (__cyw43_init()) {
-    return jerry_create_error_from_value(create_system_error(EAGAIN), true);
+    return jerry_exception_value(create_system_error(EAGAIN), true);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 // Function to get the MAC address of connected clients
 JERRYXX_FUN(pico_cyw43_wifi_ap_get_stas) {
   // verify if AP_mode is enabled
   if ((__cyw43_drv.status_flag & KM_CYW43_STATUS_AP_MODE) == 0) {
-    return jerry_create_error(JERRY_ERROR_COMMON,
-                              (const jerry_char_t *)"WiFi AP_mode is not enabled.");
+    return jerry_error_sz(JERRY_ERROR_COMMON,
+                              "WiFi AP_mode is not enabled.");
   }
 
   int num_stas;
@@ -1473,15 +1471,15 @@ JERRYXX_FUN(pico_cyw43_wifi_ap_get_stas) {
   uint8_t *macs = (uint8_t*)malloc(max_stas * 6);
   //uint8_t macs[32 * 6];
   cyw43_wifi_ap_get_stas(&cyw43_state, &num_stas, macs);
-  jerry_value_t MAC_array = jerry_create_array (num_stas);
+  jerry_value_t MAC_array = jerry_array (num_stas);
   char **mac_strs = (char **)malloc(num_stas * sizeof(char *));
   for (int i = 0; i < num_stas; i++) {
     mac_strs[i] = (char *)malloc(MAC_STR_LENGTH * sizeof(char));
     sprintf(mac_strs[i], "%02x:%02x:%02x:%02x:%02x:%02x", macs[i*6], macs[i*6+1], macs[i*6+2], macs[i*6+3], macs[i*6+4], macs[i*6+5]);
     // add to the array
-    jerry_value_t prop = jerry_create_string((const jerry_char_t *)mac_strs[i]);
-    jerry_release_value(jerry_set_property_by_index(MAC_array, i, prop));
-    jerry_release_value(prop);
+    jerry_value_t prop = jerry_string_sz((const char *)mac_strs[i]);
+    jerry_value_free(jerry_object_set_index(MAC_array, i, prop));
+    jerry_value_free(prop);
     free(mac_strs[i]);
   }
   // deallocate memory
@@ -1494,18 +1492,18 @@ JERRYXX_FUN(pico_cyw43_wifi_ap_get_stas) {
 jerry_value_t module_pico_cyw43_init() {
   /* PICO_CYW43 class */
   jerry_value_t pico_cyw43_ctor =
-      jerry_create_external_function(pico_cyw43_ctor_fn);
-  jerry_value_t prototype = jerry_create_object();
+      jerry_function_external(pico_cyw43_ctor_fn);
+  jerry_value_t prototype = jerry_object();
   jerryxx_set_property(pico_cyw43_ctor, "prototype", prototype);
   jerryxx_set_property_function(prototype, MSTR_PICO_CYW43_GETGPIO,
                                 pico_cyw43_get_gpio);
   jerryxx_set_property_function(prototype, MSTR_PICO_CYW43_PUTGPIO,
                                 pico_cyw43_put_gpio);
-  jerry_release_value(prototype);
+  jerry_value_free(prototype);
 
   jerry_value_t pico_cyw43_wifi_ctor =
-      jerry_create_external_function(pico_cyw43_wifi_ctor_fn);
-  jerry_value_t wifi_prototype = jerry_create_object();
+      jerry_function_external(pico_cyw43_wifi_ctor_fn);
+  jerry_value_t wifi_prototype = jerry_object();
   jerryxx_set_property(pico_cyw43_wifi_ctor, "prototype", wifi_prototype);
   jerryxx_set_property_function(wifi_prototype, MSTR_PICO_CYW43_WIFI_RESET,
                                 pico_cyw43_wifi_reset);
@@ -1536,11 +1534,11 @@ jerry_value_t module_pico_cyw43_init() {
   jerryxx_set_property_function(wifi_prototype,
                                 MSTR_PICO_CYW43_WIFI_APMODE_DISABLE_DRV_FN,
                                 pico_cyw43_wifi_disable_ap_mode);
-  jerry_release_value(wifi_prototype);
+  jerry_value_free(wifi_prototype);
 
   jerry_value_t pico_cyw43_network_ctor =
-      jerry_create_external_function(pico_cyw43_network_ctor_fn);
-  jerry_value_t network_prototype = jerry_create_object();
+      jerry_function_external(pico_cyw43_network_ctor_fn);
+  jerry_value_t network_prototype = jerry_object();
   jerryxx_set_property(pico_cyw43_network_ctor, "prototype", network_prototype);
   jerryxx_set_property_function(network_prototype,
                                 MSTR_PICO_CYW43_NETWORK_SOCKET,
@@ -1564,18 +1562,18 @@ jerry_value_t module_pico_cyw43_init() {
   jerryxx_set_property_function(network_prototype,
                                 MSTR_PICO_CYW43_NETWORK_LISTEN,
                                 pico_cyw43_network_listen);
-  jerry_release_value(network_prototype);
+  jerry_value_free(network_prototype);
 
   /* pico_cyw43 module exports */
-  jerry_value_t exports = jerry_create_object();
+  jerry_value_t exports = jerry_object();
   jerryxx_set_property(exports, MSTR_PICO_CYW43_PICO_CYW43, pico_cyw43_ctor);
   jerryxx_set_property(exports, MSTR_PICO_CYW43_PICO_CYW43_WIFI,
                        pico_cyw43_wifi_ctor);
   jerryxx_set_property(exports, MSTR_PICO_CYW43_PICO_CYW43_NETWORK,
                        pico_cyw43_network_ctor);
-  jerry_release_value(pico_cyw43_ctor);
-  jerry_release_value(pico_cyw43_wifi_ctor);
-  jerry_release_value(pico_cyw43_network_ctor);
+  jerry_value_free(pico_cyw43_ctor);
+  jerry_value_free(pico_cyw43_wifi_ctor);
+  jerry_value_free(pico_cyw43_network_ctor);
 
   return exports;
 }

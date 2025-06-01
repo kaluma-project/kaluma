@@ -49,7 +49,7 @@ JERRYXX_FUN(flash_ctor_fn) {
   jerryxx_set_property_number(JERRYXX_GET_THIS, "base", base);
   jerryxx_set_property_number(JERRYXX_GET_THIS, "count", count);
   jerryxx_set_property_number(JERRYXX_GET_THIS, "size", size);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -72,9 +72,9 @@ JERRYXX_FUN(flash_read_fn) {
   jerry_length_t buffer_length = 0;
   jerry_length_t buffer_offset = 0;
   jerry_value_t arrbuf =
-      jerry_get_typedarray_buffer(buffer, &buffer_offset, &buffer_length);
-  uint8_t *buffer_pointer = jerry_get_arraybuffer_pointer(arrbuf);
-  jerry_release_value(arrbuf);
+      jerry_typedarray_buffer(buffer, &buffer_offset, &buffer_length);
+  uint8_t *buffer_pointer = jerry_arraybuffer_data(arrbuf);
+  jerry_value_free(arrbuf);
 
   // printf("bd.read(%d, %d, %d)\r\n", block, buffer_length, offset);
 
@@ -85,7 +85,7 @@ JERRYXX_FUN(flash_read_fn) {
   for (int i = 0; i < buffer_length; i++) {
     buffer_pointer[i] = addr[((base + block) * size) + offset + i];
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -108,16 +108,16 @@ JERRYXX_FUN(flash_write_fn) {
   jerry_length_t buffer_length = 0;
   jerry_length_t buffer_offset = 0;
   jerry_value_t arrbuf =
-      jerry_get_typedarray_buffer(buffer, &buffer_offset, &buffer_length);
-  uint8_t *buffer_pointer = jerry_get_arraybuffer_pointer(arrbuf);
-  jerry_release_value(arrbuf);
+      jerry_typedarray_buffer(buffer, &buffer_offset, &buffer_length);
+  uint8_t *buffer_pointer = jerry_arraybuffer_data(arrbuf);
+  jerry_value_free(arrbuf);
 
   // printf("bd.write(%d, %d, %d)\r\n", block, buffer_length, offset);
 
   // write to buffer
   int base = jerryxx_get_property_number(JERRYXX_GET_THIS, "base", 0);
   km_flash_program(base + block, offset, buffer_pointer, buffer_length);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -138,24 +138,24 @@ JERRYXX_FUN(flash_ioctl_fn) {
 
   switch (op) {
     case 1:  // init
-      return jerry_create_number(0);
+      return jerry_number(0);
     case 2:  // shutdown
-      return jerry_create_number(0);
+      return jerry_number(0);
     case 3:  // sync
-      return jerry_create_number(0);
+      return jerry_number(0);
     case 4:  // block count
-      return jerry_create_number(
+      return jerry_number(
           jerryxx_get_property_number(JERRYXX_GET_THIS, "count", 0));
     case 5:  // block size
-      return jerry_create_number(
+      return jerry_number(
           jerryxx_get_property_number(JERRYXX_GET_THIS, "size", 0));
     case 6:  // erase block
       km_flash_erase(base + arg, 1);
-      return jerry_create_number(0);
+      return jerry_number(0);
     case 7:  // buffer size (= flash page size)
-      return jerry_create_number(256);
+      return jerry_number(256);
     default:
-      return jerry_create_number(-1);
+      return jerry_number(-1);
   }
 }
 
@@ -164,8 +164,8 @@ JERRYXX_FUN(flash_ioctl_fn) {
  */
 jerry_value_t module_flash_init() {
   /* Flash class */
-  jerry_value_t flash_ctor = jerry_create_external_function(flash_ctor_fn);
-  jerry_value_t flash_prototype = jerry_create_object();
+  jerry_value_t flash_ctor = jerry_function_external(flash_ctor_fn);
+  jerry_value_t flash_prototype = jerry_object();
   jerryxx_set_property(flash_ctor, MSTR_PROTOTYPE, flash_prototype);
   jerryxx_set_property_function(flash_prototype, MSTR_FLASH_READ,
                                 flash_read_fn);
@@ -173,11 +173,11 @@ jerry_value_t module_flash_init() {
                                 flash_write_fn);
   jerryxx_set_property_function(flash_prototype, MSTR_FLASH_IOCTL,
                                 flash_ioctl_fn);
-  jerry_release_value(flash_prototype);
+  jerry_value_free(flash_prototype);
 
   /* flash module exports */
-  jerry_value_t exports = jerry_create_object();
+  jerry_value_t exports = jerry_object();
   jerryxx_set_property(exports, MSTR_FLASH_FLASH, flash_ctor);
-  jerry_release_value(flash_ctor);
+  jerry_value_free(flash_ctor);
   return exports;
 }

@@ -384,21 +384,21 @@ JERRYXX_FUN(sdcard_ctor_fn) {
   // initialize the bus
   int ret = km_gpio_set_io_mode(cs_pin, KM_GPIO_IO_MODE_OUTPUT);
   if (ret < 0) {
-    return jerry_create_error(
+    return jerry_error_sz(
         JERRY_ERROR_COMMON,
-        (const jerry_char_t *)"SD Card CS pin setup error.");
+        "SD Card CS pin setup error.");
   }
   CS_HIGH;
   ret = km_spi_setup(bus, (km_spi_mode_t)mode, baudrate,
                      (km_spi_bitorder_t)bitorder, pins, KM_SPI_MISO_PULLUP);
   if (ret < 0) {
-    return jerry_create_error(JERRY_ERROR_COMMON,
-                              (const jerry_char_t *)"SD Card SPI setup error.");
+    return jerry_error_sz(JERRY_ERROR_COMMON,
+                              "SD Card SPI setup error.");
   }
   init_sd();
   __sdcard_handle.bus = bus;
   __sdcard_handle.cs_pin = cs_pin;
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -421,20 +421,20 @@ JERRYXX_FUN(sdcard_read_fn) {
   jerry_length_t buffer_length = 0;
   jerry_length_t buffer_offset = 0;
   jerry_value_t arrbuf =
-      jerry_get_typedarray_buffer(buffer, &buffer_offset, &buffer_length);
-  uint8_t *buffer_pointer = jerry_get_arraybuffer_pointer(arrbuf);
-  jerry_release_value(arrbuf);
+      jerry_typedarray_buffer(buffer, &buffer_offset, &buffer_length);
+  uint8_t *buffer_pointer = jerry_arraybuffer_data(arrbuf);
+  jerry_value_free(arrbuf);
   if (!(__sdcard_handle.status & SD_STATUS_INIT)) {
-    return jerry_create_error(
-        JERRY_ERROR_COMMON, (const jerry_char_t *)"SDCard is not initialized.");
+    return jerry_error_sz(
+        JERRY_ERROR_COMMON, "SDCard is not initialized.");
   }
   if (__send_command(SD_CMD17, block, 0x00) != 0xFF) {
     if (__receive_datablock(buffer_pointer, __sdcard_handle.size) < 0) {
-      return jerry_create_error(JERRY_ERROR_COMMON,
-                                (const jerry_char_t *)"SDCard read error.");
+      return jerry_error_sz(JERRY_ERROR_COMMON,
+                                "SDCard read error.");
     }
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -457,19 +457,19 @@ JERRYXX_FUN(sdcard_write_fn) {
   jerry_length_t buffer_length = 0;
   jerry_length_t buffer_offset = 0;
   jerry_value_t arrbuf =
-      jerry_get_typedarray_buffer(buffer, &buffer_offset, &buffer_length);
-  uint8_t *buffer_pointer = jerry_get_arraybuffer_pointer(arrbuf);
-  jerry_release_value(arrbuf);
+      jerry_typedarray_buffer(buffer, &buffer_offset, &buffer_length);
+  uint8_t *buffer_pointer = jerry_arraybuffer_data(arrbuf);
+  jerry_value_free(arrbuf);
   if (!(__sdcard_handle.status & SD_STATUS_INIT)) {
-    return jerry_create_error(
-        JERRY_ERROR_COMMON, (const jerry_char_t *)"SDCard is not initialized.");
+    return jerry_error_sz(
+        JERRY_ERROR_COMMON, "SDCard is not initialized.");
   }
   if ((__send_command(SD_CMD24, block, 0x00) != 0x00) ||
       (__send_datablock(buffer_pointer, __sdcard_handle.size) < 0)) {
-    return jerry_create_error(JERRY_ERROR_COMMON,
-                              (const jerry_char_t *)"SDCard write error.");
+    return jerry_error_sz(JERRY_ERROR_COMMON,
+                              "SDCard write error.");
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -490,36 +490,36 @@ JERRYXX_FUN(sdcard_ioctl_fn) {
     case 1:  // init
       ret = __sdcard_init();
       if (ret <= 0) {
-        return jerry_create_error(JERRY_ERROR_COMMON,
-                                  (const jerry_char_t *)"SD Card init error.");
+        return jerry_error_sz(JERRY_ERROR_COMMON,
+                                  "SD Card init error.");
       }
-      return jerry_create_number(ret);
+      return jerry_number(ret);
     case 2:  // shutdown
       init_sd();
-      return jerry_create_number(0);
+      return jerry_number(0);
     case 3:  // sync
-      return jerry_create_number(0);
+      return jerry_number(0);
     case 4:  // block count
-      return jerry_create_number(__sdcard_handle.count);
+      return jerry_number(__sdcard_handle.count);
     case 5:  // block size
-      return jerry_create_number(__sdcard_handle.size);
+      return jerry_number(__sdcard_handle.size);
     case 6:  // erase block
       if (!(__sdcard_handle.status & SD_STATUS_INIT)) {
-        return jerry_create_error(
+        return jerry_error_sz(
             JERRY_ERROR_COMMON,
-            (const jerry_char_t *)"SDCard is not initialized.");
+            "SDCard is not initialized.");
       } else {
         if (__erase_datablock(arg, arg) < 0) {
-          return jerry_create_error(
-              JERRY_ERROR_COMMON, (const jerry_char_t *)"SDCard earse error.");
+          return jerry_error_sz(
+              JERRY_ERROR_COMMON, "SDCard earse error.");
         }
       }
-      return jerry_create_number(0);
+      return jerry_number(0);
     case 7:  // buffer size
-      return jerry_create_number(__sdcard_handle.size);
+      return jerry_number(__sdcard_handle.size);
     default:
-      return jerry_create_error(JERRY_ERROR_COMMON,
-                                (const jerry_char_t *)"Unknown operation.");
+      return jerry_error_sz(JERRY_ERROR_COMMON,
+                                "Unknown operation.");
   }
 }
 
@@ -528,8 +528,8 @@ JERRYXX_FUN(sdcard_ioctl_fn) {
  */
 jerry_value_t module_sdcard_init() {
   /* Sdcard class */
-  jerry_value_t sdcard_ctor = jerry_create_external_function(sdcard_ctor_fn);
-  jerry_value_t sdcard_prototype = jerry_create_object();
+  jerry_value_t sdcard_ctor = jerry_function_external(sdcard_ctor_fn);
+  jerry_value_t sdcard_prototype = jerry_object();
   jerryxx_set_property(sdcard_ctor, MSTR_PROTOTYPE, sdcard_prototype);
   jerryxx_set_property_function(sdcard_prototype, MSTR_SDCARD_READ,
                                 sdcard_read_fn);
@@ -537,11 +537,11 @@ jerry_value_t module_sdcard_init() {
                                 sdcard_write_fn);
   jerryxx_set_property_function(sdcard_prototype, MSTR_SDCARD_IOCTL,
                                 sdcard_ioctl_fn);
-  jerry_release_value(sdcard_prototype);
+  jerry_value_free(sdcard_prototype);
 
   /* sdcard module exports */
-  jerry_value_t exports = jerry_create_object();
+  jerry_value_t exports = jerry_object();
   jerryxx_set_property(exports, MSTR_SDCARD_SDCARD, sdcard_ctor);
-  jerry_release_value(sdcard_ctor);
+  jerry_value_free(sdcard_ctor);
   return exports;
 }

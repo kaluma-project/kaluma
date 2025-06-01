@@ -33,30 +33,30 @@ JERRYXX_FUN(wdt_ctor_fn) {
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_WDT_TIMEOUT, timeout_ms);
   int ret = km_wdt_enable(true, timeout_ms);
   if (ret < 0) {
-    return jerry_create_error(JERRY_ERROR_REFERENCE,
-                              (const jerry_char_t *)"This board does not support Watch dog timer.");
+    return jerry_error_sz(JERRY_ERROR_REFERENCE,
+                              "This board does not support Watch dog timer.");
   } else {
-    return jerry_create_undefined();
+    return jerry_undefined();
   }
 }
 
 JERRYXX_FUN(wdt_feed_fn) {
   km_wdt_feed();
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 jerry_value_t module_wdt_init() {
   /* WDT class */
-  jerry_value_t wdt_ctor = jerry_create_external_function(wdt_ctor_fn);
-  jerry_value_t prototype = jerry_create_object();
+  jerry_value_t wdt_ctor = jerry_function_external(wdt_ctor_fn);
+  jerry_value_t prototype = jerry_object();
   jerryxx_set_property(wdt_ctor, "prototype", prototype);
   jerryxx_set_property_function(prototype, MSTR_WDT_FEED, wdt_feed_fn);
-  jerry_release_value(prototype);
+  jerry_value_free(prototype);
 
   /* wdt module exports */
-  jerry_value_t exports = jerry_create_object();
+  jerry_value_t exports = jerry_object();
   jerryxx_set_property(exports, MSTR_WDT_WDT, wdt_ctor);
-  jerry_release_value(wdt_ctor);
+  jerry_value_free(wdt_ctor);
 
   return exports;
 }

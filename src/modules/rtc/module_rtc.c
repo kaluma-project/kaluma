@@ -36,7 +36,7 @@ JERRYXX_FUN(rtc_set_time_fn) {
   JERRYXX_CHECK_ARG_NUMBER(0, "time")
   double time = JERRYXX_GET_ARG_NUMBER(0);
   km_rtc_set_time((uint64_t)time);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -46,7 +46,7 @@ JERRYXX_FUN(rtc_set_time_fn) {
  */
 JERRYXX_FUN(rtc_get_time_fn) {
   uint64_t time = km_rtc_get_time();
-  return jerry_create_number((double)time);
+  return jerry_number((double)time);
 }
 
 /**
@@ -54,7 +54,7 @@ JERRYXX_FUN(rtc_get_time_fn) {
  */
 jerry_value_t module_rtc_init() {
   /* rtc module exports */
-  jerry_value_t exports = jerry_create_object();
+  jerry_value_t exports = jerry_object();
   jerryxx_set_property_function(exports, MSTR_RTC_SET_TIME, rtc_set_time_fn);
   jerryxx_set_property_function(exports, MSTR_RTC_GET_TIME, rtc_get_time_fn);
   return exports;

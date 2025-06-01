@@ -27,7 +27,7 @@
 #include "global.h"
 #include "gpio.h"
 #include "io.h"
-#include "jerryscript-ext/handler.h"
+// #include "jerryscript-ext/handler.h"
 #include "jerryscript-port.h"
 #include "jerryscript.h"
 #include "jerryxx.h"
@@ -60,17 +60,17 @@ static km_io_idle_handle_t idler;
 static jerry_value_t vm_exec_stop_callback(void *user_p) {
   if (km_runtime_vm_stop > 0) {
     km_runtime_vm_stop = 0;
-    return jerry_create_string((const jerry_char_t *)"Aborted");
+    return jerry_string_sz((const char *)"Aborted");
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 static void idler_cb() {
-  jerry_value_t ret_val = jerry_run_all_enqueued_jobs();
+  jerry_value_t ret_val = jerry_run_jobs();
   if (jerry_value_is_error(ret_val)) {
     jerryxx_print_error(ret_val, true);
   }
-  jerry_release_value(ret_val);
+  jerry_value_free(ret_val);
 #ifdef _TARGET_FREERTOS_
   // ESP32 Kick the dog
   vTaskDelay(10);
@@ -83,12 +83,11 @@ static void idler_cb() {
 
 void km_runtime_init(bool load, bool first) {
   jerry_init(JERRY_INIT_EMPTY);
-  jerry_set_vm_exec_stop_callback(vm_exec_stop_callback, &km_runtime_vm_stop,
-                                  16);
+  jerry_halt_handler(16, vm_exec_stop_callback, &km_runtime_vm_stop);
   jerry_register_magic_strings(magic_string_items, num_magic_string_items,
                                magic_string_lengths);
   km_global_init();
-  jerry_gc(JERRY_GC_PRESSURE_HIGH);
+  jerry_heap_gc(JERRY_GC_PRESSURE_HIGH);
   if (load) {
     km_runtime_load();
   }
@@ -109,8 +108,10 @@ void km_runtime_load() {
   uint32_t size = km_prog_get_size();
   if (size > 0) {
     uint8_t *script = km_prog_addr();
+    jerry_parse_options_t parse_options;
+    parse_options.options = JERRY_PARSE_STRICT_MODE;
     jerry_value_t parsed_code =
-        jerry_parse(NULL, 0, script, size, JERRY_PARSE_STRICT_MODE);
+        jerry_parse(script, size, &parse_options);
     if (!jerry_value_is_error(parsed_code)) {
       jerry_value_t ret_value = jerry_run(parsed_code);
       if (jerry_value_is_error(ret_value)) {
@@ -119,11 +120,11 @@ void km_runtime_load() {
         km_runtime_init(false, false);
         return;
       }
-      jerry_release_value(ret_value);
+      jerry_value_free(ret_value);
     } else {
       jerryxx_print_error(parsed_code, true);
     }
-    jerry_release_value(parsed_code);
+    jerry_value_free(parsed_code);
   }
 }
 

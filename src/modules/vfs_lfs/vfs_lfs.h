@@ -29,7 +29,7 @@
 #define VFS_LFS_GET_FILE_HANDLE(vfs_handle, file, id)                    \
   vfs_lfs_file_handle_t *file = vfs_lfs_file_get_by_id(vfs_handle, id);  \
   if (file == NULL) {                                                    \
-    return jerry_create_error_from_value(create_system_error(-9), true); \
+    return jerry_exception_value(create_system_error(-9), true); \
   }
 
 typedef struct vfs_lfs_root_s vfs_lfs_root_t;

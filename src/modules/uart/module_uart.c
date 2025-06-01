@@ -44,21 +44,21 @@ static int uart_available_cb(km_io_uart_handle_t *handle) {
 static void uart_read_cb(km_io_uart_handle_t *handle, uint8_t *buf,
                          size_t len) {
   if (jerry_value_is_function(handle->read_js_cb)) {
-    jerry_value_t array_buffer = jerry_create_arraybuffer(len);
+    jerry_value_t array_buffer = jerry_arraybuffer(len);
     jerry_arraybuffer_write(array_buffer, 0, buf, len);
-    jerry_value_t array = jerry_create_typedarray_for_arraybuffer(
+    jerry_value_t array = jerry_typedarray_with_buffer(
         JERRY_TYPEDARRAY_UINT8, array_buffer);
-    jerry_release_value(array_buffer);
-    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_free(array_buffer);
+    jerry_value_t this_val = jerry_undefined();
     jerry_value_t args_p[1] = {array};
     jerry_value_t ret_val =
-        jerry_call_function(handle->read_js_cb, this_val, args_p, 1);
+        jerry_call(handle->read_js_cb, this_val, args_p, 1);
     if (jerry_value_is_error(ret_val)) {
       jerryxx_print_error(ret_val, true);
     }
-    jerry_release_value(ret_val);
-    jerry_release_value(this_val);
-    jerry_release_value(array);
+    jerry_value_free(ret_val);
+    jerry_value_free(this_val);
+    jerry_value_free(array);
   }
 }
 
@@ -107,7 +107,7 @@ JERRYXX_FUN(uart_ctor_fn) {
   int ret = km_uart_setup(port, baudrate, bits, parity, stop, flow, buffer_size,
                           pins);
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
 
   jerryxx_set_property_number(JERRYXX_GET_THIS, MSTR_UART_PORT, port);
@@ -127,11 +127,11 @@ JERRYXX_FUN(uart_ctor_fn) {
   // setup io handle
   km_io_uart_handle_t *handle = malloc(sizeof(km_io_uart_handle_t));
   km_io_uart_init(handle);
-  handle->read_js_cb = jerry_acquire_value(callback);
+  handle->read_js_cb = jerry_value_copy(callback);
   jerryxx_set_property_number(JERRYXX_GET_THIS, "handle_id", handle->base.id);
   km_io_uart_read_start(handle, port, uart_available_cb, uart_read_cb);
 
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(uart_write_fn) {
@@ -145,30 +145,30 @@ JERRYXX_FUN(uart_write_fn) {
   jerry_value_t port_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
   if (!jerry_value_is_number(port_value)) {
-    jerry_release_value(port_value);
-    return jerry_create_error(
+    jerry_value_free(port_value);
+    return jerry_error_sz(
         JERRY_ERROR_REFERENCE,
-        (const jerry_char_t *)"UART port is not initialized.");
+        "UART port is not initialized.");
   }
-  uint8_t port = (uint8_t)jerry_get_number_value(port_value);
-  jerry_release_value(port_value);
+  uint8_t port = (uint8_t)jerry_value_as_number(port_value);
+  jerry_value_free(port_value);
 
   // write data to the port
   int ret = 0;
   if (jerry_value_is_typedarray(data) &&
-      jerry_get_typedarray_type(data) ==
+      jerry_typedarray_type(data) ==
           JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
     jerry_length_t byteLength = 0;
     jerry_length_t byteOffset = 0;
     jerry_value_t array_buffer =
-        jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
-    size_t len = jerry_get_arraybuffer_byte_length(array_buffer);
-    uint8_t *buf = jerry_get_arraybuffer_pointer(array_buffer);
+        jerry_typedarray_buffer(data, &byteOffset, &byteLength);
+    size_t len = jerry_arraybuffer_size(array_buffer);
+    uint8_t *buf = jerry_arraybuffer_data(array_buffer);
     for (int c = 0; c < count; c++) {
       ret = km_uart_write(port, buf, len);
       if (ret < 0) break;
     }
-    jerry_release_value(array_buffer);
+    jerry_value_free(array_buffer);
   } else if (jerry_value_is_string(data)) { /* for string */
     jerry_size_t len = jerryxx_get_ascii_string_size(data);
     uint8_t buf[len];
@@ -178,15 +178,14 @@ JERRYXX_FUN(uart_write_fn) {
       if (ret < 0) break;
     }
   } else {
-    return jerry_create_error(
+    return jerry_error_sz(
         JERRY_ERROR_TYPE,
-        (const jerry_char_t
-             *)"The data argument must be Uint8Array or string.");
+        "The data argument must be Uint8Array or string.");
   }
   if (ret < 0)
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   else
-    return jerry_create_number(ret);
+    return jerry_number(ret);
 }
 
 /**
@@ -197,18 +196,18 @@ JERRYXX_FUN(uart_close_fn) {
   jerry_value_t port_value =
       jerryxx_get_property(JERRYXX_GET_THIS, MSTR_UART_PORT);
   if (!jerry_value_is_number(port_value)) {
-    jerry_release_value(port_value);
-    return jerry_create_error(
+    jerry_value_free(port_value);
+    return jerry_error_sz(
         JERRY_ERROR_REFERENCE,
-        (const jerry_char_t *)"UART port is not initialized.");
+        "UART port is not initialized.");
   }
-  uint8_t port = (uint8_t)jerry_get_number_value(port_value);
-  jerry_release_value(port_value);
+  uint8_t port = (uint8_t)jerry_value_as_number(port_value);
+  jerry_value_free(port_value);
 
   // close the port
   int ret = km_uart_close(port);
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
 
   // delete this.port
@@ -219,13 +218,13 @@ JERRYXX_FUN(uart_close_fn) {
       jerryxx_get_property_number(JERRYXX_GET_THIS, "handle_id", 0);
   km_io_uart_handle_t *handle = km_io_uart_get_by_id(handle_id);
   if (handle != NULL) {
-    jerry_release_value(handle->read_js_cb);
+    jerry_value_free(handle->read_js_cb);
     km_io_uart_read_stop(handle);
     km_io_handle_close((km_io_handle_t *)handle, uart_close_cb);
   }
   jerryxx_delete_property(JERRYXX_GET_THIS, "handle_id");
 
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -233,15 +232,15 @@ JERRYXX_FUN(uart_close_fn) {
  */
 jerry_value_t module_uart_init() {
   /* UART class */
-  jerry_value_t uart_ctor = jerry_create_external_function(uart_ctor_fn);
-  jerry_value_t uart_prototype = jerry_create_object();
+  jerry_value_t uart_ctor = jerry_function_external(uart_ctor_fn);
+  jerry_value_t uart_prototype = jerry_object();
   jerryxx_set_property(uart_ctor, "prototype", uart_prototype);
   jerryxx_set_property_function(uart_prototype, MSTR_UART_WRITE, uart_write_fn);
   jerryxx_set_property_function(uart_prototype, MSTR_UART_CLOSE, uart_close_fn);
-  jerry_release_value(uart_prototype);
+  jerry_value_free(uart_prototype);
 
   /* uart module exports */
-  jerry_value_t exports = jerry_create_object();
+  jerry_value_t exports = jerry_object();
   jerryxx_set_property(exports, MSTR_UART_UART, uart_ctor);
   jerryxx_set_property_number(exports, MSTR_UART_PARITY_NONE,
                               KM_UART_PARITY_TYPE_NONE);
@@ -254,7 +253,7 @@ jerry_value_t module_uart_init() {
   jerryxx_set_property_number(exports, MSTR_UART_FLOW_CTS, KM_UART_FLOW_CTS);
   jerryxx_set_property_number(exports, MSTR_UART_FLOW_RTS_CTS,
                               KM_UART_FLOW_RTS_CTS);
-  jerry_release_value(uart_ctor);
+  jerry_value_free(uart_ctor);
 
   return exports;
 }
