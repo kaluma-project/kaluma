@@ -37,9 +37,9 @@ JERRYXX_FUN(storage_set_item_fn) {
   JERRYXX_GET_ARG_STRING_AS_CHAR(1, value)
   int ret = storage_set_item(key, value);
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -50,11 +50,11 @@ JERRYXX_FUN(storage_get_item_fn) {
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
   int len = storage_get_value_length(key);
   if (len < 0) {
-    return jerry_create_null();
+    return jerry_null();
   }
   char *buf = (char *)malloc(len);
   storage_get_value(key, buf);
-  jerry_value_t value = jerry_create_string_sz((const jerry_char_t *)buf, len);
+  jerry_value_t value = jerry_string((const jerry_char_t *)buf, len, JERRY_ENCODING_CESU8);
   free(buf);
   return value;
 }
@@ -66,7 +66,7 @@ JERRYXX_FUN(storage_remove_item_fn) {
   JERRYXX_CHECK_ARG_STRING(0, "key")
   JERRYXX_GET_ARG_STRING_AS_CHAR(0, key)
   storage_remove_item(key);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -75,9 +75,9 @@ JERRYXX_FUN(storage_remove_item_fn) {
 JERRYXX_FUN(storage_clear_fn) {
   int ret = storage_clear();
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -86,9 +86,9 @@ JERRYXX_FUN(storage_clear_fn) {
 JERRYXX_FUN(storage_length_fn) {
   int ret = storage_get_item_count();
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
-  return jerry_create_number(ret);
+  return jerry_number(ret);
 }
 
 /**
@@ -99,11 +99,11 @@ JERRYXX_FUN(storage_key_fn) {
   int index = (int)JERRYXX_GET_ARG_NUMBER(0);
   int len = storage_get_key_length(index);
   if (len < 0) {
-    return jerry_create_null();
+    return jerry_null();
   }
   char *buf = (char *)malloc(len);
   storage_get_key(index, buf);
-  jerry_value_t ret = jerry_create_string_sz((const jerry_char_t *)buf, len);
+  jerry_value_t ret = jerry_string((const jerry_char_t *)buf, len, JERRY_ENCODING_CESU8);
   free(buf);
   return ret;
 }
@@ -113,7 +113,7 @@ JERRYXX_FUN(storage_key_fn) {
  */
 jerry_value_t module_storage_init() {
   /* storage module exports */
-  jerry_value_t exports = jerry_create_object();
+  jerry_value_t exports = jerry_object();
   jerryxx_set_property_function(exports, MSTR_STORAGE_SET_ITEM,
                                 storage_set_item_fn);
   jerryxx_set_property_function(exports, MSTR_STORAGE_GET_ITEM,

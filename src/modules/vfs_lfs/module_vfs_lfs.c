@@ -32,12 +32,12 @@
 #include "vfs_lfs.h"
 #include "vfs_lfs_magic_strings.h"
 
-static void vfs_handle_freecb(void *handle) {
+static void vfs_handle_freecb(void *handle, struct jerry_object_native_info_t *info_p) {
   vfs_lfs_handle_t *vfs_handle = (vfs_lfs_handle_t *)handle;
   free(vfs_handle->config.lookahead_buffer);
   free(vfs_handle->config.prog_buffer);
   free(vfs_handle->config.read_buffer);
-  jerry_release_value(vfs_handle->blkdev_js);
+  jerry_value_free(vfs_handle->blkdev_js);
   vfs_lfs_handle_remove(handle);
   free(handle);
 }
@@ -48,18 +48,18 @@ static const jerry_object_native_info_t vfs_handle_info = {
 static int blkdev_ioctl(jerry_value_t blkdev_js, int op, int arg) {
   // km_tty_printf("blkdev_ioctl(%d, %d)\r\n", op, arg);
   jerry_value_t ioctl_js = jerryxx_get_property(blkdev_js, "ioctl");
-  jerry_value_t op_js = jerry_create_number(op);
-  jerry_value_t arg_js = jerry_create_number(arg);
+  jerry_value_t op_js = jerry_number(op);
+  jerry_value_t arg_js = jerry_number(arg);
   jerry_value_t args[2] = {op_js, arg_js};
-  jerry_value_t ret = jerry_call_function(ioctl_js, blkdev_js, args, 2);
+  jerry_value_t ret = jerry_call(ioctl_js, blkdev_js, args, 2);
   int ret_value = 0;
   if (jerry_value_is_number(ret)) {
-    ret_value = (int)jerry_get_number_value(ret);
+    ret_value = (int)jerry_value_as_number(ret);
   }
-  jerry_release_value(ret);
-  jerry_release_value(arg_js);
-  jerry_release_value(op_js);
-  jerry_release_value(ioctl_js);
+  jerry_value_free(ret);
+  jerry_value_free(arg_js);
+  jerry_value_free(op_js);
+  jerry_value_free(ioctl_js);
   // km_tty_printf("blkdev_ioctl() ->  %d\r\n", ret_value);
   return ret_value;
 }
@@ -71,21 +71,21 @@ static int blkdev_read(const struct lfs_config *c, lfs_block_t block,
   // km_tty_printf("blkdev_read(lfs_config, %d, %d, buffer, %d)\r\n", block,
   // off, size);
   jerry_value_t arraybuffer =
-      jerry_create_arraybuffer_external(size, (uint8_t *)buffer, NULL);
-  jerry_value_t buffer_js = jerry_create_typedarray_for_arraybuffer(
+      jerry_arraybuffer_external((uint8_t *)buffer, size, NULL);
+  jerry_value_t buffer_js = jerry_typedarray_with_buffer(
       JERRY_TYPEDARRAY_UINT8, arraybuffer);
   jerry_value_t read_js = jerryxx_get_property(vfs_handle->blkdev_js, "read");
-  jerry_value_t block_js = jerry_create_number(block);
-  jerry_value_t offset_js = jerry_create_number(off);
+  jerry_value_t block_js = jerry_number(block);
+  jerry_value_t offset_js = jerry_number(off);
   jerry_value_t args[3] = {block_js, buffer_js, offset_js};
   jerry_value_t ret =
-      jerry_call_function(read_js, vfs_handle->blkdev_js, args, 3);
-  jerry_release_value(ret);
-  jerry_release_value(offset_js);
-  jerry_release_value(block_js);
-  jerry_release_value(read_js);
-  jerry_release_value(buffer_js);
-  jerry_release_value(arraybuffer);
+      jerry_call(read_js, vfs_handle->blkdev_js, args, 3);
+  jerry_value_free(ret);
+  jerry_value_free(offset_js);
+  jerry_value_free(block_js);
+  jerry_value_free(read_js);
+  jerry_value_free(buffer_js);
+  jerry_value_free(arraybuffer);
   return 0;
 }
 
@@ -96,21 +96,21 @@ static int blkdev_prog(const struct lfs_config *c, lfs_block_t block,
   // km_tty_printf("blkdev_prog(lfs_config, %d, %d, buffer, %d)\r\n", block,
   // off, size);
   jerry_value_t arraybuffer =
-      jerry_create_arraybuffer_external(size, (uint8_t *)buffer, NULL);
-  jerry_value_t buffer_js = jerry_create_typedarray_for_arraybuffer(
+      jerry_arraybuffer_external((uint8_t *)buffer, size, NULL);
+  jerry_value_t buffer_js = jerry_typedarray_with_buffer(
       JERRY_TYPEDARRAY_UINT8, arraybuffer);
   jerry_value_t write_js = jerryxx_get_property(vfs_handle->blkdev_js, "write");
-  jerry_value_t block_js = jerry_create_number(block);
-  jerry_value_t offset_js = jerry_create_number(off);
+  jerry_value_t block_js = jerry_number(block);
+  jerry_value_t offset_js = jerry_number(off);
   jerry_value_t args[3] = {block_js, buffer_js, offset_js};
   jerry_value_t ret =
-      jerry_call_function(write_js, vfs_handle->blkdev_js, args, 3);
-  jerry_release_value(ret);
-  jerry_release_value(offset_js);
-  jerry_release_value(block_js);
-  jerry_release_value(write_js);
-  jerry_release_value(buffer_js);
-  jerry_release_value(arraybuffer);
+      jerry_call(write_js, vfs_handle->blkdev_js, args, 3);
+  jerry_value_free(ret);
+  jerry_value_free(offset_js);
+  jerry_value_free(block_js);
+  jerry_value_free(write_js);
+  jerry_value_free(buffer_js);
+  jerry_value_free(arraybuffer);
   return 0;
 }
 
@@ -144,7 +144,7 @@ JERRYXX_FUN(vfslfs_ctor_fn) {
   vfs_lfs_handle_init(vfs_handle);
   vfs_lfs_handle_add(vfs_handle);
   vfs_handle->blkdev_js = blkdev;
-  jerry_acquire_value(vfs_handle->blkdev_js);
+  // jerry_value_copy(vfs_handle->blkdev_js);
   vfs_handle->config.context = vfs_handle;
   vfs_handle->config.read = blkdev_read;
   vfs_handle->config.prog = blkdev_prog;
@@ -169,9 +169,9 @@ JERRYXX_FUN(vfslfs_ctor_fn) {
       malloc(vfs_handle->config.lookahead_size);
 
   // assign native handle in js object
-  jerry_set_object_native_pointer(this_val, vfs_handle, &vfs_handle_info);
+  jerry_object_set_native_ptr(JERRYXX_GET_THIS, &vfs_handle_info, vfs_handle);
 
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -187,9 +187,9 @@ JERRYXX_FUN(vfs_lfs_mkfs_fn) {
   // make fs (format)
   int ret = lfs_format(&vfs_handle->lfs, &vfs_handle->config);
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -205,9 +205,9 @@ JERRYXX_FUN(vfs_lfs_mount_fn) {
   // mount vfs
   int ret = lfs_mount(&vfs_handle->lfs, &vfs_handle->config);
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -220,12 +220,12 @@ JERRYXX_FUN(vfs_lfs_unmount_fn) {
   // unmount vfs
   int ret = lfs_unmount(&vfs_handle->lfs);
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
 
   // shutdown block device
   blkdev_ioctl(vfs_handle->blkdev_js, 2, 0);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -263,13 +263,13 @@ JERRYXX_FUN(vfs_lfs_open_fn) {
   // file open
   int ret = lfs_file_open(&vfs_handle->lfs, &file->lfs_file, path, lfs_flags);
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
 
   // add file handle and return the id
   vfs_lfs_file_add(vfs_handle, file);
   uint32_t id = file->id;
-  return jerry_create_number(id);
+  return jerry_number(id);
 }
 
 /**
@@ -294,9 +294,9 @@ JERRYXX_FUN(vfs_lfs_write_fn) {
   jerry_length_t buf_length = 0;
   jerry_length_t buf_offset = 0;
   jerry_value_t arrbuf =
-      jerry_get_typedarray_buffer(buffer, &buf_offset, &buf_length);
-  uint8_t *buffer_p = jerry_get_arraybuffer_pointer(arrbuf);
-  jerry_release_value(arrbuf);
+      jerry_typedarray_buffer(buffer, &buf_offset, &buf_length);
+  uint8_t *buffer_p = jerry_arraybuffer_data(arrbuf);
+  jerry_value_free(arrbuf);
   int offset = (int)JERRYXX_GET_ARG_NUMBER_OPT(2, 0);
   int length = (int)JERRYXX_GET_ARG_NUMBER_OPT(3, buf_length);
   int position = (int)JERRYXX_GET_ARG_NUMBER_OPT(4, -1);
@@ -310,7 +310,7 @@ JERRYXX_FUN(vfs_lfs_write_fn) {
     int pos = lfs_file_seek(&vfs_handle->lfs, &file->lfs_file, position,
                             LFS_SEEK_SET);
     if (pos < 0) {
-      return jerry_create_error_from_value(create_system_error(pos), true);
+      return jerry_exception_value(create_system_error(pos), true);
     }
   }
 
@@ -318,11 +318,11 @@ JERRYXX_FUN(vfs_lfs_write_fn) {
   int ret = lfs_file_write(&vfs_handle->lfs, &file->lfs_file,
                            (void *)(buffer_p + offset), length);
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
 
   // return number of bytes written
-  return jerry_create_number(ret);
+  return jerry_number(ret);
 }
 
 /**
@@ -347,9 +347,9 @@ JERRYXX_FUN(vfs_lfs_read_fn) {
   jerry_length_t buf_length = 0;
   jerry_length_t buf_offset = 0;
   jerry_value_t arrbuf =
-      jerry_get_typedarray_buffer(buffer, &buf_offset, &buf_length);
-  uint8_t *buffer_p = jerry_get_arraybuffer_pointer(arrbuf);
-  jerry_release_value(arrbuf);
+      jerry_typedarray_buffer(buffer, &buf_offset, &buf_length);
+  uint8_t *buffer_p = jerry_arraybuffer_data(arrbuf);
+  jerry_value_free(arrbuf);
   int offset = (int)JERRYXX_GET_ARG_NUMBER_OPT(2, 0);
   int length = (int)JERRYXX_GET_ARG_NUMBER_OPT(3, buf_length);
   int position = (int)JERRYXX_GET_ARG_NUMBER_OPT(4, -1);
@@ -363,7 +363,7 @@ JERRYXX_FUN(vfs_lfs_read_fn) {
     int pos = lfs_file_seek(&vfs_handle->lfs, &file->lfs_file, position,
                             LFS_SEEK_SET);
     if (pos < 0) {
-      return jerry_create_error_from_value(create_system_error(pos), true);
+      return jerry_exception_value(create_system_error(pos), true);
     }
   }
 
@@ -371,11 +371,11 @@ JERRYXX_FUN(vfs_lfs_read_fn) {
   int ret = lfs_file_read(&vfs_handle->lfs, &file->lfs_file,
                           (uint8_t *)(buffer_p + offset), length);
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
 
   // return number of bytes read
-  return jerry_create_number(ret);
+  return jerry_number(ret);
 }
 
 /**
@@ -395,7 +395,7 @@ JERRYXX_FUN(vfs_lfs_close_fn) {
   // file close
   int ret = lfs_file_close(&vfs_handle->lfs, &file->lfs_file);
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
 
   // remote file handle
@@ -403,7 +403,7 @@ JERRYXX_FUN(vfs_lfs_close_fn) {
   free(file);
 
   // return
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -424,11 +424,11 @@ JERRYXX_FUN(vfs_lfs_stat_fn) {
   struct lfs_info info;
   int ret = lfs_stat(&vfs_handle->lfs, path, &info);
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
 
   // return stat object {type, size}
-  jerry_value_t obj = jerry_create_object();
+  jerry_value_t obj = jerry_object();
   jerryxx_set_property_number(obj, "type", info.type);
   jerryxx_set_property_number(obj, "size",
                               info.type == LFS_TYPE_REG ? info.size : 0);
@@ -454,9 +454,9 @@ JERRYXX_FUN(vfs_lfs_rename_fn) {
   // file rename
   int ret = lfs_rename(&vfs_handle->lfs, old_path, new_path);
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -475,9 +475,9 @@ JERRYXX_FUN(vfs_lfs_unlink_fn) {
   // file delete
   int ret = lfs_remove(&vfs_handle->lfs, path);
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -496,9 +496,9 @@ JERRYXX_FUN(vfs_lfs_mkdir_fn) {
   // create a directory
   int ret = lfs_mkdir(&vfs_handle->lfs, path);
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -520,13 +520,13 @@ JERRYXX_FUN(vfs_lfs_readdir_fn) {
   struct lfs_info info;
   int ret = lfs_dir_open(&vfs_handle->lfs, &dir, path);
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
-  jerry_value_t files = jerry_create_array(0);
+  jerry_value_t files = jerry_array(0);
   while (true) {
     ret = lfs_dir_read(&vfs_handle->lfs, &dir, &info);
     if (ret < 0) {
-      return jerry_create_error_from_value(create_system_error(ret), true);
+      return jerry_exception_value(create_system_error(ret), true);
     }
     if (ret == 0) {
       break;
@@ -534,14 +534,14 @@ JERRYXX_FUN(vfs_lfs_readdir_fn) {
     // add to array except '.', '..'
     if (strcmp(info.name, ".") != 0 && strcmp(info.name, "..") != 0) {
       jerry_value_t item =
-          jerry_create_string((const jerry_char_t *)(info.name));
+          jerry_string_sz((const char *)(info.name));
       jerryxx_array_push_string(files, item);
-      jerry_release_value(item);
+      jerry_value_free(item);
     }
   }
   ret = lfs_dir_close(&vfs_handle->lfs, &dir);
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
   return files;
 }
@@ -562,9 +562,9 @@ JERRYXX_FUN(vfs_lfs_rmdir_fn) {
   // remove directory
   int ret = lfs_remove(&vfs_handle->lfs, path);
   if (ret < 0) {
-    return jerry_create_error_from_value(create_system_error(ret), true);
+    return jerry_exception_value(create_system_error(ret), true);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -572,8 +572,8 @@ JERRYXX_FUN(vfs_lfs_rmdir_fn) {
  */
 jerry_value_t module_vfs_lfs_init() {
   /* VFSLittleFS class */
-  jerry_value_t vfs_lfs_ctor = jerry_create_external_function(vfslfs_ctor_fn);
-  jerry_value_t vfs_lfs_prototype = jerry_create_object();
+  jerry_value_t vfs_lfs_ctor = jerry_function_external(vfslfs_ctor_fn);
+  jerry_value_t vfs_lfs_prototype = jerry_object();
   jerryxx_set_property(vfs_lfs_ctor, MSTR_PROTOTYPE, vfs_lfs_prototype);
   jerryxx_set_property_function(vfs_lfs_prototype, MSTR_VFS_LFS_MKFS,
                                 vfs_lfs_mkfs_fn);
@@ -601,12 +601,12 @@ jerry_value_t module_vfs_lfs_init() {
                                 vfs_lfs_readdir_fn);
   jerryxx_set_property_function(vfs_lfs_prototype, MSTR_VFS_LFS_RMDIR,
                                 vfs_lfs_rmdir_fn);
-  jerry_release_value(vfs_lfs_prototype);
+  jerry_value_free(vfs_lfs_prototype);
 
   /* vfslittlefs module exports */
-  jerry_value_t exports = jerry_create_object();
+  jerry_value_t exports = jerry_object();
   jerryxx_set_property(exports, MSTR_VFS_LFS_VFSLITTLEFS, vfs_lfs_ctor);
-  jerry_release_value(vfs_lfs_ctor);
+  jerry_value_free(vfs_lfs_ctor);
 
   return exports;
 }

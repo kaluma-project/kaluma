@@ -36,7 +36,7 @@
 
 gc_font_t custom_font;
 
-static void gc_handle_freecb(void *handle) { free(handle); }
+static void gc_handle_freecb(void *handle, struct jerry_object_native_info_t *info_p) { free(handle); }
 
 static const jerry_object_native_info_t gc_handle_info = {.free_cb =
                                                               gc_handle_freecb};
@@ -61,7 +61,7 @@ JERRYXX_FUN(gc_ctor_fn) {
   gc_handle->font_color = 1;
   gc_handle->font_scale_x = 1;
   gc_handle->font_scale_y = 1;
-  jerry_set_object_native_pointer(this_val, gc_handle, &gc_handle_info);
+  jerry_object_set_native_ptr(JERRYXX_GET_THIS, &gc_handle_info, gc_handle);
 
   // read parameters
   gc_handle->device_width = (int16_t)JERRYXX_GET_ARG_NUMBER(0);
@@ -82,7 +82,7 @@ JERRYXX_FUN(gc_ctor_fn) {
                            set_pixel_js_cb);
       gc_handle->set_pixel_js_cb =
           set_pixel_js_cb;  // reference without acquire
-      jerry_release_value(set_pixel_js_cb);
+      jerry_value_free(set_pixel_js_cb);
 
       // getPixel callback
       jerry_value_t get_pixel_js_cb =
@@ -91,7 +91,7 @@ JERRYXX_FUN(gc_ctor_fn) {
                            get_pixel_js_cb);
       gc_handle->get_pixel_js_cb =
           get_pixel_js_cb;  // reference without acquire
-      jerry_release_value(get_pixel_js_cb);
+      jerry_value_free(get_pixel_js_cb);
 
       // fillRect callback
       jerry_value_t fill_rect_js_cb =
@@ -100,7 +100,7 @@ JERRYXX_FUN(gc_ctor_fn) {
                            fill_rect_js_cb);
       gc_handle->fill_rect_js_cb =
           fill_rect_js_cb;  // reference without acquire
-      jerry_release_value(fill_rect_js_cb);
+      jerry_value_free(fill_rect_js_cb);
     }
   }
 
@@ -112,7 +112,7 @@ JERRYXX_FUN(gc_ctor_fn) {
   gc_handle->fill_rect_cb = gc_prim_cb_fill_rect;
   gc_handle->fill_screen_cb = gc_prim_cb_fill_screen;
 
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -121,7 +121,7 @@ JERRYXX_FUN(gc_ctor_fn) {
 JERRYXX_FUN(gc_get_width_fn) {
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   int16_t width = gc_get_width(gc_handle);
-  return jerry_create_number(width);
+  return jerry_number(width);
 }
 
 /**
@@ -130,7 +130,7 @@ JERRYXX_FUN(gc_get_width_fn) {
 JERRYXX_FUN(gc_get_height_fn) {
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   int16_t height = gc_get_height(gc_handle);
-  return jerry_create_number(height);
+  return jerry_number(height);
 }
 
 /**
@@ -145,7 +145,7 @@ JERRYXX_FUN(gc_color16_fn) {
   uint8_t blue = (uint8_t)JERRYXX_GET_ARG_NUMBER(2);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   uint16_t color16 = gc_color16(gc_handle, red, green, blue);
-  return jerry_create_number(color16);
+  return jerry_number(color16);
 }
 
 /**
@@ -154,7 +154,7 @@ JERRYXX_FUN(gc_color16_fn) {
 JERRYXX_FUN(gc_clear_screen_fn) {
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   gc_clear_screen(gc_handle);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -165,7 +165,7 @@ JERRYXX_FUN(gc_fill_screen_fn) {
   uint16_t color = (uint16_t)JERRYXX_GET_ARG_NUMBER(0);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   gc_fill_screen(gc_handle, color);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -176,7 +176,7 @@ JERRYXX_FUN(gc_set_rotation_fn) {
   uint8_t rotation = (uint8_t)JERRYXX_GET_ARG_NUMBER(0);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   gc_set_rotation(gc_handle, rotation);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -185,7 +185,7 @@ JERRYXX_FUN(gc_set_rotation_fn) {
 JERRYXX_FUN(gc_get_rotation_fn) {
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   uint8_t rotation = gc_get_rotation(gc_handle);
-  return jerry_create_number(rotation);
+  return jerry_number(rotation);
 }
 
 /**
@@ -196,7 +196,7 @@ JERRYXX_FUN(gc_set_color_fn) {
   uint16_t color = (uint16_t)JERRYXX_GET_ARG_NUMBER(0);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   gc_set_color(gc_handle, color);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -205,7 +205,7 @@ JERRYXX_FUN(gc_set_color_fn) {
 JERRYXX_FUN(gc_get_color_fn) {
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   uint16_t color = gc_get_color(gc_handle);
-  return jerry_create_number(color);
+  return jerry_number(color);
 }
 
 /**
@@ -216,7 +216,7 @@ JERRYXX_FUN(gc_set_fill_color_fn) {
   uint16_t color = (uint16_t)JERRYXX_GET_ARG_NUMBER(0);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   gc_set_fill_color(gc_handle, color);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -225,7 +225,7 @@ JERRYXX_FUN(gc_set_fill_color_fn) {
 JERRYXX_FUN(gc_get_fill_color_fn) {
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   uint16_t color = gc_get_fill_color(gc_handle);
-  return jerry_create_number(color);
+  return jerry_number(color);
 }
 
 /**
@@ -236,7 +236,7 @@ JERRYXX_FUN(gc_set_font_color_fn) {
   uint16_t color = (uint16_t)JERRYXX_GET_ARG_NUMBER(0);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   gc_set_font_color(gc_handle, color);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -245,7 +245,7 @@ JERRYXX_FUN(gc_set_font_color_fn) {
 JERRYXX_FUN(gc_get_font_color_fn) {
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   uint16_t color = gc_get_font_color(gc_handle);
-  return jerry_create_number(color);
+  return jerry_number(color);
 }
 
 /**
@@ -272,43 +272,43 @@ JERRYXX_FUN(gc_set_font_fn) {
       // get bitmap buffer
       jerry_value_t bitmap = jerryxx_get_property(font, MSTR_GRAPHICS_BITMAP);
       if (jerry_value_is_typedarray(bitmap) &&
-          jerry_get_typedarray_type(bitmap) ==
+          jerry_typedarray_type(bitmap) ==
               JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
         jerry_length_t byteLength = 0;
         jerry_length_t byteOffset = 0;
         jerry_value_t buffer =
-            jerry_get_typedarray_buffer(bitmap, &byteOffset, &byteLength);
-        custom_font.bitmap = jerry_get_arraybuffer_pointer(buffer);
-        jerry_release_value(buffer);
+            jerry_typedarray_buffer(bitmap, &byteOffset, &byteLength);
+        custom_font.bitmap = jerry_arraybuffer_data(buffer);
+        jerry_value_free(buffer);
         // } else if (jerry_value_is_string(bitmap)) {
         //   custom_font.bitmap = NULL;
       } else {
-        return jerry_create_error(
+        return jerry_error_sz(
             JERRY_ERROR_TYPE,
-            (const jerry_char_t *)"font.bitmap must be Uint8Array.");
+            "font.bitmap must be Uint8Array.");
       }
-      jerry_release_value(bitmap);
+      jerry_value_free(bitmap);
       // get glyphs buffer
       jerry_value_t glyphs = jerryxx_get_property(font, MSTR_GRAPHICS_GLYPHS);
       if (jerry_value_is_typedarray(glyphs) &&
-          jerry_get_typedarray_type(glyphs) == JERRY_TYPEDARRAY_UINT8) {
+          jerry_typedarray_type(glyphs) == JERRY_TYPEDARRAY_UINT8) {
         jerry_length_t byteLength = 0;
         jerry_length_t byteOffset = 0;
         jerry_value_t buffer =
-            jerry_get_typedarray_buffer(glyphs, &byteOffset, &byteLength);
+            jerry_typedarray_buffer(glyphs, &byteOffset, &byteLength);
         custom_font.glyphs =
-            (gc_font_glyph_t *)jerry_get_arraybuffer_pointer(buffer);
-        jerry_release_value(buffer);
+            (gc_font_glyph_t *)jerry_arraybuffer_data(buffer);
+        jerry_value_free(buffer);
         // } else if (jerry_value_is_string(glyphs)) {
         //   custom_font.glyphs = NULL;
       }
-      jerry_release_value(glyphs);
+      jerry_value_free(glyphs);
       gc_handle->font = &custom_font;
     } else {
       gc_handle->font = NULL;
     }
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -321,7 +321,7 @@ JERRYXX_FUN(gc_set_font_scale_fn) {
   int8_t scale_y = (int8_t)JERRYXX_GET_ARG_NUMBER(1);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   gc_set_font_scale(gc_handle, scale_x, scale_y);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -336,7 +336,7 @@ JERRYXX_FUN(gc_set_pixel_fn) {
   uint16_t color = (uint16_t)JERRYXX_GET_ARG_NUMBER(2);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   gc_set_pixel(gc_handle, x, y, color);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -349,7 +349,7 @@ JERRYXX_FUN(gc_get_pixel_fn) {
   int16_t y = (int16_t)JERRYXX_GET_ARG_NUMBER(1);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   uint16_t color = gc_get_pixel(gc_handle, x, y);
-  return jerry_create_number(color);
+  return jerry_number(color);
 }
 
 /**
@@ -366,7 +366,7 @@ JERRYXX_FUN(gc_draw_line_fn) {
   int16_t y1 = (int16_t)JERRYXX_GET_ARG_NUMBER(3);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   gc_draw_line(gc_handle, x0, y0, x1, y1);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -383,7 +383,7 @@ JERRYXX_FUN(gc_draw_rect_fn) {
   int16_t h = (int16_t)JERRYXX_GET_ARG_NUMBER(3);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   gc_draw_rect(gc_handle, x, y, w, h);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -400,7 +400,7 @@ JERRYXX_FUN(gc_fill_rect_fn) {
   int16_t h = (int16_t)JERRYXX_GET_ARG_NUMBER(3);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   gc_fill_rect(gc_handle, x, y, w, h);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -415,7 +415,7 @@ JERRYXX_FUN(gc_draw_circle_fn) {
   int16_t r = (int16_t)JERRYXX_GET_ARG_NUMBER(2);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   gc_draw_circle(gc_handle, x, y, r);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -430,7 +430,7 @@ JERRYXX_FUN(gc_fill_circle_fn) {
   int16_t r = (int16_t)JERRYXX_GET_ARG_NUMBER(2);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   gc_fill_circle(gc_handle, x, y, r);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -449,7 +449,7 @@ JERRYXX_FUN(gc_draw_roundrect_fn) {
   int16_t r = (int16_t)JERRYXX_GET_ARG_NUMBER(4);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   gc_draw_roundrect(gc_handle, x, y, w, h, r);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -468,7 +468,7 @@ JERRYXX_FUN(gc_fill_roundrect_fn) {
   int16_t r = (int16_t)JERRYXX_GET_ARG_NUMBER(4);
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   gc_fill_roundrect(gc_handle, x, y, w, h, r);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -483,7 +483,7 @@ JERRYXX_FUN(gc_draw_text_fn) {
   JERRYXX_GET_ARG_STRING_AS_CHAR(2, text)
   JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
   gc_draw_text(gc_handle, x, y, text);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -496,7 +496,7 @@ JERRYXX_FUN(gc_measure_text_fn) {
   uint16_t w = 0;
   uint16_t h = 0;
   gc_measure_text(gc_handle, text, &w, &h);
-  jerry_value_t metric = jerry_create_object();
+  jerry_value_t metric = jerry_object();
   jerryxx_set_property_number(metric, "width", w);
   jerryxx_set_property_number(metric, "height", h);
   return metric;
@@ -542,9 +542,9 @@ JERRYXX_FUN(gc_draw_bitmap_fn) {
               jerryxx_get_property(options, MSTR_GRAPHICS_TRANSPARENT);
           if (jerry_value_is_number(tp)) {
             transparent = true;
-            transparent_color = (uint16_t)jerry_get_number_value(tp);
+            transparent_color = (uint16_t)jerry_value_as_number(tp);
           }
-          jerry_release_value(tp);
+          jerry_value_free(tp);
           scale_x = jerryxx_get_property_number(options, MSTR_GRAPHICS_SCALE_X,
                                                 scale_x);
           scale_y = jerryxx_get_property_number(options, MSTR_GRAPHICS_SCALE_Y,
@@ -560,43 +560,43 @@ JERRYXX_FUN(gc_draw_bitmap_fn) {
       JERRYXX_GET_NATIVE_HANDLE(gc_handle, gc_handle_t, gc_handle_info);
       jerry_value_t data = jerryxx_get_property(bitmap, MSTR_GRAPHICS_DATA);
       if (jerry_value_is_typedarray(data) &&
-          jerry_get_typedarray_type(data) ==
+          jerry_typedarray_type(data) ==
               JERRY_TYPEDARRAY_UINT8) { /* Uint8Array */
         jerry_length_t byteLength = 0;
         jerry_length_t byteOffset = 0;
         jerry_value_t buffer =
-            jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
-        uint8_t *buf = jerry_get_arraybuffer_pointer(buffer);
+            jerry_typedarray_buffer(data, &byteOffset, &byteLength);
+        uint8_t *buf = jerry_arraybuffer_data(buffer);
         gc_draw_bitmap(gc_handle, x, y, buf, w, h, bpp, color, transparent,
                        transparent_color, scale_x, scale_y, flip_x, flip_y);
-        jerry_release_value(buffer);
+        jerry_value_free(buffer);
       } else if (jerry_value_is_string(data)) { /* decode base64 string */
-        jerry_value_t global = jerry_get_global_object();
+        jerry_value_t global = jerry_current_realm();
         jerry_value_t atob_fn = jerryxx_get_property(global, MSTR_ATOB);
-        jerry_value_t this_val = jerry_create_undefined();
+        jerry_value_t this_val = jerry_undefined();
         jerry_value_t args[] = {data};
-        jerry_value_t decoded = jerry_call_function(atob_fn, this_val, args, 1);
+        jerry_value_t decoded = jerry_call(atob_fn, this_val, args, 1);
         jerry_length_t byteLength = 0;
         jerry_length_t byteOffset = 0;
         jerry_value_t buffer =
-            jerry_get_typedarray_buffer(decoded, &byteOffset, &byteLength);
-        uint8_t *buf = jerry_get_arraybuffer_pointer(buffer);
+            jerry_typedarray_buffer(decoded, &byteOffset, &byteLength);
+        uint8_t *buf = jerry_arraybuffer_data(buffer);
         gc_draw_bitmap(gc_handle, x, y, buf, w, h, bpp, color, transparent,
                        transparent_color, scale_x, scale_y, flip_x, flip_y);
-        jerry_release_value(buffer);
-        jerry_release_value(decoded);
-        jerry_release_value(this_val);
-        jerry_release_value(atob_fn);
-        jerry_release_value(global);
+        jerry_value_free(buffer);
+        jerry_value_free(decoded);
+        jerry_value_free(this_val);
+        jerry_value_free(atob_fn);
+        jerry_value_free(global);
       } else {
-        return jerry_create_error(
+        return jerry_error_sz(
             JERRY_ERROR_TYPE,
-            (const jerry_char_t *)"bitmap.data must be Uint8Array or string.");
+            "bitmap.data must be Uint8Array or string.");
       }
-      jerry_release_value(data);
+      jerry_value_free(data);
     }
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -607,15 +607,15 @@ JERRYXX_FUN(gc_display_fn) {
   if (jerry_value_is_function(gc_handle->display_js_cb)) {
     jerry_value_t buffer =
         jerryxx_get_property(JERRYXX_GET_THIS, MSTR_GRAPHICS_BUFFER);
-    jerry_value_t this_ = jerry_create_undefined();
+    jerry_value_t this_ = jerry_undefined();
     jerry_value_t args[] = {buffer};
     jerry_value_t ret_val =
-        jerry_call_function(gc_handle->display_js_cb, this_, args, 1);
-    jerry_release_value(buffer);
-    jerry_release_value(this_);
+        jerry_call(gc_handle->display_js_cb, this_, args, 1);
+    jerry_value_free(buffer);
+    jerry_value_free(this_);
     return ret_val;
   } else {
-    return jerry_create_undefined();
+    return jerry_undefined();
   }
 }
 
@@ -639,7 +639,7 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
   gc_handle->font_color = 1;
   gc_handle->font_scale_x = 1;
   gc_handle->font_scale_y = 1;
-  jerry_set_object_native_pointer(this_val, gc_handle, &gc_handle_info);
+  jerry_object_set_native_ptr(JERRYXX_GET_THIS, &gc_handle_info, gc_handle);
 
   // read parameters
   gc_handle->device_width = (int16_t)JERRYXX_GET_ARG_NUMBER(0);
@@ -669,7 +669,7 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
       jerryxx_set_property(JERRYXX_GET_THIS, MSTR_GRAPHICS_DISPLAY_CB,
                            display_js_cb);
       gc_handle->display_js_cb = display_js_cb;  // reference without acquire
-      jerry_release_value(display_js_cb);
+      jerry_value_free(display_js_cb);
     }
   }
 
@@ -706,17 +706,17 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
   } else {
     size = size * 2;
   }
-  jerry_value_t buffer = jerry_create_typedarray(JERRY_TYPEDARRAY_UINT8, size);
+  jerry_value_t buffer = jerry_typedarray(JERRY_TYPEDARRAY_UINT8, size);
   jerryxx_set_property(JERRYXX_GET_THIS, MSTR_GRAPHICS_BUFFER, buffer);
   jerry_length_t byteOffset = 0;
   jerry_length_t byteLength = 0;
   jerry_value_t buf =
-      jerry_get_typedarray_buffer(buffer, &byteOffset, &byteLength);
-  gc_handle->buffer = jerry_get_arraybuffer_pointer(buf);
+      jerry_typedarray_buffer(buffer, &byteOffset, &byteLength);
+  gc_handle->buffer = jerry_arraybuffer_data(buf);
   gc_handle->buffer_size = size;
-  jerry_release_value(buf);
-  jerry_release_value(buffer);
-  return jerry_create_undefined();
+  jerry_value_free(buf);
+  jerry_value_free(buffer);
+  return jerry_undefined();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -726,8 +726,8 @@ JERRYXX_FUN(buffered_gc_ctor_fn) {
  */
 jerry_value_t module_graphics_init() {
   /* GraphicsContext class */
-  jerry_value_t gc_ctor = jerry_create_external_function(gc_ctor_fn);
-  jerry_value_t gc_prototype = jerry_create_object();
+  jerry_value_t gc_ctor = jerry_function_external(gc_ctor_fn);
+  jerry_value_t gc_prototype = jerry_object();
   jerryxx_set_property(gc_ctor, "prototype", gc_prototype);
   jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_CLEAR_SCREEN,
                                 gc_clear_screen_fn);
@@ -783,12 +783,12 @@ jerry_value_t module_graphics_init() {
                                 gc_measure_text_fn);
   jerryxx_set_property_function(gc_prototype, MSTR_GRAPHICS_DRAW_BITMAP,
                                 gc_draw_bitmap_fn);
-  jerry_release_value(gc_prototype);
+  jerry_value_free(gc_prototype);
 
   /* BufferedGraphicsContext */
   jerry_value_t buffered_gc_ctor =
-      jerry_create_external_function(buffered_gc_ctor_fn);
-  jerry_value_t buffered_gc_prototype = jerry_create_object();
+      jerry_function_external(buffered_gc_ctor_fn);
+  jerry_value_t buffered_gc_prototype = jerry_object();
   jerryxx_set_property(buffered_gc_ctor, "prototype", buffered_gc_prototype);
   jerryxx_set_property_function(buffered_gc_prototype,
                                 MSTR_GRAPHICS_CLEAR_SCREEN, gc_clear_screen_fn);
@@ -853,15 +853,15 @@ jerry_value_t module_graphics_init() {
                                 MSTR_GRAPHICS_DRAW_BITMAP, gc_draw_bitmap_fn);
   jerryxx_set_property_function(buffered_gc_prototype, MSTR_GRAPHICS_DISPLAY,
                                 gc_display_fn);
-  jerry_release_value(buffered_gc_prototype);
+  jerry_value_free(buffered_gc_prototype);
 
   /* graphics module exports */
-  jerry_value_t exports = jerry_create_object();
+  jerry_value_t exports = jerry_object();
   jerryxx_set_property(exports, MSTR_GRAPHICS_GRAPHICS_CONTEXT, gc_ctor);
   jerryxx_set_property(exports, MSTR_GRAPHICS_BUFFERED_GRAPHICS_CONTEXT,
                        buffered_gc_ctor);
-  jerry_release_value(gc_ctor);
-  jerry_release_value(buffered_gc_ctor);
+  jerry_value_free(gc_ctor);
+  jerry_value_free(buffered_gc_ctor);
 
   return exports;
 }

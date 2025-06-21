@@ -25,7 +25,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "jerryscript-ext/handler.h"
+// #include "jerryscript-ext/handler.h"
 #include "jerryscript-port.h"
 #include "jerryscript.h"
 #include "rtc.h"
@@ -41,16 +41,8 @@ void jerry_port_fatal(jerry_fatal_code_t code) {
 /**
  * Provide log message implementation for the engine.
  */
-void jerry_port_log(jerry_log_level_t level, /**< log level */
-                    const char *format,      /**< format string */
-                    ...) {                   /**< parameters */
-  /* Drain log messages since IoT.js has not support log levels yet. */
-  char buf[256];
-  va_list args;
-  va_start(args, format);
-  vsnprintf(buf, 256, format, args);
-  km_tty_printf("%s\r", buf);
-  va_end(args);
+void jerry_port_log (const char *message_p) {
+  km_tty_printf("%s\r", message_p);
 } /* jerry_port_log */
 
 double jerry_port_get_local_time_zone_adjustment(double unix_ms, bool is_utc) {
@@ -115,28 +107,71 @@ jerry_value_t jerry_port_get_native_module(
     jerry_value_t name) /**< module specifier */
 {
   (void)name;
-  return jerry_create_undefined();
+  return jerry_undefined();
 } /* jerry_port_get_native_module */
+
 /**
- * Default implementation of jerry_port_track_promise_rejection.
- * Prints the reason of the unhandled rejections.
+ * Default implementation of jerry_port_init. Do nothing.
  */
-void jerry_port_track_promise_rejection(
-    const jerry_value_t promise, /**< rejected promise */
-    const jerry_promise_rejection_operation_t operation) /**< operation */
+void JERRY_ATTR_WEAK
+jerry_port_init (void)
 {
-  (void)operation; /* unused */
+} /* jerry_port_init */
 
-  jerry_value_t reason = jerry_get_promise_result(promise);
-  jerry_value_t reason_to_string = jerry_value_to_string(reason);
-  jerry_size_t req_sz = jerry_get_utf8_string_size(reason_to_string);
-  JERRY_VLA(jerry_char_t, str_buf_p, req_sz + 1);
-  jerry_string_to_utf8_char_buffer(reason_to_string, str_buf_p, req_sz);
-  str_buf_p[req_sz] = '\0';
+jerry_char_t *JERRY_ATTR_WEAK
+jerry_port_path_normalize (const jerry_char_t *path_p, jerry_size_t path_size)
+{
+  jerry_char_t *buffer_p = (jerry_char_t *) malloc (path_size + 1);
 
-  jerry_release_value(reason_to_string);
-  jerry_release_value(reason);
+  if (buffer_p == NULL)
+  {
+    return NULL;
+  }
 
-  jerry_port_log(JERRY_LOG_LEVEL_WARNING, "Uncaught (in promise) %s\n",
-                 str_buf_p);
-} /* jerry_port_track_promise_rejection */
+  /* Also copy terminating zero byte. */
+  memcpy (buffer_p, path_p, path_size + 1);
+
+  return buffer_p;
+} /* jerry_port_path_normalize */
+
+void JERRY_ATTR_WEAK
+jerry_port_path_free (jerry_char_t *path_p)
+{
+  free (path_p);
+} /* jerry_port_path_free */
+
+jerry_char_t *JERRY_ATTR_WEAK
+jerry_port_source_read (const char *file_name_p, jerry_size_t *out_size_p)
+{
+  return NULL;
+}
+
+double
+jerry_port_current_time (void)
+{
+  km_rtc_init();
+  return (double)km_rtc_get_time();
+} /* jerry_port_current_time */
+
+int32_t
+jerry_port_local_tza (double unix_ms)
+{
+  (void) unix_ms;
+
+  /* We live in UTC. */
+  return 0;
+} /* jerry_port_local_tza */
+
+void JERRY_ATTR_WEAK
+jerry_port_source_free (uint8_t *buffer_p)
+{
+  free (buffer_p);
+} /* jerry_port_source_free */
+
+jerry_size_t JERRY_ATTR_WEAK
+jerry_port_path_base (const jerry_char_t *path_p)
+{
+  const jerry_char_t *basename_p = (jerry_char_t *) strrchr ((char *) path_p, '/') + 1;
+
+  return (jerry_size_t) (basename_p - path_p);
+} /* jerry_port_path_base */

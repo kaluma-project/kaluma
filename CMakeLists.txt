@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 
 # default target: rp2
 if(NOT TARGET)
@@ -10,7 +10,7 @@ if(NOT "${TARGET}" STREQUAL "rp2")
 endif()
 
 if(NOT VER)
-  set(VER "1.2.1")
+  set(VER "1.3.0-beta.1")
 endif()
 
 include(${CMAKE_SOURCE_DIR}/targets/${TARGET}/target.cmake)

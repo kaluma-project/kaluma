@@ -41,9 +41,9 @@ static void cmd_ls(km_repl_state_t *state, char *arg) {
     if (jerry_value_is_error(file_array_js)) {
       jerryxx_print_error(file_array_js, true);
     } else {
-      int len = jerry_get_array_length(file_array_js);
+      int len = jerry_array_length(file_array_js);
       for (int i = 0; i < len; i++) {
-        jerry_value_t file_js = jerry_get_property_by_index(file_array_js, i);
+        jerry_value_t file_js = jerry_object_get_index(file_array_js, i);
         jerry_value_t join_args[2] = {cwd_js, file_js};
         jerry_value_t file_path_js =
             jerryxx_call_method(path, "join", join_args, 2);
@@ -52,7 +52,7 @@ static void cmd_ls(km_repl_state_t *state, char *arg) {
             jerryxx_call_method(fs, MSTR_FS_STAT, stat_args, 1);
         jerry_value_t is_dir_js = jerryxx_call_method(
             file_stat_js, MSTR_FS_STATS_IS_DIRECTORY, NULL, 0);
-        bool is_dir = jerry_get_boolean_value(is_dir_js);
+        bool is_dir = jerry_value_is_true(is_dir_js);
         int file_size =
             jerryxx_get_property_number(file_stat_js, MSTR_FS_STATS_SIZE, 0);
         JERRYXX_GET_STRING_AS_CHAR(file_js, file_name);
@@ -61,17 +61,17 @@ static void cmd_ls(km_repl_state_t *state, char *arg) {
         } else {
           km_repl_printf("%u\t%s\r\n", file_size, file_name);
         }
-        jerry_release_value(is_dir_js);
-        jerry_release_value(file_stat_js);
-        jerry_release_value(file_path_js);
-        jerry_release_value(file_js);
+        jerry_value_free(is_dir_js);
+        jerry_value_free(file_stat_js);
+        jerry_value_free(file_path_js);
+        jerry_value_free(file_js);
       }
     }
-    jerry_release_value(file_array_js);
+    jerry_value_free(file_array_js);
   }
-  jerry_release_value(cwd_js);
-  jerry_release_value(path);
-  jerry_release_value(fs);
+  jerry_value_free(cwd_js);
+  jerry_value_free(path);
+  jerry_value_free(fs);
 }
 
 static void cmd_pwd(km_repl_state_t *state, char *arg) {
@@ -83,79 +83,79 @@ static void cmd_pwd(km_repl_state_t *state, char *arg) {
     JERRYXX_GET_STRING_AS_CHAR(ret, cwd);
     km_repl_printf("%s\r\n", cwd);
   }
-  jerry_release_value(ret);
-  jerry_release_value(fs);
+  jerry_value_free(ret);
+  jerry_value_free(fs);
 }
 
 static void cmd_cd(km_repl_state_t *state, char *arg) {
   jerry_value_t fs = jerryxx_call_require("fs");
-  jerry_value_t path_js = jerry_create_string((const jerry_char_t *)arg);
+  jerry_value_t path_js = jerry_string_sz((const char *)arg);
   jerry_value_t args_js[1] = {path_js};
   jerry_value_t ret = jerryxx_call_method(fs, MSTR_FS_CHDIR, args_js, 1);
   if (jerry_value_is_error(ret)) {
     jerryxx_print_error(ret, true);
   }
-  jerry_release_value(ret);
-  jerry_release_value(path_js);
-  jerry_release_value(fs);
+  jerry_value_free(ret);
+  jerry_value_free(path_js);
+  jerry_value_free(fs);
 }
 
 static void cmd_mkdir(km_repl_state_t *state, char *arg) {
   jerry_value_t fs = jerryxx_call_require("fs");
-  jerry_value_t path_js = jerry_create_string((const jerry_char_t *)arg);
+  jerry_value_t path_js = jerry_string_sz((const char *)arg);
   jerry_value_t args_js[1] = {path_js};
   jerry_value_t ret = jerryxx_call_method(fs, MSTR_FS_MKDIR, args_js, 1);
   if (jerry_value_is_error(ret)) {
     jerryxx_print_error(ret, true);
   }
-  jerry_release_value(ret);
-  jerry_release_value(path_js);
-  jerry_release_value(fs);
+  jerry_value_free(ret);
+  jerry_value_free(path_js);
+  jerry_value_free(fs);
 }
 
 static void cmd_rm(km_repl_state_t *state, char *arg) {
   jerry_value_t fs = jerryxx_call_require("fs");
-  jerry_value_t path_js = jerry_create_string((const jerry_char_t *)arg);
+  jerry_value_t path_js = jerry_string_sz((const char *)arg);
   jerry_value_t args_js[1] = {path_js};
   jerry_value_t ret = jerryxx_call_method(fs, MSTR_FS_RM, args_js, 1);
   if (jerry_value_is_error(ret)) {
     jerryxx_print_error(ret, true);
   }
-  jerry_release_value(ret);
-  jerry_release_value(path_js);
-  jerry_release_value(fs);
+  jerry_value_free(ret);
+  jerry_value_free(path_js);
+  jerry_value_free(fs);
 }
 
 static void cmd_cat(km_repl_state_t *state, char *arg) {
   jerry_value_t fs = jerryxx_call_require("fs");
-  jerry_value_t path_js = jerry_create_string((const jerry_char_t *)arg);
+  jerry_value_t path_js = jerry_string_sz((const char *)arg);
   jerry_value_t args_js[1] = {path_js};
   jerry_value_t fd = jerryxx_call_method(fs, MSTR_FS_OPEN, args_js, 1);
   int buf_size = 128;
   jerry_value_t buf_js =
-      jerry_create_typedarray(JERRY_TYPEDARRAY_UINT8, buf_size);
-  jerry_value_t buf_size_js = jerry_create_number(buf_size);
+      jerry_typedarray(JERRY_TYPEDARRAY_UINT8, buf_size);
+  jerry_value_t buf_size_js = jerry_number(buf_size);
   uint8_t *buf = jerryxx_get_typedarray_buffer(buf_js);
   int pos = 0;
   int read_bytes = 0;
   do {
-    jerry_value_t pos_js = jerry_create_number(pos);
+    jerry_value_t pos_js = jerry_number(pos);
     jerry_value_t read_args_js[5] = {fd, buf_js, 0, buf_size_js, pos_js};
     jerry_value_t ret = jerryxx_call_method(fs, MSTR_FS_READ, read_args_js, 5);
-    read_bytes = jerry_get_number_value(ret);
+    read_bytes = jerry_value_as_number(ret);
     for (int i = 0; i < read_bytes; i++) {
       km_tty_putc(buf[i]);
     }
     pos += read_bytes;
-    jerry_release_value(ret);
-    jerry_release_value(pos_js);
+    jerry_value_free(ret);
+    jerry_value_free(pos_js);
   } while (read_bytes == buf_size);
   km_tty_printf("\r\n");
-  jerry_release_value(buf_size_js);
-  jerry_release_value(buf_js);
-  jerry_release_value(fd);
-  jerry_release_value(path_js);
-  jerry_release_value(fs);
+  jerry_value_free(buf_size_js);
+  jerry_value_free(buf_js);
+  jerry_value_free(fd);
+  jerry_value_free(path_js);
+  jerry_value_free(fs);
 }
 
 /*
@@ -180,5 +180,5 @@ jerry_value_t module_fs_init() {
   km_repl_register_command(".cat", "Print the content of file", cmd_cat);
   // km_repl_register_command(".cp", "Copy file", cmd_cp);
   // km_repl_register_command(".ftr", "File transfer", cmd_ftr);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }

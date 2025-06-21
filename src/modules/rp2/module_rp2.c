@@ -62,17 +62,17 @@ static PIO __pio(uint8_t pio) {
 
 void __pio_handler(uint8_t pio, uint8_t interrupt) {
   if (jerry_value_is_function(__pio_call_back[pio])) {
-    jerry_value_t this_val = jerry_create_undefined();
+    jerry_value_t this_val = jerry_undefined();
     jerry_value_t args[1];
-    args[0] = jerry_create_number(interrupt);
+    args[0] = jerry_number(interrupt);
     jerry_value_t ret_val =
-        jerry_call_function(__pio_call_back[pio], this_val, args, 1);
+        jerry_call(__pio_call_back[pio], this_val, args, 1);
     if (jerry_value_is_error(ret_val)) {
       // print error
       jerryxx_print_error(ret_val, true);
     }
-    jerry_release_value(ret_val);
-    jerry_release_value(this_val);
+    jerry_value_free(ret_val);
+    jerry_value_free(this_val);
   }
 }
 
@@ -99,25 +99,25 @@ JERRYXX_FUN(pio_add_program_fn) {
   jerry_value_t prog = JERRYXX_GET_ARG(1);
   pio_program_t pio_prog;
   if (jerry_value_is_typedarray(prog) &&
-      jerry_get_typedarray_type(prog) ==
+      jerry_typedarray_type(prog) ==
           JERRY_TYPEDARRAY_UINT16) { /* Uint16Array */
     jerry_length_t byteLength = 0;
     jerry_length_t byteOffset = 0;
     jerry_value_t array_buffer =
-        jerry_get_typedarray_buffer(prog, &byteOffset, &byteLength);
+        jerry_typedarray_buffer(prog, &byteOffset, &byteLength);
     pio_prog.origin = -1;
     pio_prog.pio_version = PICO_PIO_VERSION;
     pio_prog.instructions =
-        (uint16_t *)jerry_get_arraybuffer_pointer(array_buffer),
-    pio_prog.length = jerry_get_arraybuffer_byte_length(array_buffer) / 2,
-    jerry_release_value(array_buffer);
+        (uint16_t *)jerry_arraybuffer_data(array_buffer),
+    pio_prog.length = jerry_arraybuffer_size(array_buffer) / 2,
+    jerry_value_free(array_buffer);
     PIO _pio = __pio(pio);
     int offset = pio_add_program(_pio, &pio_prog);
-    return jerry_create_number(offset);
+    return jerry_number(offset);
   } else {
-    return jerry_create_error(
+    return jerry_error_sz(
         JERRY_ERROR_TYPE,
-        (const jerry_char_t *)"The prog argument must be Uint16Array");
+        "The prog argument must be Uint16Array");
   }
 }
 
@@ -245,7 +245,7 @@ JERRYXX_FUN(pio_sm_init_fn) {
   sm_config_set_mov_status(&sm_config, move_status_sel, move_status_n);
 
   pio_sm_init(_pio, sm, offset, &sm_config);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pio_sm_set_enabled_fn) {
@@ -257,7 +257,7 @@ JERRYXX_FUN(pio_sm_set_enabled_fn) {
   bool enabled = JERRYXX_GET_ARG_BOOLEAN(2);
   PIO _pio = __pio(pio);
   pio_sm_set_enabled(_pio, sm, enabled);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pio_sm_restart_fn) {
@@ -267,7 +267,7 @@ JERRYXX_FUN(pio_sm_restart_fn) {
   uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
   PIO _pio = __pio(pio);
   pio_sm_restart(_pio, sm);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pio_sm_exec_fn) {
@@ -279,7 +279,7 @@ JERRYXX_FUN(pio_sm_exec_fn) {
   uint16_t inst = (uint16_t)JERRYXX_GET_ARG_NUMBER(2);
   PIO _pio = __pio(pio);
   pio_sm_exec(_pio, sm, inst);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pio_sm_put_fn) {
@@ -291,28 +291,27 @@ JERRYXX_FUN(pio_sm_put_fn) {
   jerry_value_t data = JERRYXX_GET_ARG(2);
   PIO _pio = __pio(pio);
   if (jerry_value_is_typedarray(data) &&
-      jerry_get_typedarray_type(data) ==
+      jerry_typedarray_type(data) ==
           JERRY_TYPEDARRAY_UINT32) { /* Uint32Array */
     jerry_length_t byteLength = 0;
     jerry_length_t byteOffset = 0;
     jerry_value_t array_buffer =
-        jerry_get_typedarray_buffer(data, &byteOffset, &byteLength);
-    size_t len = jerry_get_arraybuffer_byte_length(array_buffer) / 4;
-    uint8_t *data_buf = jerry_get_arraybuffer_pointer(array_buffer);
-    jerry_release_value(array_buffer);
+        jerry_typedarray_buffer(data, &byteOffset, &byteLength);
+    size_t len = jerry_arraybuffer_size(array_buffer) / 4;
+    uint8_t *data_buf = jerry_arraybuffer_data(array_buffer);
+    jerry_value_free(array_buffer);
     for (int i = 0; i < len; i++) {
       pio_sm_put_blocking(_pio, sm, *((uint32_t *)data_buf + i));
     }
   } else if (jerry_value_is_number(data)) {
-    uint32_t data_value = jerry_get_number_value(data);
+    uint32_t data_value = jerry_value_as_number(data);
     pio_sm_put_blocking(_pio, sm, data_value);
   } else {
-    return jerry_create_error(
+    return jerry_error_sz(
         JERRY_ERROR_TYPE,
-        (const jerry_char_t
-             *)"The data argument must be number of Uint32Array");
+        "The data argument must be number of Uint32Array");
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pio_sm_get_fn) {
@@ -322,7 +321,7 @@ JERRYXX_FUN(pio_sm_get_fn) {
   uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
   PIO _pio = __pio(pio);
   uint32_t data = pio_sm_get_blocking(_pio, sm);
-  return jerry_create_number(data);
+  return jerry_number(data);
 }
 
 JERRYXX_FUN(pio_sm_set_pins_fn) {
@@ -336,7 +335,7 @@ JERRYXX_FUN(pio_sm_set_pins_fn) {
   uint32_t mask = (uint32_t)JERRYXX_GET_ARG_NUMBER(3);
   PIO _pio = __pio(pio);
   pio_sm_set_pins_with_mask(_pio, sm, value, mask);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pio_sm_rxfifo_fn) {
@@ -346,7 +345,7 @@ JERRYXX_FUN(pio_sm_rxfifo_fn) {
   uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
   PIO _pio = __pio(pio);
   uint length = pio_sm_get_rx_fifo_level(_pio, sm);
-  return jerry_create_number(length);
+  return jerry_number(length);
 }
 
 JERRYXX_FUN(pio_sm_txfifo_fn) {
@@ -356,7 +355,7 @@ JERRYXX_FUN(pio_sm_txfifo_fn) {
   uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
   PIO _pio = __pio(pio);
   uint length = pio_sm_get_tx_fifo_level(_pio, sm);
-  return jerry_create_number(length);
+  return jerry_number(length);
 }
 
 JERRYXX_FUN(pio_sm_clear_fifos_fn) {
@@ -366,7 +365,7 @@ JERRYXX_FUN(pio_sm_clear_fifos_fn) {
   uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
   PIO _pio = __pio(pio);
   pio_sm_clear_fifos(_pio, sm);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pio_sm_drain_txfifo_fn) {
@@ -376,7 +375,7 @@ JERRYXX_FUN(pio_sm_drain_txfifo_fn) {
   uint8_t sm = (uint8_t)JERRYXX_GET_ARG_NUMBER(1);
   PIO _pio = __pio(pio);
   pio_sm_drain_tx_fifo(_pio, sm);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(pio_sm_irq_fn) {
@@ -394,9 +393,9 @@ JERRYXX_FUN(pio_sm_irq_fn) {
     irq_set_mask_enabled((1u << PIO1_IRQ_0), true);
     irq_set_enabled(PIO1_IRQ_0, true);
   }
-  __pio_call_back[pio] = jerry_acquire_value(callback);
+  __pio_call_back[pio] = jerry_value_copy(callback);
 
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 JERRYXX_FUN(dormant_fn) {
@@ -404,34 +403,33 @@ JERRYXX_FUN(dormant_fn) {
   JERRYXX_CHECK_ARG_ARRAY(1, "events");
   jerry_value_t pins = JERRYXX_GET_ARG(0);
   jerry_value_t events = JERRYXX_GET_ARG(1);
-  int len = jerry_get_array_length(pins);
-  int elen = jerry_get_array_length(events);
+  int len = jerry_array_length(pins);
+  int elen = jerry_array_length(events);
   if (len != elen) {
-    return jerry_create_error(
+    return jerry_error_sz(
         JERRY_ERROR_TYPE,
-        (const jerry_char_t
-             *)"The length of pins and events should be the same.");
+        "The length of pins and events should be the same.");
   }
 
   uint8_t _pins[len];
   uint8_t _events[elen];
   for (int i = 0; i < len; i++) {
-    jerry_value_t pin = jerry_get_property_by_index(pins, i);
-    jerry_value_t event = jerry_get_property_by_index(events, i);
+    jerry_value_t pin = jerry_object_get_index(pins, i);
+    jerry_value_t event = jerry_object_get_index(events, i);
     if (!jerry_value_is_number(pin)) {
-      return jerry_create_error(
+      return jerry_error_sz(
           JERRY_ERROR_TYPE,
-          (const jerry_char_t *)"The pin should be a number.");
+          "The pin should be a number.");
     }
     if (!jerry_value_is_number(event)) {
-      return jerry_create_error(
+      return jerry_error_sz(
           JERRY_ERROR_TYPE,
-          (const jerry_char_t *)"The event should be a number.");
+          "The event should be a number.");
     }
-    _pins[i] = (uint8_t)jerry_get_number_value(pin);
-    _events[i] = (uint8_t)jerry_get_number_value(event);
-    jerry_release_value(pin);
-    jerry_release_value(event);
+    _pins[i] = (uint8_t)jerry_value_as_number(pin);
+    _events[i] = (uint8_t)jerry_value_as_number(event);
+    jerry_value_free(pin);
+    jerry_value_free(event);
   }
 
   // Hibernate system for dormant
@@ -511,7 +509,7 @@ JERRYXX_FUN(dormant_fn) {
   // just select and enable Normally choose clk_sys or clk_usb
   clock_configure(clk_peri, 0, CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLK_SYS,
                   125 * MHZ, 125 * MHZ);
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 /**
@@ -524,7 +522,7 @@ JERRYXX_FUN(dormant_fn) {
 JERRYXX_FUN(random_big_int_fn) {
   rng_128_t random;
   get_rand_128 (&random);
-  return jerry_create_bigint(random.r, 2, false);
+  return jerry_bigint(random.r, 2, false);
 }
 
 /**
@@ -534,11 +532,11 @@ jerry_value_t module_rp2_init() {
   irq_set_exclusive_handler(PIO0_IRQ_0, __pio0_irq_0_handler);
   irq_set_exclusive_handler(PIO1_IRQ_0, __pio1_irq_0_handler);
   for (int i = 0; i < KALUMA_PIO_NUM; i++) {
-    __pio_call_back[i] = jerry_create_undefined();
+    __pio_call_back[i] = jerry_undefined();
   }
 
   // pio module exports
-  jerry_value_t exports = jerry_create_object();
+  jerry_value_t exports = jerry_object();
   jerryxx_set_property_function(exports, MSTR_RP2_PIO_ADD_PROGRAM,
                                 pio_add_program_fn);
   jerryxx_set_property_function(exports, MSTR_RP2_PIO_SM_INIT, pio_sm_init_fn);

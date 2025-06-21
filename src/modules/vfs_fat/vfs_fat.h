@@ -30,13 +30,13 @@
 #define VFS_FAT_GET_FILE_HANDLE(vfs_handle, file, id)                    \
   vfs_fat_file_handle_t *file = vfs_fat_file_get_by_id(vfs_handle, id);  \
   if (file == NULL) {                                                    \
-    return jerry_create_error_from_value(create_system_error(-9), true); \
+    return jerry_exception_value(create_system_error(-9), true); \
   }
 
 #define VFS_GET_FS_HANDLE(root, vfs_handle, pdrv)                        \
   vfs_fat_handle_t *vfs_handle = vfs_fat_get_fs_by_drv(root, pdrv);      \
   if (vfs_handle == NULL) {                                              \
-    return jerry_create_error_from_value(create_system_error(-5), true); \
+    return jerry_exception_value(create_system_error(-5), true); \
   }
 
 typedef struct vfs_fat_root_s vfs_fat_root_t;

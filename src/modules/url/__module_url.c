@@ -134,68 +134,68 @@ JERRYXX_FUN(url_ctor_fn) {
         }
       }
     } else {
-      return jerry_create_error(JERRY_ERROR_TYPE,
-                                (const jerry_char_t *)"Invalid URL");
+      return jerry_error_sz(JERRY_ERROR_TYPE,
+                                "Invalid URL");
     }
     // create properties
     jerry_value_t protocol;
     if (protocol_s >= 0) {
       protocol =
-          jerry_create_string_sz((const jerry_char_t *)input + protocol_s,
+          jerry_string_sz((const char *)input + protocol_s,
                                  protocol_e - protocol_s + 1);
     } else {
-      protocol = jerry_create_string((const jerry_char_t *)"");
+      protocol = jerry_string_sz((const char *)"");
     }
     jerry_value_t username;
     if (user_s >= 0) {
-      username = jerry_create_string_sz((const jerry_char_t *)input + user_s,
+      username = jerry_string_sz((const char *)input + user_s,
                                         user_e - user_s + 1);
     } else {
-      username = jerry_create_string((const jerry_char_t *)"");
+      username = jerry_string_sz((const char *)"");
     }
     jerry_value_t password;
     if (pass_s >= 0) {
-      password = jerry_create_string_sz((const jerry_char_t *)input + pass_s,
+      password = jerry_string_sz((const char *)input + pass_s,
                                         pass_e - pass_s + 1);
     } else {
-      password = jerry_create_string((const jerry_char_t *)"");
+      password = jerry_string_sz((const char *)"");
     }
     jerry_value_t hostname;
     if (hostname_s >= 0) {
       hostname =
-          jerry_create_string_sz((const jerry_char_t *)input + hostname_s,
+          jerry_string_sz((const char *)input + hostname_s,
                                  hostname_e - hostname_s + 1);
     } else {
-      hostname = jerry_create_string((const jerry_char_t *)"");
+      hostname = jerry_string_sz((const char *)"");
     }
     jerry_value_t port;
     if (port_s >= 0) {
-      port = jerry_create_string_sz((const jerry_char_t *)input + port_s,
+      port = jerry_string_sz((const char *)input + port_s,
                                     port_e - port_s + 1);
     } else {
-      port = jerry_create_string((const jerry_char_t *)"");
+      port = jerry_string_sz((const char *)"");
     }
     jerry_value_t pathname;
     if (pathname_s >= 0) {
       pathname =
-          jerry_create_string_sz((const jerry_char_t *)input + pathname_s,
+          jerry_string_sz((const char *)input + pathname_s,
                                  pathname_e - pathname_s + 1);
     } else {
-      pathname = jerry_create_string((const jerry_char_t *)"");
+      pathname = jerry_string_sz((const char *)"");
     }
     jerry_value_t search;
     if (search_s >= 0) {
-      search = jerry_create_string_sz((const jerry_char_t *)input + search_s,
+      search = jerry_string_sz((const char *)input + search_s,
                                       search_e - search_s + 1);
     } else {
-      search = jerry_create_string((const jerry_char_t *)"");
+      search = jerry_string_sz((const char *)"");
     }
     jerry_value_t hash;
     if (hash_s >= 0) {
-      hash = jerry_create_string_sz((const jerry_char_t *)input + hash_s,
+      hash = jerry_string_sz((const char *)input + hash_s,
                                     hash_e - hash_s + 1);
     } else {
-      hash = jerry_create_string((const jerry_char_t *)"");
+      hash = jerry_string_sz((const char *)"");
     }
     jerryxx_set_property(JERRYXX_GET_THIS, MSTR_URL_PROTOCOL, protocol);
     jerryxx_set_property(JERRYXX_GET_THIS, MSTR_URL_USERNAME, username);
@@ -205,24 +205,24 @@ JERRYXX_FUN(url_ctor_fn) {
     jerryxx_set_property(JERRYXX_GET_THIS, MSTR_URL_PATHNAME, pathname);
     jerryxx_set_property(JERRYXX_GET_THIS, MSTR_URL_SEARCH, search);
     jerryxx_set_property(JERRYXX_GET_THIS, MSTR_URL_HASH, hash);
-    jerry_release_value(protocol);
-    jerry_release_value(username);
-    jerry_release_value(password);
-    jerry_release_value(hostname);
-    jerry_release_value(port);
-    jerry_release_value(pathname);
-    jerry_release_value(search);
-    jerry_release_value(hash);
+    jerry_value_free(protocol);
+    jerry_value_free(username);
+    jerry_value_free(password);
+    jerry_value_free(hostname);
+    jerry_value_free(port);
+    jerry_value_free(pathname);
+    jerry_value_free(search);
+    jerry_value_free(hash);
   }
-  return jerry_create_undefined();
+  return jerry_undefined();
 }
 
 jerry_value_t module_url_init() {
   /* URL class */
-  jerry_value_t url_ctor = jerry_create_external_function(url_ctor_fn);
-  jerry_value_t prototype = jerry_create_object();
+  jerry_value_t url_ctor = jerry_function_external(url_ctor_fn);
+  jerry_value_t prototype = jerry_object();
   jerryxx_set_property(url_ctor, "prototype", prototype);
-  jerry_release_value(prototype);
+  jerry_value_free(prototype);
   // jerryxx_set_property_function(prototype, MSTR_PWM_START, pwm_start_fn);
   // jerryxx_set_property_function(prototype, MSTR_PWM_STOP, pwm_stop_fn);
   // jerryxx_set_property_function(prototype, MSTR_PWM_GET_FREQUENCY,
@@ -234,9 +234,9 @@ jerry_value_t module_url_init() {
   // jerryxx_set_property_function(prototype, MSTR_PWM_CLOSE, pwm_close_fn);
 
   /* url module exports */
-  jerry_value_t exports = jerry_create_object();
+  jerry_value_t exports = jerry_object();
   jerryxx_set_property(exports, MSTR_URL_URL, url_ctor);
-  jerry_release_value(url_ctor);
+  jerry_value_free(url_ctor);
 
   return exports;
 }

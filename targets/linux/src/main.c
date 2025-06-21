@@ -53,23 +53,25 @@ int main(int argc, char* argv[]) {
     fclose(f);
 
     // printf("%s\r\n", buffer);
-    jerry_value_t parsed_code = jerry_parse(NULL, 0, (jerry_char_t*)script,
-                                            size, JERRY_PARSE_STRICT_MODE);
+    jerry_parse_options_t parse_options;
+    parse_options.options = JERRY_PARSE_STRICT_MODE;
+    jerry_value_t parsed_code = jerry_parse((jerry_char_t*)script,
+                                            size, &parse_options);
     if (!jerry_value_is_error(parsed_code)) {
-      jerry_release_value(parsed_code);
+      jerry_value_free(parsed_code);
       jerry_value_t ret_value = jerry_run(parsed_code);
       if (jerry_value_is_error(ret_value)) {
         jerryxx_print_error(ret_value, true);
-        jerry_release_value(ret_value);
+        jerry_value_free(ret_value);
         // km_runtime_cleanup();
         // km_runtime_init(false, false);
         return 0;
       }
-      jerry_release_value(ret_value);
+      jerry_value_free(ret_value);
     } else {
       jerryxx_print_error(parsed_code, true);
     }
-    jerry_release_value(parsed_code);
+    jerry_value_free(parsed_code);
   }
   free(script);
   km_io_run(argc < 2);

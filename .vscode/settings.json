@@ -20,5 +20,14 @@
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "cmake.configureOnOpen": false,
   "git.detectSubmodules": false,
-  "git.ignoreSubmodules": true
+  "git.ignoreSubmodules": true,
+  "files.associations": {
+    "jerryscript.h": "c",
+    "system.h": "c",
+    "array": "c",
+    "span": "c",
+    "string": "c",
+    "string_view": "c",
+    "vector": "c"
+  }
 }

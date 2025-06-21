@@ -52,18 +52,18 @@ void gc_prim_cb_set_pixel(gc_handle_t *handle, int16_t x, int16_t y,
         break;
     }
     if (jerry_value_is_function(handle->set_pixel_js_cb)) {
-      jerry_value_t this_val = jerry_create_undefined();
-      jerry_value_t arg_x = jerry_create_number(x);
-      jerry_value_t arg_y = jerry_create_number(y);
-      jerry_value_t arg_color = jerry_create_number(color);
+      jerry_value_t this_val = jerry_undefined();
+      jerry_value_t arg_x = jerry_number(x);
+      jerry_value_t arg_y = jerry_number(y);
+      jerry_value_t arg_color = jerry_number(color);
       jerry_value_t args[] = {arg_x, arg_y, arg_color};
       jerry_value_t ret_val =
-          jerry_call_function(handle->set_pixel_js_cb, this_val, args, 3);
-      jerry_release_value(ret_val);
-      jerry_release_value(arg_x);
-      jerry_release_value(arg_y);
-      jerry_release_value(arg_color);
-      jerry_release_value(this_val);
+          jerry_call(handle->set_pixel_js_cb, this_val, args, 3);
+      jerry_value_free(ret_val);
+      jerry_value_free(arg_x);
+      jerry_value_free(arg_y);
+      jerry_value_free(arg_color);
+      jerry_value_free(this_val);
     }
   }
 }
@@ -86,19 +86,19 @@ void gc_prim_cb_get_pixel(gc_handle_t *handle, int16_t x, int16_t y,
         break;
     }
     if (jerry_value_is_function(handle->get_pixel_js_cb)) {
-      jerry_value_t this_val = jerry_create_undefined();
-      jerry_value_t arg_x = jerry_create_number(x);
-      jerry_value_t arg_y = jerry_create_number(y);
+      jerry_value_t this_val = jerry_undefined();
+      jerry_value_t arg_x = jerry_number(x);
+      jerry_value_t arg_y = jerry_number(y);
       jerry_value_t args[] = {arg_x, arg_y};
       jerry_value_t ret_val =
-          jerry_call_function(handle->get_pixel_js_cb, this_val, args, 2);
+          jerry_call(handle->get_pixel_js_cb, this_val, args, 2);
       if (jerry_value_is_number(ret_val)) {
-        *color = (uint16_t)jerry_get_number_value(ret_val);
+        *color = (uint16_t)jerry_value_as_number(ret_val);
       }
-      jerry_release_value(ret_val);
-      jerry_release_value(arg_x);
-      jerry_release_value(arg_y);
-      jerry_release_value(this_val);
+      jerry_value_free(ret_val);
+      jerry_value_free(arg_x);
+      jerry_value_free(arg_y);
+      jerry_value_free(this_val);
     }
   }
 }
@@ -157,22 +157,22 @@ void gc_prim_cb_fill_rect(gc_handle_t *handle, int16_t x, int16_t y, int16_t w,
   if (y2 >= handle->device_height) y2 = handle->device_height - 1;
   // draw
   if (jerry_value_is_function(handle->fill_rect_js_cb)) {
-    jerry_value_t this_val = jerry_create_undefined();
-    jerry_value_t arg_x = jerry_create_number(x1);
-    jerry_value_t arg_y = jerry_create_number(y1);
-    jerry_value_t arg_w = jerry_create_number(x2 - x1 + 1);
-    jerry_value_t arg_h = jerry_create_number(y2 - y1 + 1);
-    jerry_value_t arg_color = jerry_create_number(color);
+    jerry_value_t this_val = jerry_undefined();
+    jerry_value_t arg_x = jerry_number(x1);
+    jerry_value_t arg_y = jerry_number(y1);
+    jerry_value_t arg_w = jerry_number(x2 - x1 + 1);
+    jerry_value_t arg_h = jerry_number(y2 - y1 + 1);
+    jerry_value_t arg_color = jerry_number(color);
     jerry_value_t args[] = {arg_x, arg_y, arg_w, arg_h, arg_color};
     jerry_value_t ret_val =
-        jerry_call_function(handle->fill_rect_js_cb, this_val, args, 5);
-    jerry_release_value(ret_val);
-    jerry_release_value(arg_x);
-    jerry_release_value(arg_y);
-    jerry_release_value(arg_w);
-    jerry_release_value(arg_h);
-    jerry_release_value(arg_color);
-    jerry_release_value(this_val);
+        jerry_call(handle->fill_rect_js_cb, this_val, args, 5);
+    jerry_value_free(ret_val);
+    jerry_value_free(arg_x);
+    jerry_value_free(arg_y);
+    jerry_value_free(arg_w);
+    jerry_value_free(arg_h);
+    jerry_value_free(arg_color);
+    jerry_value_free(this_val);
   }
 }
 
