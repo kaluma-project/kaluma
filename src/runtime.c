@@ -99,6 +99,7 @@ void km_runtime_init(bool load, bool first) {
 }
 
 void km_runtime_cleanup() {
+  jerry_heap_gc(JERRY_GC_PRESSURE_HIGH);
   jerry_cleanup();
   km_system_cleanup();
   km_io_cleanup();
